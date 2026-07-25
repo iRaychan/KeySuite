@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeySuite Alpha</title>
+  <link rel="icon" href="assets/keylargo-logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <img src="assets/keylargo-logo.png" alt="Keylargo" class="login-logo" />
+      <h1>KeySuite</h1>
+      <p>Sales and product management alpha</p>
+      <label>Email</label>
+      <input id="loginEmail" type="email" value="ray@keylargo.com" />
+      <label>Password</label>
+      <input id="loginPassword" type="password" value="admin123" />
+      <button class="primary full" onclick="login()">Log in</button>
+      <small>Demo admin: ray@keylargo.com / admin123</small>
+    </div>
+  </section>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/keylargo-logo.png" alt="Keylargo" />
+        <div><strong>KeySuite</strong><span>Alpha V0.1</span></div>
+      </div>
+      <nav>
+        <button class="nav active" data-page="dashboard" onclick="showPage('dashboard', this)">Dashboard</button>
+        <button class="nav" data-page="users" onclick="showPage('users', this)">Users</button>
+        <button class="nav" data-page="customers" onclick="showPage('customers', this)">Customers</button>
+        <button class="nav" data-page="products" onclick="showPage('products', this)">Products</button>
+        <button class="nav" data-page="price-import" onclick="showPage('price-import', this)">Excel Price Import</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div id="currentUserLabel"></div>
+        <button class="ghost full" onclick="logout()">Log out</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Your KeySuite working demo</p>
+        </div>
+        <button class="primary" onclick="quickAdd()">+ Quick Add</button>
+      </header>
+
+      <section id="page-dashboard" class="page active-page">
+        <div class="hero-card">
+          <div>
+            <span class="eyebrow">KEYSUITE ALPHA</span>
+            <h1>A working base you can test now.</h1>
+            <p>Add users, add customers, maintain products, and replace product prices from Excel.</p>
+          </div>
+          <button class="primary" onclick="showPage('price-import', document.querySelector('[data-page=price-import]'))">Upload Price Excel</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat"><span>Users</span><strong id="statUsers">0</strong></div>
+          <div class="stat"><span>Customers</span><strong id="statCustomers">0</strong></div>
+          <div class="stat"><span>Products</span><strong id="statProducts">0</strong></div>
+          <div class="stat"><span>Last Import</span><strong id="statImport">Never</strong></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Recent activity</h3><p>Changes made in this browser</p></div></div>
+          <div id="activityList" class="activity-list"></div>
+        </div>
+      </section>
+
+      <section id="page-users" class="page">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h3>User Management</h3><p>Create admin, sales, and dealer users.</p></div>
+            <button class="primary" onclick="openUserModal()">+ Add User</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="userRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="page-customers" class="page">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h3>Customers</h3><p>Keep company and contact details ready for quotations.</p></div>
+            <button class="primary" onclick="openCustomerModal()">+ Add Customer</button>
+          </div>
+          <div class="toolbar"><input id="customerSearch" placeholder="Search company, contact, phone or email" oninput="renderCustomers()" /></div>
+          <div class="table-wrap"><table><thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Email</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="page-products" class="page">
+        <div class="panel">
+          <div class="panel-head">
+            <div><h3>Products</h3><p>Maintain standalone products and package components.</p></div>
+            <button class="primary" onclick="openProductModal()">+ Add Product</button>
+          </div>
+          <div class="toolbar two">
+            <input id="productSearch" placeholder="Search model, description, brand or series" oninput="renderProducts()" />
+            <select id="productCategoryFilter" onchange="renderProducts()"><option value="">All categories</option></select>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Model</th><th>Description</th><th>Category</th><th>Brand</th><th class="num">Cost</th><th class="num">Price</th><th></th></tr></thead><tbody id="productRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="page-price-import" class="page">
+        <div class="import-grid">
+          <div class="panel">
+            <div class="panel-head"><div><h3>Excel Price Import</h3><p>Update prices by matching the Model column.</p></div></div>
+            <div class="dropzone" id="dropzone">
+              <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelFile(event)" />
+              <div class="drop-icon">↑</div>
+              <h3>Drop Excel here or click to browse</h3>
+              <p>Accepted: .xlsx, .xls, .csv</p>
+            </div>
+            <div class="template-box">
+              <strong>Required column</strong><span>Model</span>
+              <strong>Price column</strong><span>Price or Selling Price</span>
+              <p>Optional: Description, Cost, HP, kW, Brand, Series, Category.</p>
+              <a href="Price_Import_Template.xlsx" download>Download Excel template</a>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Import Summary</h3><p>Nothing changes until you confirm.</p></div></div>
+            <div class="summary-cards">
+              <div><span>Updated</span><strong id="sumUpdated">0</strong></div>
+              <div><span>New</span><strong id="sumNew">0</strong></div>
+              <div><span>Skipped</span><strong id="sumSkipped">0</strong></div>
+            </div>
+            <button id="confirmImportBtn" class="primary full" disabled onclick="confirmImport()">Confirm Import</button>
+            <button class="ghost full" onclick="clearImport()">Clear Preview</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Preview</h3><p>Existing and incoming prices are shown before saving.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Status</th><th>Model</th><th>Description</th><th class="num">Old Price</th><th class="num">New Price</th><th>Change</th></tr></thead><tbody id="importRows"></tbody></table></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden" onclick="modalBackdrop(event)">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="modalTitle"></h3><button class="icon-btn" onclick="closeModal()">×</button></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
+# KeySuite Alpha V0.1
+
+GitHub Pages-ready working demo for Keylargo.
+
+## Features
+- Working local login
+- Add/edit/delete users
+- Add/edit/delete customers
+- Add/edit/delete products
+- Excel price import with preview and confirmation
+- Existing model prices are updated; unknown models are added
+- Browser local storage persistence
+
+## Demo login
+- Email: `ray@keylargo.com`
+- Password: `admin123`
+
+## Publish on GitHub Pages
+1. Create a new public or private GitHub repository.
+2. Upload every file in this folder to the repository root.
+3. Open **Settings → Pages**.
+4. Under **Build and deployment**, choose **Deploy from a branch**.
+5. Select `main` and `/root`, then save.
+
+## Important alpha limitation
+This version is a front-end demo. Data is stored only in the current browser using `localStorage`. It is suitable for testing the workflow, but not yet for multi-user production use. Supabase authentication and cloud database will be connected in the next build.
+
+## Excel import columns
+Required:
+- Model
+- Price
+
+Optional:
+- Description
+- Cost
+- HP
+- kW
+- Brand
+- Series
+- Category
+
+:root{--bg:#f5f7fb;--panel:#fff;--text:#152033;--muted:#6b7280;--line:#e5e7eb;--primary:#0f4c81;--primary2:#123b62;--danger:#b42318;--success:#067647;--warning:#b54708;--shadow:0 16px 40px rgba(16,24,40,.08)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}button,input,select{font:inherit}.hidden{display:none!important}
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef4fb,#f7f9fc)}.login-card{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;padding:34px;box-shadow:var(--shadow)}.login-logo{height:48px;max-width:220px;object-fit:contain;object-position:left}.login-card h1{margin:20px 0 4px;font-size:34px}.login-card p{margin:0 0 24px;color:var(--muted)}label{display:block;font-size:13px;font-weight:700;margin:14px 0 7px}input,select{width:100%;border:1px solid #d0d5dd;border-radius:10px;padding:11px 12px;background:#fff;color:var(--text);outline:none}input:focus,select:focus{border-color:#7aa7d2;box-shadow:0 0 0 3px rgba(15,76,129,.1)}.login-card small{display:block;text-align:center;color:var(--muted);margin-top:14px}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:#0d2033;color:#fff;padding:22px 16px;display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 24px}.brand img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:10px;padding:4px}.brand strong,.brand span{display:block}.brand span{font-size:12px;color:#9fb2c6;margin-top:3px}.sidebar nav{display:grid;gap:7px}.nav{border:0;background:transparent;color:#c7d3df;text-align:left;padding:11px 12px;border-radius:10px;cursor:pointer}.nav:hover,.nav.active{background:#173b5f;color:#fff}.sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;color:#b8c5d2;font-size:13px}.sidebar-bottom div{margin-bottom:12px}
+main{min-width:0}.topbar{height:90px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;z-index:5}.topbar h2{margin:0;font-size:24px}.topbar p{margin:5px 0 0;color:var(--muted);font-size:14px}.page{display:none;padding:28px 30px}.active-page{display:block}.primary,.ghost,.danger{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:#fff}.primary:hover{background:var(--primary2)}.primary:disabled{opacity:.45;cursor:not-allowed}.ghost{background:#edf2f7;color:#263648}.danger{background:#fff0ee;color:var(--danger)}.full{width:100%;margin-top:12px}.icon-btn{border:0;background:transparent;font-size:26px;cursor:pointer;color:var(--muted)}
+.hero-card{background:linear-gradient(120deg,#0f4c81,#1f6aa5);color:#fff;border-radius:24px;padding:36px;display:flex;justify-content:space-between;align-items:end;gap:24px;box-shadow:var(--shadow)}.hero-card h1{font-size:34px;max-width:620px;margin:8px 0}.hero-card p{margin:0;color:#d9e6f2}.hero-card .primary{background:#fff;color:#0f4c81}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0}.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 18px rgba(16,24,40,.03)}.stat{padding:20px}.stat span{display:block;color:var(--muted);font-size:13px}.stat strong{display:block;font-size:28px;margin-top:7px}.panel{padding:20px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.panel-head h3{margin:0;font-size:18px}.panel-head p{margin:4px 0 0;color:var(--muted);font-size:13px}.toolbar{margin-bottom:14px}.toolbar.two{display:grid;grid-template-columns:1fr 220px;gap:12px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{background:#f8fafc;color:#475467;font-size:12px;text-transform:uppercase;letter-spacing:.04em}tr:last-child td{border-bottom:0}.num{text-align:right}.actions{display:flex;justify-content:flex-end;gap:7px}.table-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;cursor:pointer}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;background:#eef4ff;color:#1849a9}.badge.success{background:#ecfdf3;color:var(--success)}.badge.warn{background:#fff6ed;color:var(--warning)}.badge.danger{background:#fef3f2;color:var(--danger)}.empty{padding:30px;text-align:center;color:var(--muted)}
+.activity-list{display:grid;gap:10px}.activity{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.activity:last-child{border-bottom:0}.activity span{color:var(--muted);font-size:13px}
+.import-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.dropzone{position:relative;border:2px dashed #b9c7d5;border-radius:16px;padding:36px;text-align:center;background:#f8fbff}.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer}.drop-icon{font-size:32px;color:var(--primary)}.dropzone h3{margin:7px 0}.dropzone p{margin:0;color:var(--muted)}.template-box{margin-top:16px;background:#f8fafc;border-radius:12px;padding:15px;display:grid;grid-template-columns:140px 1fr;gap:7px 12px;font-size:13px}.template-box p,.template-box a{grid-column:1/-1;margin:5px 0}.template-box a{font-weight:700;color:var(--primary)}.summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.summary-cards div{background:#f8fafc;border-radius:12px;padding:14px}.summary-cards span{display:block;color:var(--muted);font-size:12px}.summary-cards strong{font-size:24px}
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.45);display:grid;place-items:center;padding:18px;z-index:20}.modal-card{width:min(650px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:var(--shadow)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-head h3{margin:0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;padding:18px 20px}.form-grid .wide{grid-column:1/-1}.modal-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.toast{position:fixed;right:22px;bottom:22px;background:#111827;color:#fff;padding:13px 16px;border-radius:10px;box-shadow:var(--shadow);z-index:40;opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:none}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{height:auto;position:relative}.sidebar nav{grid-template-columns:repeat(5,1fr);overflow:auto}.sidebar-bottom{display:none}.topbar{position:relative}.stats-grid{grid-template-columns:repeat(2,1fr)}.import-grid{grid-template-columns:1fr}.hero-card{align-items:flex-start;flex-direction:column}}@media(max-width:600px){.page,.topbar{padding-left:16px;padding-right:16px}.stats-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.toolbar.two{grid-template-columns:1fr}.sidebar nav{grid-template-columns:1fr 1fr}.hero-card h1{font-size:28px}}
+
