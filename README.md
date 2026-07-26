@@ -1,23 +1,27 @@
-# KeySuite CHC Testing v0.1
+# KeySuite + KeySelector CHC Merged v0.2
 
-A browser-based testing dashboard for:
-- Customer records
-- CHC duty-point selection
-- Pump head curve
-- Quotation creation
-- Draft/Sent/Won/Lost status
-- Saved quotation history
-- Print / Save PDF
-- Offline/PWA support
+This build merges:
+- KeySuite customer and quotation dashboard
+- KeySelector v3.3.0 Stable (Locked)
+- Full CHC pump selection and technical PDF
+- One-click transfer of selected pump into quotation
+- Saved customer and quotation history
+- Print / Save quotation PDF
 
-## Run
-Upload all files to a GitHub repository, then enable GitHub Pages from the main/root branch.
+## Workflow
+1. Add a customer in Customers.
+2. Open CHC Selector.
+3. Enter flow/head and select the pump.
+4. Press ADD SELECTED PUMP TO QUOTATION.
+5. Choose the customer, enter price and commercial terms.
+6. Save or print the quotation.
+7. Use EXPORT PDF inside KeySelector for the full technical curve report.
 
-You can also open index.html locally, but browser local-storage behavior is more reliable through GitHub Pages.
+## Storage
+Customer and quotation records use browser localStorage in this trial version.
+They do not sync across devices and will be removed if browser site data is cleared.
 
-## Important
-This version contains only a small SAMPLE CHC_DATA set in app.js.
-Replace CHC_DATA and the runSelection function with the frozen completed CHC Selector database/engine.
-
-Customer and quotation records are stored in the current browser using localStorage.
-They do not sync between devices and can be lost if browser site data is cleared.
+## GitHub Pages
+Upload all extracted files and folders to one repository.
+Enable GitHub Pages from the main branch and root folder.
+Do not remove or rename the selector folder.

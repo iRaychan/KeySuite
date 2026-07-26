@@ -105,3 +105,27 @@ $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').va
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';
 newQuote();refreshAll();drawCurve(null,12,35);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+
+
+window.addEventListener('message',function(event){
+ if(!event.data || event.data.type!=='KEYSUITE_ADD_SELECTION') return;
+ const p=event.data.payload||{};
+ selected=p;
+ showPage('quotation');
+ $('qModel').value=p.model||'';
+ $('qQty').value=1;
+ const hp=p.motor_hp!=null?`${Number(p.motor_hp).toFixed(2).replace(/\.00$/,'')} HP`:'';
+ const kw=p.motor_kw!=null?`${Number(p.motor_kw).toFixed(2)} kW`:'';
+ const motor=[kw,hp].filter(Boolean).join(' / ');
+ $('description').value=[
+   'B.G.Reich Vertical Multistage Pump',
+   `Model: ${p.model||'-'}`,
+   `Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,
+   `Motor: ${motor}, ${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz`,
+   p.speed_rpm!=null?`Speed: ${Math.round(p.speed_rpm)} rpm`:'',
+   p.efficiency!=null?`Pump Efficiency: ${Number(p.efficiency).toFixed(1)}%`:'',
+   p.npshr!=null?`NPSHr: ${Number(p.npshr).toFixed(2)} m`:'',
+   p.connection?`Connection: ${p.connection}`:''
+ ].filter(Boolean).join('\n');
+ calcTotal();
+});
