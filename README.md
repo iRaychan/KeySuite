@@ -1,40 +1,23 @@
-# KeySuite Alpha V0.1
+# KeySuite CHC Testing v0.1
 
-GitHub Pages-ready working demo for Keylargo.
+A browser-based testing dashboard for:
+- Customer records
+- CHC duty-point selection
+- Pump head curve
+- Quotation creation
+- Draft/Sent/Won/Lost status
+- Saved quotation history
+- Print / Save PDF
+- Offline/PWA support
 
-## Features
-- Working local login
-- Add/edit/delete users
-- Add/edit/delete customers
-- Add/edit/delete products
-- Excel price import with preview and confirmation
-- Existing model prices are updated; unknown models are added
-- Browser local storage persistence
+## Run
+Upload all files to a GitHub repository, then enable GitHub Pages from the main/root branch.
 
-## Demo login
-- Email: `ray@keylargo.com`
-- Password: `admin123`
+You can also open index.html locally, but browser local-storage behavior is more reliable through GitHub Pages.
 
-## Publish on GitHub Pages
-1. Create a new public or private GitHub repository.
-2. Upload every file in this folder to the repository root.
-3. Open **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Select `main` and `/root`, then save.
+## Important
+This version contains only a small SAMPLE CHC_DATA set in app.js.
+Replace CHC_DATA and the runSelection function with the frozen completed CHC Selector database/engine.
 
-## Important alpha limitation
-This version is a front-end demo. Data is stored only in the current browser using `localStorage`. It is suitable for testing the workflow, but not yet for multi-user production use. Supabase authentication and cloud database will be connected in the next build.
-
-## Excel import columns
-Required:
-- Model
-- Price
-
-Optional:
-- Description
-- Cost
-- HP
-- kW
-- Brand
-- Series
-- Category
+Customer and quotation records are stored in the current browser using localStorage.
+They do not sync between devices and can be lost if browser site data is cleared.
