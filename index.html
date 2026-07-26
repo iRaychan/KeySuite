@@ -1,157 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KeySuite Alpha</title>
-  <link rel="icon" href="assets/keylargo-logo.png" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KeySuite V1</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--blue2:#1d4ed8;--green:#047857;--shadow:0 12px 34px rgba(15,23,42,.08)}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}.app{min-height:100vh}.topbar{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}.brand{font-size:24px;font-weight:800;letter-spacing:-.5px}.brand span{color:var(--blue)}.user{display:flex;gap:10px;align-items:center;color:var(--muted)}.avatar{width:34px;height:34px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center;font-weight:800}.shell{max-width:1180px;margin:0 auto;padding:30px 22px 60px}.view{display:none}.view.active{display:block}.hero{display:flex;justify-content:space-between;align-items:end;margin-bottom:24px}.hero h1{font-size:32px;margin:0 0 6px}.hero p{margin:0;color:var(--muted)}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.action-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow);cursor:pointer;transition:.18s;min-height:148px}.action-card:hover{transform:translateY(-3px);border-color:#bfdbfe}.icon{width:46px;height:46px;border-radius:14px;background:#eff6ff;color:var(--blue);display:grid;place-items:center;font-size:23px;margin-bottom:18px}.action-card h3{margin:0 0 8px;font-size:18px}.action-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin-top:22px}.panel h2{margin:0 0 16px;font-size:20px}.recent{width:100%;border-collapse:collapse}.recent th,.recent td{text-align:left;padding:14px 10px;border-bottom:1px solid var(--line);font-size:14px}.recent th{color:var(--muted);font-weight:600}.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700;background:#ecfdf5;color:#047857}.back{border:0;background:none;color:var(--blue);padding:0;margin-bottom:18px;cursor:pointer;font-weight:700}.selector-grid{display:grid;grid-template-columns:360px 1fr;gap:22px}.field{margin-bottom:16px}.field label{display:block;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:7px}.field-row{display:grid;grid-template-columns:1fr 112px;gap:8px}.input,.select,.textarea{width:100%;border:1px solid #d1d5db;border-radius:12px;padding:12px 13px;background:#fff;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe}.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2)}.btn-secondary{background:#eff6ff;color:var(--blue)}.btn-light{background:#f3f4f6;color:#374151}.result-empty{height:100%;min-height:300px;display:grid;place-items:center;color:var(--muted);text-align:center}.result-card{display:none}.result-card.show{display:block}.best{color:var(--green);font-size:13px;font-weight:800}.model{font-size:30px;font-weight:900;margin:5px 0 18px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric{border:1px solid var(--line);border-radius:14px;padding:14px}.metric span{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.metric strong{font-size:18px}.actions{display:flex;gap:10px;margin-top:18px}.chart-wrap{height:330px;margin-top:22px}.quote-layout{display:grid;grid-template-columns:1.5fr .8fr;gap:22px}.quote-item{border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px}.quote-item.manual{border-style:dashed}.quote-item-actions{display:flex;gap:8px;flex-wrap:wrap}.item-number{width:32px;height:32px;border-radius:10px;background:#eff6ff;color:var(--blue);display:grid;place-items:center;font-weight:900;flex:0 0 auto}.quote-item-title{display:flex;gap:12px;align-items:flex-start}.item-amount{font-size:18px;font-weight:900;text-align:right}.quote-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.empty-note{color:var(--muted);text-align:center;padding:26px 10px}.mini{padding:8px 10px;border-radius:10px;font-size:12px}.quote-item-top{display:flex;justify-content:space-between;gap:15px}.quote-item h3{margin:0 0 4px}.quote-item small{color:var(--muted)}.option-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.summary-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.total{font-size:25px;font-weight:900;color:var(--blue)}.list-item{padding:14px 0;border-bottom:1px solid var(--line)}.list-item strong{display:block}.list-item span{color:var(--muted);font-size:14px}.notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px}.footer-note{text-align:center;color:#9ca3af;font-size:12px;margin-top:30px}@media(max-width:850px){.grid4{grid-template-columns:1fr 1fr}.selector-grid,.quote-layout{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.option-grid{grid-template-columns:1fr}.topbar{padding:0 16px}.shell{padding:22px 14px 50px}}@media(max-width:520px){.grid4{grid-template-columns:1fr}.hero h1{font-size:26px}.field-row{grid-template-columns:1fr 100px}}
+</style>
 </head>
 <body>
-  <div id="toast" class="toast"></div>
+<div class="app">
+<header class="topbar"><div class="brand">Key<span>Suite</span></div><div class="user"><span>Ray Chan</span><div class="avatar">RC</div></div></header>
+<main class="shell">
+<section id="dashboard" class="view active">
+<div class="hero"><div><h1>Good afternoon, Ray</h1><p>Select what you want to do.</p></div></div>
+<div class="grid4">
+<div class="action-card" onclick="openView('quotation')"><div class="icon">📝</div><h3>New Quotation</h3><p>Create a customer quotation and add selected pumps.</p></div>
+<div class="action-card" onclick="openView('selector')"><div class="icon">🔍</div><h3>Pump Selector</h3><p>Enter flow and head to find the best matching pump.</p></div>
+<div class="action-card" onclick="openView('customers')"><div class="icon">👥</div><h3>Customers</h3><p>View and maintain customer contact details.</p></div>
+<div class="action-card" onclick="openView('settings')"><div class="icon">⚙️</div><h3>Settings</h3><p>Company profile, currency and quotation numbering.</p></div>
+</div>
+<div class="panel"><h2>Recent Quotations</h2><table class="recent"><thead><tr><th>Quotation</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="recentBody"><tr><td>QT260001</td><td>ABC Engineering Sdn Bhd</td><td>RM 3,000.00</td><td><span class="badge">Draft</span></td></tr></tbody></table></div>
+</section>
 
-  <section id="loginView" class="login-shell">
-    <div class="login-card">
-      <img src="assets/keylargo-logo.png" alt="Keylargo" class="login-logo" />
-      <h1>KeySuite</h1>
-      <p>Sales and product management alpha</p>
-      <label>Email</label>
-      <input id="loginEmail" type="email" value="ray@keylargo.com" />
-      <label>Password</label>
-      <input id="loginPassword" type="password" value="admin123" />
-      <button class="primary full" onclick="login()">Log in</button>
-      <small>Demo admin: ray@keylargo.com / admin123</small>
-    </div>
-  </section>
+<section id="selector" class="view">
+<button class="back" onclick="openView('dashboard')">← Dashboard</button>
+<div class="hero"><div><h1>Pump Selector</h1><p>Find a suitable pump from the sample product data.</p></div></div>
+<div class="selector-grid">
+<div class="panel" style="margin-top:0"><div class="notice">Working MVP using the sample CHC and SVMT models from your Excel workbook.</div>
+<div class="field"><label>Required Flow</label><div class="field-row"><input id="flow" class="input" type="number" step="0.1" value="15"><select id="flowUnit" class="select"><option value="m3h">m³/h</option><option value="lpm">L/min</option><option value="lps">L/s</option><option value="usgpm">US gpm</option></select></div></div>
+<div class="field"><label>Required Head</label><div class="field-row"><input id="head" class="input" type="number" step="0.1" value="33"><select id="headUnit" class="select"><option value="m">m</option><option value="bar">bar</option><option value="ft">ft</option><option value="kpa">kPa</option></select></div></div>
+<button class="btn btn-primary" style="width:100%" onclick="searchPump()">Search Pump</button></div>
+<div class="panel" style="margin-top:0"><div id="emptyResult" class="result-empty"><div><div style="font-size:44px">🔎</div><h3>Enter the duty point</h3><p>The recommended model will appear here.</p></div></div>
+<div id="resultCard" class="result-card"><div class="best">★★★★★ BEST MATCH</div><div id="resultModel" class="model"></div><div class="metrics"><div class="metric"><span>Required Duty</span><strong id="metricDuty"></strong></div><div class="metric"><span>Rated Duty</span><strong id="metricRated"></strong></div><div class="metric"><span>Motor</span><strong id="metricMotor"></strong></div><div class="metric"><span>List Price</span><strong id="metricPrice"></strong></div></div><div class="actions"><button class="btn btn-secondary" onclick="toggleChart()">View Curve</button><button class="btn btn-primary" onclick="addSelectedToQuote()">Add to Quotation</button></div><div id="chartWrap" class="chart-wrap" style="display:none"><canvas id="curveChart"></canvas></div></div></div>
+</div>
+</section>
 
-  <div id="appView" class="app hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <img src="assets/keylargo-logo.png" alt="Keylargo" />
-        <div><strong>KeySuite</strong><span>Alpha V0.1</span></div>
-      </div>
-      <nav>
-        <button class="nav active" data-page="dashboard" onclick="showPage('dashboard', this)">Dashboard</button>
-        <button class="nav" data-page="users" onclick="showPage('users', this)">Users</button>
-        <button class="nav" data-page="customers" onclick="showPage('customers', this)">Customers</button>
-        <button class="nav" data-page="products" onclick="showPage('products', this)">Products</button>
-        <button class="nav" data-page="price-import" onclick="showPage('price-import', this)">Excel Price Import</button>
-      </nav>
-      <div class="sidebar-bottom">
-        <div id="currentUserLabel"></div>
-        <button class="ghost full" onclick="logout()">Log out</button>
-      </div>
-    </aside>
+<section id="quotation" class="view">
+<button class="back" onclick="openView('dashboard')">← Dashboard</button><div class="hero"><div><h1>Quotation</h1><p>Add multiple pumps and manual items in one quotation.</p></div></div>
+<div class="quote-layout"><div class="panel" style="margin-top:0">
+<div class="field-row" style="grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Customer</label><select id="quoteCustomer" class="select"><option>ABC Engineering Sdn Bhd</option><option>XYZ M&E Sdn Bhd</option><option>New Customer</option></select></div><div class="field"><label>Quotation No.</label><input id="quoteNo" class="input" value="QT260001"></div></div>
+<div class="field-row" style="grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Attention</label><input id="quoteAttention" class="input" value="Mr. Lim"></div><div class="field"><label>Project</label><input id="quoteProject" class="input" placeholder="Project name"></div></div>
+<h2>Items</h2><div id="quoteItems"></div>
+<div class="quote-buttons"><button class="btn btn-secondary" onclick="openView('selector')">+ Add Pump</button><button class="btn btn-light" onclick="addManualItem()">+ Add Manual Item</button></div></div>
+<div class="panel" style="margin-top:0"><h2>Summary</h2><div class="summary-line"><span>Number of Items</span><strong id="itemCount">0</strong></div><div class="summary-line"><span>Subtotal</span><strong id="subtotal">RM 0.00</strong></div><div class="summary-line"><span>Overall Discount</span><div style="width:110px"><input id="discount" class="input" type="number" value="0" min="0" max="100" oninput="updateTotals()"></div></div><div class="summary-line"><span>SST</span><strong>Not included</strong></div><div class="summary-line" style="border:0;padding-top:18px"><span>Total</span><span id="grandTotal" class="total">RM 0.00</span></div><button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="saveQuotation()">Save Draft</button><button class="btn btn-light" style="width:100%;margin-top:8px" onclick="window.print()">Preview / Print</button></div></div>
+</section>
 
-    <main>
-      <header class="topbar">
-        <div>
-          <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSubtitle">Your KeySuite working demo</p>
-        </div>
-        <button class="primary" onclick="quickAdd()">+ Quick Add</button>
-      </header>
+<section id="customers" class="view"><button class="back" onclick="openView('dashboard')">← Dashboard</button><div class="hero"><div><h1>Customers</h1><p>Simple customer list for V1.</p></div></div><div class="panel" style="margin-top:0"><div class="field"><input class="input" placeholder="Search customer..."></div><div class="list-item"><strong>ABC Engineering Sdn Bhd</strong><span>Mr. Lim · sales@abc.com.my · 03-1234 5678</span></div><div class="list-item"><strong>XYZ M&E Sdn Bhd</strong><span>Ms. Tan · enquiry@xyz.com.my · 03-9876 5432</span></div><button class="btn btn-primary" style="margin-top:18px">+ New Customer</button></div></section>
 
-      <section id="page-dashboard" class="page active-page">
-        <div class="hero-card">
-          <div>
-            <span class="eyebrow">KEYSUITE ALPHA</span>
-            <h1>A working base you can test now.</h1>
-            <p>Add users, add customers, maintain products, and replace product prices from Excel.</p>
-          </div>
-          <button class="primary" onclick="showPage('price-import', document.querySelector('[data-page=price-import]'))">Upload Price Excel</button>
-        </div>
-        <div class="stats-grid">
-          <div class="stat"><span>Users</span><strong id="statUsers">0</strong></div>
-          <div class="stat"><span>Customers</span><strong id="statCustomers">0</strong></div>
-          <div class="stat"><span>Products</span><strong id="statProducts">0</strong></div>
-          <div class="stat"><span>Last Import</span><strong id="statImport">Never</strong></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div><h3>Recent activity</h3><p>Changes made in this browser</p></div></div>
-          <div id="activityList" class="activity-list"></div>
-        </div>
-      </section>
-
-      <section id="page-users" class="page">
-        <div class="panel">
-          <div class="panel-head">
-            <div><h3>User Management</h3><p>Create admin, sales, and dealer users.</p></div>
-            <button class="primary" onclick="openUserModal()">+ Add User</button>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="userRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="page-customers" class="page">
-        <div class="panel">
-          <div class="panel-head">
-            <div><h3>Customers</h3><p>Keep company and contact details ready for quotations.</p></div>
-            <button class="primary" onclick="openCustomerModal()">+ Add Customer</button>
-          </div>
-          <div class="toolbar"><input id="customerSearch" placeholder="Search company, contact, phone or email" oninput="renderCustomers()" /></div>
-          <div class="table-wrap"><table><thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Email</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="page-products" class="page">
-        <div class="panel">
-          <div class="panel-head">
-            <div><h3>Products</h3><p>Maintain standalone products and package components.</p></div>
-            <button class="primary" onclick="openProductModal()">+ Add Product</button>
-          </div>
-          <div class="toolbar two">
-            <input id="productSearch" placeholder="Search model, description, brand or series" oninput="renderProducts()" />
-            <select id="productCategoryFilter" onchange="renderProducts()"><option value="">All categories</option></select>
-          </div>
-          <div class="table-wrap"><table><thead><tr><th>Model</th><th>Description</th><th>Category</th><th>Brand</th><th class="num">Cost</th><th class="num">Price</th><th></th></tr></thead><tbody id="productRows"></tbody></table></div>
-        </div>
-      </section>
-
-      <section id="page-price-import" class="page">
-        <div class="import-grid">
-          <div class="panel">
-            <div class="panel-head"><div><h3>Excel Price Import</h3><p>Update prices by matching the Model column.</p></div></div>
-            <div class="dropzone" id="dropzone">
-              <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" onchange="handleExcelFile(event)" />
-              <div class="drop-icon">↑</div>
-              <h3>Drop Excel here or click to browse</h3>
-              <p>Accepted: .xlsx, .xls, .csv</p>
-            </div>
-            <div class="template-box">
-              <strong>Required column</strong><span>Model</span>
-              <strong>Price column</strong><span>Price or Selling Price</span>
-              <p>Optional: Description, Cost, HP, kW, Brand, Series, Category.</p>
-              <a href="Price_Import_Template.xlsx" download>Download Excel template</a>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><h3>Import Summary</h3><p>Nothing changes until you confirm.</p></div></div>
-            <div class="summary-cards">
-              <div><span>Updated</span><strong id="sumUpdated">0</strong></div>
-              <div><span>New</span><strong id="sumNew">0</strong></div>
-              <div><span>Skipped</span><strong id="sumSkipped">0</strong></div>
-            </div>
-            <button id="confirmImportBtn" class="primary full" disabled onclick="confirmImport()">Confirm Import</button>
-            <button class="ghost full" onclick="clearImport()">Clear Preview</button>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div><h3>Preview</h3><p>Existing and incoming prices are shown before saving.</p></div></div>
-          <div class="table-wrap"><table><thead><tr><th>Status</th><th>Model</th><th>Description</th><th class="num">Old Price</th><th class="num">New Price</th><th>Change</th></tr></thead><tbody id="importRows"></tbody></table></div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div id="modal" class="modal hidden" onclick="modalBackdrop(event)">
-    <div class="modal-card">
-      <div class="modal-head"><h3 id="modalTitle"></h3><button class="icon-btn" onclick="closeModal()">×</button></div>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+<section id="settings" class="view"><button class="back" onclick="openView('dashboard')">← Dashboard</button><div class="hero"><div><h1>Settings</h1><p>Only the essentials for V1.</p></div></div><div class="panel" style="margin-top:0;max-width:700px"><div class="field"><label>Company Name</label><input class="input" value="Keylargo Industrial Sdn Bhd"></div><div class="field"><label>Currency</label><select class="select"><option>MYR — Malaysian Ringgit</option></select></div><div class="field"><label>Quotation Prefix</label><input class="input" value="QT26"></div><button class="btn btn-primary">Save Settings</button></div></section>
+<div class="footer-note">KeySuite V1 Working MVP · Account + Selector + Quotation</div>
+</main></div>
+<script>
+const products=[
+{model:'CHC 15-30',series:'CHC-50Hz',flow:15,head:33,minFlow:8,maxFlow:23,kw:3,hp:4,price:2000,currency:'MYR',seal:'CC',casingOring:'NBR',sealOring:'VITON',material:'SS (CI Connection)',curve:'CHC 15'},
+{model:'CHC 15-70',series:'CHC-50Hz',flow:15,head:80,minFlow:8,maxFlow:23,kw:5.5,hp:7.5,price:0,currency:'MYR',seal:'CC',casingOring:'NBR',sealOring:'VITON',material:'SS (CI Connection)',curve:'CHC 15'},
+{model:'SVMT 15-30',series:'SVMT-50Hz',flow:15,head:33,minFlow:8,maxFlow:23,kw:3,hp:4,price:2800,currency:'RMB',seal:'CC',casingOring:'NBR',sealOring:'VITON',material:'SS (CI Connection)',curve:'CHC 15'},
+{model:'SVMT 15-100',series:'SVMT-50Hz',flow:15,head:113,minFlow:8,maxFlow:23,kw:11,hp:15,price:3800,currency:'RMB',seal:'SS',casingOring:'NBR',sealOring:'VITON',material:'SS (CI Connection)',curve:'CHC 20'}];
+const curves={
+'CHC 15':{flow:[0,1,2,4,6,8,10,12,14,15,16,18,20,22,23],head:[14.08,13.9,13.7,13.5,13.3,13.1,12.8,12.3,12,11.8,11.3,10.3,9.6,8.3,7.8]},
+'CHC 20':{flow:[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28],head:[14.13,14.08,13.98,13.88,13.8,13.63,13.38,13.13,12.8,12.38,11.8,11.08,10.3,9.38,8.38]}};
+let selected=null,chart=null,quoteItemsData=[];
+function openView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function toM3h(v,u){return u==='m3h'?v:u==='lpm'?v*0.06:u==='lps'?v*3.6:v*0.2271247}
+function toM(v,u){return u==='m'?v:u==='bar'?v*10.1972:u==='ft'?v*0.3048:v/9.80665}
+function searchPump(){const q=toM3h(+flow.value,flowUnit.value),h=toM(+head.value,headUnit.value);let candidates=products.filter(p=>q>=p.minFlow*.75&&q<=p.maxFlow*1.2&&p.head>=h*.9);if(!candidates.length)candidates=products;selected=candidates.sort((a,b)=>{const sa=Math.abs(a.flow-q)/Math.max(q,1)+Math.abs(a.head-h)/Math.max(h,1)+a.kw*.01;const sb=Math.abs(b.flow-q)/Math.max(q,1)+Math.abs(b.head-h)/Math.max(h,1)+b.kw*.01;return sa-sb})[0];emptyResult.style.display='none';resultCard.classList.add('show');resultModel.textContent=selected.model;metricDuty.textContent=`${q.toFixed(1)} m³/h @ ${h.toFixed(1)} m`;metricRated.textContent=`${selected.flow} m³/h @ ${selected.head} m`;metricMotor.textContent=`${selected.kw} kW`;metricPrice.textContent=selected.price?`${selected.currency} ${selected.price.toLocaleString()}`:'Not set';renderCurve(q,h)}
+function renderCurve(q,h){const c=curves[selected.curve],stageFactor=Math.max(1,selected.head/(selected.curve==='CHC 15'?11.8:11.8));const heads=c.head.map(x=>+(x*stageFactor).toFixed(2));if(chart)chart.destroy();chart=new Chart(document.getElementById('curveChart'),{type:'line',data:{labels:c.flow,datasets:[{label:selected.model+' Head',data:heads,borderWidth:3,tension:.35,pointRadius:2},{label:'Required Duty',data:c.flow.map(x=>Math.abs(x-q)<1? h:null),showLine:false,pointRadius:7,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{title:{display:true,text:'Flow (m³/h)'}},y:{title:{display:true,text:'Head (m)'},beginAtZero:true}}}})}
+function toggleChart(){chartWrap.style.display=chartWrap.style.display==='none'?'block':'none'}
+function addSelectedToQuote(){if(!selected)return;quoteItemsData.push({type:'pump',...selected,qty:1,unitPrice:selected.price||0,itemDiscount:0,sealChoice:selected.seal||'CC',elastomerChoice:selected.casingOring||'NBR'});renderQuoteItems();openView('quotation')}
+function addManualItem(){quoteItemsData.push({type:'manual',description:'New Manual Item',details:'',qty:1,unitPrice:0,itemDiscount:0});renderQuoteItems()}
+function updateItem(index,field,value){const item=quoteItemsData[index];if(['qty','unitPrice','itemDiscount'].includes(field))value=Number(value)||0;item[field]=value;updateTotals()}
+function duplicateItem(index){const copy=JSON.parse(JSON.stringify(quoteItemsData[index]));quoteItemsData.splice(index+1,0,copy);renderQuoteItems()}
+function removeItem(index){quoteItemsData.splice(index,1);renderQuoteItems()}
+function moveItem(index,direction){const target=index+direction;if(target<0||target>=quoteItemsData.length)return;[quoteItemsData[index],quoteItemsData[target]]=[quoteItemsData[target],quoteItemsData[index]];renderQuoteItems()}
+function renderQuoteItems(){if(!quoteItemsData.length){quoteItems.innerHTML='<div class="empty-note"><p>No items added yet.</p><button class="btn btn-secondary" onclick="openView(\'selector\')">Open Pump Selector</button></div>';updateTotals();return}
+quoteItems.innerHTML=quoteItemsData.map((item,i)=>{const amount=item.qty*item.unitPrice*(1-item.itemDiscount/100);if(item.type==='manual')return `<div class="quote-item manual"><div class="quote-item-top"><div class="quote-item-title"><div class="item-number">${i+1}</div><div style="flex:1"><input class="input" value="${item.description}" oninput="updateItem(${i},'description',this.value)"><textarea class="textarea" rows="2" style="margin-top:8px" placeholder="Description or scope" oninput="updateItem(${i},'details',this.value)">${item.details||''}</textarea></div></div><div class="item-amount">${money(amount)}</div></div><div class="option-grid"><div class="field"><label>Quantity</label><input class="input" type="number" min="1" value="${item.qty}" oninput="updateItem(${i},'qty',this.value)"></div><div class="field"><label>Unit Price</label><input class="input" type="number" value="${item.unitPrice}" oninput="updateItem(${i},'unitPrice',this.value)"></div><div class="field"><label>Item Discount %</label><input class="input" type="number" min="0" max="100" value="${item.itemDiscount}" oninput="updateItem(${i},'itemDiscount',this.value)"></div></div><div class="quote-item-actions"><button class="btn btn-light mini" onclick="duplicateItem(${i})">Duplicate</button><button class="btn btn-light mini" onclick="moveItem(${i},-1)">↑</button><button class="btn btn-light mini" onclick="moveItem(${i},1)">↓</button><button class="btn btn-light mini" onclick="removeItem(${i})">Delete</button></div></div>`;
+return `<div class="quote-item"><div class="quote-item-top"><div class="quote-item-title"><div class="item-number">${i+1}</div><div><h3>${item.model}</h3><small>${item.material} · ${item.kw} kW · ${item.series}</small></div></div><div class="item-amount">${money(amount)}</div></div><div class="option-grid"><div class="field"><label>Mechanical Seal</label><select class="select" onchange="updateItem(${i},'sealChoice',this.value)"><option ${item.sealChoice==='CC'?'selected':''} value="CC">CC — Carbon/Ceramic</option><option ${item.sealChoice==='CS'?'selected':''} value="CS">CS — Carbon/SiC</option><option ${item.sealChoice==='SS'?'selected':''} value="SS">SS — SiC/SiC</option><option ${item.sealChoice==='TT'?'selected':''} value="TT">TT — TC/TC</option></select></div><div class="field"><label>Elastomer</label><select class="select" onchange="updateItem(${i},'elastomerChoice',this.value)"><option ${item.elastomerChoice==='NBR'?'selected':''}>NBR</option><option ${item.elastomerChoice==='EPDM'?'selected':''}>EPDM</option><option ${item.elastomerChoice==='FKM (Viton)'?'selected':''}>FKM (Viton)</option></select></div><div class="field"><label>Quantity</label><input class="input" type="number" min="1" value="${item.qty}" oninput="updateItem(${i},'qty',this.value)"></div><div class="field"><label>Unit Price</label><input class="input" type="number" value="${item.unitPrice}" oninput="updateItem(${i},'unitPrice',this.value)"></div><div class="field"><label>Item Discount %</label><input class="input" type="number" min="0" max="100" value="${item.itemDiscount}" oninput="updateItem(${i},'itemDiscount',this.value)"></div></div><div class="quote-item-actions"><button class="btn btn-light mini" onclick="duplicateItem(${i})">Duplicate</button><button class="btn btn-light mini" onclick="moveItem(${i},-1)">↑</button><button class="btn btn-light mini" onclick="moveItem(${i},1)">↓</button><button class="btn btn-light mini" onclick="removeItem(${i})">Delete</button></div></div>`}).join('');updateTotals()}
+function money(v){return 'RM '+Number(v).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function updateTotals(){const sub=quoteItemsData.reduce((sum,item)=>sum+(item.qty*item.unitPrice*(1-item.itemDiscount/100)),0);const total=sub*(1-(+discount.value||0)/100);itemCount.textContent=quoteItemsData.length;subtotal.textContent=money(sub);grandTotal.textContent=money(total);document.querySelectorAll('.item-amount').forEach((el,i)=>{const item=quoteItemsData[i];el.textContent=money(item.qty*item.unitPrice*(1-item.itemDiscount/100))})}
+function saveQuotation(){if(!quoteItemsData.length){alert('Please add at least one item.');return}const no=quoteNo.value||('QT26'+String(Date.now()).slice(-4));const sub=quoteItemsData.reduce((sum,item)=>sum+(item.qty*item.unitPrice*(1-item.itemDiscount/100)),0);const total=sub*(1-(+discount.value||0)/100);const row=document.createElement('tr');row.innerHTML=`<td>${no}</td><td>${quoteCustomer.value}</td><td>${money(total)}</td><td><span class="badge">Draft</span></td>`;recentBody.prepend(row);alert(no+' saved as draft with '+quoteItemsData.length+' item(s).');openView('dashboard')}
+renderQuoteItems();
+</script>
 </body>
 </html>
