@@ -21,7 +21,7 @@
     .card{background:white;border:1px solid #e2e8f0;border-radius:13px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
     .metric b{font-size:26px;display:block;margin-top:8px}.muted{color:var(--muted);font-size:13px}
     label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:white}
-    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.contact-row{display:grid;grid-template-columns:110px 1.4fr 1fr 1.3fr auto;gap:10px;align-items:end;margin-bottom:10px}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:8px;padding:10px 15px;background:var(--navy);color:white}.btn.secondary{background:#e2e8f0;color:#172033}.btn.green{background:var(--ok)}.btn.danger{background:#b91c1c}
     table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e2e8f0;padding:10px 8px;text-align:left}th{background:#f8fafc}
     .table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:12px}.badge.sent{background:#dbeafe}.badge.won{background:#dcfce7}.badge.lost{background:#fee2e2}
@@ -29,7 +29,7 @@
     .quote-head{display:flex;justify-content:space-between;gap:20px}.quote-total{font-size:22px;font-weight:700;text-align:right}
     .notice{padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;margin-bottom:14px}
     @media(max-width:900px){.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
-    @media(max-width:560px){.grid-4,.grid-2,.form-grid{grid-template-columns:1fr}.quote-head{display:block}}
+    @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
@@ -40,7 +40,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.1</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.3</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -68,29 +68,35 @@
 
     <section id="customers" class="page">
       <h1>Customers</h1>
-      <div class="grid grid-2">
-        <div class="card">
-          <h2>Add / Edit Customer</h2>
-          <input type="hidden" id="customerId">
-          <div class="form-grid">
-            <div><label>Company Name *</label><input id="company"></div>
-            <div><label>Contact Person</label><input id="contact"></div>
-            <div><label>Phone</label><input id="phone"></div>
-            <div><label>Email</label><input id="email" type="email"></div>
-            <div><label>Address</label><input id="address"></div>
-            <div><label>Notes</label><input id="customerNotes"></div>
-          </div>
-          <div class="actions"><button class="btn" id="saveCustomer">Save Customer</button><button class="btn secondary" id="clearCustomer">Clear</button></div>
+      <div class="card">
+        <h2>Company Details</h2>
+        <input type="hidden" id="customerId">
+        <div class="form-grid">
+          <div class="span-2"><label>Company Name *</label><input id="company"></div>
+          <div><label>Company Phone</label><input id="companyPhone"></div>
+          <div class="span-3"><label>Address</label><textarea id="address" style="min-height:72px"></textarea></div>
+          <div class="span-2"><label>Project</label><input id="customerProject"></div>
+          <div><label>Customer Reference</label><input id="customerReference"></div>
+          <div class="span-3"><label>Notes</label><input id="customerNotes"></div>
         </div>
-        <div class="card"><h2>Customer List</h2><div class="table-wrap"><table><thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+        <h2 style="margin-top:22px">Contact Persons</h2>
+        <div id="contactEditor"></div>
+        <button type="button" class="btn secondary" id="addContact">+ Add Contact Person</button>
+        <div class="actions"><button class="btn" id="saveCustomer">Save Customer</button><button class="btn secondary" id="clearCustomer">Clear</button></div>
       </div>
+      <div class="card" style="margin-top:16px"><h2>Customer List</h2><div class="table-wrap"><table><thead><tr><th>Company</th><th>Project</th><th>Contacts</th><th>Active</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
     </section>
 
     <section id="selector" class="page">
       <h1>CHC Selector</h1>
-      <div class="notice">This is your completed KeySelector v3.3.0 Stable. Run the selection, choose the preferred model, then press <b>ADD SELECTED PUMP TO QUOTATION</b>.</div>
+      <div id="activeCustomerBanner" class="notice">Select an active customer from the Customer page first.</div>
+      <div class="card selector-toolbar">
+        <div><label>Pump Material</label><select id="pumpMaterial"><option value="CHC - Cast Iron Connection / Stainless Steel Hydraulic Parts">CHC — Cast Iron Connection / Stainless Steel Hydraulic Parts</option><option value="CHCS - Stainless Steel 304">CHCS — Stainless Steel 304</option><option value="CHCN - Stainless Steel 316">CHCN — Stainless Steel 316</option></select></div>
+        <div><label>Mechanical Seal Faces</label><select id="sealFaces"><option>Carbon / Silicon Carbide</option><option>Silicon Carbide / Silicon Carbide</option><option>Tungsten Carbide / Tungsten Carbide</option></select></div>
+        <div><label>Elastomer</label><select id="sealElastomer"><option>EPDM</option><option>Viton (FKM)</option><option>NBR</option></select></div>
+      </div>
       <div class="card" style="padding:0;overflow:hidden">
-        <iframe id="selectorFrame" src="selector/index.html" title="KeySelector CHC Series" style="width:100%;height:1150px;border:0;display:block"></iframe>
+        <iframe id="selectorFrame" src="selector/index.html" title="KeySelector CHC Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 

@@ -1,27 +1,12 @@
-# KeySuite + KeySelector CHC Merged v0.2
+# KeySuite + Full KeySelector v0.3
 
-This build merges:
-- KeySuite customer and quotation dashboard
-- KeySelector v3.3.0 Stable (Locked)
-- Full CHC pump selection and technical PDF
-- One-click transfer of selected pump into quotation
-- Saved customer and quotation history
-- Print / Save quotation PDF
+- Full locked KeySelector v3.3.0 embedded in the CHC Selector page
+- Company name and address enlarged
+- Multiple contact persons per company with prefix, phone and email
+- Project and customer reference stored with customer
+- Active-customer workflow
+- Material, seal faces and elastomer selection
+- Selected pump transfers to quotation
+- Quantity remains in quotation only
 
-## Workflow
-1. Add a customer in Customers.
-2. Open CHC Selector.
-3. Enter flow/head and select the pump.
-4. Press ADD SELECTED PUMP TO QUOTATION.
-5. Choose the customer, enter price and commercial terms.
-6. Save or print the quotation.
-7. Use EXPORT PDF inside KeySelector for the full technical curve report.
-
-## Storage
-Customer and quotation records use browser localStorage in this trial version.
-They do not sync across devices and will be removed if browser site data is cleared.
-
-## GitHub Pages
-Upload all extracted files and folders to one repository.
-Enable GitHub Pages from the main branch and root folder.
-Do not remove or rename the selector folder.
+Records are stored in browser localStorage for testing.
