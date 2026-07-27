@@ -1,10 +1,7 @@
-# KeySuite + KeySelector CHC Merged v0.8
+# KeySuite CHC Merged v0.9
 
-Changes:
-- Selector button renamed to Add to Quotation
-- Button positioned at the top-right in the same header row as the logo
-- SS304 quotation models use CHCS prefix
-- SS316 quotation models use CHCN prefix
-- Default SS304 Cast Iron Connection retains CHC prefix
-- CHC 32 and larger automatically use Round Flange; Oval Flange is disabled
-- Existing CHC quotation description and multi-item quotation workflow retained
+- Uses KeySelector v3.3.3 Final as the embedded selector.
+- Flow and Head inputs start at 0.
+- Add to Quotation button is on the top-right logo row.
+- CHCS model prefix for SS304 and CHCN for SS316.
+- CHC 32, CHC 45, CHC 64, CHC 90, CHC 120, CHC 150 and CHC 200 are locked to Round Flange; the Connection selector is disabled after selection.

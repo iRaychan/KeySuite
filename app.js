@@ -193,11 +193,20 @@ function refreshQuotes(){
 }
 
 function updateConnectionAvailabilityFromModel(model){
- const size=Number((String(model||'').match(/CHC[S|N]?\s+(\d+)/i)||[])[1]||0);
+ const size=Number((String(model||'').match(/CHC(?:S|N)?\s+(\d+)/i)||[])[1]||0);
  const sel=$('connectionType');
  const oval=sel?.querySelector('option[value="oval"]');
  if(!sel||!oval)return;
- if(size>=32){sel.value='round';oval.disabled=true}else{oval.disabled=false}
+ if(size>=32){
+   sel.value='round';
+   oval.disabled=true;
+   sel.disabled=true;
+   sel.title='CHC 32 to CHC 200 use Round Flange only';
+ }else{
+   oval.disabled=false;
+   sel.disabled=false;
+   sel.title='';
+ }
 }
 
 function refreshAll(){refreshCustomers();refreshQuotes()}
@@ -220,9 +229,13 @@ window.addEventListener('message',function(event){
  const ovalOption=connectionSelect.querySelector('option[value="oval"]');
  if(seriesSize>=32){
    connectionSelect.value='round';
+   connectionSelect.disabled=true;
+   connectionSelect.title='CHC 32 to CHC 200 use Round Flange only';
    if(ovalOption) ovalOption.disabled=true;
  }else if(ovalOption){
    ovalOption.disabled=false;
+   connectionSelect.disabled=false;
+   connectionSelect.title='';
  }
  const connectionType=connectionSelect.value;
  const quotationModel=material==='SS304' ? rawModel.replace(/^CHC\b/i,'CHCS') : material==='SS316' ? rawModel.replace(/^CHC\b/i,'CHCN') : rawModel;
