@@ -21,7 +21,7 @@
     .card{background:white;border:1px solid #e2e8f0;border-radius:13px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
     .metric b{font-size:26px;display:block;margin-top:8px}.muted{color:var(--muted);font-size:13px}
     label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:white}
-    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title-row h1{margin:0}.customer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr);gap:16px}.search-box{margin-bottom:12px}.customer-item{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid #e2e8f0;background:white;padding:13px 10px}.customer-item:hover,.customer-item.selected{background:#eef6ff}.customer-item b{display:block}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail-value{border-bottom:1px solid #e2e8f0;padding:5px 0 10px;min-height:32px}.contact-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:end;margin-bottom:14px;padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#fbfdff}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
+    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title-row h1{margin:0}.customer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr);gap:16px}.search-box{margin-bottom:12px}.customer-item{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid #e2e8f0;background:white;padding:13px 10px}.customer-item:hover,.customer-item.selected{background:#eef6ff}.customer-item b{display:block}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail-value{border-bottom:1px solid #e2e8f0;padding:5px 0 10px;min-height:32px}.contact-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:end;margin-bottom:14px;padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#fbfdff}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.25fr 1.4fr .8fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:8px;padding:10px 15px;background:var(--navy);color:white}.btn.secondary{background:#e2e8f0;color:#172033}.btn.green{background:var(--ok)}.btn.danger{background:#b91c1c}
     table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e2e8f0;padding:10px 8px;text-align:left}th{background:#f8fafc}
     .table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:12px}.badge.sent{background:#dbeafe}.badge.won{background:#dcfce7}.badge.lost{background:#fee2e2}
@@ -42,7 +42,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.6</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.7</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -65,7 +65,7 @@
         <div class="card"><h2>Start</h2><p class="muted">Create a customer first, then select a CHC pump and prepare the quotation.</p><div class="actions"><button class="btn" data-go="customers">Add Customer</button><button class="btn green" data-go="selector">New CHC Quote</button></div></div>
         <div class="card"><h2>Testing Notes</h2><textarea id="testingNotes" placeholder="Write anything that feels slow, confusing or missing during your one-week trial..."></textarea><div class="actions"><button class="btn secondary" id="saveNotes">Save Notes</button></div></div>
       </div>
-      <div class="card" style="margin-top:16px"><h2>Recent Quotations</h2><div class="table-wrap"><table><thead><tr><th>No.</th><th>Customer</th><th>Model</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentQuotes"></tbody></table></div></div>
+      <div class="card" style="margin-top:16px"><h2>Recent Quotations</h2><div class="table-wrap"><table><thead><tr><th>No.</th><th>Customer</th><th>Model</th><th>Total</th><th>Type</th></tr></thead><tbody id="recentQuotes"></tbody></table></div></div>
     </section>
 
     <section id="customers" class="page">
@@ -153,9 +153,11 @@
       <h1>CHC Selector</h1>
       <div id="activeCustomerBanner" class="notice">Select an active customer from the Customer page first.</div>
       <div class="card selector-toolbar">
-        <div><label>Pump Material</label><select id="pumpMaterial"><option value="CHC - Cast Iron Connection / Stainless Steel Hydraulic Parts">CHC — Cast Iron Connection / Stainless Steel Hydraulic Parts</option><option value="CHCS - Stainless Steel 304">CHCS — Stainless Steel 304</option><option value="CHCN - Stainless Steel 316">CHCN — Stainless Steel 316</option></select></div>
-        <div><label>Mechanical Seal Faces</label><select id="sealFaces"><option>Carbon / Silicon Carbide</option><option>Silicon Carbide / Silicon Carbide</option><option>Tungsten Carbide / Tungsten Carbide</option></select></div>
-        <div><label>Elastomer</label><select id="sealElastomer"><option>EPDM</option><option>Viton (FKM)</option><option>NBR</option></select></div>
+        <div><label>Material</label><select id="pumpMaterial"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
+        <div><label>Mechanical Seal</label><select id="sealFaces"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
+        <div><label>Elastomer</label><select id="sealElastomer"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
+        <div><label>Connection</label><select id="connectionType"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
+        <div><label>Supply</label><label style="display:flex;align-items:center;gap:9px;height:42px;margin:0;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff"><input id="bareShaft" type="checkbox" style="width:auto"> Bare Shaft Pump</label></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <iframe id="selectorFrame" src="selector/index.html" title="KeySelector CHC Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
@@ -177,7 +179,6 @@
           <div><label>Date</label><input id="qDate" type="date"></div>
           <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
           <div><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
-          <div><label>Status</label><select id="qStatus"><option>Draft</option><option>Sent</option><option>Won</option><option>Lost</option></select></div>
 </div>
         <div class="page-title-row" style="margin-top:20px;margin-bottom:8px">
           <h2>Items</h2>
@@ -195,7 +196,7 @@
 
     <section id="history" class="page">
       <h1>Quotation History</h1>
-      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Customer</th><th>Items</th><th>Total</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
     </section>
   </main>
 </div>

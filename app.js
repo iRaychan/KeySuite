@@ -180,18 +180,57 @@ function nextQuoteNo(){
  return `R-${yy}${mm}-${seq}`;
 }
 function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);total+=itemTotal});$('quoteTotal').textContent=money(total);return total}
-function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,status:$('qStatus').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,delivery:$('delivery').value,validity:$('validity').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
-function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qStatus').value=q.status||'Draft';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('delivery').value=q.delivery||'';$('validity').value=q.validity||'';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
+function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,delivery:$('delivery').value,validity:$('validity').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
+function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('delivery').value=q.delivery||'';$('validity').value=q.validity||'';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
-function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qDocumentType').value='Quotation';$('qStatus').value='Draft';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
-function refreshQuotes(){const arr=quotes();$('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><span class="badge ${String(q.status||'Draft').toLowerCase()}">${esc(q.status||'Draft')}</span></td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="8" class="muted">No quotations yet.</td></tr>';document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.openQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));$('recentQuotes').innerHTML=arr.slice(0,5).map(q=>`<tr><td>${esc(q.no)}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(q.items?.[0]?.model||q.model||'')}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';$('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((s,q)=>s+q.total,0));$('mPending').textContent=arr.filter(q=>['Draft','Sent'].includes(q.status)).length}
+function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qDocumentType').value='Quotation';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
+function refreshQuotes(){
+ const arr=quotes();
+ $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7" class="muted">No quotations yet.</td></tr>';
+ document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.openQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));
+ $('recentQuotes').innerHTML=arr.slice(0,5).map(q=>{const first=q.items?.[0]?.model||q.model||'';return `<tr><td>${esc(q.no)}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(first)}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';
+ $('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((sum,q)=>sum+q.total,0));$('mPending').textContent=arr.length;
+}
 function refreshAll(){refreshCustomers();refreshQuotes()}
 
 window.addEventListener('message',function(event){
  if(!event.data||event.data.type!=='KEYSUITE_ADD_SELECTION')return;
- const p=event.data.payload||{},a=activeCustomer();
- if(!a){alert('Please select a customer first.');showPage('customers');return}
- showPage('quotation');$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery';const mat=$('pumpMaterial').value,faces=$('sealFaces').value,elast=$('sealElastomer').value;const motor=[p.motor_kw!=null?`${Number(p.motor_kw).toFixed(2)} kW`:'',p.motor_hp!=null?`${Number(p.motor_hp).toFixed(2).replace(/\.00$/,'')} HP`:''].filter(Boolean).join(' / ');const description=['B.G.Reich Vertical Multistage Pump',`Model: ${p.model||'-'}`,`Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,`Material: ${mat}`,`Mechanical Seal: ${faces}, ${elast}`,`Motor: ${motor}, ${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz`,p.speed_rpm!=null?`Speed: ${Math.round(p.speed_rpm)} rpm`:'',p.efficiency!=null?`Pump Efficiency: ${Number(p.efficiency).toFixed(1)}%`:'',p.npshr!=null?`NPSHr: ${Number(p.npshr).toFixed(2)} m`:'',p.connection?`Connection: ${p.connection}`:''].filter(Boolean).join('\n');const rows=[...document.querySelectorAll('.quote-item')];const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;const row=empty?rows[0]:quoteItemRow({});row.querySelector('.item-model').value=p.model||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=description;calcTotal();
+ const p=event.data.payload||{},customer=activeCustomer();
+ if(!customer){alert('Please select a customer first.');showPage('customers');return}
+ showPage('quotation');
+ $('qCustomer').value=customer.id;refreshQuotationContacts();
+ $('payment').value=(customer.terms||'').trim()||'Cash before delivery';
+ const material=$('pumpMaterial').value;
+ const seal=$('sealFaces').value;
+ const elastomer=$('sealElastomer').value;
+ const connectionType=$('connectionType').value;
+ const bare=$('bareShaft').checked;
+ const rawConnection=String(p.connection||'');
+ const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
+ const gMatch=rawConnection.match(/G\s*\d+(?:[½¼¾]|\s*1\/2|\s*1\/4|\s*3\/4)?/ig)||[];
+ let suctionDischarge;
+ if(connectionType==='oval'){
+   const oval=gMatch[0]||rawConnection.match(/\(([^)]+)\)/)?.[1]||'G';
+   suctionDischarge=`${oval} x ${oval}`;
+ }else{
+   const round=dnMatch[0]||rawConnection.split('(')[0].trim()||'DN';
+   suctionDischarge=`${round} x ${round}`;
+ }
+ const hp=p.motor_hp!=null?Number(p.motor_hp).toFixed(2).replace(/\.00$/,''):'';
+ const motorLine=`c/w ${hp||'-'}HP 2Pole ${p.motor_efficiency_class||'IE3'} Motor (${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz)`;
+ const standardSeal=seal==='Car/Cer'&&elastomer==='Viton';
+ const materialLine=standardSeal?`${material} / Mech Seal`:`${material} / Mech Seal-${seal}/${elastomer}`;
+ const lines=[
+   `Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,
+   `B.G.Reich Vertical Multistage Pump Model: ${p.model||'-'}`,
+   bare?'(Bare shaft pump)':motorLine,
+   `Suction & Discharge: ${suctionDischarge}`,
+   `Material: ${materialLine}`
+ ];
+ const rows=[...document.querySelectorAll('.quote-item')];
+ const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
+ const row=empty?rows[0]:quoteItemRow({});
+ row.querySelector('.item-model').value=p.model||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;
