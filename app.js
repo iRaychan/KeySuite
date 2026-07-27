@@ -169,6 +169,7 @@ function updateQuotationContactInfo(){
 }
 function quoteItemRow(data={}){
  const wrap=document.createElement('div');wrap.className='quote-item';
+ if(data.pumpData) wrap.dataset.pumpData=JSON.stringify(data.pumpData);
  wrap.innerHTML=`<div class="quote-item-head"><b>Item <span class="item-number"></span></b><button type="button" class="btn danger remove-quote-item no-print">Remove Item</button></div><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div>`;
  $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons()}));renumberQuoteItems();calcTotal();return wrap;
 }
@@ -191,6 +192,17 @@ function printWithFilename(filename,targetRow=null){
  window.print();
  setTimeout(restorePrintState,1500);
 }
+
+function exportPumpDataSheet(row,filename){
+ const raw=row.dataset.pumpData;
+ if(!raw){alert('Pump data is unavailable for this item. Please select the pump again and add it to the quotation.');return}
+ let pumpData;
+ try{pumpData=JSON.parse(raw)}catch(e){alert('Unable to read the saved pump data.');return}
+ const frame=$('selectorFrame');
+ if(!frame||!frame.contentWindow){alert('Pump selector is not ready.');return}
+ frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:pumpData,filename:safePdfName(filename)},'*');
+}
+
 function refreshItemExportButtons(){
  const box=$('itemExportButtons');if(!box)return;
  const rows=[...document.querySelectorAll('.quote-item')];
@@ -201,12 +213,12 @@ function refreshItemExportButtons(){
    const b=document.createElement('button');
    b.className='btn secondary';
    b.textContent=`Export Item ${no} - ${model}`;
-   b.onclick=()=>printWithFilename(`Item ${no} - ${model}`,row);
+   b.onclick=()=>exportPumpDataSheet(row,`Item ${no} - ${model}`);
    box.appendChild(b);
  });
 }
 
-function getQuoteItems(){return [...document.querySelectorAll('.quote-item')].map(r=>({model:r.querySelector('.item-model').value.trim(),qty:+r.querySelector('.item-qty').value||0,unitPrice:+r.querySelector('.item-price').value||0,discount:+r.querySelector('.item-discount').value||0,description:r.querySelector('.item-description').value.trim()})).filter(x=>x.model||x.description||x.unitPrice||x.qty)}
+function getQuoteItems(){return [...document.querySelectorAll('.quote-item')].map(r=>({model:r.querySelector('.item-model').value.trim(),qty:+r.querySelector('.item-qty').value||0,unitPrice:+r.querySelector('.item-price').value||0,discount:+r.querySelector('.item-discount').value||0,description:r.querySelector('.item-description').value.trim(),pumpData:r.dataset.pumpData?JSON.parse(r.dataset.pumpData):null})).filter(x=>x.model||x.description||x.unitPrice||x.qty)}
 function setQuoteItems(items=[]){$('quoteItems').innerHTML='';(items.length?items:[{}]).forEach(quoteItemRow);calcTotal()}
 function nextQuoteNo(){
  const d=new Date(),yy=String(d.getFullYear()).slice(-2),mm=String(d.getMonth()+1).padStart(2,'0'),seq=String(quotes().length+1).padStart(4,'0');
@@ -260,20 +272,22 @@ window.addEventListener('message',function(event){
  const seriesSize=Number((rawModel.match(/CHC\s+(\d+)/i)||[])[1]||0);
  const connectionSelect=$('connectionType');
  const ovalOption=connectionSelect.querySelector('option[value="oval"]');
- if(seriesSize>=32){
+ const quotationModel=material==='SS304' ? rawModel.replace(/^CHC\b/i,'CHCS') : material==='SS316' ? rawModel.replace(/^CHC\b/i,'CHCN') : rawModel;
+ const rawConnection=String(p.connection||'');
+ const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
+ const connectionDN=Number((dnMatch[0]||'').match(/\d+/)?.[0]||0);
+ const roundOnly=seriesSize>=32 || connectionDN>=65;
+ if(roundOnly){
    connectionSelect.value='round';
    connectionSelect.disabled=true;
-   connectionSelect.title='CHC 32 to CHC 200 use Round Flange only';
+   connectionSelect.title='DN65 and larger use Round Flange only';
    if(ovalOption) ovalOption.disabled=true;
- }else if(ovalOption){
-   ovalOption.disabled=false;
+ }else{
+   if(ovalOption) ovalOption.disabled=false;
    connectionSelect.disabled=false;
    connectionSelect.title='';
  }
  const connectionType=connectionSelect.value;
- const quotationModel=material==='SS304' ? rawModel.replace(/^CHC\b/i,'CHCS') : material==='SS316' ? rawModel.replace(/^CHC\b/i,'CHCN') : rawModel;
- const rawConnection=String(p.connection||'');
- const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
  const gMatch=rawConnection.match(/G\s*\d+(?:[½¼¾]|\s*1\/2|\s*1\/4|\s*3\/4)?/ig)||[];
  let suctionDischarge;
  if(connectionType==='oval'){
@@ -297,7 +311,7 @@ window.addEventListener('message',function(event){
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
- row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();refreshItemExportButtons();
+ row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');row.dataset.pumpData=JSON.stringify({...p,quotation_model:quotationModel});calcTotal();refreshItemExportButtons();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;
