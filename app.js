@@ -225,10 +225,10 @@ function nextQuoteNo(){
  return `R-${yy}${mm}-${seq}`;
 }
 function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);total+=itemTotal});$('quoteTotal').textContent=money(total);return total}
-function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,delivery:$('delivery').value,validity:$('validity').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
-function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('delivery').value=q.delivery||'';$('validity').value=q.validity||'';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
+function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,project:$('project').value,customerReference:$('customerReference').value,delivery:$('delivery').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
+function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('project').value=q.project||'';$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
-function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qDocumentType').value='Quotation';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
+function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qDocumentType').value='Quotation';$('project').value='';$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
 function refreshQuotes(){
  const arr=quotes();
  $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7" class="muted">No quotations yet.</td></tr>';
@@ -324,6 +324,50 @@ window.addEventListener('message',function(event){
  row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');row.dataset.pumpData=JSON.stringify({...p,quotation_model:quotationModel,keysuite_material:material,keysuite_seal:seal,keysuite_elastomer:elastomer,keysuite_connection_type:connectionType});calcTotal();refreshItemExportButtons();
 });
 
+
+function displayDate(value){
+ const d=value?new Date(value+'T00:00:00'):new Date();
+ return d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
+}
+function buildPrintQuotation(){
+ const c=customers().find(x=>x.id===$('qCustomer').value)||{};
+ const contact=(c.contacts||[])[Number($('qContact').value)]||{};
+ const title=$('qDocumentType').value||'Quotation';
+ $('pDocTitle').textContent=title;
+ $('pTo').textContent=c.company||'';
+ $('pAttn').textContent=[contact.prefix,contact.name].filter(Boolean).join(' ');
+ $('pTel').textContent=formatMYPhone(contact.phone||c.companyPhone||'');
+ $('pEmail').textContent=contact.email||'';
+ $('pDate').textContent=$('pDate2').textContent=displayDate($('qDate').value);
+ $('pProject').textContent=$('project').value||'';
+ $('pCustomerRef').textContent=$('customerReference').value||'';
+ $('pQuoteNo').textContent=$('pQuoteNo2').textContent=$('quoteNo').value||'';
+ $('pPreparedBy').textContent=$('preparedBy').value||'';
+ $('pDear').textContent=`Dear ${[contact.prefix,contact.name].filter(Boolean).join(' ')||'Sir / Madam'},`;
+ $('pDelivery').textContent=$('delivery').value||'';
+ $('pPayment').textContent=$('payment').value||'';
+ $('pValidity').textContent=$('validity').value||'';
+ $('pPriceBasis').textContent=$('priceBasis').value||'';
+ const items=getQuoteItems();
+ let subtotal=0;
+ $('pItems').innerHTML=items.map((item,i)=>{
+   const amount=item.qty*item.unitPrice*(1-item.discount/100);subtotal+=amount;
+   return `<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${item.qty}</td><td>${money(item.unitPrice)}</td><td>${money(amount)}</td></tr>`;
+ }).join('');
+ $('pSubtotal').textContent=money(subtotal);$('pGrandTotal').textContent=money(subtotal);
+}
+function printCompleteQuotation(){
+ buildPrintQuotation();restorePrintState();window.__ksOldTitle=document.title;document.title=safePdfName($('quoteNo').value||'Quotation');document.body.classList.add('print-complete');
+ window.addEventListener('afterprint',()=>{document.body.classList.remove('print-complete');restorePrintState()},{once:true});window.print();setTimeout(()=>document.body.classList.remove('print-complete'),1600);
+}
+function loadPrintSample(){
+ let arr=customers();let c=arr.find(x=>x.company==='Sample Engineering Sdn. Bhd.');
+ if(!c){c={id:crypto.randomUUID(),company:'Sample Engineering Sdn. Bhd.',companyPhone:'+60 (3) 1234 5678',address:'No. 10, Jalan Perindustrian, 48000 Rawang, Selangor',terms:'30 days',contacts:[{prefix:'Ms.',name:'Amanda Lee',phone:'+60 (12) 3456 7890',email:'amanda@example.com'}]};arr.push(c);store.set('ks_customers',arr)}
+ localStorage.setItem('ks_active_customer',c.id);refreshAll();$('qCustomer').value=c.id;refreshQuotationContacts();$('qContact').value='0';updateQuotationContactInfo();
+ $('project').value='Rawang Booster Pump Replacement';$('customerReference').value='RFQ-2026-071';$('quoteNo').value='R-2607-0180';$('preparedBy').value='Ray';$('qDate').value=new Date().toISOString().slice(0,10);$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value='30 days';
+ setQuoteItems([{model:'CHCS 15-50',qty:1,unitPrice:4580,discount:0,description:'Duty: 15.0 m³/h @ 33.0 m\n\nB.G.Reich Vertical Multistage Pump\nModel: CHCS 15-50\n\nc/w 4HP 2Pole IE3 Motor\n(415V / 3Ph / 50Hz)\n\nSuction & Discharge:\nDN50 x DN50\n\nMaterial:\nStainless Steel 304 / Mech Seal'}]);calcTotal();alert('Print sample loaded. Press Export Complete Quotation PDF.');
+}
+
 $('addNewCustomer').onclick=openNewCustomer;
 $('addContact').onclick=()=>contactRow();
 $('saveCustomer').onclick=saveCustomer;
@@ -336,7 +380,7 @@ $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>quoteItemRow({});
-$('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=()=>printWithFilename($('quoteNo').value||'Quotation');
+$('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=printCompleteQuotation;$('loadPrintSample').onclick=loadPrintSample;
 $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').value);alert('Testing notes saved.')};
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';
 
