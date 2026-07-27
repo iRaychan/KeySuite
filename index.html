@@ -34,6 +34,9 @@
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
       body{background:white}
+      body.export-single .quote-item{display:none!important}
+      body.export-single .quote-item.export-target{display:block!important}
+      body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
     }
   
 .contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{border:1px solid #dbe3ec;border-radius:10px;padding:14px;margin-top:12px;background:#fbfdff}.quote-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}}
@@ -42,7 +45,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.8</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.10</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -190,7 +193,7 @@
           <div><label>Remarks</label><input id="remarks"></div>
         </div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
-        <div class="actions no-print"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button><button class="btn green" id="printQuote">Print / Save PDF</button></div>
+        <div class="actions no-print"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button></div><div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
       </div>
     </section>
 

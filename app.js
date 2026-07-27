@@ -170,9 +170,42 @@ function updateQuotationContactInfo(){
 function quoteItemRow(data={}){
  const wrap=document.createElement('div');wrap.className='quote-item';
  wrap.innerHTML=`<div class="quote-item-head"><b>Item <span class="item-number"></span></b><button type="button" class="btn danger remove-quote-item no-print">Remove Item</button></div><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div>`;
- $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input').forEach(x=>x.addEventListener('input',calcTotal));renumberQuoteItems();calcTotal();return wrap;
+ $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons()}));renumberQuoteItems();calcTotal();return wrap;
 }
-function renumberQuoteItems(){[...document.querySelectorAll('.quote-item')].forEach((r,i)=>r.querySelector('.item-number').textContent=i+1)}
+function renumberQuoteItems(){[...document.querySelectorAll('.quote-item')].forEach((r,i)=>r.querySelector('.item-number').textContent=i+1);refreshItemExportButtons()}
+
+function safePdfName(value){
+ return String(value||'Pump Model').replace(/[\\/:*?\"<>|]/g,'-').replace(/\s+/g,' ').trim()||'Pump Model';
+}
+function restorePrintState(){
+ document.body.classList.remove('export-single');
+ document.querySelectorAll('.quote-item.export-target').forEach(x=>x.classList.remove('export-target'));
+ if(window.__ksOldTitle){document.title=window.__ksOldTitle;window.__ksOldTitle=''}
+}
+function printWithFilename(filename,targetRow=null){
+ restorePrintState();
+ window.__ksOldTitle=document.title;
+ document.title=safePdfName(filename);
+ if(targetRow){document.body.classList.add('export-single');targetRow.classList.add('export-target')}
+ window.addEventListener('afterprint',restorePrintState,{once:true});
+ window.print();
+ setTimeout(restorePrintState,1500);
+}
+function refreshItemExportButtons(){
+ const box=$('itemExportButtons');if(!box)return;
+ const rows=[...document.querySelectorAll('.quote-item')];
+ box.innerHTML='';
+ rows.forEach((row,i)=>{
+   const model=row.querySelector('.item-model')?.value.trim()||'Pump Model';
+   const no=String(i+1).padStart(2,'0');
+   const b=document.createElement('button');
+   b.className='btn secondary';
+   b.textContent=`Export Item ${no} - ${model}`;
+   b.onclick=()=>printWithFilename(`Item ${no} - ${model}`,row);
+   box.appendChild(b);
+ });
+}
+
 function getQuoteItems(){return [...document.querySelectorAll('.quote-item')].map(r=>({model:r.querySelector('.item-model').value.trim(),qty:+r.querySelector('.item-qty').value||0,unitPrice:+r.querySelector('.item-price').value||0,discount:+r.querySelector('.item-discount').value||0,description:r.querySelector('.item-description').value.trim()})).filter(x=>x.model||x.description||x.unitPrice||x.qty)}
 function setQuoteItems(items=[]){$('quoteItems').innerHTML='';(items.length?items:[{}]).forEach(quoteItemRow);calcTotal()}
 function nextQuoteNo(){
@@ -264,7 +297,7 @@ window.addEventListener('message',function(event){
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
- row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();
+ row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();refreshItemExportButtons();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;
@@ -279,7 +312,7 @@ $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>quoteItemRow({});
-$('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=()=>window.print();
+$('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=()=>printWithFilename($('quoteNo').value||'Quotation');
 $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').value);alert('Testing notes saved.')};
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';
 
