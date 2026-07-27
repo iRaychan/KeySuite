@@ -21,14 +21,14 @@
     .card{background:white;border:1px solid #e2e8f0;border-radius:13px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
     .metric b{font-size:26px;display:block;margin-top:8px}.muted{color:var(--muted);font-size:13px}
     label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:white}
-    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.contact-row{display:grid;grid-template-columns:110px 1.4fr 1fr 1.3fr auto;gap:10px;align-items:end;margin-bottom:10px}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
+    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title-row h1{margin:0}.customer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr);gap:16px}.search-box{margin-bottom:12px}.customer-item{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid #e2e8f0;background:white;padding:13px 10px}.customer-item:hover,.customer-item.selected{background:#eef6ff}.customer-item b{display:block}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail-value{border-bottom:1px solid #e2e8f0;padding:5px 0 10px;min-height:32px}.contact-row{display:grid;grid-template-columns:110px 1.4fr 1fr 1.3fr auto;gap:10px;align-items:end;margin-bottom:10px}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:8px;padding:10px 15px;background:var(--navy);color:white}.btn.secondary{background:#e2e8f0;color:#172033}.btn.green{background:var(--ok)}.btn.danger{background:#b91c1c}
     table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e2e8f0;padding:10px 8px;text-align:left}th{background:#f8fafc}
     .table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:12px}.badge.sent{background:#dbeafe}.badge.won{background:#dcfce7}.badge.lost{background:#fee2e2}
     canvas{width:100%;height:310px;border:1px solid #e2e8f0;border-radius:10px;background:white}
     .quote-head{display:flex;justify-content:space-between;gap:20px}.quote-total{font-size:22px;font-weight:700;text-align:right}
     .notice{padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;margin-bottom:14px}
-    @media(max-width:900px){.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
+    @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
@@ -40,7 +40,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.3</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.4</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -67,24 +67,84 @@
     </section>
 
     <section id="customers" class="page">
-      <h1>Customers</h1>
-      <div class="card">
-        <h2>Company Details</h2>
-        <input type="hidden" id="customerId">
-        <div class="form-grid">
-          <div class="span-2"><label>Company Name *</label><input id="company"></div>
-          <div><label>Company Phone</label><input id="companyPhone"></div>
-          <div class="span-3"><label>Address</label><textarea id="address" style="min-height:72px"></textarea></div>
-          <div class="span-2"><label>Project</label><input id="customerProject"></div>
-          <div><label>Customer Reference</label><input id="customerReference"></div>
-          <div class="span-3"><label>Notes</label><input id="customerNotes"></div>
-        </div>
-        <h2 style="margin-top:22px">Contact Persons</h2>
-        <div id="contactEditor"></div>
-        <button type="button" class="btn secondary" id="addContact">+ Add Contact Person</button>
-        <div class="actions"><button class="btn" id="saveCustomer">Save Customer</button><button class="btn secondary" id="clearCustomer">Clear</button></div>
+      <div class="page-title-row">
+        <h1>Customers</h1>
+        <button class="btn" id="addNewCustomer">+ Add New</button>
       </div>
-      <div class="card" style="margin-top:16px"><h2>Customer List</h2><div class="table-wrap"><table><thead><tr><th>Company</th><th>Project</th><th>Contacts</th><th>Active</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+
+      <div class="customer-layout">
+        <div class="card">
+          <div class="search-box">
+            <label>Search Customer</label>
+            <input id="customerSearch" placeholder="Search company name, TIN, BRN or phone...">
+          </div>
+          <div id="customerListPanel"></div>
+        </div>
+
+        <div>
+          <div id="customerEmpty" class="card">
+            <h2>Customer Details</h2>
+            <p class="muted">Search and click a customer to view the saved contact details, or press Add New.</p>
+          </div>
+
+          <div id="customerDetail" class="card" style="display:none">
+            <div class="page-title-row" style="margin-bottom:12px">
+              <h2 id="detailCompany">Customer Details</h2>
+              <div class="actions" style="margin:0">
+                <button class="btn green" id="selectDetailCustomer">Select Customer</button>
+                <button class="btn secondary" id="editDetailCustomer">Edit</button>
+              </div>
+            </div>
+            <div class="detail-grid">
+              <div class="span-2"><label>Address</label><div class="detail-value" id="detailAddress"></div></div>
+              <div><label>Company Phone</label><div class="detail-value" id="detailPhone"></div></div>
+              <div><label>Terms</label><div class="detail-value" id="detailTerms"></div></div>
+              <div><label>TIN Number</label><div class="detail-value" id="detailTin"></div></div>
+              <div><label>Business Registration No.</label><div class="detail-value" id="detailBrn"></div></div>
+              <div><label>SST Registration No.</label><div class="detail-value" id="detailSst"></div></div>
+              <div><label>MSIC Code</label><div class="detail-value" id="detailMsic"></div></div>
+              <div class="span-2"><label>Business Activity Description</label><div class="detail-value" id="detailBusinessActivity"></div></div>
+              <div class="span-2"><label>Notes</label><div class="detail-value" id="detailNotes"></div></div>
+            </div>
+            <h2 style="margin-top:20px">Contact Persons</h2>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Phone</th><th>Email</th></tr></thead>
+                <tbody id="detailContacts"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="customerEditorCard" class="card" style="display:none">
+            <h2 id="customerEditorTitle">Add New Customer</h2>
+            <input type="hidden" id="customerId">
+            <div class="form-grid">
+              <div class="span-2"><label>Company Name *</label><input id="company"></div>
+              <div><label>Company Phone</label><input id="companyPhone" placeholder="+60 (x) xxxx xxxx"></div>
+              <div class="span-3"><label>Address</label><textarea id="address" style="min-height:110px"></textarea></div>
+              <div class="span-2"><label>Terms</label><input id="customerTerms" placeholder="Example: 30 days"></div>
+              <div><label>TIN Number</label><input id="tinNumber"></div>
+              <div><label>Business Registration No.</label><input id="brnNumber"></div>
+              <div><label>SST Registration No.</label><input id="sstNumber"></div>
+              <div><label>MSIC Code</label><input id="msicCode"></div>
+              <div class="span-2"><label>Business Activity Description</label><input id="businessActivity"></div>
+              <div class="span-3"><label>Notes</label><textarea id="customerNotes"></textarea></div>
+            </div>
+
+            <div class="page-title-row" style="margin-top:20px;margin-bottom:10px">
+              <h2>Contact Persons</h2>
+              <button class="btn secondary" type="button" id="addContact">+ Add Contact</button>
+            </div>
+            <div id="contactEditor"></div>
+
+            <div class="actions">
+              <button class="btn" id="saveCustomer">Save Customer</button>
+              <button class="btn secondary" id="cancelCustomerEdit">Cancel</button>
+              <button class="btn danger" id="deleteCustomerBtn" style="display:none">Delete Customer</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="selector" class="page">
@@ -110,9 +170,7 @@
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Date</label><input id="qDate" type="date"></div>
           <div><label>Status</label><select id="qStatus"><option>Draft</option><option>Sent</option><option>Won</option><option>Lost</option></select></div>
-          <div><label>Project</label><input id="qProject"></div>
-          <div><label>Your Reference</label><input id="qYourRef"></div>
-          <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+<div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
         </div>
         <h2 style="margin-top:20px">Product</h2>
         <div class="form-grid">
@@ -135,7 +193,7 @@
 
     <section id="history" class="page">
       <h1>Quotation History</h1>
-      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Customer</th><th>Project</th><th>Model</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Customer</th><th>Model</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
     </section>
   </main>
 </div>
