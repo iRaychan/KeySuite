@@ -237,16 +237,21 @@ function refreshQuotes(){
  $('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((sum,q)=>sum+q.total,0));$('mPending').textContent=arr.length;
 }
 
-function updateConnectionAvailabilityFromModel(model){
- const size=Number((String(model||'').match(/CHC(?:S|N)?\s+(\d+)/i)||[])[1]||0);
+function updateConnectionAvailabilityFromSelection(selection){
+ const model=typeof selection==='string'?selection:String(selection?.model||'');
+ const connection=typeof selection==='object'?String(selection?.connection||''):'';
+ const size=Number((model.match(/CHC(?:S|N)?\s+(\d+)/i)||[])[1]||0);
+ const dnValues=(connection.match(/DN\s*\d+/ig)||[]).map(x=>Number((x.match(/\d+/)||[])[0]||0));
+ const maxDN=dnValues.length?Math.max(...dnValues):0;
+ const roundOnly=size>=32||maxDN>=65;
  const sel=$('connectionType');
  const oval=sel?.querySelector('option[value="oval"]');
  if(!sel||!oval)return;
- if(size>=32){
+ if(roundOnly){
    sel.value='round';
    oval.disabled=true;
    sel.disabled=true;
-   sel.title='CHC 32 to CHC 200 use Round Flange only';
+   sel.title='CHC 32 series / DN65 and larger use Round Flange only';
  }else{
    oval.disabled=false;
    sel.disabled=false;
@@ -257,7 +262,12 @@ function updateConnectionAvailabilityFromModel(model){
 function refreshAll(){refreshCustomers();refreshQuotes()}
 
 window.addEventListener('message',function(event){
- if(!event.data||event.data.type!=='KEYSUITE_ADD_SELECTION')return;
+ if(!event.data)return;
+ if(event.data.type==='KEYSUITE_SELECTION_CHANGED'){
+   updateConnectionAvailabilityFromSelection(event.data.payload||{});
+   return;
+ }
+ if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const p=event.data.payload||{},customer=activeCustomer();
  if(!customer){alert('Please select a customer first.');showPage('customers');return}
  showPage('quotation');
@@ -268,7 +278,7 @@ window.addEventListener('message',function(event){
  const elastomer=$('sealElastomer').value;
  const bare=$('bareShaft').checked;
  const rawModel=String(p.model||'');
- updateConnectionAvailabilityFromModel(rawModel);
+ updateConnectionAvailabilityFromSelection(p);
  const seriesSize=Number((rawModel.match(/CHC\s+(\d+)/i)||[])[1]||0);
  const connectionSelect=$('connectionType');
  const ovalOption=connectionSelect.querySelector('option[value="oval"]');
@@ -311,7 +321,7 @@ window.addEventListener('message',function(event){
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
- row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');row.dataset.pumpData=JSON.stringify({...p,quotation_model:quotationModel});calcTotal();refreshItemExportButtons();
+ row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');row.dataset.pumpData=JSON.stringify({...p,quotation_model:quotationModel,keysuite_material:material,keysuite_seal:seal,keysuite_elastomer:elastomer,keysuite_connection_type:connectionType});calcTotal();refreshItemExportButtons();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;
