@@ -1,6 +1,6 @@
-# KeySuite CHC v0.14 - Quotation Print Sample
+# KeySuite CHC v0.15 - Quotation Print Sample
 
-GitHub Pages sample based on KeySuite v0.13.
+GitHub Pages sample based on KeySuite v0.15.
 
 ## Test the quotation print
 1. Open Quotation.
