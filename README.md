@@ -1,13 +1,10 @@
-# KeySuite + KeySelector CHC Merged v0.7
+# KeySuite + KeySelector CHC Merged v0.8
 
 Changes:
-- CHC material options corrected with SS304 cast-iron connection as default
-- Mechanical seal and elastomer options corrected
-- Round flange / oval flange connection selection
-- Bare shaft pump option
-- Add Selected Pump to Quotation moved beside the KeySelector logo
-- CHC quotation description follows the approved compact format
-- Full seal and elastomer specification appears whenever either is non-default
-- Quotation status removed
-- Quotation / Proforma Invoice remains available
-- Multiple quotation items retained
+- Selector button renamed to Add to Quotation
+- Button positioned at the top-right in the same header row as the logo
+- SS304 quotation models use CHCS prefix
+- SS316 quotation models use CHCN prefix
+- Default SS304 Cast Iron Connection retains CHC prefix
+- CHC 32 and larger automatically use Round Flange; Oval Flange is disabled
+- Existing CHC quotation description and multi-item quotation workflow retained

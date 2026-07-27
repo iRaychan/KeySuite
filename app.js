@@ -191,6 +191,15 @@ function refreshQuotes(){
  $('recentQuotes').innerHTML=arr.slice(0,5).map(q=>{const first=q.items?.[0]?.model||q.model||'';return `<tr><td>${esc(q.no)}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(first)}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';
  $('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((sum,q)=>sum+q.total,0));$('mPending').textContent=arr.length;
 }
+
+function updateConnectionAvailabilityFromModel(model){
+ const size=Number((String(model||'').match(/CHC[S|N]?\s+(\d+)/i)||[])[1]||0);
+ const sel=$('connectionType');
+ const oval=sel?.querySelector('option[value="oval"]');
+ if(!sel||!oval)return;
+ if(size>=32){sel.value='round';oval.disabled=true}else{oval.disabled=false}
+}
+
 function refreshAll(){refreshCustomers();refreshQuotes()}
 
 window.addEventListener('message',function(event){
@@ -203,8 +212,20 @@ window.addEventListener('message',function(event){
  const material=$('pumpMaterial').value;
  const seal=$('sealFaces').value;
  const elastomer=$('sealElastomer').value;
- const connectionType=$('connectionType').value;
  const bare=$('bareShaft').checked;
+ const rawModel=String(p.model||'');
+ updateConnectionAvailabilityFromModel(rawModel);
+ const seriesSize=Number((rawModel.match(/CHC\s+(\d+)/i)||[])[1]||0);
+ const connectionSelect=$('connectionType');
+ const ovalOption=connectionSelect.querySelector('option[value="oval"]');
+ if(seriesSize>=32){
+   connectionSelect.value='round';
+   if(ovalOption) ovalOption.disabled=true;
+ }else if(ovalOption){
+   ovalOption.disabled=false;
+ }
+ const connectionType=connectionSelect.value;
+ const quotationModel=material==='SS304' ? rawModel.replace(/^CHC\b/i,'CHCS') : material==='SS316' ? rawModel.replace(/^CHC\b/i,'CHCN') : rawModel;
  const rawConnection=String(p.connection||'');
  const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
  const gMatch=rawConnection.match(/G\s*\d+(?:[½¼¾]|\s*1\/2|\s*1\/4|\s*3\/4)?/ig)||[];
@@ -222,7 +243,7 @@ window.addEventListener('message',function(event){
  const materialLine=standardSeal?`${material} / Mech Seal`:`${material} / Mech Seal-${seal}/${elastomer}`;
  const lines=[
    `Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,
-   `B.G.Reich Vertical Multistage Pump Model: ${p.model||'-'}`,
+   `B.G.Reich Vertical Multistage Pump Model: ${quotationModel||'-'}`,
    bare?'(Bare shaft pump)':motorLine,
    `Suction & Discharge: ${suctionDischarge}`,
    `Material: ${materialLine}`
@@ -230,7 +251,7 @@ window.addEventListener('message',function(event){
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
- row.querySelector('.item-model').value=p.model||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();
+ row.querySelector('.item-model').value=quotationModel||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');calcTotal();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;

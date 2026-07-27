@@ -98,7 +98,7 @@ header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
 
 <style>
 #keysuiteBridge{
- position:static;z-index:9999;width:auto;margin-left:auto;flex:0 0 auto;
+ position:static;z-index:9999;width:auto;margin-left:auto;flex:0 0 auto;white-space:nowrap;
  background:#17365d;color:#fff;border:0;border-radius:10px;
  padding:12px 17px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.18)
 }
@@ -816,11 +816,11 @@ if ("serviceWorker" in navigator) {
 </script>
 
 
-<button id="keysuiteBridge" type="button">ADD SELECTED PUMP TO QUOTATION</button>
+<button id="keysuiteBridge" type="button">ADD TO QUOTATION</button>
 <script>
 (function(){
  const bridge=document.getElementById('keysuiteBridge');
- const header=document.querySelector('header'); if(header) header.appendChild(bridge);
+ const brandWrap=document.querySelector('.brand-wrap'); if(brandWrap) brandWrap.appendChild(bridge);
  function currentSelection(){
    try{
      if(!selectionState || !selectionState.models || !selectionState.models.length) return null;
