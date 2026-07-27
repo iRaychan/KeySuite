@@ -148,11 +148,36 @@ function refreshCustomers(){
  refreshCustomerList();
  const arr=customers(),opts='<option value="">Select customer</option>'+arr.map(c=>`<option value="${c.id}">${esc(c.company)}</option>`).join('');
  const old=$('qCustomer').value;$('qCustomer').innerHTML=opts;$('qCustomer').value=old;
+ refreshQuotationContacts();
  const a=activeCustomer();$('activeCustomerBanner').className=a?'notice active-customer':'notice';
  $('activeCustomerBanner').innerHTML=a?`Selected customer: <b>${esc(a.company)}</b>`:'Select a customer from the Customer page first.';
  if(viewedCustomerId&&$('customerDetail').style.display!=='none')showCustomerDetail(viewedCustomerId);
 }
 
+
+function refreshQuotationContacts(){
+ const customerId=$('qCustomer').value;
+ const c=customers().find(x=>x.id===customerId);
+ const old=$('qContact')?.value||'';
+ const contacts=c?.contacts||[];
+ $('qContact').innerHTML='<option value="">Select contact person</option>'+contacts.map((x,i)=>`<option value="${i}">${esc([x.prefix,x.name].filter(Boolean).join(' '))}</option>`).join('');
+ if(old && Number(old)<contacts.length)$('qContact').value=old;
+ else if(contacts.length)$('qContact').value='0';
+ updateQuotationContactInfo();
+ if(c){
+   $('payment').value=(c.terms||'').trim()||'Cash before delivery';
+ }
+}
+function updateQuotationContactInfo(){
+ const c=customers().find(x=>x.id===$('qCustomer').value);
+ const idx=$('qContact').value;
+ const person=(c?.contacts||[])[Number(idx)];
+ if(!person){$('qContactInfo').textContent='-';return}
+ const parts=[];
+ if(person.phone)parts.push(formatMYPhone(person.phone));
+ if(person.email)parts.push(person.email);
+ $('qContactInfo').textContent=parts.join(' · ')||'-';
+}
 function nextQuoteNo(){
  const d=new Date(),yy=String(d.getFullYear()).slice(-2),mm=String(d.getMonth()+1).padStart(2,'0'),seq=String(quotes().length+1).padStart(4,'0');
  return `R-${yy}${mm}-${seq}`;
@@ -163,21 +188,33 @@ function calcTotal(){
 }
 function saveQuote(){
  if(!$('qCustomer').value)return alert('Customer is required.');
- const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,status:$('qStatus').value,customerId:$('qCustomer').value,preparedBy:$('preparedBy').value,model:$('qModel').value,qty:+$('qQty').value,unitPrice:+$('unitPrice').value,discount:+$('discount').value,delivery:$('delivery').value,validity:$('validity').value,description:$('description').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};
+ const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,status:$('qStatus').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,model:$('qModel').value,qty:+$('qQty').value,unitPrice:+$('unitPrice').value,discount:+$('discount').value,delivery:$('delivery').value,validity:$('validity').value,description:$('description').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};
  let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);
  store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert('Quotation saved.');
 }
 function loadQuote(id){
  const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;
- const map={quoteNo:'no',qDate:'date',qStatus:'status',qCustomer:'customerId',preparedBy:'preparedBy',qModel:'model',qQty:'qty',unitPrice:'unitPrice',discount:'discount',delivery:'delivery',validity:'validity',description:'description',payment:'payment',remarks:'remarks'};
- Object.entries(map).forEach(([id,k])=>$(id).value=q[k]??'');calcTotal();showPage('quotation');
+ const map={quoteNo:'no',qDate:'date',qStatus:'status',qCustomer:'customerId',qContact:'contactIndex',preparedBy:'preparedBy',qModel:'model',qQty:'qty',unitPrice:'unitPrice',discount:'discount',delivery:'delivery',validity:'validity',description:'description',payment:'payment',remarks:'remarks'};
+ Object.entries(map).forEach(([id,k])=>{if($(id))$(id).value=q[k]??''});
+ refreshQuotationContacts();
+ if(q.contactIndex!=null)$('qContact').value=String(q.contactIndex);
+ updateQuotationContactInfo();
+ calcTotal();showPage('quotation');
 }
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
 function newQuote(){
  editingQuoteId=null;['qModel','description','remarks'].forEach(id=>$(id).value='');
  $('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qStatus').value='Draft';
  $('qQty').value=1;$('unitPrice').value=0;$('discount').value=0;
- const a=activeCustomer();if(a){$('qCustomer').value=a.id;$('payment').value=a.terms||'To be advised'}
+ const a=activeCustomer();
+ if(a){
+   $('qCustomer').value=a.id;
+   refreshQuotationContacts();
+   $('payment').value=(a.terms||'').trim()||'Cash before delivery';
+ }else{
+   $('payment').value='Cash before delivery';
+   refreshQuotationContacts();
+ }
  calcTotal();
 }
 function refreshQuotes(){
@@ -193,7 +230,7 @@ window.addEventListener('message',function(event){
  if(!event.data||event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const p=event.data.payload||{},a=activeCustomer();
  if(!a){alert('Please select a customer first.');showPage('customers');return}
- showPage('quotation');$('qCustomer').value=a.id;$('payment').value=a.terms||'To be advised';$('qModel').value=p.model||'';$('qQty').value=1;
+ showPage('quotation');$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery';$('qModel').value=p.model||'';$('qQty').value=1;
  const mat=$('pumpMaterial').value,faces=$('sealFaces').value,elast=$('sealElastomer').value;
  const motor=[p.motor_kw!=null?`${Number(p.motor_kw).toFixed(2)} kW`:'',p.motor_hp!=null?`${Number(p.motor_hp).toFixed(2).replace(/\.00$/,'')} HP`:''].filter(Boolean).join(' / ');
  $('description').value=['B.G.Reich Vertical Multistage Pump',`Model: ${p.model||'-'}`,`Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,`Material: ${mat}`,`Mechanical Seal: ${faces}, ${elast}`,`Motor: ${motor}, ${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz`,p.speed_rpm!=null?`Speed: ${Math.round(p.speed_rpm)} rpm`:'',p.efficiency!=null?`Pump Efficiency: ${Number(p.efficiency).toFixed(1)}%`:'',p.npshr!=null?`NPSHr: ${Number(p.npshr).toFixed(2)} m`:'',p.connection?`Connection: ${p.connection}`:''].filter(Boolean).join('\n');
@@ -208,6 +245,8 @@ $('deleteCustomerBtn').onclick=()=>deleteCustomer($('customerId').value);
 $('editDetailCustomer').onclick=()=>editCustomer(viewedCustomerId);
 $('selectDetailCustomer').onclick=()=>selectCustomer(viewedCustomerId);
 $('customerSearch').addEventListener('input',refreshCustomerList);
+$('qCustomer').addEventListener('change',refreshQuotationContacts);
+$('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 ['qQty','unitPrice','discount'].forEach(id=>$(id).addEventListener('input',calcTotal));
 $('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=()=>window.print();

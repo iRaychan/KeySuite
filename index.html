@@ -40,7 +40,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.4</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.5</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -163,15 +163,19 @@
     <section id="quotation" class="page">
       <div class="quote-head">
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
-        <div><label>Quotation No.</label><input id="quoteNo" style="width:190px"></div>
+        <div style="display:grid;grid-template-columns:190px 170px;gap:12px;align-items:end">
+          <div><label>Quotation No.</label><input id="quoteNo"></div>
+          <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+        </div>
       </div>
       <div class="card">
         <div class="form-grid">
           <div><label>Customer</label><select id="qCustomer"></select></div>
+          <div><label>Customer Name</label><select id="qContact"></select></div>
           <div><label>Date</label><input id="qDate" type="date"></div>
+          <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
           <div><label>Status</label><select id="qStatus"><option>Draft</option><option>Sent</option><option>Won</option><option>Lost</option></select></div>
-<div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
-        </div>
+</div>
         <h2 style="margin-top:20px">Product</h2>
         <div class="form-grid">
           <div><label>Model</label><input id="qModel"></div>
@@ -183,7 +187,7 @@
         </div>
         <div style="margin-top:13px"><label>Description</label><textarea id="description"></textarea></div>
         <div class="grid grid-2" style="margin-top:13px">
-          <div><label>Payment Terms</label><input id="payment" value="To be advised"></div>
+          <div><label>Payment Terms</label><input id="payment" value="Cash before delivery"></div>
           <div><label>Remarks</label><input id="remarks"></div>
         </div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
