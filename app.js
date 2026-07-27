@@ -39,20 +39,9 @@ function formatPhoneInputs(){
 }
 
 function contactRow(data={}){
- const row=document.createElement('div');
- row.className='contact-row';
- row.innerHTML=`<div><label>Prefix</label><select class="contact-prefix">
- <option ${data.prefix==='Mr.'?'selected':''}>Mr.</option><option ${data.prefix==='Ms.'?'selected':''}>Ms.</option>
- <option ${data.prefix==='Mrs.'?'selected':''}>Mrs.</option><option ${data.prefix==='Dr.'?'selected':''}>Dr.</option>
- <option ${data.prefix==='Ir.'?'selected':''}>Ir.</option><option ${data.prefix==="Dato'"?'selected':''}>Dato'</option>
- </select></div>
- <div><label>Name</label><input class="contact-name" value="${esc(data.name||'')}"></div>
- <div><label>Phone</label><input class="contact-phone" placeholder="+60 (x) xxxx xxxx" value="${esc(formatMYPhone(data.phone||''))}"></div>
- <div><label>Email</label><input class="contact-email" type="email" value="${esc(data.email||'')}"></div>
- <button class="btn danger remove-contact" type="button">Remove</button>`;
- row.querySelector('.remove-contact').onclick=()=>row.remove();
- $('contactEditor').appendChild(row);
- formatPhoneInputs();
+ const row=document.createElement('div');row.className='contact-row';
+ row.innerHTML=`<div><label>Prefix</label><select class="contact-prefix"><option ${data.prefix==='Mr.'?'selected':''}>Mr.</option><option ${data.prefix==='Ms.'?'selected':''}>Ms.</option><option ${data.prefix==='Mrs.'?'selected':''}>Mrs.</option><option ${data.prefix==='Dr.'?'selected':''}>Dr.</option><option ${data.prefix==='Ir.'?'selected':''}>Ir.</option><option ${data.prefix==="Dato'"?'selected':''}>Dato'</option></select></div><button class="btn danger remove-contact" type="button">Remove Contact</button><div><label>Name</label><input class="contact-name" value="${esc(data.name||'')}"></div><div><label>Phone</label><input class="contact-phone" placeholder="+60 (x) xxxx xxxx" value="${esc(formatMYPhone(data.phone||''))}"></div><div><label>Email</label><input class="contact-email" type="email" value="${esc(data.email||'')}"></div>`;
+ row.querySelector('.remove-contact').onclick=()=>row.remove();$('contactEditor').appendChild(row);formatPhoneInputs();
 }
 function getContacts(){
  return [...document.querySelectorAll('.contact-row')].map(r=>({
@@ -178,63 +167,31 @@ function updateQuotationContactInfo(){
  if(person.email)parts.push(person.email);
  $('qContactInfo').textContent=parts.join(' · ')||'-';
 }
+function quoteItemRow(data={}){
+ const wrap=document.createElement('div');wrap.className='quote-item';
+ wrap.innerHTML=`<div class="quote-item-head"><b>Item <span class="item-number"></span></b><button type="button" class="btn danger remove-quote-item no-print">Remove Item</button></div><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div>`;
+ $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input').forEach(x=>x.addEventListener('input',calcTotal));renumberQuoteItems();calcTotal();return wrap;
+}
+function renumberQuoteItems(){[...document.querySelectorAll('.quote-item')].forEach((r,i)=>r.querySelector('.item-number').textContent=i+1)}
+function getQuoteItems(){return [...document.querySelectorAll('.quote-item')].map(r=>({model:r.querySelector('.item-model').value.trim(),qty:+r.querySelector('.item-qty').value||0,unitPrice:+r.querySelector('.item-price').value||0,discount:+r.querySelector('.item-discount').value||0,description:r.querySelector('.item-description').value.trim()})).filter(x=>x.model||x.description||x.unitPrice||x.qty)}
+function setQuoteItems(items=[]){$('quoteItems').innerHTML='';(items.length?items:[{}]).forEach(quoteItemRow);calcTotal()}
 function nextQuoteNo(){
  const d=new Date(),yy=String(d.getFullYear()).slice(-2),mm=String(d.getMonth()+1).padStart(2,'0'),seq=String(quotes().length+1).padStart(4,'0');
  return `R-${yy}${mm}-${seq}`;
 }
-function calcTotal(){
- const total=(+$('qQty').value||0)*(+$('unitPrice').value||0)*(1-(+$('discount').value||0)/100);
- $('quoteTotal').textContent=money(total);return total;
-}
-function saveQuote(){
- if(!$('qCustomer').value)return alert('Customer is required.');
- const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,status:$('qStatus').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,model:$('qModel').value,qty:+$('qQty').value,unitPrice:+$('unitPrice').value,discount:+$('discount').value,delivery:$('delivery').value,validity:$('validity').value,description:$('description').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};
- let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);
- store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert('Quotation saved.');
-}
-function loadQuote(id){
- const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;
- const map={quoteNo:'no',qDate:'date',qStatus:'status',qCustomer:'customerId',qContact:'contactIndex',preparedBy:'preparedBy',qModel:'model',qQty:'qty',unitPrice:'unitPrice',discount:'discount',delivery:'delivery',validity:'validity',description:'description',payment:'payment',remarks:'remarks'};
- Object.entries(map).forEach(([id,k])=>{if($(id))$(id).value=q[k]??''});
- refreshQuotationContacts();
- if(q.contactIndex!=null)$('qContact').value=String(q.contactIndex);
- updateQuotationContactInfo();
- calcTotal();showPage('quotation');
-}
+function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);total+=itemTotal});$('quoteTotal').textContent=money(total);return total}
+function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,status:$('qStatus').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,delivery:$('delivery').value,validity:$('validity').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
+function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qStatus').value=q.status||'Draft';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('delivery').value=q.delivery||'';$('validity').value=q.validity||'';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
-function newQuote(){
- editingQuoteId=null;['qModel','description','remarks'].forEach(id=>$(id).value='');
- $('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qStatus').value='Draft';
- $('qQty').value=1;$('unitPrice').value=0;$('discount').value=0;
- const a=activeCustomer();
- if(a){
-   $('qCustomer').value=a.id;
-   refreshQuotationContacts();
-   $('payment').value=(a.terms||'').trim()||'Cash before delivery';
- }else{
-   $('payment').value='Cash before delivery';
-   refreshQuotationContacts();
- }
- calcTotal();
-}
-function refreshQuotes(){
- const arr=quotes();
- $('quoteRows').innerHTML=arr.map(q=>`<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(q.model)}</td><td>${money(q.total)}</td><td><span class="badge ${q.status.toLowerCase()}">${q.status}</span></td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted">No quotations yet.</td></tr>';
- document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.openQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));
- $('recentQuotes').innerHTML=arr.slice(0,5).map(q=>`<tr><td>${q.no}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(q.model)}</td><td>${money(q.total)}</td><td>${q.status}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';
- $('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((s,q)=>s+q.total,0));$('mPending').textContent=arr.filter(q=>['Draft','Sent'].includes(q.status)).length;
-}
+function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qDocumentType').value='Quotation';$('qStatus').value='Draft';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
+function refreshQuotes(){const arr=quotes();$('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><span class="badge ${String(q.status||'Draft').toLowerCase()}">${esc(q.status||'Draft')}</span></td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="8" class="muted">No quotations yet.</td></tr>';document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.openQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));$('recentQuotes').innerHTML=arr.slice(0,5).map(q=>`<tr><td>${esc(q.no)}</td><td>${esc(customerName(q.customerId))}</td><td>${esc(q.items?.[0]?.model||q.model||'')}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';$('mCustomers').textContent=customers().length;$('mQuotes').textContent=arr.length;$('mValue').textContent=money(arr.reduce((s,q)=>s+q.total,0));$('mPending').textContent=arr.filter(q=>['Draft','Sent'].includes(q.status)).length}
 function refreshAll(){refreshCustomers();refreshQuotes()}
 
 window.addEventListener('message',function(event){
  if(!event.data||event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const p=event.data.payload||{},a=activeCustomer();
  if(!a){alert('Please select a customer first.');showPage('customers');return}
- showPage('quotation');$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery';$('qModel').value=p.model||'';$('qQty').value=1;
- const mat=$('pumpMaterial').value,faces=$('sealFaces').value,elast=$('sealElastomer').value;
- const motor=[p.motor_kw!=null?`${Number(p.motor_kw).toFixed(2)} kW`:'',p.motor_hp!=null?`${Number(p.motor_hp).toFixed(2).replace(/\.00$/,'')} HP`:''].filter(Boolean).join(' / ');
- $('description').value=['B.G.Reich Vertical Multistage Pump',`Model: ${p.model||'-'}`,`Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,`Material: ${mat}`,`Mechanical Seal: ${faces}, ${elast}`,`Motor: ${motor}, ${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz`,p.speed_rpm!=null?`Speed: ${Math.round(p.speed_rpm)} rpm`:'',p.efficiency!=null?`Pump Efficiency: ${Number(p.efficiency).toFixed(1)}%`:'',p.npshr!=null?`NPSHr: ${Number(p.npshr).toFixed(2)} m`:'',p.connection?`Connection: ${p.connection}`:''].filter(Boolean).join('\n');
- calcTotal();
+ showPage('quotation');$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery';const mat=$('pumpMaterial').value,faces=$('sealFaces').value,elast=$('sealElastomer').value;const motor=[p.motor_kw!=null?`${Number(p.motor_kw).toFixed(2)} kW`:'',p.motor_hp!=null?`${Number(p.motor_hp).toFixed(2).replace(/\.00$/,'')} HP`:''].filter(Boolean).join(' / ');const description=['B.G.Reich Vertical Multistage Pump',`Model: ${p.model||'-'}`,`Duty: ${Number(p.flow_m3h||0).toFixed(1)} m³/h @ ${Number(p.head_m||0).toFixed(1)} m`,`Material: ${mat}`,`Mechanical Seal: ${faces}, ${elast}`,`Motor: ${motor}, ${p.motor_voltage||415}V / ${p.motor_phase||'3Ph'} / ${Number(p.frequency_hz||50).toFixed(1)}Hz`,p.speed_rpm!=null?`Speed: ${Math.round(p.speed_rpm)} rpm`:'',p.efficiency!=null?`Pump Efficiency: ${Number(p.efficiency).toFixed(1)}%`:'',p.npshr!=null?`NPSHr: ${Number(p.npshr).toFixed(2)} m`:'',p.connection?`Connection: ${p.connection}`:''].filter(Boolean).join('\n');const rows=[...document.querySelectorAll('.quote-item')];const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;const row=empty?rows[0]:quoteItemRow({});row.querySelector('.item-model').value=p.model||'';row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=description;calcTotal();
 });
 
 $('addNewCustomer').onclick=openNewCustomer;
@@ -248,7 +205,7 @@ $('customerSearch').addEventListener('input',refreshCustomerList);
 $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
-['qQty','unitPrice','discount'].forEach(id=>$(id).addEventListener('input',calcTotal));
+$('addQuoteItem').onclick=()=>quoteItemRow({});
 $('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=()=>window.print();
 $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').value);alert('Testing notes saved.')};
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';
