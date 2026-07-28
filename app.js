@@ -559,7 +559,6 @@ $('saveTwoLine')?.addEventListener('click',e=>{
   $(twoLineTarget+'2').value=$('twoLine2').value;
 });
 $('topPrintQuote')?.addEventListener('click',printCompleteQuotation);
-$('topExportAll')?.addEventListener('click',exportAllQuotationAndCurves);
 
 // Optional custom signature image for Page 1 closing.
 window.ksSignatureImage=window.ksSignatureImage||'';

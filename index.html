@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.32 Page 2 Workflow</title>
+  <title>KeySuite CHC v0.33 Quotation Layout</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -31,8 +31,14 @@
     @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
 
-    .quote-top-controls{display:grid;grid-template-columns:auto 170px minmax(360px,1fr);gap:12px;align-items:end}
-    .prepared-signature-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(260px,1.35fr) auto;gap:8px;align-items:end}
+    .quote-top-controls{display:grid;grid-template-columns:110px 170px minmax(140px,1fr) minmax(260px,1.45fr) auto;gap:10px;align-items:end;flex:1;max-width:1000px}
+    .quote-top-controls>.btn{height:42px;padding:8px 12px;white-space:nowrap}
+    .quote-top-controls>div>label{white-space:nowrap}
+    .signature-inline{min-width:0}
+    .signature-inline input{padding:7px;min-height:42px}
+    .customer-head-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .customer-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .prepared-signature-row{display:contents}
     .date-rev-row{display:grid;grid-template-columns:170px 170px auto;gap:12px;align-items:end}
     .short-field{max-width:35%}
     .full-field{grid-column:1/-1}
@@ -40,7 +46,7 @@
     dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
     dialog.ks-dialog::backdrop{background:rgba(15,23,42,.45)}
     .dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-    @media(max-width:900px){.quote-top-controls,.prepared-signature-row,.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
+    @media(max-width:900px){.quote-top-controls{grid-template-columns:1fr 1fr}.prepared-signature-row{display:contents}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
@@ -50,7 +56,7 @@
       body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
     }
   
-.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px minmax(150px,1fr) 72px 130px auto;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-actions{display:flex;gap:5px;justify-content:flex-end}.item-actions .btn{padding:6px 9px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px minmax(100px,1fr) 62px 105px auto}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px minmax(80px,1fr) 54px 90px}.item-actions{display:none}}
+.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px minmax(150px,1fr) 72px 130px 150px;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-actions{display:flex;gap:5px;justify-content:flex-end;min-width:0;white-space:nowrap}.quote-item.collapsed .item-actions{align-self:center}.item-actions .btn{padding:6px 9px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px minmax(100px,1fr) 62px 105px 138px}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px minmax(80px,1fr) 54px 90px}.item-actions{display:none}}
 .item-status-indicator{position:relative;width:18px;height:32px;border:0;border-radius:5px;background:var(--status);cursor:help;padding:0;justify-self:center}.item-status-indicator::after{content:attr(data-tooltip);position:absolute;left:0;top:calc(100% + 8px);z-index:1000;display:none;width:250px;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#111827;color:#fff;text-align:left;white-space:pre-line;font-size:12px;line-height:1.45;font-weight:400;box-shadow:0 10px 24px rgba(15,23,42,.25);pointer-events:none}.item-status-indicator::before{content:"";position:absolute;display:none;left:5px;top:100%;border:6px solid transparent;border-bottom-color:#111827}.item-status-indicator:hover::after,.item-status-indicator:focus::after,.item-status-indicator:hover::before,.item-status-indicator:focus::before{display:block}.quote-customer-card>.customer-card-body{display:block}.quote-customer-card.collapsed>.customer-card-body{display:none}.customer-summary{display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.quote-customer-card.collapsed .customer-summary{display:block}.customer-card-head,.items-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.customer-card-head h2,.items-toolbar h2{margin:0}.items-toolbar-actions,.status-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status-summary{font-size:12px}.status-pill{display:inline-flex;align-items:center;gap:4px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.status-dot.green{background:#16a34a}.status-dot.yellow{background:#eab308}.status-dot.red{background:#dc2626}.btn.export-all{background:#facc15;color:#111827;border-color:#eab308;font-weight:800;min-width:42px}.btn.export-all:hover{background:#eab308}.quote-top-controls{align-items:flex-start}
 
 #printQuotationDocument{display:none}
@@ -246,18 +252,18 @@
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
         <div class="quote-top-controls">
           <button class="btn green no-print" type="button" id="topPrintQuote">Quotation</button>
-          <button class="btn export-all no-print" type="button" id="topExportAll" title="Export quotation and all available pump curves">A</button>
           <div><label>Quotation No.</label><input id="quoteNo"></div>
-          <div class="prepared-signature-row">
-            <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
-            <label style="font-weight:400;margin:0">Optional Signature Image <span class="muted" style="font-size:11px">(PNG 300 × 120 px)</span><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" style="margin-top:5px"></label>
-            <button class="btn secondary no-print" type="button" id="removeSignatureImage">Remove</button>
-          </div>
+          <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+          <div class="signature-inline"><label>Signature Attachment</label><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp"></div>
+          <button class="btn secondary no-print" type="button" id="removeSignatureImage">Remove</button>
         </div>
       </div>
       <div class="card quote-customer-card" id="quoteCustomerCard">
         <div class="customer-card-head">
-          <h2>Customer &amp; Quotation Details</h2>
+          <div class="customer-head-left">
+            <div class="customer-head-actions no-print"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button></div>
+            <h2>Customer &amp; Quotation Details</h2>
+          </div>
           <button class="btn secondary no-print" type="button" id="collapseCustomer" title="Collapse customer details">▲</button>
         </div>
         <div class="customer-summary" id="customerSummary">Customer details</div>
@@ -287,7 +293,7 @@
         </div>
         <div id="quoteItems"></div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
-        <div class="actions no-print"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button></div><div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
+        <div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
       </div>
     </section>
 
