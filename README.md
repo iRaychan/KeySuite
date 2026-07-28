@@ -11,3 +11,10 @@ Changes in this test build:
 - Page 2 quantity, amount, header, logo and total-column changes from v0.23 remain.
 
 Upload all files and folders to the root of your GitHub Pages repository.
+
+
+## v0.25 Step 3
+- Removed the blank gap between Date and Rev on Page 1.
+- Signature area fixed as a merged 3-row × 10-column-equivalent block.
+- Prepared By fallback signature uses Rage Italic, bold, 28 pt, centred.
+- Signature image is centred and kept 1 mm above the baseline.
