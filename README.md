@@ -1,15 +1,13 @@
-# KeySuite CHC v0.25
+# KeySuite CHC v0.24 – Quotation Layout Test
 
-GitHub Pages test build based on the working v0.24 source.
+Changes in this test build:
 
-Changes:
-- Page 1 left alignment set to 21.8 mm.
-- Page 1 and continuation-page logos moved 1 mm left.
-- Prepared By and printed signature use one input.
-- Fixed Ray signature removed; blank signature space remains.
-- Customer print fields: To, Attn, Tel (company), Mobile (contact), email.
-- Empty customer print values show a hyphen.
-- Printed filled values use normal font weight.
-- Conditional Rev row and revised date added.
-- Document Type field shortened; Validity moved below it.
-- Project and Delivery use the expanded middle area.
+- Page 1 effective left margin changed to **21.8 mm**.
+- Removed the fixed handwritten **Ray** below “Your sincerely”.
+- Kept the reserved signature area and signature line.
+- Added an optional **Signature / Name** input beside **Prepared By**.
+- Added an optional signature image upload (PNG/JPG/WEBP).
+- If both are empty, the printed quotation keeps a blank space for manual/custom use.
+- Page 2 quantity, amount, header, logo and total-column changes from v0.23 remain.
+
+Upload all files and folders to the root of your GitHub Pages repository.
