@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.17 Keylargo Quotation</title>
+  <title>KeySuite CHC v0.18 Keylargo Quotation</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -47,49 +47,52 @@
   html,body{margin:0!important;padding:0!important;background:#fff!important}
   body.print-complete .app{display:none!important}
   body.print-complete #printQuotationDocument{display:block!important}
-  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:8mm 8mm 18mm 8mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.35;page-break-after:always;overflow:hidden}
+  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:8mm 8mm 18mm;background:#fff;color:#111;font-family:Calibri,Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.28;page-break-after:always;overflow:hidden}
   .print-page:last-child{page-break-after:auto}
-  .print-content{width:194mm;margin:0 auto}
-  .print-header{display:grid;grid-template-columns:92mm 1fr;column-gap:10mm;align-items:start;margin:0;width:100%}
-  .print-company img{width:72mm;height:28mm;object-fit:contain;object-position:center;display:block;margin:0 auto 2mm}
-  .print-company{line-height:1.43}.print-company>strong{display:block;margin-bottom:1.4mm;font-size:10.4pt}
-  .print-customer-address{padding-top:30mm;line-height:1.55}
-  .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:31mm 5mm 1fr;min-height:5.2mm}
-  .print-date{margin-top:6mm;grid-template-columns:14mm 5mm 1fr}
-  .full-rule{width:100%;border-top:1px solid #111;height:0;margin:3mm 0 0}
-  .print-page h1{text-align:center;text-decoration:underline;text-decoration-thickness:1.2px;text-underline-offset:2px;font-size:23pt;margin:10mm 0 8mm;font-weight:700}
-  .print-meta{line-height:1.52;margin-bottom:7mm;width:112mm}
-  .print-dear{margin:0 0 7mm}
-  .print-terms{line-height:1.5;margin-top:6mm}
-  .print-terms>div{grid-template-columns:27mm 5mm 1fr}
-  .print-closing{margin-top:9mm;line-height:1.55}
+  .print-cover-inner{position:relative;width:194mm;height:271mm;margin:0}
+  .print-company{position:absolute;top:8mm;left:118mm;width:70mm;line-height:1.38;font-size:10.2pt}
+  .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm 0}
+  .print-company>strong{display:block;margin-bottom:1mm;font-size:10.2pt}
+  .print-company-email{text-decoration:underline;color:#0645ad}
+  .print-customer-address{position:absolute;top:39mm;left:20mm;width:78mm;line-height:1.42}
+  .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:15mm 5mm 1fr;min-height:5mm}
+  .print-date{margin-top:5.5mm;grid-template-columns:11mm 5mm 1fr}
+  .print-page h1{position:absolute;top:89mm;left:0;width:194mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
+  .print-meta{position:absolute;top:112mm;left:20mm;width:105mm;line-height:1.35}
+  .print-meta>div{grid-template-columns:28mm 5mm 1fr}
+  .print-dear{position:absolute;top:136mm;left:20mm;margin:0}
+  .print-intro{position:absolute;top:147mm;left:20mm;width:164mm;margin:0}
+  .print-terms{position:absolute;top:158mm;left:20mm;width:164mm;line-height:1.35}
+  .print-terms>div{grid-template-columns:24mm 5mm 1fr}
+  .print-closing{position:absolute;top:194mm;left:20mm;width:164mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
-  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:6mm 0 0 13mm;transform:rotate(-7deg);width:max-content;line-height:1}
-  .signature-line{width:52mm;border-top:1px solid #111;margin-top:2mm}
-  .bottom-rules{position:absolute;left:8mm;right:8mm;bottom:17mm}
-  .bottom-rules .full-rule{margin:0 0 2.2mm}
-  .bottom-rules .full-rule:last-child{margin-bottom:0}
-  .print-page footer{position:absolute;left:8mm;right:8mm;bottom:8mm;text-align:center;line-height:1.45;font-size:9.7pt}
-  .print-items-page{padding-top:8mm}
-  .print-items-top{display:flex;flex-direction:column;gap:1.4mm;margin:0 0 6mm auto;width:75mm}
-  .print-items-top>div{display:grid;grid-template-columns:27mm 4mm 44mm}
-  .print-items-table{width:100%;border-collapse:collapse;font-size:10pt;table-layout:fixed}
-  .print-items-table thead th{border-top:1px solid #111;border-bottom:1.2px solid #111;padding:2.2mm 1.3mm;text-align:left;background:#fff;font-weight:400}
-  .print-items-table tbody td{vertical-align:top;padding:4mm 1.3mm;border-bottom:0}
-  .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:11mm}
-  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:15mm;text-align:center}
-  .print-items-table th:nth-child(4),.print-items-table td:nth-child(4),.print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:28mm;text-align:right}
+  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:8mm 0 0 14mm;transform:rotate(-7deg);width:max-content;line-height:1}
+  .signature-line{width:48mm;border-top:1px solid #111;margin-top:2mm}
+  .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
+  .print-items-page{padding:8mm 8mm 18mm}
+  .print-items-logo{position:absolute;top:9mm;left:126mm;width:58mm;height:25mm;object-fit:contain}
+  .print-items-top{position:absolute;top:37mm;left:118mm;width:70mm;line-height:1.4}
+  .print-items-top>div{display:grid;grid-template-columns:27mm 4mm 39mm;min-height:5mm}
+  .print-items-table{position:absolute;top:58mm;left:20mm;width:174mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
+  .print-items-table thead th{border-bottom:1.2px solid #111;padding:0 1.5mm 1.8mm;text-align:left;background:#fff;font-weight:700}
+  .print-items-table thead th:nth-child(2){font-size:0}
+  .print-items-table tbody td{vertical-align:top;padding:5mm 1.5mm 0;border:0}
+  .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:13mm}
+  .print-items-table th:nth-child(2),.print-items-table td:nth-child(2){width:auto}
+  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:14mm;text-align:center}
+  .print-items-table th:nth-child(4),.print-items-table td:nth-child(4){width:27mm;text-align:right}
+  .print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:27mm;text-align:right}
   .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}
-  .print-summary{width:72mm;margin-left:auto;margin-top:8mm}
-  .print-summary>div{display:flex;justify-content:space-between;padding:1.5mm 0}
-  .print-summary .grand{font-weight:700;border-top:1.2px solid #111;border-bottom:2px double #111}
+  .print-summary{position:absolute;right:16mm;bottom:31mm;width:72mm}
+  .print-summary>div{display:flex;justify-content:space-between;padding:1.2mm 0}
+  .print-summary .grand{font-weight:700;border-top:1px solid #111;border-bottom:3px double #111}
 }
 </style>
 </head>
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.17</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.18</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -255,7 +258,6 @@
 
 <div id="printQuotationDocument" aria-hidden="true">
   <section class="print-page print-cover">
-    <div class="print-content">
     <div class="print-header">
       <div class="print-customer-address">
         <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
@@ -272,11 +274,10 @@
         <div>Rawang, Selangor Darul Ehsan, Malaysia</div>
         <div>Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
         <div>Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
-        <div>email&nbsp;: keylargo@keylargo.com.my</div>
+        <div>email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
         <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
       </div>
     </div>
-    <div class="full-rule"></div>
     <h1 id="pDocTitle">Quotation</h1>
     <div class="print-meta">
       <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
@@ -285,7 +286,7 @@
       <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
     </div>
     <p class="print-dear" id="pDear">Dear Sir / Madam,</p>
-    <p>We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
+    <p class="print-intro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
     <div class="print-terms">
       <div><span>Delivery</span><b>:</b><strong id="pDelivery"></strong></div>
       <div><span>Term</span><b>:</b><strong id="pPayment"></strong></div>
@@ -300,18 +301,16 @@
       <div class="signature-line"></div>
       <div>Keylargo Industrial Sdn. Bhd.</div>
     </div>
-    </div>
-    <div class="bottom-rules"><div class="full-rule"></div><div class="full-rule"></div><div class="full-rule"></div></div>
     <footer><div>E &amp; O.E.</div><div>Page 1 of 2</div></footer>
   </section>
   <section class="print-page print-items-page">
-    <div class="print-content">
+    <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
     <div class="print-items-top">
       <div><span>Our reference</span><b>:</b><strong id="pQuoteNo2"></strong></div>
       <div><span>Date</span><b>:</b><strong id="pDate2"></strong></div>
     </div>
     <table class="print-items-table">
-      <thead><tr><th>Pos.</th><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+      <thead><tr><th>Pos.</th><th aria-label="Description"></th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
       <tbody id="pItems"></tbody>
     </table>
     <div class="print-summary">
@@ -319,8 +318,6 @@
       <div><span>0% SST</span><strong>RM 0.00</strong></div>
       <div class="grand"><span>Total</span><strong id="pGrandTotal"></strong></div>
     </div>
-    </div>
-    <div class="bottom-rules"><div class="full-rule"></div><div class="full-rule"></div><div class="full-rule"></div></div>
     <footer><div>E &amp; O.E.</div><div>Page 2 of 2</div></footer>
   </section>
 </div>

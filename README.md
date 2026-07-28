@@ -1,10 +1,12 @@
-# KeySuite CHC v0.17 - Keylargo Quotation Format
+# KeySuite CHC v0.18 — Keylargo Quotation
 
-GitHub Pages-ready build.
+GitHub-ready test build.
 
-## Updated
-- Complete quotation print layout follows the uploaded Keylargo quotation draft.
-- Keylargo company logo, address, customer block, quotation details, closing, signature and footer retained.
-- Product item page uses the same quotation reference/date header and E & O.E. footer.
-- CHC selector position and existing pump datasheet exports remain unchanged.
-- Cache version updated to v0.17.
+## Quotation changes
+- Fixed A4 quotation template following the supplied Keylargo design
+- Full Keylargo logo on page 1 and page 2 onward
+- Quotation-only margins: top 0.8 cm, bottom 1.8 cm, left/right 0.8 cm
+- Customer/company blocks, title, terms, signature, footer and item table repositioned to match the design
+- CHC selector remains unchanged
+
+Upload all extracted files to the GitHub Pages repository root.
