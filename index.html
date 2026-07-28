@@ -51,7 +51,7 @@
   .print-page:last-child{page-break-after:auto}
   .print-cover-inner{position:relative;width:194mm;height:271mm;margin:0}
   .print-company{position:absolute;top:8mm;right:0;width:70mm;line-height:1.38;font-size:10.2pt}
-  .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm 0}
+  .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-company>strong{display:block;margin-bottom:1mm;font-size:10.2pt}
   .print-company-email{text-decoration:underline;color:#0645ad}
   .print-customer-address{position:absolute;top:39mm;left:13.8mm;width:100mm;line-height:1.42}
@@ -66,10 +66,12 @@
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
   .print-closing{position:absolute;top:194mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
-  .signature-space{height:17mm;width:55mm;margin-top:2mm;display:flex;align-items:flex-end;justify-content:flex-start;overflow:hidden}
-  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:0 0 1mm 14mm;transform:rotate(-7deg);width:max-content;line-height:1;white-space:nowrap}
+  .signature-space{height:17mm;width:55mm;margin-top:2mm;display:flex;align-items:flex-end;justify-content:flex-start;overflow:hidden;padding-bottom:1mm;box-sizing:border-box}
+  .signature{font-family:Calibri,Arial,Helvetica,sans-serif;font-size:11pt;font-style:normal;margin:0 0 0 2mm;width:max-content;line-height:1;white-space:nowrap}
   .signature-image{display:none;max-width:52mm;max-height:15mm;object-fit:contain;object-position:left bottom;margin-left:2mm}
   .signature-line{width:48mm;border-top:1px solid #111;margin-top:0}
+  .print-cover strong{font-weight:400}
+  .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
   .print-items-logo{position:absolute;top:9mm;right:8mm;width:30mm;height:11mm;object-fit:contain}
@@ -226,14 +228,13 @@
     <section id="quotation" class="page">
       <div class="quote-head">
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
-        <div style="display:grid;grid-template-columns:170px 150px 190px;gap:12px;align-items:end">
+        <div style="display:grid;grid-template-columns:170px 150px;gap:12px;align-items:end">
           <div><label>Quotation No.</label><input id="quoteNo"></div>
           <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
-          <div><label>Signature / Name</label><input id="closingSignature" placeholder="Optional"></div>
         </div>
       </div>
       <div class="no-print" style="display:flex;justify-content:flex-end;align-items:end;gap:8px;margin:6px 0 12px">
-        <label style="font-weight:400;margin:0;width:190px">Optional signature image
+        <label style="font-weight:400;margin:0;width:190px">Optional Signature Image<br><span class="muted" style="font-size:11px">Recommended: transparent PNG, 300 × 120 px</span>
           <input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" style="margin-top:5px">
         </label>
         <button class="btn secondary" type="button" id="removeSignatureImage">Remove Signature</button>
@@ -243,6 +244,7 @@
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Customer Name</label><select id="qContact"></select></div>
           <div><label>Date</label><input id="qDate" type="date"></div>
+          <div><label>Revision Date</label><input id="qRevisionDate" type="date"><div class="muted" style="font-size:11px;margin-top:4px">Leave blank for original quotation</div></div>
           <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
           <div><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
           <div><label>Project</label><input id="project" placeholder="Optional"></div>
@@ -279,8 +281,8 @@
         <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
         <div><span>Attn</span><b>:</b><strong id="pAttn"></strong></div>
         <div><span>Tel</span><b>:</b><strong id="pTel"></strong></div>
-        <div><span>Fax</span><b>:</b><strong></strong></div>
-        <div><span>email</span><b>:</b><strong id="pEmail"></strong></div>
+        <div><span>Mobile</span><b>:</b><strong id="pMobile"></strong></div>
+        <div><span>Email</span><b>:</b><strong id="pEmail"></strong></div>
       </div>
       <div class="print-company">
         <img src="keylargo-logo.png" alt="Keylargo">
@@ -292,6 +294,7 @@
         <div>Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
         <div>email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
         <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
+        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span><b>:</b><strong id="pRevisionDate"></strong></div>
       </div>
     </div>
     <h1 id="pDocTitle">Quotation</h1>
