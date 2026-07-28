@@ -1,11 +1,10 @@
-# KeySuite CHC v0.15 - Quotation Print Sample
+# KeySuite CHC v0.16 - Keylargo Quotation Format
 
-GitHub Pages sample based on KeySuite v0.15.
+GitHub Pages-ready build.
 
-## Test the quotation print
-1. Open Quotation.
-2. Click **Load Print Sample** (optional).
-3. Click **Export Complete Quotation PDF**.
-4. In the browser print dialog, choose **Save as PDF**, A4, Scale 100%, and disable browser headers and footers.
-
-The complete quotation prints with a Keylargo corporate cover page and quotation item page. Individual pump data exports remain separate.
+## Updated
+- Complete quotation print layout follows the uploaded Keylargo quotation draft.
+- Keylargo company logo, address, customer block, quotation details, closing, signature and footer retained.
+- Product item page uses the same quotation reference/date header and E & O.E. footer.
+- CHC selector position and existing pump datasheet exports remain unchanged.
+- Cache version updated to v0.16.

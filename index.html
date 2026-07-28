@@ -43,30 +43,48 @@
 
 #printQuotationDocument{display:none}
 @media print{
-  @page{size:A4;margin:0}
+  @page{size:A4 portrait;margin:0}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
   body.print-complete .app{display:none!important}
   body.print-complete #printQuotationDocument{display:block!important}
-  .print-page{position:relative;width:210mm;height:297mm;padding:19mm 24mm 18mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;page-break-after:always;overflow:hidden}
+  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:17mm 23mm 18mm 23mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.35;page-break-after:always;overflow:hidden}
   .print-page:last-child{page-break-after:auto}
-  .print-header{display:grid;grid-template-columns:1fr 1.18fr;gap:25mm;align-items:start;margin-top:3mm}
-  .print-company img{width:58mm;height:auto;display:block;margin:0 auto 4mm}
-  .print-company{line-height:1.42}.print-company>strong{display:block;margin-bottom:1.5mm}
-  .print-customer-address{padding-top:28mm;line-height:1.55}
-  .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div,.print-items-top>div{display:grid;grid-template-columns:32mm 5mm 1fr}
-  .print-date{margin-top:7mm}.print-page h1{text-align:center;text-decoration:underline;font-size:23pt;margin:13mm 0 10mm}
-  .print-meta{line-height:1.55;margin-bottom:8mm}.print-dear{margin-top:0}.print-terms{line-height:1.5;margin-top:7mm}
-  .print-closing{margin-top:10mm;line-height:1.55}.signature{font-family:cursive;font-size:25pt;font-style:italic;margin:8mm 0 0 13mm;transform:rotate(-7deg);width:max-content}
-  .signature-line{width:49mm;border-top:1px solid #111;margin-top:1mm}
-  .print-page footer{position:absolute;left:0;right:0;bottom:8mm;text-align:center;line-height:1.45}
-  .print-items-top{display:flex;justify-content:space-between;margin:3mm 0 7mm}.print-items-top>div{grid-template-columns:27mm 4mm 45mm}
-  .print-items-table{width:100%;border-collapse:collapse;font-size:10pt}.print-items-table th{border-bottom:1.5px solid #111;padding:2.5mm 1.5mm;text-align:left;background:#fff}.print-items-table td{vertical-align:top;padding:4mm 1.5mm;border-bottom:1px solid #aaa}.print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:12mm}.print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:15mm;text-align:center}.print-items-table th:nth-child(4),.print-items-table td:nth-child(4),.print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:28mm;text-align:right}.print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}.print-summary{width:72mm;margin-left:auto;margin-top:8mm}.print-summary>div{display:flex;justify-content:space-between;padding:1.5mm 0}.print-summary .grand{font-weight:700;border-top:1.5px solid #111;border-bottom:2px double #111}
+  .print-header{display:grid;grid-template-columns:1fr 1.17fr;column-gap:24mm;align-items:start;margin-top:0}
+  .print-company img{width:61mm;max-height:30mm;object-fit:contain;display:block;margin:0 auto 3mm}
+  .print-company{line-height:1.43}.print-company>strong{display:block;margin-bottom:1.4mm;font-size:10.4pt}
+  .print-customer-address{padding-top:31mm;line-height:1.55}
+  .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:31mm 5mm 1fr;min-height:5.2mm}
+  .print-date{margin-top:7mm;grid-template-columns:14mm 5mm 1fr}
+  .print-page h1{text-align:center;text-decoration:underline;text-decoration-thickness:1.2px;text-underline-offset:2px;font-size:23pt;margin:13mm 0 8mm;font-weight:700}
+  .print-meta{line-height:1.52;margin-bottom:7mm;width:112mm}
+  .print-dear{margin:0 0 7mm}
+  .print-terms{line-height:1.5;margin-top:6mm}
+  .print-terms>div{grid-template-columns:27mm 5mm 1fr}
+  .print-closing{margin-top:9mm;line-height:1.55}
+  .print-closing p{margin:0 0 6mm}
+  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:6mm 0 0 13mm;transform:rotate(-7deg);width:max-content;line-height:1}
+  .signature-line{width:52mm;border-top:1px solid #111;margin-top:2mm}
+  .print-page footer{position:absolute;left:0;right:0;bottom:8mm;text-align:center;line-height:1.45;font-size:9.7pt}
+  .print-items-page{padding-top:17mm}
+  .print-items-top{display:flex;flex-direction:column;gap:1.4mm;margin:0 0 6mm auto;width:75mm}
+  .print-items-top>div{display:grid;grid-template-columns:27mm 4mm 44mm}
+  .print-items-table{width:100%;border-collapse:collapse;font-size:10pt;table-layout:fixed}
+  .print-items-table thead th{border-bottom:1.2px solid #111;padding:2.2mm 1.3mm;text-align:left;background:#fff;font-weight:400}
+  .print-items-table tbody td{vertical-align:top;padding:4mm 1.3mm;border-bottom:0}
+  .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:11mm}
+  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:15mm;text-align:center}
+  .print-items-table th:nth-child(4),.print-items-table td:nth-child(4),.print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:28mm;text-align:right}
+  .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}
+  .print-summary{width:72mm;margin-left:auto;margin-top:8mm}
+  .print-summary>div{display:flex;justify-content:space-between;padding:1.5mm 0}
+  .print-summary .grand{font-weight:700;border-top:1.2px solid #111;border-bottom:2px double #111}
 }
 </style>
 </head>
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.15</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.16</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
