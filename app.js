@@ -1,5 +1,7 @@
 const $=id=>document.getElementById(id);
 const money=n=>'RM '+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const printAmount=n=>Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const printQty=n=>`${Number(n||0).toLocaleString('en-MY')} ${Number(n||0)===1?'Unit':'Units'}`;
 const store={get:(k,d=[])=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d)),set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
 let editingQuoteId=null, viewedCustomerId=null;
 
@@ -338,8 +340,8 @@ function estimatePrintItemHeight(item){
  return 5+lines*4.05; // measured print estimate in millimetres, including row top spacing
 }
 function paginatePrintItems(prepared){
- const normalLimit=186; // keeps at least one empty printed row before E. & O.E.
- const lastLimit=158;   // final page: one empty row plus E. & O.E. and totals block
+ const normalLimit=177; // keeps at least one empty printed row before E. & O.E.
+ const lastLimit=149;   // final page: one empty row plus E. & O.E. and totals block
  const pages=[];let current=[],used=0;
  prepared.forEach(entry=>{
    if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
@@ -382,9 +384,9 @@ function updateQuotePageIndicators(){
 }
 function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
  const summary=showSummary?`<div class="print-summary">
-   <div class="summary-row"><span>Sub-total</span><strong>${money(subtotal)}</strong></div>
-   <div class="summary-row"><span>0% SST</span><strong>RM 0.00</strong></div>
-   <div class="summary-row grand"><span>Total</span><strong>${money(subtotal)}</strong></div>
+   <div class="summary-row"><span>Sub-total</span><strong>${printAmount(subtotal)}</strong></div>
+   <div class="summary-row"><span>0% SST</span><strong>0.00</strong></div>
+   <div class="summary-row grand"><span>Total</span><strong>${printAmount(subtotal)}</strong></div>
  </div>`:'';
  return `<section class="print-page print-items-page ${showSummary?'has-summary':'no-summary'}">
    <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
@@ -424,7 +426,7 @@ function buildPrintQuotation(){
  let subtotal=0;
  const prepared=items.map((item,i)=>{
    const amount=item.qty*item.unitPrice*(1-item.discount/100);subtotal+=amount;
-   return {height:estimatePrintItemHeight(item),html:`<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${item.qty}</td><td>${money(item.unitPrice)}</td><td>${money(amount)}</td></tr>`};
+   return {height:estimatePrintItemHeight(item),html:`<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${printQty(item.qty)}</td><td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr>`};
  });
  const pages=paginatePrintItems(prepared);
  const totalPages=1+pages.length;
