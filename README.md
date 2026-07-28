@@ -1,20 +1,13 @@
-# KeySuite CHC v0.24 – Quotation Layout Test
+# KeySuite CHC v0.25 Step 4
 
-Changes in this test build:
+GitHub Pages-ready build.
 
-- Page 1 effective left margin changed to **21.8 mm**.
-- Removed the fixed handwritten **Ray** below “Your sincerely”.
-- Kept the reserved signature area and signature line.
-- Added an optional **Signature / Name** input beside **Prepared By**.
-- Added an optional signature image upload (PNG/JPG/WEBP).
-- If both are empty, the printed quotation keeps a blank space for manual/custom use.
-- Page 2 quantity, amount, header, logo and total-column changes from v0.23 remain.
-
-Upload all files and folders to the root of your GitHub Pages repository.
-
-
-## v0.25 Step 3
-- Removed the blank gap between Date and Rev on Page 1.
-- Signature area fixed as a merged 3-row × 10-column-equivalent block.
-- Prepared By fallback signature uses Rage Italic, bold, 28 pt, centred.
-- Signature image is centred and kept 1 mm above the baseline.
+Changes:
+- Revision checkbox controls whether the revision date prints.
+- Date and Revision Date are on the same row.
+- Prepared By, Optional Signature Image and Remove are on one row.
+- Top Quotation export button added.
+- Document Type reduced; Validity placed below at matching width.
+- Project and Delivery use full-width two-line popup editors.
+- PDF always reserves two Delivery lines; second line is blank when unused.
+- Signature block moved 5 mm left.

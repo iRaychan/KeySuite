@@ -30,6 +30,17 @@
     .notice{padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;margin-bottom:14px}
     @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
+
+    .quote-top-controls{display:grid;grid-template-columns:auto 170px minmax(360px,1fr);gap:12px;align-items:end}
+    .prepared-signature-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(260px,1.35fr) auto;gap:8px;align-items:end}
+    .date-rev-row{display:grid;grid-template-columns:170px 170px auto;gap:12px;align-items:end}
+    .short-field{max-width:35%}
+    .full-field{grid-column:1/-1}
+    .popup-input{cursor:pointer;background:#fff}
+    dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
+    dialog.ks-dialog::backdrop{background:rgba(15,23,42,.45)}
+    .dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+    @media(max-width:900px){.quote-top-controls,.prepared-signature-row,.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
@@ -65,7 +76,8 @@
   .print-intro{position:absolute;top:147mm;left:13.8mm;width:180.2mm;margin:0}
   .print-terms{position:absolute;top:158mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
-  .print-closing{position:absolute;top:194mm;left:13.8mm;width:180.2mm;line-height:1.35}
+  #pProject,#pDelivery{white-space:pre-line}
+  .print-closing{position:absolute;top:194mm;left:8.8mm;width:180.2mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
   .signature-space{height:17mm;width:55mm;margin-top:2mm;display:flex;align-items:center;justify-content:center;overflow:hidden;padding-bottom:1mm;box-sizing:border-box}
   .signature{font-family:"Rage Italic","Segoe Script","Brush Script MT",cursive;font-size:28pt;font-style:italic;font-weight:700;margin:0;width:100%;line-height:1;text-align:center;white-space:nowrap}
@@ -229,30 +241,32 @@
     <section id="quotation" class="page">
       <div class="quote-head">
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
-        <div style="display:grid;grid-template-columns:170px 150px;gap:12px;align-items:end">
+        <div class="quote-top-controls">
+          <button class="btn green no-print" type="button" id="topPrintQuote">Quotation</button>
           <div><label>Quotation No.</label><input id="quoteNo"></div>
-          <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+          <div class="prepared-signature-row">
+            <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+            <label style="font-weight:400;margin:0">Optional Signature Image <span class="muted" style="font-size:11px">(PNG 300 × 120 px)</span><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" style="margin-top:5px"></label>
+            <button class="btn secondary no-print" type="button" id="removeSignatureImage">Remove</button>
+          </div>
         </div>
-      </div>
-      <div class="no-print" style="display:flex;justify-content:flex-end;align-items:end;gap:8px;margin:6px 0 12px">
-        <label style="font-weight:400;margin:0;width:190px">Optional Signature Image<br><span class="muted" style="font-size:11px">Recommended: transparent PNG, 300 × 120 px</span>
-          <input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" style="margin-top:5px">
-        </label>
-        <button class="btn secondary" type="button" id="removeSignatureImage">Remove Signature</button>
       </div>
       <div class="card">
         <div class="form-grid">
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Customer Name</label><select id="qContact"></select></div>
-          <div><label>Date</label><input id="qDate" type="date"></div>
-          <div><label>Revision Date</label><input id="qRevisionDate" type="date"><div class="muted" style="font-size:11px;margin-top:4px">Leave blank for original quotation</div></div>
+          <div class="date-rev-row">
+            <div><label>Date</label><input id="qDate" type="date"></div>
+            <div><label>Revision Date</label><input id="qRevisionDate" type="date"></div>
+            <label style="display:flex;align-items:center;gap:8px;margin:0 0 10px;font-weight:700"><input id="showRevision" type="checkbox" style="width:auto"> Revision</label>
+          </div>
           <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
-          <div><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
-          <div><label>Project</label><input id="project" placeholder="Optional"></div>
+          <div class="short-field"><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
+          <div class="short-field"><label>Validity</label><input id="validity" value="14 days"></div>
+          <div class="full-field"><label>Project</label><input id="project" class="popup-input" readonly placeholder="Click to enter up to 2 lines"><input id="project2" type="hidden"></div>
+          <div class="full-field"><label>Delivery</label><input id="delivery" class="popup-input" readonly value="Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order."><input id="delivery2" type="hidden"></div>
           <div><label>Customer Reference</label><input id="customerReference" placeholder="Optional"></div>
-          <div><label>Delivery</label><input id="delivery" value="Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order."></div>
-          <div><label>Validity</label><input id="validity" value="14 days"></div>
-          <div><label>Price Basis</label><input id="priceBasis" value="Ex - K.L. only, nett in Ringgit Malaysia."></div>
+          <div class="span-2"><label>Price Basis</label><input id="priceBasis" value="Ex - K.L. only, nett in Ringgit Malaysia."></div>
 </div>
         <div class="page-title-row" style="margin-top:20px;margin-bottom:8px">
           <h2>Items</h2>
@@ -274,6 +288,15 @@
     </section>
   </main>
 </div>
+
+<dialog id="twoLineDialog" class="ks-dialog">
+  <form method="dialog" class="dialog-body">
+    <h2 id="twoLineTitle">Edit</h2>
+    <div><label>Line 1</label><input id="twoLine1"></div>
+    <div style="margin-top:12px"><label>Line 2</label><input id="twoLine2"></div>
+    <div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveTwoLine" value="default">Save</button></div>
+  </form>
+</dialog>
 
 <div id="printQuotationDocument" aria-hidden="true">
   <section class="print-page print-cover">
