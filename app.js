@@ -338,8 +338,8 @@ function estimatePrintItemHeight(item){
  return 5+lines*4.05; // measured print estimate in millimetres, including row top spacing
 }
 function paginatePrintItems(prepared){
- const normalLimit=190; // item pages without totals
- const lastLimit=165;   // final item page, reserving the totals block
+ const normalLimit=186; // keeps at least one empty printed row before E. & O.E.
+ const lastLimit=158;   // final page: one empty row plus E. & O.E. and totals block
  const pages=[];let current=[],used=0;
  prepared.forEach(entry=>{
    if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
@@ -382,15 +382,15 @@ function updateQuotePageIndicators(){
 }
 function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
  const summary=showSummary?`<div class="print-summary">
-   <div><span>Sub-total</span><strong>${money(subtotal)}</strong></div>
-   <div><span>0% SST</span><strong>RM 0.00</strong></div>
-   <div class="grand"><span>Total</span><strong>${money(subtotal)}</strong></div>
+   <div class="summary-row"><span>Sub-total</span><strong>${money(subtotal)}</strong></div>
+   <div class="summary-row"><span>0% SST</span><strong>RM 0.00</strong></div>
+   <div class="summary-row grand"><span>Total</span><strong>${money(subtotal)}</strong></div>
  </div>`:'';
  return `<section class="print-page print-items-page ${showSummary?'has-summary':'no-summary'}">
    <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
    <div class="print-items-top">
-     <div><span>Our reference</span><b>:</b><strong>${esc(quoteNo)}</strong></div>
-     <div><span>Date</span><b>:</b><strong>${esc(date)}</strong></div>
+     <div><span>Date:</span><strong>${esc(date)}</strong></div>
+     <div><span>Our Reference:</span><strong>${esc(quoteNo)}</strong></div>
    </div>
    <table class="print-items-table">
      <thead><tr><th>Pos.</th><th aria-label="Description"></th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
