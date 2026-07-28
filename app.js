@@ -426,7 +426,7 @@ function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
    <div class="summary-row grand"><span>Total</span><strong>${printAmount(subtotal)}</strong></div>
  </div>`:'';
  return `<section class="print-page print-items-page ${showSummary?'has-summary':'no-summary'}">
-   <img class="print-items-logo" src="${esc(new URL('keylargo-logo.png',document.baseURI).href)}" alt="Keylargo">
+   <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
    <div class="print-items-top">
      <div><span>Date:</span><strong>${esc(date)}</strong></div>
      <div><span>Our Reference:</span><strong>${esc(quoteNo)}</strong></div>
