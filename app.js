@@ -146,6 +146,13 @@ function refreshCustomers(){
 }
 
 
+function updateCustomerSummary(){
+ const c=customers().find(x=>x.id===$('qCustomer').value);const idx=$('qContact').value;const person=(c?.contacts||[])[Number(idx)];
+ if($('customerSummaryCompany'))$('customerSummaryCompany').textContent=c?.company||'No customer selected';
+ if($('customerSummaryContact'))$('customerSummaryContact').textContent=person?[person.prefix,person.name].filter(Boolean).join(' '):'No contact';
+ if($('customerSummaryRef'))$('customerSummaryRef').textContent=`Customer Ref: ${$('customerReference').value.trim()||'—'}`;
+}
+function setAllItemsCollapsed(collapsed){document.querySelectorAll('.quote-item').forEach(r=>{r.classList.toggle('collapsed',collapsed);const b=r.querySelector('.collapse-item');if(b){b.textContent=collapsed?'▼':'▲';b.title=collapsed?'Expand item':'Collapse item';}})}
 function refreshQuotationContacts(){
  const customerId=$('qCustomer').value;
  const c=customers().find(x=>x.id===customerId);
@@ -163,16 +170,16 @@ function updateQuotationContactInfo(){
  const c=customers().find(x=>x.id===$('qCustomer').value);
  const idx=$('qContact').value;
  const person=(c?.contacts||[])[Number(idx)];
- if(!person){$('qContactInfo').textContent='-';return}
+ if(!person){$('qContactInfo').textContent='-';updateCustomerSummary();return}
  const parts=[];
  if(person.phone)parts.push(formatMYPhone(person.phone));
  if(person.email)parts.push(person.email);
- $('qContactInfo').textContent=parts.join(' · ')||'-';
+ $('qContactInfo').textContent=parts.join(' · ')||'-';updateCustomerSummary();
 }
 function quoteItemRow(data={}){
  const wrap=document.createElement('div');wrap.className='quote-item';wrap.draggable=true;
  if(data.pumpData) wrap.dataset.pumpData=JSON.stringify(data.pumpData);
- wrap.innerHTML=`<div class="quote-item-head"><span class="drag-handle no-print" title="Drag to reorder">☰</span><button type="button" class="collapse-item no-print" title="Collapse item">▲</button><b>#<span class="item-number"></span></b><span class="item-summary-model">${esc(data.model||'New Item')}</span><span class="item-summary-qty">Qty: ${data.qty??1}</span><span class="item-summary-total">RM 0.00</span><span class="item-actions no-print"><button type="button" class="btn secondary duplicate-quote-item" title="Duplicate">Copy</button><button type="button" class="btn danger remove-quote-item" title="Delete">Delete</button></span></div><div class="quote-item-body"><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div></div>`;
+ wrap.innerHTML=`<div class="quote-item-head"><button type="button" class="item-status-indicator no-print" aria-label="Item status" data-tooltip="Checking item..."></button><span class="drag-handle no-print" title="Drag to reorder">☰</span><button type="button" class="collapse-item no-print" title="Collapse item">▲</button><b>#<span class="item-number"></span></b><span class="item-summary-model">${esc(data.model||'New Item')}</span><span class="item-summary-qty">Qty: ${data.qty??1}</span><span class="item-summary-total">RM 0.00</span><span class="item-actions no-print"><button type="button" class="btn secondary duplicate-quote-item" title="Duplicate">Copy</button><button type="button" class="btn danger remove-quote-item" title="Delete">Delete</button></span></div><div class="quote-item-body"><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div></div>`;
  $('quoteItems').appendChild(wrap);
  const toggle=()=>{wrap.classList.toggle('collapsed');wrap.querySelector('.collapse-item').textContent=wrap.classList.contains('collapsed')?'▼':'▲';wrap.querySelector('.collapse-item').title=wrap.classList.contains('collapsed')?'Expand item':'Collapse item'};
  wrap.querySelector('.collapse-item').onclick=toggle;
@@ -239,11 +246,28 @@ function nextQuoteNo(){
  const d=new Date(),yy=String(d.getFullYear()).slice(-2),mm=String(d.getMonth()+1).padStart(2,'0'),seq=String(quotes().length+1).padStart(4,'0');
  return `R-${yy}${mm}-${seq}`;
 }
-function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const model=r.querySelector('.item-model').value.trim(),qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);r.querySelector('.item-summary-model').textContent=model||'New Item';r.querySelector('.item-summary-qty').textContent=`Qty: ${qty}`;r.querySelector('.item-summary-total').textContent=money(itemTotal);r.classList.remove('status-complete','status-warning','status-error');r.classList.add(!model||qty<=0||price<=0?'status-error':(!r.querySelector('.item-description').value.trim()?'status-warning':'status-complete'));total+=itemTotal});$('quoteTotal').textContent=money(total);setTimeout(updateQuotePageIndicators,0);return total}
+function calcTotal(){
+ let total=0,complete=0,warning=0,error=0;
+ const rows=[...document.querySelectorAll('.quote-item')];
+ rows.forEach(r=>{
+  const model=r.querySelector('.item-model').value.trim(),qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,description=r.querySelector('.item-description').value.trim(),itemTotal=qty*price*(1-discount/100);
+  r.querySelector('.item-total').textContent=money(itemTotal);r.querySelector('.item-summary-model').textContent=model||'New Item';r.querySelector('.item-summary-qty').textContent=`Qty: ${qty}`;r.querySelector('.item-summary-total').textContent=money(itemTotal);r.classList.remove('status-complete','status-warning','status-error');
+  let status,tooltip;
+  const missing=[];if(!model)missing.push('Product / model');if(qty<=0)missing.push('Valid quantity');if(price<=0)missing.push('Unit price');
+  if(missing.length){status='error';error++;tooltip=`Cannot export\nMissing required: ${missing.join(', ')}`;}
+  else if(!description){status='warning';warning++;tooltip='Warning\nDescription is empty. Export is allowed, but please review the item.';}
+  else{status='complete';complete++;tooltip='Complete\nProduct, quantity, price and description are ready.';}
+  r.classList.add(`status-${status}`);const indicator=r.querySelector('.item-status-indicator');if(indicator){indicator.dataset.tooltip=tooltip;indicator.setAttribute('aria-label',tooltip.replace(/\n/g,' — '));}
+  total+=itemTotal;
+ });
+ $('quoteTotal').textContent=money(total);
+ if($('itemCount'))$('itemCount').textContent=`(${rows.length})`;if($('completeCount'))$('completeCount').textContent=complete;if($('warningCount'))$('warningCount').textContent=warning;if($('errorCount'))$('errorCount').textContent=error;
+ setTimeout(updateQuotePageIndicators,0);return total
+}
 function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,revisionDate:$('qRevisionDate').value,showRevision:$('showRevision').checked,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,signatureImage:window.ksSignatureImage||'',items,project:$('project').value,project2:$('project2').value,customerReference:$('customerReference').value,delivery:$('delivery').value,delivery2:$('delivery2').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
 function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qRevisionDate').value=q.revisionDate||'';$('showRevision').checked=!!q.showRevision;$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';window.ksSignatureImage=q.signatureImage||'';$('project').value=q.project||'';$('project2').value=q.project2||'';$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value=q.delivery2||'';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
-function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qRevisionDate').value='';$('showRevision').checked=false;$('qDocumentType').value='Quotation';$('project').value='';$('project2').value='';$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value='';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal()}
+function newQuote(){editingQuoteId=null;$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qRevisionDate').value='';$('showRevision').checked=false;$('qDocumentType').value='Quotation';$('project').value='';$('project2').value='';$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value='';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal();updateCustomerSummary()}
 function refreshQuotes(){
  const arr=quotes();
  $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7" class="muted">No quotations yet.</td></tr>';
@@ -480,6 +504,10 @@ $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>quoteItemRow({});
+$('expandAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(false));
+$('collapseAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(true));
+$('collapseCustomer')?.addEventListener('click',()=>{const card=$('quoteCustomerCard');card.classList.toggle('collapsed');const collapsed=card.classList.contains('collapsed');$('collapseCustomer').textContent=collapsed?'▼':'▲';$('collapseCustomer').title=collapsed?'Expand customer details':'Collapse customer details';updateCustomerSummary();});
+$('customerReference')?.addEventListener('input',updateCustomerSummary);
 $('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=printCompleteQuotation;$('loadPrintSample').onclick=loadPrintSample;
 $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').value);alert('Testing notes saved.')};
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';

@@ -1,13 +1,5 @@
-# KeySuite CHC v0.25 Step 4
+# KeySuite CHC v0.31
 
-GitHub Pages-ready build.
+GitHub Pages-ready quotation build. Page 1 is frozen. v0.31 updates the Page 2 quotation workflow with aligned print headers, collapsible customer details, one-row quotation items, expand/collapse-all controls, live status counts, and hover explanations for item status colors.
 
-Changes:
-- Revision checkbox controls whether the revision date prints.
-- Date and Revision Date are on the same row.
-- Prepared By, Optional Signature Image and Remove are on one row.
-- Top Quotation export button added.
-- Document Type reduced; Validity placed below at matching width.
-- Project and Delivery use full-width two-line popup editors.
-- PDF always reserves two Delivery lines; second line is blank when unused.
-- Signature block moved 5 mm left.
+After uploading, allow GitHub Pages a few minutes to deploy. If an older version remains visible, refresh once or close and reopen the installed PWA. The service-worker cache name has been updated for this release.
