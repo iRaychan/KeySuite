@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.15 Quotation Print Sample</title>
+  <title>KeySuite CHC v0.17 Keylargo Quotation</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -47,15 +47,17 @@
   html,body{margin:0!important;padding:0!important;background:#fff!important}
   body.print-complete .app{display:none!important}
   body.print-complete #printQuotationDocument{display:block!important}
-  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:17mm 23mm 18mm 23mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.35;page-break-after:always;overflow:hidden}
+  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:8mm 8mm 18mm 8mm;background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;line-height:1.35;page-break-after:always;overflow:hidden}
   .print-page:last-child{page-break-after:auto}
-  .print-header{display:grid;grid-template-columns:1fr 1.17fr;column-gap:24mm;align-items:start;margin-top:0}
-  .print-company img{width:61mm;max-height:30mm;object-fit:contain;display:block;margin:0 auto 3mm}
+  .print-content{width:194mm;margin:0 auto}
+  .print-header{display:grid;grid-template-columns:92mm 1fr;column-gap:10mm;align-items:start;margin:0;width:100%}
+  .print-company img{width:72mm;height:28mm;object-fit:contain;object-position:center;display:block;margin:0 auto 2mm}
   .print-company{line-height:1.43}.print-company>strong{display:block;margin-bottom:1.4mm;font-size:10.4pt}
-  .print-customer-address{padding-top:31mm;line-height:1.55}
+  .print-customer-address{padding-top:30mm;line-height:1.55}
   .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:31mm 5mm 1fr;min-height:5.2mm}
-  .print-date{margin-top:7mm;grid-template-columns:14mm 5mm 1fr}
-  .print-page h1{text-align:center;text-decoration:underline;text-decoration-thickness:1.2px;text-underline-offset:2px;font-size:23pt;margin:13mm 0 8mm;font-weight:700}
+  .print-date{margin-top:6mm;grid-template-columns:14mm 5mm 1fr}
+  .full-rule{width:100%;border-top:1px solid #111;height:0;margin:3mm 0 0}
+  .print-page h1{text-align:center;text-decoration:underline;text-decoration-thickness:1.2px;text-underline-offset:2px;font-size:23pt;margin:10mm 0 8mm;font-weight:700}
   .print-meta{line-height:1.52;margin-bottom:7mm;width:112mm}
   .print-dear{margin:0 0 7mm}
   .print-terms{line-height:1.5;margin-top:6mm}
@@ -64,12 +66,15 @@
   .print-closing p{margin:0 0 6mm}
   .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:6mm 0 0 13mm;transform:rotate(-7deg);width:max-content;line-height:1}
   .signature-line{width:52mm;border-top:1px solid #111;margin-top:2mm}
-  .print-page footer{position:absolute;left:0;right:0;bottom:8mm;text-align:center;line-height:1.45;font-size:9.7pt}
-  .print-items-page{padding-top:17mm}
+  .bottom-rules{position:absolute;left:8mm;right:8mm;bottom:17mm}
+  .bottom-rules .full-rule{margin:0 0 2.2mm}
+  .bottom-rules .full-rule:last-child{margin-bottom:0}
+  .print-page footer{position:absolute;left:8mm;right:8mm;bottom:8mm;text-align:center;line-height:1.45;font-size:9.7pt}
+  .print-items-page{padding-top:8mm}
   .print-items-top{display:flex;flex-direction:column;gap:1.4mm;margin:0 0 6mm auto;width:75mm}
   .print-items-top>div{display:grid;grid-template-columns:27mm 4mm 44mm}
   .print-items-table{width:100%;border-collapse:collapse;font-size:10pt;table-layout:fixed}
-  .print-items-table thead th{border-bottom:1.2px solid #111;padding:2.2mm 1.3mm;text-align:left;background:#fff;font-weight:400}
+  .print-items-table thead th{border-top:1px solid #111;border-bottom:1.2px solid #111;padding:2.2mm 1.3mm;text-align:left;background:#fff;font-weight:400}
   .print-items-table tbody td{vertical-align:top;padding:4mm 1.3mm;border-bottom:0}
   .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:11mm}
   .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:15mm;text-align:center}
@@ -84,7 +89,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.16</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.17</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -250,6 +255,7 @@
 
 <div id="printQuotationDocument" aria-hidden="true">
   <section class="print-page print-cover">
+    <div class="print-content">
     <div class="print-header">
       <div class="print-customer-address">
         <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
@@ -270,6 +276,7 @@
         <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
       </div>
     </div>
+    <div class="full-rule"></div>
     <h1 id="pDocTitle">Quotation</h1>
     <div class="print-meta">
       <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
@@ -293,9 +300,12 @@
       <div class="signature-line"></div>
       <div>Keylargo Industrial Sdn. Bhd.</div>
     </div>
+    </div>
+    <div class="bottom-rules"><div class="full-rule"></div><div class="full-rule"></div><div class="full-rule"></div></div>
     <footer><div>E &amp; O.E.</div><div>Page 1 of 2</div></footer>
   </section>
   <section class="print-page print-items-page">
+    <div class="print-content">
     <div class="print-items-top">
       <div><span>Our reference</span><b>:</b><strong id="pQuoteNo2"></strong></div>
       <div><span>Date</span><b>:</b><strong id="pDate2"></strong></div>
@@ -309,6 +319,8 @@
       <div><span>0% SST</span><strong>RM 0.00</strong></div>
       <div class="grand"><span>Total</span><strong id="pGrandTotal"></strong></div>
     </div>
+    </div>
+    <div class="bottom-rules"><div class="full-rule"></div><div class="full-rule"></div><div class="full-rule"></div></div>
     <footer><div>E &amp; O.E.</div><div>Page 2 of 2</div></footer>
   </section>
 </div>
