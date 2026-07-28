@@ -50,7 +50,7 @@
       body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
     }
   
-.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{border:1px solid #dbe3ec;border-radius:10px;padding:14px;margin-top:12px;background:#fbfdff}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}}
+.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px minmax(150px,1fr) 72px 130px auto;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-actions{display:flex;gap:5px;justify-content:flex-end}.item-actions .btn{padding:6px 9px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px minmax(100px,1fr) 62px 105px auto}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px minmax(80px,1fr) 54px 90px}.item-actions{display:none}}
 
 #printQuotationDocument{display:none}
 @media print{
@@ -89,10 +89,10 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo{position:absolute;top:9mm;right:8mm;width:30mm;height:11mm;object-fit:contain}
-  .print-items-top{position:absolute;top:25mm;right:8mm;width:88mm;line-height:1.4}
+  .print-items-logo{position:absolute;top:8mm;right:8mm;width:66mm;height:27mm;object-fit:contain;object-position:center}
+  .print-items-top{position:absolute;top:38mm;right:8mm;width:88mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
-  .print-items-table{position:absolute;top:43mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
+  .print-items-table{position:absolute;top:52mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
   .print-items-table thead{position:relative}
   .print-items-table thead::after{content:"";position:absolute;left:-1.67mm;right:-1.67mm;bottom:0;border-bottom:1.2px solid #111}
   .print-items-table thead th{border-bottom:0;padding:0 1.5mm 1.8mm;text-align:left;background:#fff;font-weight:700}
