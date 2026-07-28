@@ -171,7 +171,7 @@ function quoteItemRow(data={}){
  const wrap=document.createElement('div');wrap.className='quote-item';
  if(data.pumpData) wrap.dataset.pumpData=JSON.stringify(data.pumpData);
  wrap.innerHTML=`<div class="quote-item-head"><b>Item <span class="item-number"></span></b><button type="button" class="btn danger remove-quote-item no-print">Remove Item</button></div><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" value="${esc(data.model||'')}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div><div><label>Discount (%)</label><input class="item-discount" type="number" min="0" step="0.1" value="${data.discount??0}"></div></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description">${esc(data.description||'')}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div>`;
- $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons()}));renumberQuoteItems();calcTotal();return wrap;
+ $('quoteItems').appendChild(wrap);wrap.querySelector('.remove-quote-item').onclick=()=>{if(document.querySelectorAll('.quote-item').length<=1)return alert('At least one item is required.');wrap.remove();renumberQuoteItems();calcTotal()};wrap.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons();updateQuotePageIndicators()}));renumberQuoteItems();calcTotal();return wrap;
 }
 function renumberQuoteItems(){[...document.querySelectorAll('.quote-item')].forEach((r,i)=>r.querySelector('.item-number').textContent=i+1);refreshItemExportButtons()}
 
@@ -224,7 +224,7 @@ function nextQuoteNo(){
  const d=new Date(),yy=String(d.getFullYear()).slice(-2),mm=String(d.getMonth()+1).padStart(2,'0'),seq=String(quotes().length+1).padStart(4,'0');
  return `R-${yy}${mm}-${seq}`;
 }
-function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);total+=itemTotal});$('quoteTotal').textContent=money(total);return total}
+function calcTotal(){let total=0;document.querySelectorAll('.quote-item').forEach(r=>{const qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,discount=+r.querySelector('.item-discount').value||0,itemTotal=qty*price*(1-discount/100);r.querySelector('.item-total').textContent=money(itemTotal);total+=itemTotal});$('quoteTotal').textContent=money(total);setTimeout(updateQuotePageIndicators,0);return total}
 function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,items,project:$('project').value,customerReference:$('customerReference').value,delivery:$('delivery').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
 function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||'Ray';$('project').value=q.project||'';$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
@@ -333,8 +333,52 @@ function estimatePrintItemHeight(item){
  const text=[item.model||'',item.description||''].join('\n');
  const logical=text.split(/\n/);
  let lines=0;
- logical.forEach(line=>{lines+=Math.max(1,Math.ceil(String(line).length/58))});
- return 8+lines*4.45; // approximate millimetres including item spacing
+ // The description column is wide; about 70 characters normally fit on one printed line.
+ logical.forEach(line=>{lines+=Math.max(1,Math.ceil(String(line).length/70))});
+ return 5+lines*4.05; // measured print estimate in millimetres, including row top spacing
+}
+function paginatePrintItems(prepared){
+ const normalLimit=190; // item pages without totals
+ const lastLimit=165;   // final item page, reserving the totals block
+ const pages=[];let current=[],used=0;
+ prepared.forEach(entry=>{
+   if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
+   current.push(entry);used+=entry.height;
+ });
+ if(current.length||!pages.length)pages.push(current);
+ // Keep the final page within the totals-safe area. Move all required trailing rows together,
+ // instead of creating one mostly-empty page for each moved item.
+ let finalPage=pages[pages.length-1];
+ let finalUsed=finalPage.reduce((n,x)=>n+x.height,0);
+ if(finalUsed>lastLimit && finalPage.length>1){
+   const carry=[];
+   while(finalPage.length>1 && finalUsed>lastLimit){
+     const moved=finalPage.pop();
+     finalUsed-=moved.height;
+     carry.unshift(moved);
+   }
+   if(carry.length)pages.push(carry);
+ }
+ return pages;
+}
+function updateQuotePageIndicators(){
+ const box=$('quoteItems');if(!box)return;
+ box.querySelectorAll('.quote-page-indicator').forEach(x=>x.remove());
+ const rows=[...box.querySelectorAll('.quote-item')];
+ const items=getQuoteItems();
+ if(!rows.length||!items.length)return;
+ const prepared=items.map((item,i)=>({height:estimatePrintItemHeight(item),rowIndex:i}));
+ const pages=paginatePrintItems(prepared);
+ let cumulative=0;
+ pages.slice(0,-1).forEach((pg,pageIndex)=>{
+   cumulative+=pg.length;
+   const row=rows[cumulative-1];
+   if(!row)return;
+   const marker=document.createElement('div');
+   marker.className='quote-page-indicator no-print';
+   marker.innerHTML=`<span>End of printed Page ${pageIndex+2} — next item starts Page ${pageIndex+3}</span>`;
+   row.insertAdjacentElement('afterend',marker);
+ });
 }
 function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
  const summary=showSummary?`<div class="print-summary">
@@ -382,22 +426,7 @@ function buildPrintQuotation(){
    const amount=item.qty*item.unitPrice*(1-item.discount/100);subtotal+=amount;
    return {height:estimatePrintItemHeight(item),html:`<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${item.qty}</td><td>${money(item.unitPrice)}</td><td>${money(amount)}</td></tr>`};
  });
- // Reserve more space on the last page for totals. Items that would cross the bottom margin start on a new page.
- const normalLimit=183,lastLimit=146;
- const pages=[];let current=[],used=0;
- prepared.forEach(entry=>{
-   if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
-   current.push(entry);used+=entry.height;
- });
- if(current.length||!pages.length)pages.push(current);
- // Ensure the last page has room for totals; move trailing items to a new page when needed.
- let last=pages[pages.length-1];
- let lastUsed=last.reduce((n,x)=>n+x.height,0);
- while(last.length>1 && lastUsed>lastLimit){
-   const moved=last.pop();lastUsed-=moved.height;
-   if(pages.length===1 || pages[pages.length-2]!==last){/* no-op */}
-   pages.push([moved]);last=pages[pages.length-1];lastUsed=moved.height;
- }
+ const pages=paginatePrintItems(prepared);
  const totalPages=1+pages.length;
  document.querySelector('.print-cover footer').innerHTML=`<div>E &amp; O.E.</div><div>Page 1 of ${totalPages}</div>`;
  const quoteNo=$('quoteNo').value||'';

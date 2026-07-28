@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.18 Keylargo Quotation</title>
+  <title>KeySuite CHC v0.20 Keylargo Quotation</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -39,7 +39,7 @@
       body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
     }
   
-.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{border:1px solid #dbe3ec;border-radius:10px;padding:14px;margin-top:12px;background:#fbfdff}.quote-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}}
+.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{border:1px solid #dbe3ec;border-radius:10px;padding:14px;margin-top:12px;background:#fbfdff}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}}
 
 #printQuotationDocument{display:none}
 @media print{
@@ -50,21 +50,21 @@
   .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:8mm 8mm 18mm;background:#fff;color:#111;font-family:Calibri,Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.28;page-break-after:always;overflow:hidden}
   .print-page:last-child{page-break-after:auto}
   .print-cover-inner{position:relative;width:194mm;height:271mm;margin:0}
-  .print-company{position:absolute;top:8mm;left:118mm;width:70mm;line-height:1.38;font-size:10.2pt}
+  .print-company{position:absolute;top:8mm;right:0;width:70mm;line-height:1.38;font-size:10.2pt}
   .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm 0}
   .print-company>strong{display:block;margin-bottom:1mm;font-size:10.2pt}
   .print-company-email{text-decoration:underline;color:#0645ad}
-  .print-customer-address{position:absolute;top:39mm;left:8mm;width:92mm;line-height:1.42}
+  .print-customer-address{position:absolute;top:39mm;left:0;width:100mm;line-height:1.42}
   .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:15mm 5mm 1fr;min-height:5mm}
   .print-date{margin-top:5.5mm;grid-template-columns:11mm 5mm 1fr}
   .print-page h1{position:absolute;top:89mm;left:0;width:194mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
-  .print-meta{position:absolute;top:112mm;left:8mm;width:117mm;line-height:1.35}
+  .print-meta{position:absolute;top:112mm;left:0;width:125mm;line-height:1.35}
   .print-meta>div{grid-template-columns:28mm 5mm 1fr}
-  .print-dear{position:absolute;top:136mm;left:8mm;margin:0}
-  .print-intro{position:absolute;top:147mm;left:8mm;width:194mm;margin:0}
-  .print-terms{position:absolute;top:158mm;left:8mm;width:194mm;line-height:1.35}
+  .print-dear{position:absolute;top:136mm;left:0;margin:0}
+  .print-intro{position:absolute;top:147mm;left:0;width:194mm;margin:0}
+  .print-terms{position:absolute;top:158mm;left:0;width:194mm;line-height:1.35}
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
-  .print-closing{position:absolute;top:194mm;left:8mm;width:194mm;line-height:1.35}
+  .print-closing{position:absolute;top:194mm;left:0;width:194mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
   .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:8mm 0 0 14mm;transform:rotate(-7deg);width:max-content;line-height:1}
   .signature-line{width:48mm;border-top:1px solid #111;margin-top:2mm}
@@ -94,7 +94,7 @@
 <body>
 <div class="app">
   <aside>
-    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.19</small></div>
+    <div class="brand">KeySuite<small>CHC Testing Dashboard v0.20</small></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>

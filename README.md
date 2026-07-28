@@ -1,12 +1,12 @@
-# KeySuite CHC v0.19 — Keylargo Quotation
+# KeySuite CHC v0.20 — Quotation Margin & Pagination Indicator
 
 GitHub-ready test build.
 
-## Quotation changes
-- Fixed A4 quotation template following the supplied Keylargo design
-- Full Keylargo logo on page 1 and page 2 onward
-- Quotation-only margins: top 0.8 cm, bottom 1.8 cm, left/right 0.8 cm
-- Customer/company blocks, title, terms, signature, footer and item table repositioned to match the design
-- CHC selector remains unchanged
+## Changes
+- Page 1 now uses the same narrow 8 mm left/right printable margin as item pages.
+- Added visible red dashed page-break indicators in the quotation editor. These indicators do not print.
+- Corrected the pagination estimator so the wider description column is measured more accurately.
+- Fixed the final-page packing bug that could create unnecessarily empty pages.
+- Totals remain reserved on the final page, and any item crossing the safe bottom area moves intact to the next page.
 
-Upload all extracted files to the GitHub Pages repository root.
+Upload all extracted files to the GitHub Pages repository root, then hard-refresh.
