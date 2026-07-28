@@ -1,5 +1,5 @@
-const CACHE='keysuite-v0.36-page2';
-const FILES=['./','index.html','app.js','manifest.json','selector/index.html','selector/favicon.png','selector/apple-touch-icon.png','selector/bgreich-logo.png'];
+const CACHE='keysuite-v0.37-print-fix';
+const FILES=['./','index.html','app.js','manifest.json','keylargo-logo.png','selector/index.html','selector/favicon.png','selector/apple-touch-icon.png','selector/bgreich-logo.png'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
 self.addEventListener('fetch',event=>{

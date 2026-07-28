@@ -97,7 +97,8 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo{position:absolute;top:8mm;right:5mm;width:66mm;height:27mm;object-fit:contain;object-position:center;display:block}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
   .print-items-table{position:absolute;top:52mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
@@ -108,12 +109,13 @@
   .print-items-table tbody td{vertical-align:top;padding:5mm 1.5mm 0;border:0}
   .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:13mm}
   .print-items-table th:nth-child(2),.print-items-table td:nth-child(2){width:auto}
-  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:14mm;text-align:center}
+  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:22mm;text-align:center;white-space:nowrap}
   .print-items-table th:nth-child(4),.print-items-table td:nth-child(4){width:27mm;text-align:right}
   .print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:27mm;text-align:right}
   .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}
   .print-summary-spacer td{height:5mm;padding:0!important}
-  .print-summary-line td{height:0;padding:0!important;border-top:1.2px solid #111}
+  .print-summary-line td{height:0;padding:0!important;border:0!important}
+  .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
   .print-summary-entry td{padding:0!important;height:5.2mm;vertical-align:middle!important}
   .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:78mm;margin-left:auto;padding:0 1.5mm}
   .print-summary-entry.grand{font-weight:700}
