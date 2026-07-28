@@ -329,6 +329,33 @@ function displayDate(value){
  const d=value?new Date(value+'T00:00:00'):new Date();
  return d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
 }
+function estimatePrintItemHeight(item){
+ const text=[item.model||'',item.description||''].join('\n');
+ const logical=text.split(/\n/);
+ let lines=0;
+ logical.forEach(line=>{lines+=Math.max(1,Math.ceil(String(line).length/58))});
+ return 8+lines*4.45; // approximate millimetres including item spacing
+}
+function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
+ const summary=showSummary?`<div class="print-summary">
+   <div><span>Sub-total</span><strong>${money(subtotal)}</strong></div>
+   <div><span>0% SST</span><strong>RM 0.00</strong></div>
+   <div class="grand"><span>Total</span><strong>${money(subtotal)}</strong></div>
+ </div>`:'';
+ return `<section class="print-page print-items-page ${showSummary?'has-summary':'no-summary'}">
+   <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
+   <div class="print-items-top">
+     <div><span>Our reference</span><b>:</b><strong>${esc(quoteNo)}</strong></div>
+     <div><span>Date</span><b>:</b><strong>${esc(date)}</strong></div>
+   </div>
+   <table class="print-items-table">
+     <thead><tr><th>Pos.</th><th aria-label="Description"></th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+     <tbody>${rows.join('')}</tbody>
+   </table>
+   ${summary}
+   <footer><div>E &amp; O.E.</div><div>Page ${pageNo} of ${totalPages}</div></footer>
+ </section>`;
+}
 function buildPrintQuotation(){
  const c=customers().find(x=>x.id===$('qCustomer').value)||{};
  const contact=(c.contacts||[])[Number($('qContact').value)]||{};
@@ -338,10 +365,11 @@ function buildPrintQuotation(){
  $('pAttn').textContent=[contact.prefix,contact.name].filter(Boolean).join(' ');
  $('pTel').textContent=formatMYPhone(contact.phone||c.companyPhone||'');
  $('pEmail').textContent=contact.email||'';
- $('pDate').textContent=$('pDate2').textContent=displayDate($('qDate').value);
+ const shownDate=displayDate($('qDate').value);
+ $('pDate').textContent=shownDate;
  $('pProject').textContent=$('project').value||'';
  $('pCustomerRef').textContent=$('customerReference').value||'';
- $('pQuoteNo').textContent=$('pQuoteNo2').textContent=$('quoteNo').value||'';
+ $('pQuoteNo').textContent=$('quoteNo').value||'';
  $('pPreparedBy').textContent=$('preparedBy').value||'';
  $('pDear').textContent=`Dear ${[contact.prefix,contact.name].filter(Boolean).join(' ')||'Sir / Madam'},`;
  $('pDelivery').textContent=$('delivery').value||'';
@@ -350,11 +378,30 @@ function buildPrintQuotation(){
  $('pPriceBasis').textContent=$('priceBasis').value||'';
  const items=getQuoteItems();
  let subtotal=0;
- $('pItems').innerHTML=items.map((item,i)=>{
+ const prepared=items.map((item,i)=>{
    const amount=item.qty*item.unitPrice*(1-item.discount/100);subtotal+=amount;
-   return `<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${item.qty}</td><td>${money(item.unitPrice)}</td><td>${money(amount)}</td></tr>`;
- }).join('');
- $('pSubtotal').textContent=money(subtotal);$('pGrandTotal').textContent=money(subtotal);
+   return {height:estimatePrintItemHeight(item),html:`<tr><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(item.description)}</div></td><td>${item.qty}</td><td>${money(item.unitPrice)}</td><td>${money(amount)}</td></tr>`};
+ });
+ // Reserve more space on the last page for totals. Items that would cross the bottom margin start on a new page.
+ const normalLimit=183,lastLimit=146;
+ const pages=[];let current=[],used=0;
+ prepared.forEach(entry=>{
+   if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
+   current.push(entry);used+=entry.height;
+ });
+ if(current.length||!pages.length)pages.push(current);
+ // Ensure the last page has room for totals; move trailing items to a new page when needed.
+ let last=pages[pages.length-1];
+ let lastUsed=last.reduce((n,x)=>n+x.height,0);
+ while(last.length>1 && lastUsed>lastLimit){
+   const moved=last.pop();lastUsed-=moved.height;
+   if(pages.length===1 || pages[pages.length-2]!==last){/* no-op */}
+   pages.push([moved]);last=pages[pages.length-1];lastUsed=moved.height;
+ }
+ const totalPages=1+pages.length;
+ document.querySelector('.print-cover footer').innerHTML=`<div>E &amp; O.E.</div><div>Page 1 of ${totalPages}</div>`;
+ const quoteNo=$('quoteNo').value||'';
+ $('pItemPages').innerHTML=pages.map((pg,idx)=>itemPageHtml(idx+2,totalPages,quoteNo,shownDate,pg.map(x=>x.html),idx===pages.length-1,subtotal)).join('');
 }
 function printCompleteQuotation(){
  buildPrintQuotation();restorePrintState();window.__ksOldTitle=document.title;document.title=safePdfName($('quoteNo').value||'Quotation');document.body.classList.add('print-complete');
