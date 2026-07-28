@@ -428,9 +428,9 @@ function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
    <tr class="print-summary-entry"><td colspan="5"><div class="summary-row"><span>0% SST</span><strong>0.00</strong></div></td></tr>
    <tr class="print-summary-line"><td colspan="5"><div class="print-summary-rule"></div></td></tr>
    <tr class="print-summary-entry grand"><td colspan="5"><div class="summary-row"><span>Total</span><strong>${printAmount(subtotal)}</strong></div></td></tr>
-   <tr class="print-summary-line"><td colspan="5"><div class="print-summary-rule"></div></td></tr>`:'';
+   <tr class="print-summary-line bottom-full"><td colspan="5"><div class="print-summary-rule"></div></td></tr>`:'';
  return `<section class="print-page print-items-page">
-   <div class="print-items-logo-wrap"><img class="print-items-logo" src="keylargo-logo.png?v=037" alt="Keylargo"></div>
+   <div class="print-items-logo-wrap"><img class="print-items-logo" src="${KEYLARGO_LOGO_DATA}" alt="Keylargo"></div>
    <div class="print-items-top">
      <div><span>Date:</span><strong>${esc(date)}</strong></div>
      <div><span>Our Reference:</span><strong>${esc(quoteNo)}</strong></div>
@@ -443,7 +443,7 @@ function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
  </section>`;
 }
 function buildPrintQuotation(){
- document.querySelectorAll('#printQuotationDocument img[alt="Keylargo"]').forEach(img=>{if(!img.getAttribute('src'))img.src='keylargo-logo.png?v=037';img.onerror=()=>{img.onerror=null;img.src=KEYLARGO_LOGO_DATA;};});
+ document.querySelectorAll('#printQuotationDocument img[alt="Keylargo"]').forEach(img=>{img.onerror=null;img.src=KEYLARGO_LOGO_DATA;});
  const c=customers().find(x=>x.id===$('qCustomer').value)||{};
  const contact=(c.contacts||[])[Number($('qContact').value)]||{};
  const title=$('qDocumentType').value||'Quotation';
@@ -483,7 +483,7 @@ function buildPrintQuotation(){
  document.querySelector('.print-cover footer').innerHTML=`<div>E &amp; O.E.</div><div>Page 1 of ${totalPages}</div>`;
  const quoteNo=$('quoteNo').value||'';
  $('pItemPages').innerHTML=pages.map((pg,idx)=>itemPageHtml(idx+2,totalPages,quoteNo,shownDate,pg.map(x=>x.html),idx===pages.length-1,subtotal)).join('');
- document.querySelectorAll('#pItemPages .print-items-logo').forEach(img=>{img.onerror=()=>{img.onerror=null;img.src=KEYLARGO_LOGO_DATA;};if(img.complete&&img.naturalWidth===0)img.src=KEYLARGO_LOGO_DATA;});
+ document.querySelectorAll('#pItemPages .print-items-logo').forEach(img=>{img.onerror=null;img.src=KEYLARGO_LOGO_DATA;});
 }
 function exportAllQuotationAndCurves(){
  const rows=[...document.querySelectorAll('.quote-item')];
@@ -511,9 +511,15 @@ function exportAllQuotationAndCurves(){
  printCompleteQuotation();
 }
 
-function printCompleteQuotation(){
- buildPrintQuotation();restorePrintState();window.__ksOldTitle=document.title;document.title=safePdfName($('quoteNo').value||'Quotation');document.body.classList.add('print-complete');
- window.addEventListener('afterprint',()=>{document.body.classList.remove('print-complete');restorePrintState()},{once:true});window.print();setTimeout(()=>document.body.classList.remove('print-complete'),1600);
+async function printCompleteQuotation(){
+ buildPrintQuotation();
+ document.querySelectorAll('#printQuotationDocument img[alt="Keylargo"]').forEach(img=>{img.src=KEYLARGO_LOGO_DATA;});
+ const logoImages=[...document.querySelectorAll('#printQuotationDocument img[alt="Keylargo"]')];
+ await Promise.all(logoImages.map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve()));
+ restorePrintState();window.__ksOldTitle=document.title;document.title=safePdfName($('quoteNo').value||'Quotation');document.body.classList.add('print-complete');
+ window.addEventListener('afterprint',()=>{document.body.classList.remove('print-complete');restorePrintState()},{once:true});
+ requestAnimationFrame(()=>setTimeout(()=>window.print(),80));
+ setTimeout(()=>document.body.classList.remove('print-complete'),1800);
 }
 function loadPrintSample(){
  let arr=customers();let c=arr.find(x=>x.company==='Sample Engineering Sdn. Bhd.');

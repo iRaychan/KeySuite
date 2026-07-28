@@ -7,3 +7,8 @@ Print fixes:
 - Flexible totals pagination retained.
 
 KeySuite CHC v0.36 — flexible totals pagination and embedded print logo. Upload all files and folders to the GitHub Pages repository root.
+
+
+## v0.38
+- Full-width bottom line under Total, matching Pos. separator.
+- Embedded print logo with decode wait before printing.
