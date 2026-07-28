@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.23 Keylargo Quotation</title>
+  <title>KeySuite CHC v0.24 Keylargo Quotation</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -54,20 +54,22 @@
   .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm 0}
   .print-company>strong{display:block;margin-bottom:1mm;font-size:10.2pt}
   .print-company-email{text-decoration:underline;color:#0645ad}
-  .print-customer-address{position:absolute;top:39mm;left:15mm;width:100mm;line-height:1.42}
+  .print-customer-address{position:absolute;top:39mm;left:13.8mm;width:100mm;line-height:1.42}
   .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:15mm 5mm 1fr;min-height:5mm}
   .print-date{margin-top:5.5mm;grid-template-columns:11mm 5mm 1fr}
-  .print-page h1{position:absolute;top:89mm;left:15mm;width:179mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
-  .print-meta{position:absolute;top:112mm;left:15mm;width:125mm;line-height:1.35}
+  .print-page h1{position:absolute;top:89mm;left:13.8mm;width:180.2mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
+  .print-meta{position:absolute;top:112mm;left:13.8mm;width:125mm;line-height:1.35}
   .print-meta>div{grid-template-columns:28mm 5mm 1fr}
-  .print-dear{position:absolute;top:136mm;left:15mm;margin:0}
-  .print-intro{position:absolute;top:147mm;left:15mm;width:179mm;margin:0}
-  .print-terms{position:absolute;top:158mm;left:15mm;width:179mm;line-height:1.35}
+  .print-dear{position:absolute;top:136mm;left:13.8mm;margin:0}
+  .print-intro{position:absolute;top:147mm;left:13.8mm;width:180.2mm;margin:0}
+  .print-terms{position:absolute;top:158mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
-  .print-closing{position:absolute;top:194mm;left:15mm;width:179mm;line-height:1.35}
+  .print-closing{position:absolute;top:194mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
-  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:8mm 0 0 14mm;transform:rotate(-7deg);width:max-content;line-height:1}
-  .signature-line{width:48mm;border-top:1px solid #111;margin-top:2mm}
+  .signature-space{height:17mm;width:55mm;margin-top:2mm;display:flex;align-items:flex-end;justify-content:flex-start;overflow:hidden}
+  .signature{font-family:"Brush Script MT","Segoe Script",cursive;font-size:25pt;font-style:italic;margin:0 0 1mm 14mm;transform:rotate(-7deg);width:max-content;line-height:1;white-space:nowrap}
+  .signature-image{display:none;max-width:52mm;max-height:15mm;object-fit:contain;object-position:left bottom;margin-left:2mm}
+  .signature-line{width:48mm;border-top:1px solid #111;margin-top:0}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
   .print-items-logo{position:absolute;top:9mm;right:8mm;width:30mm;height:11mm;object-fit:contain}
@@ -224,10 +226,16 @@
     <section id="quotation" class="page">
       <div class="quote-head">
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
-        <div style="display:grid;grid-template-columns:190px 170px;gap:12px;align-items:end">
+        <div style="display:grid;grid-template-columns:170px 150px 190px;gap:12px;align-items:end">
           <div><label>Quotation No.</label><input id="quoteNo"></div>
           <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+          <div><label>Signature / Name</label><input id="closingSignature" placeholder="Optional"></div>
         </div>
+      </div>
+      <div class="no-print" style="display:flex;justify-content:flex-end;margin:6px 0 12px">
+        <label style="font-weight:400;margin:0;width:190px">Optional signature image
+          <input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" style="margin-top:5px">
+        </label>
       </div>
       <div class="card">
         <div class="form-grid">
@@ -304,7 +312,10 @@
       <p>Please contact us if you have any remaining question(s) or when this quotation is not in line with your requirements.</p>
       <p>We would appreciate to receive feedback and to keep us informed about the status of this quotation.</p>
       <p>Your sincerely,</p>
-      <div class="signature">Ray</div>
+      <div class="signature-space">
+        <img id="pSignatureImage" class="signature-image" alt="Signature">
+        <div id="pClosingSignature" class="signature"></div>
+      </div>
       <div class="signature-line"></div>
       <div>Keylargo Industrial Sdn. Bhd.</div>
     </div>
