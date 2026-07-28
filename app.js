@@ -147,11 +147,11 @@ function refreshCustomers(){
 
 
 function updateCustomerSummary(){
- const c=customers().find(x=>x.id===$('qCustomer').value);const idx=$('qContact').value;const person=(c?.contacts||[])[Number(idx)];
- if($('customerSummaryCompany'))$('customerSummaryCompany').textContent=c?.company||'No customer selected';
- if($('customerSummaryContact'))$('customerSummaryContact').textContent=person?[person.prefix,person.name].filter(Boolean).join(' '):'No contact';
- if($('customerSummaryRef'))$('customerSummaryRef').textContent=`Customer Ref: ${$('customerReference').value.trim()||'—'}`;
+ const c=customers().find(x=>x.id===$('qCustomer').value)||{},contact=(c.contacts||[])[Number($('qContact').value)]||{};
+ const bits=[c.company,[contact.prefix,contact.name].filter(Boolean).join(' '),$('customerReference')?.value,$('payment')?.value,$('remarks')?.value].filter(Boolean);
+ if($('customerSummary'))$('customerSummary').textContent=bits.join(' | ')||'No customer selected';
 }
+
 function setAllItemsCollapsed(collapsed){document.querySelectorAll('.quote-item').forEach(r=>{r.classList.toggle('collapsed',collapsed);const b=r.querySelector('.collapse-item');if(b){b.textContent=collapsed?'▼':'▲';b.title=collapsed?'Expand item':'Collapse item';}})}
 function refreshQuotationContacts(){
  const customerId=$('qCustomer').value;
@@ -254,9 +254,9 @@ function calcTotal(){
   r.querySelector('.item-total').textContent=money(itemTotal);r.querySelector('.item-summary-model').textContent=model||'New Item';r.querySelector('.item-summary-qty').textContent=`Qty: ${qty}`;r.querySelector('.item-summary-total').textContent=money(itemTotal);r.classList.remove('status-complete','status-warning','status-error');
   let status,tooltip;
   const missing=[];if(!model)missing.push('Product / model');if(qty<=0)missing.push('Valid quantity');if(price<=0)missing.push('Unit price');
-  if(missing.length){status='error';error++;tooltip=`Cannot export\nMissing required: ${missing.join(', ')}`;}
-  else if(!description){status='warning';warning++;tooltip='Warning\nDescription is empty. Export is allowed, but please review the item.';}
-  else{status='complete';complete++;tooltip='Complete\nProduct, quantity, price and description are ready.';}
+  if(missing.length){status='error';error++;tooltip=`RED — ERROR\nCannot export this item.\nMissing: ${missing.join(', ')}`;}
+  else if(!description){status='warning';warning++;tooltip='YELLOW — WARNING\nDescription is empty.\nExport is allowed, but please review this item.';}
+  else{status='complete';complete++;tooltip='GREEN — COMPLETE\nModel, quantity, price and description are ready.\nReady to export.';}
   r.classList.add(`status-${status}`);const indicator=r.querySelector('.item-status-indicator');if(indicator){indicator.dataset.tooltip=tooltip;indicator.setAttribute('aria-label',tooltip.replace(/\n/g,' — '));}
   total+=itemTotal;
  });
@@ -426,7 +426,7 @@ function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
    <div class="summary-row grand"><span>Total</span><strong>${printAmount(subtotal)}</strong></div>
  </div>`:'';
  return `<section class="print-page print-items-page ${showSummary?'has-summary':'no-summary'}">
-   <img class="print-items-logo" src="keylargo-logo.png" alt="Keylargo">
+   <img class="print-items-logo" src="${esc(new URL('keylargo-logo.png',document.baseURI).href)}" alt="Keylargo">
    <div class="print-items-top">
      <div><span>Date:</span><strong>${esc(date)}</strong></div>
      <div><span>Our Reference:</span><strong>${esc(quoteNo)}</strong></div>
@@ -480,6 +480,32 @@ function buildPrintQuotation(){
  const quoteNo=$('quoteNo').value||'';
  $('pItemPages').innerHTML=pages.map((pg,idx)=>itemPageHtml(idx+2,totalPages,quoteNo,shownDate,pg.map(x=>x.html),idx===pages.length-1,subtotal)).join('');
 }
+function exportAllQuotationAndCurves(){
+ const rows=[...document.querySelectorAll('.quote-item')];
+ const available=rows.filter(row=>row.dataset.pumpData);
+ if(!available.length){
+   alert('No pump curve data is attached to the quotation items. The quotation PDF will be exported only.');
+   printCompleteQuotation();
+   return;
+ }
+ const proceed=confirm(`Export the quotation and ${available.length} available pump curve${available.length===1?'':'s'}?\n\nYour browser will open one print/save dialog for the quotation, followed by one for each curve.`);
+ if(!proceed)return;
+ const runCurves=()=>{
+   let i=0;
+   const next=()=>{
+     if(i>=available.length)return;
+     const row=available[i++];
+     const model=row.querySelector('.item-model')?.value.trim()||'Pump Model';
+     const no=String([...document.querySelectorAll('.quote-item')].indexOf(row)+1).padStart(2,'0');
+     exportPumpDataSheet(row,`Item ${no} - ${model}`);
+     setTimeout(next,1800);
+   };
+   setTimeout(next,500);
+ };
+ window.addEventListener('afterprint',runCurves,{once:true});
+ printCompleteQuotation();
+}
+
 function printCompleteQuotation(){
  buildPrintQuotation();restorePrintState();window.__ksOldTitle=document.title;document.title=safePdfName($('quoteNo').value||'Quotation');document.body.classList.add('print-complete');
  window.addEventListener('afterprint',()=>{document.body.classList.remove('print-complete');restorePrintState()},{once:true});window.print();setTimeout(()=>document.body.classList.remove('print-complete'),1600);
@@ -507,7 +533,7 @@ $('addQuoteItem').onclick=()=>quoteItemRow({});
 $('expandAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(false));
 $('collapseAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(true));
 $('collapseCustomer')?.addEventListener('click',()=>{const card=$('quoteCustomerCard');card.classList.toggle('collapsed');const collapsed=card.classList.contains('collapsed');$('collapseCustomer').textContent=collapsed?'▼':'▲';$('collapseCustomer').title=collapsed?'Expand customer details':'Collapse customer details';updateCustomerSummary();});
-$('customerReference')?.addEventListener('input',updateCustomerSummary);
+['customerReference','payment','remarks'].forEach(id=>$(id)?.addEventListener('input',updateCustomerSummary));
 $('saveQuote').onclick=saveQuote;$('newQuote').onclick=newQuote;$('printQuote').onclick=printCompleteQuotation;$('loadPrintSample').onclick=loadPrintSample;
 $('saveNotes').onclick=()=>{localStorage.setItem('ks_notes',$('testingNotes').value);alert('Testing notes saved.')};
 $('testingNotes').value=localStorage.getItem('ks_notes')||'';
@@ -533,6 +559,7 @@ $('saveTwoLine')?.addEventListener('click',e=>{
   $(twoLineTarget+'2').value=$('twoLine2').value;
 });
 $('topPrintQuote')?.addEventListener('click',printCompleteQuotation);
+$('topExportAll')?.addEventListener('click',exportAllQuotationAndCurves);
 
 // Optional custom signature image for Page 1 closing.
 window.ksSignatureImage=window.ksSignatureImage||'';

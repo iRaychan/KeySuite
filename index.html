@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite CHC v0.31 Page 2 Workflow</title>
+  <title>KeySuite CHC v0.32 Page 2 Workflow</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -51,11 +51,7 @@
     }
   
 .contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px minmax(150px,1fr) 72px 130px auto;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-actions{display:flex;gap:5px;justify-content:flex-end}.item-actions .btn{padding:6px 9px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px minmax(100px,1fr) 62px 105px auto}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px minmax(80px,1fr) 54px 90px}.item-actions{display:none}}
-
-
-.quote-customer-card{padding:0!important;overflow:hidden}.quote-customer-head{display:grid;grid-template-columns:34px 110px minmax(180px,1.2fr) minmax(120px,.7fr) minmax(130px,.8fr);align-items:center;gap:10px;min-height:48px;padding:6px 14px;background:#fff;border-bottom:1px solid #e2e8f0}.quote-customer-head .customer-summary-label{font-weight:700}.quote-customer-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.quote-customer-body{padding:18px}.quote-customer-card.collapsed .quote-customer-body{display:none}.quote-customer-card.collapsed .quote-customer-head{border-bottom:0}.collapse-customer{border:0;background:transparent;font-size:16px;padding:4px}.items-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px;margin-bottom:8px}.items-toolbar-left,.items-toolbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.items-status-summary{display:flex;gap:8px;font-size:12px}.status-count{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border:1px solid #e2e8f0;border-radius:999px;background:#fff}.status-swatch{width:8px;height:8px;border-radius:50%;display:inline-block}.status-swatch.green{background:#16a34a}.status-swatch.yellow{background:#eab308}.status-swatch.red{background:#dc2626}.item-status-indicator{position:relative;width:10px;height:28px;border:0;border-radius:5px;background:var(--status);padding:0;cursor:help}.item-status-indicator::after{content:attr(data-tooltip);position:absolute;left:0;top:34px;z-index:50;width:230px;padding:9px 10px;border-radius:8px;background:#172033;color:#fff;font-size:12px;line-height:1.4;white-space:pre-line;box-shadow:0 8px 24px rgba(15,23,42,.25);opacity:0;pointer-events:none;transform:translateY(-3px);transition:.15s}.item-status-indicator:hover::after,.item-status-indicator:focus::after{opacity:1;transform:translateY(0)}
-.quote-item{border-left-width:1px}.quote-item-head{grid-template-columns:10px 28px 30px 48px minmax(150px,1fr) 72px 130px auto}.print-items-logo{right:5mm!important}.print-items-top{right:5mm!important;width:66mm!important}
-@media(max-width:900px){.quote-customer-head{grid-template-columns:30px 90px minmax(120px,1fr) 110px}.quote-customer-ref-summary{display:none}.quote-item-head{grid-template-columns:10px 24px 28px 42px minmax(100px,1fr) 62px 105px auto}}@media(max-width:560px){.quote-customer-head{grid-template-columns:28px 78px minmax(100px,1fr)}.quote-customer-contact-summary,.quote-customer-ref-summary{display:none}.quote-item-head{grid-template-columns:8px 22px 26px 38px minmax(80px,1fr) 54px 90px}}
+.item-status-indicator{position:relative;width:18px;height:32px;border:0;border-radius:5px;background:var(--status);cursor:help;padding:0;justify-self:center}.item-status-indicator::after{content:attr(data-tooltip);position:absolute;left:0;top:calc(100% + 8px);z-index:1000;display:none;width:250px;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#111827;color:#fff;text-align:left;white-space:pre-line;font-size:12px;line-height:1.45;font-weight:400;box-shadow:0 10px 24px rgba(15,23,42,.25);pointer-events:none}.item-status-indicator::before{content:"";position:absolute;display:none;left:5px;top:100%;border:6px solid transparent;border-bottom-color:#111827}.item-status-indicator:hover::after,.item-status-indicator:focus::after,.item-status-indicator:hover::before,.item-status-indicator:focus::before{display:block}.quote-customer-card>.customer-card-body{display:block}.quote-customer-card.collapsed>.customer-card-body{display:none}.customer-summary{display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.quote-customer-card.collapsed .customer-summary{display:block}.customer-card-head,.items-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.customer-card-head h2,.items-toolbar h2{margin:0}.items-toolbar-actions,.status-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status-summary{font-size:12px}.status-pill{display:inline-flex;align-items:center;gap:4px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.status-dot.green{background:#16a34a}.status-dot.yellow{background:#eab308}.status-dot.red{background:#dc2626}.btn.export-all{background:#facc15;color:#111827;border-color:#eab308;font-weight:800;min-width:42px}.btn.export-all:hover{background:#eab308}.quote-top-controls{align-items:flex-start}
 
 #printQuotationDocument{display:none}
 @media print{
@@ -94,8 +90,8 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo{position:absolute;top:8mm;right:8mm;width:66mm;height:27mm;object-fit:contain;object-position:center}
-  .print-items-top{position:absolute;top:38mm;right:8mm;width:88mm;line-height:1.4}
+  .print-items-logo{position:absolute;top:8mm;right:5mm;width:66mm;height:27mm;object-fit:contain;object-position:center;display:block}
+  .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
   .print-items-table{position:absolute;top:52mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
   .print-items-table thead{position:relative}
@@ -250,6 +246,7 @@
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
         <div class="quote-top-controls">
           <button class="btn green no-print" type="button" id="topPrintQuote">Quotation</button>
+          <button class="btn export-all no-print" type="button" id="topExportAll" title="Export quotation and all available pump curves">A</button>
           <div><label>Quotation No.</label><input id="quoteNo"></div>
           <div class="prepared-signature-row">
             <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
@@ -259,14 +256,12 @@
         </div>
       </div>
       <div class="card quote-customer-card" id="quoteCustomerCard">
-        <div class="quote-customer-head no-print">
-          <button type="button" class="collapse-customer" id="collapseCustomer" title="Collapse customer details">▲</button>
-          <span class="customer-summary-label">Customer</span>
-          <span id="customerSummaryCompany">No customer selected</span>
-          <span id="customerSummaryContact" class="quote-customer-contact-summary">No contact</span>
-          <span id="customerSummaryRef" class="quote-customer-ref-summary">Customer Ref: —</span>
+        <div class="customer-card-head">
+          <h2>Customer &amp; Quotation Details</h2>
+          <button class="btn secondary no-print" type="button" id="collapseCustomer" title="Collapse customer details">▲</button>
         </div>
-        <div class="quote-customer-body">
+        <div class="customer-summary" id="customerSummary">Customer details</div>
+        <div class="customer-card-body">
         <div class="form-grid">
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Customer Name</label><select id="qContact"></select></div>
@@ -281,29 +276,16 @@
           <div class="full-field"><label>Project</label><input id="project" class="popup-input" readonly placeholder="Click to enter up to 2 lines"><input id="project2" type="hidden"></div>
           <div class="full-field"><label>Delivery</label><input id="delivery" class="popup-input" readonly value="Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order."><input id="delivery2" type="hidden"></div>
           <div><label>Customer Reference</label><input id="customerReference" placeholder="Optional"></div>
-          <div class="span-2"><label>Price Basis</label><input id="priceBasis" value="Ex - K.L. only, nett in Ringgit Malaysia."></div>
-</div>
-        </div>
-        <div class="items-toolbar no-print">
-          <div class="items-toolbar-left">
-            <h2 style="margin:0">Items <span id="itemCount" class="muted">(0)</span></h2>
-            <div class="items-status-summary" aria-label="Item status summary">
-              <span class="status-count" title="Complete items"><i class="status-swatch green"></i><b id="completeCount">0</b></span>
-              <span class="status-count" title="Warning items"><i class="status-swatch yellow"></i><b id="warningCount">0</b></span>
-              <span class="status-count" title="Items with errors"><i class="status-swatch red"></i><b id="errorCount">0</b></span>
-            </div>
-          </div>
-          <div class="items-toolbar-actions">
-            <button class="btn secondary" type="button" id="expandAllItems">▼ Expand All</button>
-            <button class="btn secondary" type="button" id="collapseAllItems">▲ Collapse All</button>
-            <button class="btn secondary" type="button" id="addQuoteItem">+ Add Item</button>
-          </div>
-        </div>
-        <div id="quoteItems"></div>
-        <div class="grid grid-2" style="margin-top:13px">
           <div><label>Payment Terms</label><input id="payment" value="Cash before delivery"></div>
           <div><label>Remarks</label><input id="remarks"></div>
+          <div class="span-3"><label>Price Basis</label><input id="priceBasis" value="Ex - K.L. only, nett in Ringgit Malaysia."></div>
         </div>
+        </div>
+        <div class="items-toolbar" style="margin-top:20px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2>Items <span id="itemCount" class="muted"></span></h2><div class="status-summary"><span class="status-pill" title="Complete"><i class="status-dot green"></i><b id="completeCount">0</b></span><span class="status-pill" title="Warning"><i class="status-dot yellow"></i><b id="warningCount">0</b></span><span class="status-pill" title="Error"><i class="status-dot red"></i><b id="errorCount">0</b></span></div></div>
+          <div class="items-toolbar-actions no-print"><button class="btn secondary" type="button" id="expandAllItems">Expand All</button><button class="btn secondary" type="button" id="collapseAllItems">Collapse All</button><button class="btn secondary" type="button" id="addQuoteItem">+ Add Item</button></div>
+        </div>
+        <div id="quoteItems"></div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
         <div class="actions no-print"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button></div><div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
       </div>
