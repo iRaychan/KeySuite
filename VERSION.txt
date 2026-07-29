@@ -1,3 +1,3 @@
-KeySuite V1.00
-Company & Pricing Foundation
-Release date: 2026-07-29
+KeySuite Version 1.00
+Secure Login + Supabase Auth + RLS
+Release date: 29 July 2026

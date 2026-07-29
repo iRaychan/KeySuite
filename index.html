@@ -10,7 +10,7 @@
     :root{--navy:#17365d;--navy2:#244b78;--blue:#2f75b5;--bg:#f4f7fb;--card:#fff;--line:#d8e0ea;--text:#172033;--muted:#68758a;--green:#16794b;--orange:#a85400;--red:#b42318}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}
     .app{min-height:100vh;display:grid;grid-template-columns:238px minmax(0,1fr)}
-    aside{background:linear-gradient(180deg,var(--navy),#102b4a);color:#fff;padding:20px 14px;position:sticky;top:0;height:100vh}
+    aside{background:linear-gradient(180deg,var(--navy),#102b4a);color:#fff;padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
     .brand{padding:4px 12px 22px;font-size:25px;font-weight:700;letter-spacing:.2px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.78;margin-top:5px}
     nav button{display:block;width:100%;border:0;background:transparent;color:#fff;text-align:left;padding:12px 14px;border-radius:9px;margin:4px 0}nav button:hover,nav button.active{background:rgba(255,255,255,.14)}
     main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}.page-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title h1{margin:0;font-size:27px}.page-title p{margin:5px 0 0;color:var(--muted)}
@@ -23,15 +23,39 @@
     .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}th,td{padding:10px 9px;border-bottom:1px solid #e7edf4;white-space:nowrap;text-align:left}th{position:sticky;top:0;background:#eff4f9;color:#25364c;z-index:1}td.num,th.num{text-align:right}tbody tr:hover{background:#f7fbff}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e5edf6;color:#274463}.badge.green{background:#dff6e8;color:#12633b}.badge.orange{background:#fff0dc;color:#824300}.badge.red{background:#fee7e7;color:#9b1c1c}
     .company-layout{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(460px,1.3fr);gap:16px}.kv{display:grid;grid-template-columns:170px 1fr;gap:8px;border-bottom:1px solid #edf1f6;padding:8px 0}.kv b{color:#38475c}.user-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:11px 0;border-bottom:1px solid #edf1f6}
     .quote-line{display:grid;grid-template-columns:110px minmax(230px,1.5fr) 90px 130px 130px 42px;gap:10px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fbfdff;margin-bottom:10px}.quote-total{text-align:right;font-size:23px;font-weight:700;margin-top:18px}.quote-total small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:5px}
-    .version{margin-top:auto;position:absolute;bottom:18px;left:26px;font-size:11px;opacity:.75}.right{text-align:right}.hidden{display:none!important}
+    .user-panel{margin-top:auto;padding:13px 12px;border-top:1px solid rgba(255,255,255,.16)}.user-panel b,.user-panel small{display:block;overflow:hidden;text-overflow:ellipsis}.user-panel small{opacity:.72;margin-top:3px}.user-panel button{width:100%;margin-top:11px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:8px;padding:8px}.version{padding:8px 12px 0;font-size:11px;opacity:.75}.right{text-align:right}.hidden{display:none!important}
     .print-doc{display:none}
+
+    .auth-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,#315c88 0,#17365d 34%,#0d2440 100%)}
+    .auth-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    .auth-brand{font-size:31px;font-weight:800;color:var(--navy);letter-spacing:.2px}.auth-brand small{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:6px}
+    .auth-card h1{font-size:23px;margin:28px 0 6px}.auth-card>p{margin:0 0 21px;color:var(--muted);line-height:1.5}.auth-card .field{margin-bottom:14px}.auth-card .btn{width:100%;padding:12px}
+    .auth-message{display:none;margin:0 0 15px;padding:11px 12px;border-radius:9px;font-size:13px;line-height:1.45}.auth-message.show{display:block}.auth-message.error{background:#fff0f0;border:1px solid #efb3b3;color:#8f1d1d}.auth-message.info{background:#eef6ff;border:1px solid #b7d3ef;color:#214e76}
+    .auth-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;margin:2px 0 16px}.auth-check input{width:auto}.auth-foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
+    .loading-screen{min-height:100vh;display:grid;place-items:center;background:var(--bg)}.loading-card{text-align:center;color:var(--muted)}.spinner{width:42px;height:42px;border:4px solid #d8e3ef;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}
+    .security-strip{display:flex;align-items:center;gap:8px;margin-top:15px;font-size:12px;color:#47617b}.security-dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 0 4px rgba(22,121,75,.12)}
     @media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.field-grid{grid-template-columns:repeat(2,1fr)}.span-4{grid-column:1/-1}.toolbar{grid-template-columns:1fr 1fr}.company-layout{grid-template-columns:1fr}.quote-line{grid-template-columns:95px 1fr 80px 120px 120px 42px}}
     @media(max-width:760px){.app{grid-template-columns:1fr}aside{height:auto;position:static;padding:10px}.brand{padding:5px 10px 10px}nav{display:flex;overflow:auto}nav button{width:auto;white-space:nowrap}main{padding:14px}.grid-4,.grid-3,.grid-2,.field-grid,.toolbar{grid-template-columns:1fr}.span-2,.span-4{grid-column:auto}.quote-line{grid-template-columns:1fr 1fr}.quote-line .desc{grid-column:1/-1}.quote-line .remove{align-self:end}.version{display:none}}
     @media print{aside,.no-print,main{display:none!important}.print-doc{display:block!important}.print-page{width:210mm;min-height:297mm;padding:16mm;font-family:Calibri,Arial,sans-serif;color:#111;background:#fff}.print-head{display:flex;justify-content:space-between;border-bottom:1px solid #111;padding-bottom:7mm}.print-head h1{margin:0}.print-meta{margin:10mm 0;display:grid;grid-template-columns:35mm 1fr;gap:2mm}.print-table{width:100%;border-collapse:collapse}.print-table th,.print-table td{border-bottom:1px solid #aaa;padding:3mm 2mm}.print-table th{position:static;background:#fff}.print-total{text-align:right;font-size:14pt;font-weight:700;margin-top:8mm}.print-foot{margin-top:18mm;font-size:9pt;color:#555}}
   </style>
 </head>
 <body>
-<div class="app">
+<div id="loginView" class="auth-shell">
+  <form id="loginForm" class="auth-card" novalidate>
+    <div class="auth-brand">KeySuite<small>Secure company and pricing system</small></div>
+    <h1>Sign in</h1>
+    <p>Only approved Keylargo users can enter Company, Pricing and Quotation.</p>
+    <div id="loginMessage" class="auth-message"></div>
+    <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@keylargo.com.my"></div>
+    <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Password"></div>
+    <label class="auth-check"><input id="showPassword" type="checkbox"> Show password</label>
+    <button id="loginButton" class="btn" type="submit">Sign in</button>
+    <div class="security-strip"><span class="security-dot"></span><span>Protected by Supabase Auth and database Row Level Security</span></div>
+    <div class="auth-foot">Authorized users only · No public registration</div>
+  </form>
+</div>
+<div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
+<div id="appView" class="app hidden">
   <aside>
     <div class="brand">KeySuite<small>Company & Pricing Foundation</small></div>
     <nav>
@@ -41,12 +65,13 @@
       <button data-page="quotation">Quotation</button>
       <button data-page="dataReview">Data Review</button>
     </nav>
-    <div class="version">Version 1.00 · 29 Jul 2026</div>
+    <div class="user-panel"><b id="sessionUserName">Signed in</b><small id="sessionUserEmail"></small><button id="logoutButton" type="button">Sign out</button></div>
+    <div class="version">Version 1.00 · Secure Login · 29 Jul 2026</div>
   </aside>
 
   <main>
     <section id="dashboard" class="page active">
-      <div class="page-title"><div><h1>Dashboard</h1><p>KeySuite V1.00 company, category and CHC pricing integration.</p></div></div>
+      <div class="page-title"><div><h1>Dashboard</h1><p>KeySuite V1.00 secure company, category and CHC pricing integration.</p></div></div>
       <div class="grid grid-4">
         <div class="card metric"><span>Companies</span><b id="mCompanies">0</b></div>
         <div class="card metric"><span>Company Users</span><b id="mUsers">0</b></div>
@@ -105,9 +130,9 @@
     </section>
 
     <section id="dataReview" class="page">
-      <div class="page-title"><div><h1>Data Review</h1><p>Source linkage, normalization and price availability.</p></div></div>
+      <div class="page-title"><div><h1>Data Review</h1><p>Authenticated database access, source linkage and price availability.</p></div></div>
       <div class="grid grid-2">
-        <div class="card"><h2>Source Files</h2><div class="kv"><b>Company</b><span>002 - Company 260729 - V1.0.xlsx</span></div><div class="kv"><b>Category</b><span>003 - Category 260729 - V1.0.xlsx</span></div><div class="kv"><b>Price List</b><span>010 - CHC (Pricelist) - 260729 - V1.0.xlsx</span></div><div class="kv"><b>Consolidated</b><span>KeySuite_Master_Data_V1.00.xlsx</span></div></div>
+        <div class="card"><h2>Security Status</h2><div class="kv"><b>Login</b><span>Supabase email and password</span></div><div class="kv"><b>User Access</b><span>Approved-email allowlist</span></div><div class="kv"><b>Database</b><span>Row Level Security enabled</span></div><div class="kv"><b>Public Files</b><span>No company or pricing master data included</span></div></div>
         <div class="card"><h2>Validation</h2><div id="validationList"></div></div>
       </div>
       <div class="card" style="margin-top:16px"><h2>Price Coverage by Material</h2><div id="coverageTable"></div></div>
@@ -116,7 +141,8 @@
 </div>
 
 <div id="printDoc" class="print-doc"><div class="print-page"><div class="print-head"><div><h1>Quotation</h1><div>KeySuite V1.00</div></div><div class="right"><div id="pQuoteNo"></div><div id="pDate"></div></div></div><div class="print-meta"><b>Customer</b><span id="pCustomer"></span><b>Project</b><span id="pProject"></span><b>Prepared By</b><span id="pPrepared"></span></div><table class="print-table"><thead><tr><th>Pos.</th><th>Description</th><th class="num">Qty</th><th class="num">Unit Price</th><th class="num">Total</th></tr></thead><tbody id="pItems"></tbody></table><div class="print-total">Total: <span id="pTotal"></span></div><div class="print-foot">Prices are generated using the linked Company → Category → CHC pricing rules in KeySuite V1.00.</div></div></div>
-<script src="data/master-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

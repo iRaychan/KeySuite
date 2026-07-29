@@ -1,9 +1,10 @@
 {
-  "name": "KeySuite V1.00 Company & Pricing",
+  "name": "KeySuite V1.00 Secure",
   "short_name": "KeySuite",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f7fb",
   "theme_color": "#17365d",
-  "icons": []
+  "icons": [],
+  "description": "Secure KeySuite company, pricing and quotation system."
 }
