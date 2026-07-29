@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.03</title>
+  <title>KeySuite V1.04</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -12,7 +12,7 @@
     button,input,select,textarea{font:inherit} button{cursor:pointer}
     .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
     aside{background:var(--navy);color:white;padding:22px 14px}
-    .brand{font-size:23px;font-weight:700;padding:0 12px 20px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.75;margin-top:4px}
+    .brand-row{display:flex;align-items:flex-start;gap:8px;padding:0 6px 18px}.brand{font-size:23px;font-weight:700;padding:0 6px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.75;margin-top:4px}.key-button{margin-left:auto;border:1px solid #a87900;border-radius:9px;background:linear-gradient(180deg,#d8b642,#b88700);color:#fff;padding:8px 10px;font-weight:800;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,.24)}.key-button:hover{filter:brightness(1.08)}.key-button svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
     nav button{display:block;width:100%;text-align:left;padding:12px 14px;margin:5px 0;border:0;border-radius:9px;background:transparent;color:white}
     nav button.active,nav button:hover{background:rgba(255,255,255,.14)}
     main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}
@@ -31,7 +31,7 @@
     @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
 
-    .quote-top-controls{display:grid;grid-template-columns:96px 190px minmax(280px,1.45fr) 92px;gap:10px;align-items:end;flex:1;max-width:1000px}
+    .quote-top-controls{display:grid;grid-template-columns:110px 190px;gap:10px;align-items:end;justify-content:end;flex:none;margin-left:auto}
     .quote-top-controls>.btn{height:42px;padding:8px 12px;white-space:nowrap}
     .quote-top-controls>div>label{white-space:nowrap}
     .signature-inline{min-width:0}
@@ -47,7 +47,7 @@
     dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
     dialog.ks-dialog::backdrop{background:rgba(15,23,42,.45)}
     .dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-    @media(max-width:900px){.quote-top-controls{grid-template-columns:1fr 1fr}.prepared-signature-row{display:contents}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
+    @media(max-width:900px){.quote-top-controls{grid-template-columns:110px minmax(160px,190px)}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
@@ -85,7 +85,7 @@
   .print-terms{position:absolute;top:158mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
   #pProject,#pDelivery{white-space:pre-line}
-  .print-closing{position:absolute;top:194mm;left:8.8mm;width:180.2mm;line-height:1.35}
+  .print-closing{position:absolute;top:194mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
   .signatory-block{display:inline-block;width:max-content;max-width:100%}
   .signature-space{position:relative;height:17mm;width:100%;margin-top:2mm;overflow:hidden;padding-bottom:1mm;box-sizing:border-box}
@@ -97,7 +97,7 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:8mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
   .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
@@ -118,7 +118,7 @@
   .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
   .print-summary-line.bottom-full .print-summary-rule{width:auto;margin-left:-1.67mm;margin-right:-1.67mm}
   .print-summary-entry td{padding:0!important;height:5.2mm;vertical-align:middle!important}
-  .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:78mm;margin-left:auto;padding:0 1.5mm}
+  .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:54mm;margin-left:auto;padding:0 1.5mm}
   .print-summary-entry.grand{font-weight:700}
 }
 
@@ -141,14 +141,14 @@
     .user-panel .settings-button{margin-top:12px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22)}
     .user-panel .settings-button:hover{background:rgba(255,255,255,.22)}
     .settings-dialog{width:min(720px,calc(100vw - 32px))!important}.dialog-close{border:0;background:transparent;font-size:28px;line-height:1;color:var(--muted);padding:0 4px}.dialog-close:hover{color:var(--text)}
-    .signatory-label{font-size:8.5pt;font-weight:700;margin-top:1.2mm}.signatory-name{font-size:9pt;font-weight:700;margin-top:.5mm}.signatory-designation{font-size:8.5pt;min-height:3.5mm}
+    .signature-settings-preview-wrap{display:flex;align-items:flex-end;gap:14px;min-height:88px}.signature-settings-preview{display:none;max-width:260px;max-height:80px;object-fit:contain;object-position:left bottom;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:6px}
     #customerAccessNotice{margin-bottom:16px}.owner-readonly{opacity:.78;background:#f8fafc}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.03 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.04 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +163,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand">KeySuite<small>Full Suite V1.03</small></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.04</small></div><button id="keyButton" type="button" class="key-button" title="Open pricing and quotation workspace"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -178,7 +178,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.03 · V1.02 output frozen</div>
+    <div class="suite-version">KeySuite V1.04 · V1.02 output base retained</div>
   </aside>
 
   <main>
@@ -306,8 +306,6 @@
           <div><label>Quotation No.</label><input id="quoteNo"></div>
           <input id="preparedBy" type="hidden">
           <input id="preparedByDesignation" type="hidden">
-          <div class="signature-inline"><label>Signature Attachment</label><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp"></div>
-          <button class="btn secondary no-print" type="button" id="removeSignatureImage">Remove</button>
         </div>
       </div>
       <div class="card quote-customer-card" id="quoteCustomerCard">
@@ -415,7 +413,15 @@
       <div><label>Contact Number</label><input id="settingsPhone" placeholder="+60 (x) xxxx xxxx"></div>
       <div class="span-2"><label>Login Email</label><input id="settingsEmail" type="email" readonly><div class="muted" style="margin-top:5px">Ask an administrator before changing a login email because access approval uses this address.</div></div>
     </div>
-    <h2 style="margin-top:22px">Change Password</h2>
+    <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0">
+    <h2 style="margin-bottom:12px">Quotation Signature</h2>
+    <div class="form-grid">
+      <div class="span-2"><label>Signatory</label><input id="settingsSignatoryName" placeholder="Name used as the typed signature when no image is attached"><div class="muted" style="margin-top:5px">The signature image is used first. The signatory text is used only when no image is attached.</div></div>
+      <div class="span-2"><label>Signature Attachment</label><input id="settingsSignatureUpload" type="file" accept="image/png,image/jpeg,image/webp"><div class="muted" style="margin-top:5px">PNG, JPG or WEBP. Saved to your secure KeySuite profile and used for new quotations.</div></div>
+      <div class="span-2 signature-settings-preview-wrap"><img id="settingsSignaturePreview" class="signature-settings-preview" alt="Signature preview"><button id="settingsRemoveSignature" class="btn secondary" type="button">Remove Signature</button></div>
+    </div>
+    <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0">
+    <h2 style="margin-bottom:12px">Change Password</h2>
     <p class="muted">Leave these three fields blank when only updating your profile.</p>
     <div class="form-grid">
       <div><label>Current Password</label><input id="settingsCurrentPassword" type="password" autocomplete="current-password"></div>
@@ -473,9 +479,6 @@
           <div id="pClosingSignature" class="signature"></div>
         </div>
         <div class="signature-line"></div>
-        <div class="signatory-label">Authorized Signature</div>
-        <div class="signatory-name" id="pPreparedBy"></div>
-        <div class="signatory-designation" id="pPreparedByDesignation"></div>
         <div class="signatory-company">Keylargo Industrial Sdn. Bhd.</div>
       </div>
     </div>

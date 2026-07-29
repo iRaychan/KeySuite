@@ -5,6 +5,8 @@
   let session=null;
   let access=null;
   let profile=null;
+  let pendingSignatureData=null;
+  let removeSignatureRequested=false;
 
   function configReady(){
     const cfg=window.KEYSUITE_CONFIG||{};
@@ -30,19 +32,31 @@
     ]);
     const failed=[companies,users,categories,products,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
     const setting=settings.data?.[0]||{};
-    return {version:'1.03',release_date:'2026-07-29',currency:setting.currency||'MYR',source_currency:setting.source_currency||'USD',currency_multiplier:Number(setting.currency_multiplier||0),
+    return {version:'1.04',release_date:'2026-07-29',currency:setting.currency||'MYR',source_currency:setting.source_currency||'USD',currency_multiplier:Number(setting.currency_multiplier||0),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),factors:{CHC:Number(c.chc_factor||1)},transport:Number(c.transport||0)})),
       products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,prices_usd:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},source_row:p.source_row}))};
   }
-  function buildProfile(s,userAccess,data){
+  async function loadUserProfile(email){
+    try{
+      const {data,error}=await client.from('ks_user_profiles').select('*').eq('email',String(email||'').toLowerCase()).maybeSingle();
+      if(error){
+        if(String(error.code||'')==='PGRST205'||String(error.message||'').toLowerCase().includes('schema cache'))return {};
+        throw error;
+      }
+      return data||{};
+    }catch(error){console.warn('User profile settings are not available yet',error);return {}}
+  }
+  function buildProfile(s,userAccess,data,saved={}){
     const meta=s?.user?.user_metadata||{};
     const directory=(data?.users||[]).find(u=>String(u.email||'').toLowerCase()===String(s?.user?.email||'').toLowerCase())||{};
     return {
-      display_name:String(meta.display_name||userAccess?.display_name||directory.name||s?.user?.email||'').trim(),
-      designation:String(meta.designation||'').trim(),
-      phone:String(meta.phone||directory.phone||'').trim(),
+      display_name:String(saved.display_name||meta.display_name||userAccess?.display_name||directory.name||s?.user?.email||'').trim(),
+      designation:String(saved.designation||meta.designation||'').trim(),
+      phone:String(saved.phone||meta.phone||directory.phone||'').trim(),
+      signatory_name:String(saved.signatory_name||meta.signatory_name||'').trim(),
+      signature_image:String(saved.signature_image||'').trim(),
       email:String(s?.user?.email||userAccess?.email||'').toLowerCase(),
       role:userAccess?.role||'user',
       company_id:userAccess?.company_id||''
@@ -61,7 +75,7 @@
       if(!userAccess){await client.auth.signOut({scope:'local'});showLogin('This account is valid, but it is not approved for KeySuite.');return}
       showLoading('Loading protected company and pricing data…');
       const data=await loadData();if(!data.companies.length)throw new Error('No company data was returned. Check the database and RLS policies.');
-      session=s;access=userAccess;profile=buildProfile(s,access,data);
+      session=s;access=userAccess;const savedProfile=await loadUserProfile(s?.user?.email||'');profile=buildProfile(s,access,data,savedProfile);
       window.KEYSUITE_SECURE_DATA=data;window.KEYSUITE_ACCESS=access;applyProfile(profile);
       window.KeySuitePricing?.init(data,access);unlockSelector();
       showLoading('Loading your customer access…');
@@ -82,14 +96,39 @@
   }
   function openSettings(){
     if(!session||!profile)return;
-    settingsMessage('');el('settingsDisplayName').value=profile.display_name||'';el('settingsDesignation').value=profile.designation||'';el('settingsPhone').value=profile.phone||'';el('settingsEmail').value=profile.email||'';
+    settingsMessage('');el('settingsDisplayName').value=profile.display_name||'';el('settingsDesignation').value=profile.designation||'';el('settingsPhone').value=profile.phone||'';el('settingsEmail').value=profile.email||'';el('settingsSignatoryName').value=profile.signatory_name||profile.display_name||'';
+    pendingSignatureData=profile.signature_image||'';removeSignatureRequested=false;el('settingsSignatureUpload').value='';renderSignaturePreview();
     el('settingsCurrentPassword').value='';el('settingsNewPassword').value='';el('settingsConfirmPassword').value='';el('settingsDialog').showModal();
+  }
+  function renderSignaturePreview(){
+    const preview=el('settingsSignaturePreview'),remove=el('settingsRemoveSignature');if(!preview||!remove)return;
+    const data=removeSignatureRequested?'':(pendingSignatureData||profile?.signature_image||'');
+    preview.src=data||'';preview.style.display=data?'block':'none';remove.disabled=!data;
+  }
+  function optimizeSignature(file){
+    return new Promise((resolve,reject)=>{
+      if(!/^image\/(png|jpeg|webp)$/.test(file.type))return reject(new Error('Please upload PNG, JPG or WEBP.'));
+      if(file.size>3*1024*1024)return reject(new Error('The signature file must be smaller than 3 MB.'));
+      const reader=new FileReader();
+      reader.onerror=()=>reject(new Error('The signature image could not be read.'));
+      reader.onload=()=>{
+        const image=new Image();image.onerror=()=>reject(new Error('The signature image is invalid.'));
+        image.onload=()=>{
+          const maxW=900,maxH=300,scale=Math.min(1,maxW/image.width,maxH/image.height);
+          const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+          const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+          resolve(canvas.toDataURL('image/png'));
+        };image.src=String(reader.result||'');
+      };reader.readAsDataURL(file);
+    });
   }
   function closeSettings(){el('settingsDialog')?.close()}
   async function saveSettings(event){
     event.preventDefault();if(!client||!session)return;
     const displayName=el('settingsDisplayName').value.trim(),designation=el('settingsDesignation').value.trim();
     const phone=typeof window.formatMYPhone==='function'?window.formatMYPhone(el('settingsPhone').value):el('settingsPhone').value.trim();
+    const signatoryName=el('settingsSignatoryName').value.trim()||displayName;
+    const signatureImage=removeSignatureRequested?'':(pendingSignatureData!==null?pendingSignatureData:(profile.signature_image||''));
     const currentPassword=el('settingsCurrentPassword').value,newPassword=el('settingsNewPassword').value,confirmPassword=el('settingsConfirmPassword').value;
     if(!displayName){settingsMessage('Display Name is required.');return}
     const changingPassword=!!(currentPassword||newPassword||confirmPassword);
@@ -104,11 +143,14 @@
         const check=await client.auth.signInWithPassword({email:profile.email,password:currentPassword});
         if(check.error)throw new Error('The current password is incorrect.');
       }
-      const metadata={...(session.user.user_metadata||{}),display_name:displayName,designation,phone};
+      const metadata={...(session.user.user_metadata||{}),display_name:displayName,designation,phone,signatory_name:signatoryName};
       const profileResult=await client.auth.updateUser({data:metadata});if(profileResult.error)throw profileResult.error;
+      const savedProfile={email:profile.email,company_id:profile.company_id,display_name:displayName,designation,phone,signatory_name:signatoryName,signature_image:signatureImage,updated_at:new Date().toISOString()};
+      const dbResult=await client.from('ks_user_profiles').upsert(savedProfile,{onConflict:'email'}).select('*').single();
+      if(dbResult.error)throw new Error(`${dbResult.error.message}. Run the V1.04 Supabase migration SQL if the profile table is missing.`);
       if(changingPassword){const passwordResult=await client.auth.updateUser({password:newPassword});if(passwordResult.error)throw passwordResult.error}
       const sessionResult=await client.auth.getSession();if(sessionResult.data?.session)session=sessionResult.data.session;
-      applyProfile({...profile,display_name:displayName,designation,phone});
+      pendingSignatureData=signatureImage;removeSignatureRequested=false;applyProfile({...profile,display_name:displayName,designation,phone,signatory_name:signatoryName,signature_image:signatureImage});
       el('settingsPhone').value=phone;el('settingsCurrentPassword').value='';el('settingsNewPassword').value='';el('settingsConfirmPassword').value='';
       settingsMessage(changingPassword?'Profile and password updated.':'Profile updated.','info');
       setTimeout(closeSettings,700);
@@ -118,6 +160,12 @@
   async function init(){
     el('loginForm').addEventListener('submit',signIn);el('logoutButton').addEventListener('click',signOut);el('showPassword').addEventListener('change',event=>el('loginPassword').type=event.target.checked?'text':'password');el('refreshSecurePricing')?.addEventListener('click',refreshSecure);
     el('settingsButton')?.addEventListener('click',openSettings);el('settingsForm')?.addEventListener('submit',saveSettings);el('closeSettings')?.addEventListener('click',closeSettings);el('cancelSettings')?.addEventListener('click',closeSettings);
+    el('settingsSignatureUpload')?.addEventListener('change',async event=>{
+      const file=event.target.files?.[0];if(!file)return;
+      try{pendingSignatureData=await optimizeSignature(file);removeSignatureRequested=false;renderSignaturePreview();settingsMessage('Signature ready. Click Save Settings to keep it.','info')}
+      catch(error){event.target.value='';settingsMessage(error.message||'The signature could not be loaded.')}
+    });
+    el('settingsRemoveSignature')?.addEventListener('click',()=>{pendingSignatureData='';removeSignatureRequested=true;el('settingsSignatureUpload').value='';renderSignaturePreview();settingsMessage('Signature will be removed when you save.','info')});
     if(!configReady()){showLogin('Your existing config.js is missing or incomplete. Keep the config.js that already works on GitHub.','info');return}
     if(!window.supabase?.createClient){showLogin('The Supabase library could not be loaded. Check the internet connection.');return}
     const cfg=window.KEYSUITE_CONFIG;client=window.supabase.createClient(cfg.supabaseUrl.trim(),cfg.supabaseAnonKey.trim(),{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
