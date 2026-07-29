@@ -1,14 +1,5 @@
-const CACHE='keysuite-v0.37-print-fix';
-const FILES=['./','index.html','app.js','manifest.json','keylargo-logo.png','selector/index.html','selector/favicon.png','selector/apple-touch-icon.png','selector/bgreich-logo.png'];
-self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});
-self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const request=event.request;
-  const isAppFile=request.mode==='navigate'||['document','script','style'].includes(request.destination);
-  if(isAppFile){
-    event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy));return response;}).catch(()=>caches.match(request)));
-  }else{
-    event.respondWith(caches.match(request).then(cached=>cached||fetch(request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy));return response;})));
-  }
-});
+const CACHE='keysuite-v1.00-company-pricing';
+const FILES=['./','index.html','app.js','manifest.json','data/master-data.js','data/master-data.json'];
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)))});
+self.addEventListener('activate',e=>{e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)))});

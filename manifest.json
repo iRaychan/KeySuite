@@ -1,9 +1,9 @@
 {
-  "name": "KeySuite CHC Testing",
+  "name": "KeySuite V1.00 Company & Pricing",
   "short_name": "KeySuite",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f6f8fb",
+  "background_color": "#f4f7fb",
   "theme_color": "#17365d",
   "icons": []
 }
