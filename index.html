@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.01</title>
+  <title>KeySuite V1.02</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -13,6 +13,7 @@
     .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
     aside{background:var(--navy);color:white;padding:22px 14px}
     .brand{font-size:23px;font-weight:700;padding:0 12px 20px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.75;margin-top:4px}
+    .brand-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.brand-row .brand{min-width:0;flex:1}.key-access-button{margin-top:0;border:1px solid rgba(255,255,255,.5);border-radius:9px;padding:8px 12px;background:#d6a929;color:#172033;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.2)}.key-access-button:hover,.key-access-button.active{background:#f0c84b;color:#111}
     nav button{display:block;width:100%;text-align:left;padding:12px 14px;margin:5px 0;border:0;border-radius:9px;background:transparent;color:white}
     nav button.active,nav button:hover{background:rgba(255,255,255,.14)}
     main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}
@@ -28,6 +29,18 @@
     canvas{width:100%;height:310px;border:1px solid #e2e8f0;border-radius:10px;background:white}
     .quote-head{display:flex;justify-content:space-between;gap:20px}.quote-total{font-size:22px;font-weight:700;text-align:right}
     .notice{padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;margin-bottom:14px}
+
+    @media(min-width:901px) and (max-width:1180px){
+      .app{grid-template-columns:190px minmax(0,1fr)}
+      aside{padding:18px 10px}.brand{font-size:20px;padding:0 8px 16px}.key-access-button{padding:7px 10px}
+      main{padding:18px}.grid-4{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:repeat(2,1fr)}.span-3{grid-column:1/-1}
+      .customer-layout{grid-template-columns:minmax(260px,.82fr) minmax(390px,1.18fr)}
+      .quote-top-controls{grid-template-columns:90px 145px minmax(120px,1fr) minmax(210px,1.25fr);max-width:none}.quote-top-controls>.btn{grid-column:auto}
+      .selector-toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .pricing-layout{grid-template-columns:1fr}.pricing-toolbar{grid-template-columns:1fr 1fr}
+      .quote-item-head{grid-template-columns:26px 28px 44px max-content minmax(170px,1fr) 64px 112px}.item-summary-model{margin-left:3ch}
+    }
     @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
 
@@ -85,7 +98,7 @@
   .print-terms{position:absolute;top:158mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-terms>div{grid-template-columns:24mm 5mm 1fr}
   #pProject,#pDelivery{white-space:pre-line}
-  .print-closing{position:absolute;top:194mm;left:8.8mm;width:180.2mm;line-height:1.35}
+  .print-closing{position:absolute;top:194mm;left:13.8mm;width:180.2mm;line-height:1.35}
   .print-closing p{margin:0 0 6mm}
   .signatory-block{display:inline-block;width:max-content;max-width:100%}
   .signature-space{position:relative;height:17mm;width:100%;margin-top:2mm;overflow:hidden;padding-bottom:1mm;box-sizing:border-box}
@@ -97,7 +110,7 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:block;z-index:5}
   .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
@@ -157,12 +170,11 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand">KeySuite<small>Full Suite V1.01</small></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.02</small></div><button id="keyAccessButton" class="key-access-button hidden" type="button" data-page="companyPricing" title="Restricted pricing access">Key</button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <button data-page="selector">CHC Selector</button>
-      <button data-page="companyPricing">Company &amp; Pricing</button>
       <button data-page="quotation">Quotation</button>
       <button data-page="history">Quote History</button>
     </nav>
@@ -171,7 +183,7 @@
       <small id="sessionUserEmail"></small>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.01 · Restored from V0.38</div>
+    <div class="suite-version">KeySuite V1.02 · Pad layout review build</div>
   </aside>
 
   <main>
@@ -336,12 +348,12 @@
 
     <section id="companyPricing" class="page">
       <div class="page-title-row">
-        <div><h1>Company &amp; Pricing</h1><div class="muted">Protected Supabase data linked to CHC selection and quotation.</div></div>
+        <div><h1>Key — Pricing Control</h1><div class="muted">Restricted pricing data linked to pump selection and quotation.</div></div>
         <button class="btn secondary" id="refreshSecurePricing" type="button">Refresh Data</button>
       </div>
       <div id="pricingAccessNotice" class="notice">Secure pricing is loading.</div>
       <div class="pricing-metrics" style="margin-top:16px">
-        <div class="card metric"><span class="muted">Companies</span><b id="pricingCompanyCount">0</b></div>
+        <div class="card metric"><span class="muted">Customers</span><b id="pricingCompanyCount">0</b></div>
         <div class="card metric"><span class="muted">Categories</span><b id="pricingCategoryCount">0</b></div>
         <div class="card metric"><span class="muted">CHC Models</span><b id="pricingModelCount">0</b></div>
         <div class="card metric"><span class="muted">Priced Variants</span><b id="pricingVariantCount">0</b></div>
@@ -349,7 +361,7 @@
       <div class="pricing-layout">
         <div class="card">
           <h2>Company</h2>
-          <div><label>Company</label><select id="pricingCompanySelect"></select></div>
+          <div><label>Customer</label><select id="pricingCompanySelect"></select></div>
           <div id="pricingCompanySummary" style="margin-top:12px"></div>
         </div>
         <div class="card">

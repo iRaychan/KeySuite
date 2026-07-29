@@ -1,0 +1,12 @@
+KeySuite V1.02 Changes
+
+- Added restricted gold “Key” button beside KeySuite.
+- Key pricing section is visible only to Owner/Admin roles.
+- Removed Company & Pricing from the normal navigation.
+- Customer and Company are treated as the same customer record in the interface.
+- Pricing remains in the separate restricted Key section.
+- Corrected Page 1 closing and signatory block alignment to match To / Attn.
+- Corrected Page 2 logo geometry to match Page 1.
+- Kept quantity values on one line and retained full-width Total bottom rule.
+- Added tablet/pad responsive layout for 901–1180 px screens.
+- Updated application version to V1.02.

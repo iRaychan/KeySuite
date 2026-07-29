@@ -59,10 +59,10 @@
     byId('pricingCategoryCount').textContent=(secureData.categories||[]).length;
     byId('pricingModelCount').textContent=(secureData.products||[]).length;
     byId('pricingVariantCount').textContent=variants(false).length;
-    byId('pricingAccessNotice').innerHTML=`Signed in as <b>${e(access?.display_name||access?.email||'approved user')}</b> · Role: <b>${e(access?.role||'user')}</b>. Company and pricing data are loaded only after authentication.`;
+    byId('pricingAccessNotice').innerHTML=`Signed in as <b>${e(access?.display_name||access?.email||'approved user')}</b> · Role: <b>${e(access?.role||'user')}</b>. Pricing data are loaded only after authorised authentication.`;
     byId('pricingAccessNotice').classList.add('active-customer');
     byId('pricingCompanySummary').innerHTML=c?[
-      ['Company ID',c.id],['Company Name',c.name],['Pricing Category',c.category||'-'],['Phone',c.phone||'-'],['Payment Term',`${c.term_days||0} days`],['TIN',c.tin||'-'],['Business Registration No.',c.business_registration_no||'-'],['SST No.',c.sst_no||'-'],['Address',c.address||'-']
+      ['Customer ID',c.id],['Customer Name',c.name],['Pricing Category',c.category||'-'],['Phone',c.phone||'-'],['Payment Term',`${c.term_days||0} days`],['TIN',c.tin||'-'],['Business Registration No.',c.business_registration_no||'-'],['SST No.',c.sst_no||'-'],['Address',c.address||'-']
     ].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No company data.</p>';
     byId('pricingCategorySummary').innerHTML=cat?[
       ['Category ID',cat.id],['Category Name',cat.name],['CHC Factor',n(cat.factors?.CHC||0,2)],['Transport',cash(cat.transport||0)],['Commission',percent(cat.commission||0)],['Set Discount',percent(cat.set_discount||0)],['Final Discount',percent(cat.final_discount||0)],['USD → MYR Multiplier',n(secureData.currency_multiplier||0,2)]
