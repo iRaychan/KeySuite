@@ -1,3 +1,3 @@
-KeySuite V1.05
+KeySuite V1.06
 Release date: 2026-07-29
-Base: V1.04 with customer UUID fallback, Company master sync, Handled by restoration, Key-only pricing access and PDF alignment corrections
+Base: V1.05 with Page 2 logo adjustment, quotation-customer wording clarification and restored CHC Add to Quotation control

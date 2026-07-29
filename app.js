@@ -183,14 +183,14 @@ function showCustomerDetail(id){
  const c=customers().find(x=>x.id===id);if(!c)return;
  viewedCustomerId=id;
  $('customerEmpty').style.display='none';$('customerEditorCard').style.display='none';$('customerDetail').style.display='block';
- $('detailCompany').textContent=c.company+(c.id===activeCustomerId()?' — Selected':'');
+ $('detailCompany').textContent=c.company+(c.id===activeCustomerId()?' — Quotation Customer':'');
  $('detailClassification').textContent=c.classification||'Other';$('detailOwner').textContent=customerOwnerName(c.assignedUserEmail);
  $('detailAddress').textContent=c.address||'-';$('detailPhone').textContent=formatMYPhone(c.companyPhone)||'-';
  $('detailTerms').textContent=c.terms||'-';$('detailTin').textContent=c.tinNumber||'-';$('detailBrn').textContent=c.brnNumber||'-';
  $('detailSst').textContent=c.sstNumber||'-';$('detailMsic').textContent=c.msicCode||'-';
  $('detailBusinessActivity').textContent=c.businessActivity||'-';$('detailNotes').textContent=c.notes||'-';
  $('detailContacts').innerHTML=(c.contacts||[]).map(x=>`<tr><td>${esc([x.prefix,x.name].filter(Boolean).join(' '))}</td><td>${esc(formatMYPhone(x.phone)||'-')}</td><td>${esc(x.email||'-')}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">No contact persons saved.</td></tr>';
- $('selectDetailCustomer').textContent=c.id===activeCustomerId()?'Selected Customer':'Select Customer';
+ $('selectDetailCustomer').textContent=c.id===activeCustomerId()?'Quotation Customer':'Use for Quotation';
  $('selectDetailCustomer').disabled=c.id===activeCustomerId();
 }
 function refreshCustomerList(){
@@ -210,7 +210,7 @@ function refreshCustomers(){
  const old=$('qCustomer').value;$('qCustomer').innerHTML=opts;$('qCustomer').value=old;
  refreshQuotationContacts();
  const a=activeCustomer();$('activeCustomerBanner').className=a?'notice active-customer':'notice';
- $('activeCustomerBanner').innerHTML=a?`Selected customer: <b>${esc(a.company)}</b>`:'Select a customer from the Customer page first.';
+ $('activeCustomerBanner').innerHTML=a?`Quotation customer: <b>${esc(a.company)}</b>`:'Choose a customer before adding a pump to quotation.';
  if(viewedCustomerId&&$('customerDetail').style.display!=='none')showCustomerDetail(viewedCustomerId);
 }
 
@@ -365,6 +365,14 @@ function updateConnectionAvailabilityFromSelection(selection){
    sel.disabled=false;
    sel.title='';
  }
+}
+
+function requestSelectionForQuotation(){
+ const customer=activeCustomer();
+ if(!customer){alert('Please choose a quotation customer first.');showPage('customers');return}
+ const frame=$('selectorFrame');
+ if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert('Pump selector is not ready. Please open CHC Selector again.');return}
+ frame.contentWindow.postMessage({type:'KEYSUITE_REQUEST_SELECTION'},'*');
 }
 
 function refreshAll(){refreshCustomers();refreshQuotes();renderCustomerAccessNotice()}
@@ -610,6 +618,7 @@ $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>quoteItemRow({});
+$('addSelectionToQuotation')?.addEventListener('click',requestSelectionForQuotation);
 $('expandAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(false));
 $('collapseAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(true));
 $('collapseCustomer')?.addEventListener('click',()=>{const card=$('quoteCustomerCard');card.classList.toggle('collapsed');const collapsed=card.classList.contains('collapsed');$('collapseCustomer').textContent=collapsed?'▼':'▲';$('collapseCustomer').title=collapsed?'Expand customer details':'Collapse customer details';updateCustomerSummary();});

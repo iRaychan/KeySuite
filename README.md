@@ -1,44 +1,25 @@
-# KeySuite V1.05
+# KeySuite V1.06
 
-Upload this package over the existing GitHub repository and keep the current working `config.js`. No new Supabase SQL is required when the V1.04 migration has already been run.
+Upload this package over the existing GitHub repository and keep the current working root `config.js`. This package intentionally excludes the real Supabase URL and publishable key.
 
-Main fixes: customer save compatibility, Company master records visible in Customers, Company & Pricing under the gold Key button, Handled by restored, Page 2 logo aligned, and totals labels shifted right by 8 mm.
+No new Supabase SQL is required when the V1.04 migration has already been completed.
 
-# KeySuite V1.04 — Customer, Signature and Alignment Corrections
+## V1.06 changes
 
-V1.04 retains the V1.02 quotation design as its base and applies only the corrections requested after testing V1.03.
+- Moves the Page 2 quotation logo 3 mm to the left.
+- Restores **Add to Quotation** at the top-right of CHC Selector.
+- The button adds the currently selected CHC pump to the quotation for the active quotation customer.
+- Clarifies customer wording to **Use for Quotation** and **Quotation Customer**.
+- Keeps the V1.02 quotation output base, with only the specifically requested logo adjustment.
 
-## Before uploading the website
+## Customer selection purpose
 
-Run this file once in **Supabase → SQL Editor**:
+The quotation customer is the customer used when a pump is sent from CHC Selector to Quotation. KeySuite automatically selects that company in the quotation and loads its contact persons and payment terms. Customer ownership and access permissions are separate from this selection.
 
-`setup/V104_SUPABASE_MIGRATION.sql`
+## Upload
 
-It creates or repairs:
-
-- `ks_customers` for secure customer saving
-- Owner/Admin access to all company customers
-- Normal-user access only to assigned customers
-- `ks_user_profiles` for each user's signatory and signature attachment
-- PostgREST schema-cache refresh
-
-When Supabase displays the safety warning, choose **Run without RLS**. The SQL enables and configures its own Row Level Security policies.
-
-## Upload to GitHub Pages
-
-Upload all files and folders in this package to the repository root and allow matching files to be replaced.
-
-Keep the working root `config.js` already present in GitHub. This package intentionally excludes the real `config.js` and publishable key.
-
-## V1.04 changes
-
-- Signature attachment and Signatory moved to User Settings
-- Quotation editor no longer asks for a signature every time
-- Quotation button and Quotation No. positioned together at the top-right
-- Gold **Key** button moved next to the KeySuite name
-- **GOLDEN KEY** removed from the embedded CHC Selector
-- Customer table setup repaired
-- Authorized Signature and prepared-by name removed from below the printed signature
-- Page 1 closing section aligned with To/Attn
-- Page 2 logo aligned with Page 1
-- Sub-total, 0% SST and Total labels aligned from the Unit Price column
+1. Extract the ZIP.
+2. Upload all files and folders to the GitHub repository root.
+3. Replace matching files.
+4. Keep the existing `config.js`.
+5. After GitHub Pages deploys, refresh with `Ctrl + Shift + R`.
