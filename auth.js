@@ -32,7 +32,7 @@
     ]);
     const failed=[companies,users,categories,products,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
     const setting=settings.data?.[0]||{};
-    return {version:'1.04',release_date:'2026-07-29',currency:setting.currency||'MYR',source_currency:setting.source_currency||'USD',currency_multiplier:Number(setting.currency_multiplier||0),
+    return {version:'1.05',release_date:'2026-07-29',currency:setting.currency||'MYR',source_currency:setting.source_currency||'USD',currency_multiplier:Number(setting.currency_multiplier||0),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),factors:{CHC:Number(c.chc_factor||1)},transport:Number(c.transport||0)})),

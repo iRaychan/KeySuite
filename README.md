@@ -1,3 +1,9 @@
+# KeySuite V1.05
+
+Upload this package over the existing GitHub repository and keep the current working `config.js`. No new Supabase SQL is required when the V1.04 migration has already been run.
+
+Main fixes: customer save compatibility, Company master records visible in Customers, Company & Pricing under the gold Key button, Handled by restored, Page 2 logo aligned, and totals labels shifted right by 8 mm.
+
 # KeySuite V1.04 — Customer, Signature and Alignment Corrections
 
 V1.04 retains the V1.02 quotation design as its base and applies only the corrections requested after testing V1.03.

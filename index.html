@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.04</title>
+  <title>KeySuite V1.05</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -97,7 +97,7 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo-wrap{position:absolute;top:8mm;right:8mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
   .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
@@ -118,7 +118,7 @@
   .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
   .print-summary-line.bottom-full .print-summary-rule{width:auto;margin-left:-1.67mm;margin-right:-1.67mm}
   .print-summary-entry td{padding:0!important;height:5.2mm;vertical-align:middle!important}
-  .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:54mm;margin-left:auto;padding:0 1.5mm}
+  .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:46mm;margin-left:auto;padding:0 1.5mm}
   .print-summary-entry.grand{font-weight:700}
 }
 
@@ -148,7 +148,7 @@
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.04 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.05 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,12 +163,11 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.04</small></div><button id="keyButton" type="button" class="key-button" title="Open pricing and quotation workspace"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.05</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <button data-page="selector">CHC Selector</button>
-      <button data-page="companyPricing">Company &amp; Pricing</button>
       <button data-page="quotation">Quotation</button>
       <button data-page="history">Quote History</button>
     </nav>
@@ -178,7 +177,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.04 · V1.02 output base retained</div>
+    <div class="suite-version">KeySuite V1.05 · V1.02 output base retained</div>
   </aside>
 
   <main>
@@ -460,6 +459,7 @@
       <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
       <div><span>Your reference</span><b>:</b><strong id="pCustomerRef"></strong></div>
       <div><span>Our reference</span><b>:</b><strong id="pQuoteNo"></strong></div>
+      <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
     </div>
     <p class="print-dear" id="pDear">Dear Sir / Madam,</p>
     <p class="print-intro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
