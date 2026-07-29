@@ -147,7 +147,6 @@
     byId('pricingAccessNotice').classList.add('active-customer');
 
     byId('pricingCompanySummary').innerHTML=c?[
-      ['Customer ID',c.id],
       ['Company Name',c.company],
       ['Classification',c.classification||'-'],
       ['Pricing Category',categoryForCustomer(c)?.name||'Not assigned'],
@@ -162,7 +161,6 @@
     ].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">Select a customer/company to view its saved address and pricing category.</p>';
 
     byId('pricingCategorySummary').innerHTML=cat?[
-      ['Category ID',cat.id],
       ['Category Name',cat.name],
       ['CHC Margin',percent(cat.margins?.CHC??cat.factors?.CHC??0)],
       ['Transport',cash(cat.transport||0)],
@@ -355,7 +353,7 @@
       rows.push([c.company,cat.name,row.product.id,row.product.model,row.material,calc.usd,calc.baseMyr,calc.margin,calc.marginPrice,calc.withTransport,calc.afterCommission,calc.afterSetDiscount,calc.beforeFuel,calc.distanceKm,calc.fuelPrice,calc.fuelCharge,calc.unroundedPrice,calc.finalPrice]);
     }
     const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
-    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.11_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.12_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
   }
 
   function selectCustomer(id,rerender=true){

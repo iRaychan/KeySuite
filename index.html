@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.11</title>
+  <title>KeySuite V1.12</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -143,12 +143,14 @@
     .settings-dialog{width:min(720px,calc(100vw - 32px))!important}.dialog-close{border:0;background:transparent;font-size:28px;line-height:1;color:var(--muted);padding:0 4px}.dialog-close:hover{color:var(--text)}
     .signature-settings-preview-wrap{display:flex;align-items:flex-end;gap:14px;min-height:88px}.signature-settings-preview{display:none;max-width:260px;max-height:80px;object-fit:contain;object-position:left bottom;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:6px}
     #customerAccessNotice{margin-bottom:16px}.owner-readonly{opacity:.78;background:#f8fafc}
+
+    .key-dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:16px}.key-module-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:170px;width:100%;padding:20px;border:1px solid #dbe3ec;border-radius:14px;background:#fff;text-align:left;box-shadow:0 1px 3px rgba(15,23,42,.06)}.key-module-card:hover{border-color:#93a8c2;box-shadow:0 8px 24px rgba(15,23,42,.08);transform:translateY(-1px)}.key-module-card .module-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#eef3f8;color:var(--navy);font-size:22px}.key-module-card h2{margin:0}.key-module-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.key-module-card .module-order{margin-top:auto;font-size:11px;font-weight:700;color:#8a6b00}.role-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.role-table td,.role-table th{vertical-align:middle}.role-select{min-width:120px}.status-toggle{display:inline-flex;align-items:center;gap:8px;font-weight:400;margin:0}.status-toggle input{width:auto}.role-note{font-size:12px;color:var(--muted);line-height:1.45}.role-audit-time{white-space:nowrap}.role-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:700;text-transform:capitalize}.role-badge.owner{background:#fef3c7;color:#92400e}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.role-badge.user{background:#dcfce7;color:#166534}.role-badge.dealer{background:#ede9fe;color:#6d28d9}.role-badge.viewer{background:#f1f5f9;color:#475569}.auth-state{font-size:12px;font-weight:700}.auth-state.ok{color:#15803d}.auth-state.missing{color:#b45309}.key-back-row{display:flex;justify-content:flex-end;margin-bottom:12px}@media(max-width:900px){.key-dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.key-dashboard-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.11 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.12 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +165,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.11</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.12</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -177,7 +179,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.11 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.12 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -346,10 +348,56 @@
     </section>
 
 
+    <section id="keyDashboard" class="page">
+      <div class="page-title-row">
+        <div><h1>Key Dashboard</h1><div class="muted">Administration, roles and protected company pricing.</div></div>
+      </div>
+      <div id="keyDashboardNotice" class="notice">Loading your Key permissions…</div>
+      <div class="key-dashboard-grid">
+        <button id="openRoleModule" type="button" class="key-module-card">
+          <span class="module-icon">👤</span>
+          <h2>Role</h2>
+          <p>Assign Owner, Admin, User, Dealer or Viewer access to each approved user.</p>
+          <span class="module-order">01 · FIRST MODULE</span>
+        </button>
+        <button type="button" class="key-module-card" data-go="companyPricing">
+          <span class="module-icon">RM</span>
+          <h2>Company &amp; Pricing</h2>
+          <p>Manage customer pricing categories, fuel price and protected CHC selling prices.</p>
+          <span class="module-order">02</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="roleManagement" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
+      <div class="page-title-row">
+        <div><h1>Role</h1><div class="muted">Assign access by user. Internal IDs remain hidden.</div></div>
+        <button class="btn" id="addRoleUser" type="button">+ Add User Access</button>
+      </div>
+      <div id="roleAccessNotice" class="notice">Loading role access…</div>
+      <div class="card">
+        <div class="role-toolbar">
+          <div><h2 style="margin-bottom:4px">Users</h2><div class="role-note">A matching login must also exist under Supabase Authentication. Role changes apply after the user refreshes or signs in again.</div></div>
+          <button id="reloadRoles" type="button" class="btn secondary">Reload</button>
+        </div>
+        <div class="table-wrap" style="margin-top:14px">
+          <table class="role-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Login</th><th></th></tr></thead>
+            <tbody id="roleRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h2>Recent Role Changes</h2>
+        <div class="table-wrap"><table><thead><tr><th>Date / Time</th><th>User</th><th>Previous</th><th>New</th><th>Changed By</th></tr></thead><tbody id="roleAuditRows"></tbody></table></div>
+      </div>
+    </section>
+
     <section id="companyPricing" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
       <div class="page-title-row">
         <div><h1>Company &amp; Pricing</h1><div class="muted">Customer/company address, pricing category and protected CHC selling prices.</div></div>
-        <button class="btn secondary" id="refreshSecurePricing" type="button">Refresh Data</button>
       </div>
       <div id="pricingAccessNotice" class="notice">Secure pricing is loading.</div>
       <div class="pricing-metrics" style="margin-top:16px">
@@ -409,6 +457,21 @@
     <div><label>Line 1</label><input id="twoLine1"></div>
     <div style="margin-top:12px"><label>Line 2</label><input id="twoLine2"></div>
     <div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveTwoLine" value="default">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="roleUserDialog" class="ks-dialog">
+  <form id="roleUserForm" class="dialog-body" novalidate>
+    <div class="page-title-row" style="margin-bottom:14px"><div><h2 id="roleDialogTitle" style="margin:0">Add User Access</h2><div class="muted">Approve a user and assign a role.</div></div><button id="closeRoleDialog" class="dialog-close" type="button" aria-label="Close">×</button></div>
+    <div id="roleDialogMessage" class="auth-message"></div>
+    <div class="form-grid">
+      <div class="span-2"><label>Email *</label><input id="roleUserEmail" type="email" autocomplete="off" placeholder="name@keylargo.com.my" required></div>
+      <div class="span-2"><label>Display Name *</label><input id="roleUserDisplayName" autocomplete="off" required></div>
+      <div><label>Role</label><select id="roleUserRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="user" selected>User</option><option value="dealer">Dealer</option><option value="viewer">Viewer</option></select></div>
+      <div><label>Status</label><select id="roleUserActive"><option value="true" selected>Active</option><option value="false">Inactive</option></select></div>
+    </div>
+    <p class="role-note" style="margin-top:14px">This approves access in KeySuite. To let a new person sign in, create the same email under Supabase → Authentication → Users.</p>
+    <div class="dialog-actions"><button class="btn secondary" id="cancelRoleDialog" type="button">Cancel</button><button class="btn" id="saveRoleUser" type="submit">Save User</button></div>
   </form>
 </dialog>
 
@@ -500,6 +563,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
 <script src="pricing.js"></script>
+<script src="roles.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>
