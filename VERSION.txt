@@ -1,3 +1,3 @@
-KeySuite V1.06
+KeySuite V1.07
 Release date: 2026-07-29
-Base: V1.05 with Page 2 logo adjustment, quotation-customer wording clarification and restored CHC Add to Quotation control
+Base: V1.06 with Page 2 logo fine adjustment, selector-header Add to Quotation and simplified Customer panel

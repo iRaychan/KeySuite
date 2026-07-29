@@ -1,20 +1,17 @@
-# KeySuite V1.06
+# KeySuite V1.07
 
 Upload this package over the existing GitHub repository and keep the current working root `config.js`. This package intentionally excludes the real Supabase URL and publishable key.
 
 No new Supabase SQL is required when the V1.04 migration has already been completed.
 
-## V1.06 changes
+## V1.07 changes
 
-- Moves the Page 2 quotation logo 3 mm to the left.
-- Restores **Add to Quotation** at the top-right of CHC Selector.
-- The button adds the currently selected CHC pump to the quotation for the active quotation customer.
-- Clarifies customer wording to **Use for Quotation** and **Quotation Customer**.
-- Keeps the V1.02 quotation output base, with only the specifically requested logo adjustment.
-
-## Customer selection purpose
-
-The quotation customer is the customer used when a pump is sent from CHC Selector to Quotation. KeySuite automatically selects that company in the quotation and loads its contact persons and payment terms. Customer ownership and access permissions are separate from this selection.
+- Moves the Page 2 quotation logo **1 mm right** from the V1.06 position.
+- Places **Add to Quotation** in the embedded CHC Selector header, on the same row as the B.G.Reich logo and at the right side.
+- Removes **Use for Quotation** from the Customers panel.
+- Customers are selected directly in the Quotation page.
+- A CHC pump can be added before selecting the quotation customer.
+- Keeps the V1.02 quotation output base, with only the specifically requested Page 2 logo adjustment.
 
 ## Upload
 

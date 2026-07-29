@@ -58,10 +58,13 @@ svg{display:block;width:100%;height:auto;aspect-ratio:700/270;margin:10px 0 14px
 
 .brand-wrap{max-width:1220px;margin:0 auto;display:flex;align-items:center;gap:20px}
 .brand-logo{height:54px;width:auto;display:block;object-fit:contain;background:#fff;padding:5px 9px;border:1px solid #d8e3ea;border-radius:8px}
+.keysuite-add-quotation{margin-left:auto;width:auto;min-width:150px;padding:11px 18px;border:0;border-radius:9px;background:#198754;color:#fff;font-weight:800;box-shadow:0 2px 7px rgba(25,135,84,.22);white-space:nowrap}
+.keysuite-add-quotation:hover{background:#157347}
+.keysuite-add-quotation:active{transform:translateY(1px)}
 header h1{margin:0;font-size:27px}
 header h1 span{font-weight:500}
 header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
-@media(max-width:600px){.brand-wrap{align-items:center;gap:14px}.brand-logo{height:42px;max-width:42%;padding:4px 7px}header h1{font-size:21px;line-height:1.15}header p{line-height:1.35}}
+@media(max-width:600px){.brand-wrap{align-items:center;gap:10px;flex-wrap:wrap}.brand-logo{height:42px;max-width:42%;padding:4px 7px}.keysuite-add-quotation{margin-left:auto;min-width:132px;padding:9px 12px;font-size:12px}header h1{font-size:21px;line-height:1.15}header p{line-height:1.35}}
 
 
 @media(max-width:600px){
@@ -128,6 +131,7 @@ header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
       <h1>KeySelector <span>- CHC Series</span></h1>
       <p>Database Version: 260717 · App v3.2.3m</p>
     </div>
+    <button id="keysuiteAddToQuotation" class="keysuite-add-quotation" type="button">Add to Quotation</button>
   </div>
 </header>
 <main>
@@ -866,6 +870,13 @@ run();
      };
    }catch(e){return null}
  }
+ function addCurrentSelectionToQuotation(){
+   const data=currentSelection();
+   if(!data){alert('Please run a CHC selection first.');return}
+   if(window.parent&&window.parent!==window){window.parent.postMessage({type:'KEYSUITE_ADD_SELECTION',payload:data},'*');return}
+   alert('Open the selector inside KeySuite to add this pump to a quotation.');
+ }
+ document.getElementById('keysuiteAddToQuotation')?.addEventListener('click',addCurrentSelectionToQuotation);
  window.addEventListener('message',function(event){
    if(!event.data)return;
    if(event.data.type==='KEYSUITE_REQUEST_SELECTION'){

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.06</title>
+  <title>KeySuite V1.07</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -97,7 +97,7 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo-wrap{position:absolute;top:8mm;right:3mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:2mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
   .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
@@ -148,7 +148,7 @@
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.06 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.07 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +163,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.06</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.07</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -177,7 +177,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.06 · V1.02 output base retained</div>
+    <div class="suite-version">KeySuite V1.07 · V1.02 output base retained</div>
   </aside>
 
   <main>
@@ -222,7 +222,6 @@
             <div class="page-title-row" style="margin-bottom:12px">
               <h2 id="detailCompany">Customer Details</h2>
               <div class="actions" style="margin:0">
-                <button class="btn green" id="selectDetailCustomer">Select Customer</button>
                 <button class="btn secondary" id="editDetailCustomer">Edit</button>
               </div>
             </div>
@@ -285,9 +284,7 @@
     <section id="selector" class="page">
       <div class="page-title-row">
         <h1>CHC Selector</h1>
-        <button class="btn green no-print" type="button" id="addSelectionToQuotation">Add to Quotation</button>
       </div>
-      <div id="activeCustomerBanner" class="notice">Choose a quotation customer from the Customer page first.</div>
       <div class="card selector-toolbar">
         <div><label>Material</label><select id="pumpMaterial"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
         <div><label>Mechanical Seal</label><select id="sealFaces"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>

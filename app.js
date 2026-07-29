@@ -165,7 +165,7 @@ async function saveCustomer(){
  try{
    const id=customerUuid($('customerId').value),old=customers().find(x=>x.id===id)||{};
    const c={...old,id,companyId:old.companyId||currentAccess().company_id,company,classification:$('customerClassification').value||'Other',assignedUserEmail:isCustomerAdmin()?($('customerOwner').value||currentEmail()):currentEmail(),createdByEmail:old.createdByEmail||currentEmail(),companyPhone:formatMYPhone($('companyPhone').value),address:$('address').value.trim(),terms:$('customerTerms').value.trim(),tinNumber:$('tinNumber').value.trim(),brnNumber:$('brnNumber').value.trim(),sstNumber:$('sstNumber').value.trim(),msicCode:$('msicCode').value.trim(),businessActivity:$('businessActivity').value.trim(),notes:$('customerNotes').value.trim(),contacts:getContacts(),status:'active'};
-   const saved=await saveCustomerRemote(c);localStorage.setItem('ks_active_customer',saved.id);viewedCustomerId=saved.id;refreshAll();showCustomerDetail(saved.id);alert('Customer saved and selected.');
+   const saved=await saveCustomerRemote(c);viewedCustomerId=saved.id;refreshAll();showCustomerDetail(saved.id);alert('Customer saved.');
  }catch(error){console.error(error);alert(`Customer could not be saved: ${error.message||error}`)}finally{button.disabled=false;button.textContent='Save Customer'}
 }
 async function deleteCustomer(id){
@@ -183,15 +183,13 @@ function showCustomerDetail(id){
  const c=customers().find(x=>x.id===id);if(!c)return;
  viewedCustomerId=id;
  $('customerEmpty').style.display='none';$('customerEditorCard').style.display='none';$('customerDetail').style.display='block';
- $('detailCompany').textContent=c.company+(c.id===activeCustomerId()?' — Quotation Customer':'');
+ $('detailCompany').textContent=c.company;
  $('detailClassification').textContent=c.classification||'Other';$('detailOwner').textContent=customerOwnerName(c.assignedUserEmail);
  $('detailAddress').textContent=c.address||'-';$('detailPhone').textContent=formatMYPhone(c.companyPhone)||'-';
  $('detailTerms').textContent=c.terms||'-';$('detailTin').textContent=c.tinNumber||'-';$('detailBrn').textContent=c.brnNumber||'-';
  $('detailSst').textContent=c.sstNumber||'-';$('detailMsic').textContent=c.msicCode||'-';
  $('detailBusinessActivity').textContent=c.businessActivity||'-';$('detailNotes').textContent=c.notes||'-';
  $('detailContacts').innerHTML=(c.contacts||[]).map(x=>`<tr><td>${esc([x.prefix,x.name].filter(Boolean).join(' '))}</td><td>${esc(formatMYPhone(x.phone)||'-')}</td><td>${esc(x.email||'-')}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">No contact persons saved.</td></tr>';
- $('selectDetailCustomer').textContent=c.id===activeCustomerId()?'Quotation Customer':'Use for Quotation';
- $('selectDetailCustomer').disabled=c.id===activeCustomerId();
 }
 function refreshCustomerList(){
  const query=($('customerSearch')?.value||'').trim().toLowerCase();
@@ -209,8 +207,6 @@ function refreshCustomers(){
  const arr=customers(),opts='<option value="">Select customer</option>'+arr.map(c=>`<option value="${c.id}">${esc(c.company)}</option>`).join('');
  const old=$('qCustomer').value;$('qCustomer').innerHTML=opts;$('qCustomer').value=old;
  refreshQuotationContacts();
- const a=activeCustomer();$('activeCustomerBanner').className=a?'notice active-customer':'notice';
- $('activeCustomerBanner').innerHTML=a?`Quotation customer: <b>${esc(a.company)}</b>`:'Choose a customer before adding a pump to quotation.';
  if(viewedCustomerId&&$('customerDetail').style.display!=='none')showCustomerDetail(viewedCustomerId);
 }
 
@@ -336,7 +332,7 @@ function calcTotal(){
 function saveQuote(){if(!$('qCustomer').value)return alert('Customer is required.');const items=getQuoteItems();if(!items.length)return alert('At least one item is required.');const q={id:editingQuoteId||crypto.randomUUID(),no:$('quoteNo').value||nextQuoteNo(),date:$('qDate').value,revisionDate:$('qRevisionDate').value,showRevision:$('showRevision').checked,documentType:$('qDocumentType').value,customerId:$('qCustomer').value,contactIndex:$('qContact').value,preparedBy:$('preparedBy').value,preparedByDesignation:$('preparedByDesignation').value,signatoryName:window.ksSignatoryName||currentProfile().signatory_name||'',signatureImage:window.ksSignatureImage||currentProfile().signature_image||'',items,project:$('project').value,project2:$('project2').value,customerReference:$('customerReference').value,delivery:$('delivery').value,delivery2:$('delivery2').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal()};let arr=quotes(),i=arr.findIndex(x=>x.id===q.id);if(i>=0)arr[i]=q;else arr.unshift(q);store.set('ks_quotes',arr);editingQuoteId=q.id;$('quoteNo').value=q.no;refreshAll();alert(`${q.documentType} saved.`)}
 function loadQuote(id){const q=quotes().find(x=>x.id===id);if(!q)return;editingQuoteId=id;$('quoteNo').value=q.no||'';$('qDate').value=q.date||'';$('qRevisionDate').value=q.revisionDate||'';$('showRevision').checked=!!q.showRevision;$('qDocumentType').value=q.documentType||'Quotation';$('qCustomer').value=q.customerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();$('preparedBy').value=q.preparedBy||currentProfile().display_name||'';$('preparedByDesignation').value=q.preparedByDesignation||currentProfile().designation||'';window.ksSignatoryName=q.signatoryName||currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=q.signatureImage||currentProfile().signature_image||'';$('project').value=q.project||'';$('project2').value=q.project2||'';$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value=q.delivery2||'';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,discount:q.discount||0,description:q.description||''}];setQuoteItems(items);showPage('quotation')}
 function deleteQuote(id){if(confirm('Delete this quotation?')){store.set('ks_quotes',quotes().filter(x=>x.id!==id));refreshAll()}}
-function newQuote(){editingQuoteId=null;$('preparedBy').value=currentProfile().display_name||currentAccess().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||'';$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qRevisionDate').value='';$('showRevision').checked=false;$('qDocumentType').value='Quotation';$('project').value='';$('project2').value='';$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value='';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';setQuoteItems([{}]);const a=activeCustomer();if(a){$('qCustomer').value=a.id;refreshQuotationContacts();$('payment').value=(a.terms||'').trim()||'Cash before delivery'}else{$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts()}calcTotal();updateCustomerSummary()}
+function newQuote(){editingQuoteId=null;$('preparedBy').value=currentProfile().display_name||currentAccess().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||'';$('quoteNo').value=nextQuoteNo();$('qDate').value=new Date().toISOString().slice(0,10);$('qRevisionDate').value='';$('showRevision').checked=false;$('qDocumentType').value='Quotation';$('project').value='';$('project2').value='';$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value='';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';setQuoteItems([{}]);$('qCustomer').value='';$('payment').value='Cash before delivery';refreshQuotationContacts();calcTotal();updateCustomerSummary()}
 function refreshQuotes(){
  const arr=quotes();
  $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1;return `<tr><td>${esc(q.no)}</td><td>${esc(q.date)}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(customerName(q.customerId))}</td><td>${itemCount}</td><td>${money(q.total)}</td><td><button class="btn secondary" data-open-q="${q.id}">Open</button> <button class="btn danger" data-del-q="${q.id}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7" class="muted">No quotations yet.</td></tr>';
@@ -368,8 +364,6 @@ function updateConnectionAvailabilityFromSelection(selection){
 }
 
 function requestSelectionForQuotation(){
- const customer=activeCustomer();
- if(!customer){alert('Please choose a quotation customer first.');showPage('customers');return}
  const frame=$('selectorFrame');
  if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert('Pump selector is not ready. Please open CHC Selector again.');return}
  frame.contentWindow.postMessage({type:'KEYSUITE_REQUEST_SELECTION'},'*');
@@ -385,11 +379,10 @@ window.addEventListener('message',function(event){
  }
  if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert('Please run a CHC selection first.');return}
  if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
- const p=event.data.payload||{},customer=activeCustomer();
- if(!customer){alert('Please select a customer first.');showPage('customers');return}
+ const p=event.data.payload||{};
  showPage('quotation');
- $('qCustomer').value=customer.id;refreshQuotationContacts();
- $('payment').value=(customer.terms||'').trim()||'Cash before delivery';
+ const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);
+ if(selectedCustomer){refreshQuotationContacts();$('payment').value=(selectedCustomer.terms||'').trim()||$('payment').value||'Cash before delivery';}
  const material=$('pumpMaterial').value;
  const seal=$('sealFaces').value;
  const elastomer=$('sealElastomer').value;
@@ -612,13 +605,11 @@ $('saveCustomer').onclick=saveCustomer;
 $('cancelCustomerEdit').onclick=cancelCustomerEdit;
 $('deleteCustomerBtn').onclick=()=>deleteCustomer($('customerId').value);
 $('editDetailCustomer').onclick=()=>editCustomer(viewedCustomerId);
-$('selectDetailCustomer').onclick=()=>selectCustomer(viewedCustomerId);
 $('customerSearch').addEventListener('input',refreshCustomerList);
 $('qCustomer').addEventListener('change',refreshQuotationContacts);
 $('qContact').addEventListener('change',updateQuotationContactInfo);
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>quoteItemRow({});
-$('addSelectionToQuotation')?.addEventListener('click',requestSelectionForQuotation);
 $('expandAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(false));
 $('collapseAllItems')?.addEventListener('click',()=>setAllItemsCollapsed(true));
 $('collapseCustomer')?.addEventListener('click',()=>{const card=$('quoteCustomerCard');card.classList.toggle('collapsed');const collapsed=card.classList.contains('collapsed');$('collapseCustomer').textContent=collapsed?'▼':'▲';$('collapseCustomer').title=collapsed?'Expand customer details':'Collapse customer details';updateCustomerSummary();});
