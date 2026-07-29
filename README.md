@@ -1,29 +1,15 @@
-# KeySuite V1.00 — Secure Login GitHub Package
+# KeySuite V1.01 — Full Suite + Secure Login
 
-This is the **public website package**. It contains the login page and application code only.
+This release restores the complete KeySuite V0.38 application and merges the working Supabase login and protected Company & Pricing data.
 
-## Security design
+## Upload
 
-- Login is the first page.
-- Email/password authentication uses Supabase Auth.
-- There is no public sign-up button.
-- An approved-email allowlist controls who can enter.
-- PostgreSQL Row Level Security controls database reads.
-- Company, user and pricing master data are **not included** in this GitHub package.
-- Quotation drafts are stored separately in the browser for each signed-in email.
+Upload all files and folders in this package to the GitHub Pages repository root. Allow existing files to be replaced.
 
-## Before uploading to GitHub
+**Do not delete or replace the working root `config.js` already connected to Supabase.** This update package intentionally does not include a root `config.js`.
 
-1. Run the private SQL file `keysuite-v1.00-secure-supabase.sql` in Supabase SQL Editor.
-2. In Supabase Authentication, manually create the approved user accounts.
-3. Disable public email sign-ups in Supabase Authentication settings.
-4. Open `config.js` and paste:
-   - Supabase Project URL
-   - Supabase publishable key or legacy anon key
-5. Upload only the contents of this public folder to GitHub Pages.
+The Supabase SQL installed for V1.00 remains valid; do not run it again for this update.
 
-## Important
+## Included functions
 
-- Never put the Supabase `service_role` key, secret key, database password, source Excel files or private SQL seed file into GitHub.
-- The browser key is not the security boundary. Row Level Security is.
-- Changing only the HTML login screen without RLS would not protect the price list.
+Dashboard, Customers, CHC Selector, Company & Pricing, Quotation, Quote History, quotation PDF layout, pump data PDF export, secure login and sign out.

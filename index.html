@@ -2,49 +2,149 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.00 - Company & Pricing</title>
+  <title>KeySuite V1.01</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    :root{--navy:#17365d;--navy2:#244b78;--blue:#2f75b5;--bg:#f4f7fb;--card:#fff;--line:#d8e0ea;--text:#172033;--muted:#68758a;--green:#16794b;--orange:#a85400;--red:#b42318}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}
-    .app{min-height:100vh;display:grid;grid-template-columns:238px minmax(0,1fr)}
-    aside{background:linear-gradient(180deg,var(--navy),#102b4a);color:#fff;padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
-    .brand{padding:4px 12px 22px;font-size:25px;font-weight:700;letter-spacing:.2px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.78;margin-top:5px}
-    nav button{display:block;width:100%;border:0;background:transparent;color:#fff;text-align:left;padding:12px 14px;border-radius:9px;margin:4px 0}nav button:hover,nav button.active{background:rgba(255,255,255,.14)}
-    main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}.page-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title h1{margin:0;font-size:27px}.page-title p{margin:5px 0 0;color:var(--muted)}
-    .grid{display:grid;gap:16px}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:0 1px 4px rgba(15,23,42,.05)}.card h2{font-size:18px;margin:0 0 14px}.metric span{display:block;color:var(--muted);font-size:13px}.metric b{display:block;font-size:27px;margin-top:7px}
-    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid #c9d4e1;border-radius:8px;padding:10px 11px;background:#fff;color:var(--text)}textarea{resize:vertical;min-height:90px}.field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.span-2{grid-column:span 2}.span-4{grid-column:1/-1}
-    .btn{border:0;border-radius:8px;padding:10px 15px;background:var(--navy);color:#fff;font-weight:700}.btn:hover{filter:brightness(1.07)}.btn.secondary{background:#e6edf5;color:#213147}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.small{padding:7px 10px;font-size:12px}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-    .notice{padding:11px 13px;border:1px solid #f3c78c;background:#fff7e8;color:#704000;border-radius:9px;font-size:13px}.ok{border-color:#a9dbbe;background:#effbf4;color:#145c38}.muted{color:var(--muted);font-size:13px}.formula{font-family:Consolas,monospace;background:#f8fafc;border:1px solid var(--line);padding:10px 12px;border-radius:8px;line-height:1.5;overflow:auto}
-    .toolbar{display:grid;grid-template-columns:1.1fr 1fr 1.2fr auto;gap:12px;align-items:end}.check{display:flex;gap:8px;align-items:center;height:41px;font-weight:400;margin:0}.check input{width:auto}
-    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}th,td{padding:10px 9px;border-bottom:1px solid #e7edf4;white-space:nowrap;text-align:left}th{position:sticky;top:0;background:#eff4f9;color:#25364c;z-index:1}td.num,th.num{text-align:right}tbody tr:hover{background:#f7fbff}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e5edf6;color:#274463}.badge.green{background:#dff6e8;color:#12633b}.badge.orange{background:#fff0dc;color:#824300}.badge.red{background:#fee7e7;color:#9b1c1c}
-    .company-layout{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(460px,1.3fr);gap:16px}.kv{display:grid;grid-template-columns:170px 1fr;gap:8px;border-bottom:1px solid #edf1f6;padding:8px 0}.kv b{color:#38475c}.user-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:11px 0;border-bottom:1px solid #edf1f6}
-    .quote-line{display:grid;grid-template-columns:110px minmax(230px,1.5fr) 90px 130px 130px 42px;gap:10px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fbfdff;margin-bottom:10px}.quote-total{text-align:right;font-size:23px;font-weight:700;margin-top:18px}.quote-total small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:5px}
-    .user-panel{margin-top:auto;padding:13px 12px;border-top:1px solid rgba(255,255,255,.16)}.user-panel b,.user-panel small{display:block;overflow:hidden;text-overflow:ellipsis}.user-panel small{opacity:.72;margin-top:3px}.user-panel button{width:100%;margin-top:11px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:8px;padding:8px}.version{padding:8px 12px 0;font-size:11px;opacity:.75}.right{text-align:right}.hidden{display:none!important}
-    .print-doc{display:none}
+    :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#f6f8fb}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+    aside{background:var(--navy);color:white;padding:22px 14px}
+    .brand{font-size:23px;font-weight:700;padding:0 12px 20px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.75;margin-top:4px}
+    nav button{display:block;width:100%;text-align:left;padding:12px 14px;margin:5px 0;border:0;border-radius:9px;background:transparent;color:white}
+    nav button.active,nav button:hover{background:rgba(255,255,255,.14)}
+    main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}
+    h1{margin:0 0 18px;font-size:25px} h2{font-size:18px;margin:0 0 14px}
+    .grid{display:grid;gap:16px}.grid-4{grid-template-columns:repeat(4,1fr)}.grid-2{grid-template-columns:repeat(2,1fr)}
+    .card{background:white;border:1px solid #e2e8f0;border-radius:13px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+    .metric b{font-size:26px;display:block;margin-top:8px}.muted{color:var(--muted);font-size:13px}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:6px} input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:white}
+    textarea{min-height:80px;resize:vertical}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.span-2{grid-column:span 2}.span-3{grid-column:1/-1}.page-title-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.page-title-row h1{margin:0}.customer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr);gap:16px}.search-box{margin-bottom:12px}.customer-item{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid #e2e8f0;background:white;padding:13px 10px}.customer-item:hover,.customer-item.selected{background:#eef6ff}.customer-item b{display:block}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.detail-value{border-bottom:1px solid #e2e8f0;padding:5px 0 10px;min-height:32px}.contact-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:end;margin-bottom:14px;padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#fbfdff}.active-customer{background:#ecfdf5;border-color:#86efac}.selector-toolbar{display:grid;grid-template-columns:1.25fr 1.4fr .8fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:8px;padding:10px 15px;background:var(--navy);color:white}.btn.secondary{background:#e2e8f0;color:#172033}.btn.green{background:var(--ok)}.btn.danger{background:#b91c1c}
+    table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e2e8f0;padding:10px 8px;text-align:left}th{background:#f8fafc}
+    .table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:12px}.badge.sent{background:#dbeafe}.badge.won{background:#dcfce7}.badge.lost{background:#fee2e2}
+    canvas{width:100%;height:310px;border:1px solid #e2e8f0;border-radius:10px;background:white}
+    .quote-head{display:flex;justify-content:space-between;gap:20px}.quote-total{font-size:22px;font-weight:700;text-align:right}
+    .notice{padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;margin-bottom:14px}
+    @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
+    @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
 
+    .quote-top-controls{display:grid;grid-template-columns:96px 170px minmax(140px,1fr) minmax(260px,1.45fr) 92px;gap:10px;align-items:end;flex:1;max-width:1000px}
+    .quote-top-controls>.btn{height:42px;padding:8px 12px;white-space:nowrap}
+    .quote-top-controls>div>label{white-space:nowrap}
+    .signature-inline{min-width:0}
+    .signature-inline input{padding:7px;min-height:42px}
+    .customer-head-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .customer-head-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .customer-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .prepared-signature-row{display:contents}
+    .date-rev-row{display:grid;grid-template-columns:170px 170px auto;gap:12px;align-items:end}
+    .short-field{max-width:35%}
+    .full-field{grid-column:1/-1}
+    .popup-input{cursor:pointer;background:#fff}
+    dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
+    dialog.ks-dialog::backdrop{background:rgba(15,23,42,.45)}
+    .dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+    @media(max-width:900px){.quote-top-controls{grid-template-columns:1fr 1fr}.prepared-signature-row{display:contents}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
+    @media print{
+      aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
+      .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
+      body{background:white}
+      body.export-single .quote-item{display:none!important}
+      body.export-single .quote-item.export-target{display:block!important}
+      body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
+    }
+  
+.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px max-content minmax(220px,1fr) 72px 130px;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;white-space:nowrap;overflow:visible;text-overflow:clip;margin-left:8ch}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-body-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px}.item-body-actions .btn{padding:7px 12px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px max-content minmax(140px,1fr) 62px 105px}.item-summary-model{margin-left:4ch}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px max-content minmax(110px,1fr) 54px 90px}.item-summary-model{margin-left:2ch;white-space:normal}}
+.item-status-indicator{position:relative;width:18px;height:32px;border:0;border-radius:5px;background:var(--status);cursor:help;padding:0;justify-self:center}.item-status-indicator::after{content:attr(data-tooltip);position:absolute;left:0;top:calc(100% + 8px);z-index:1000;display:none;width:250px;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#111827;color:#fff;text-align:left;white-space:pre-line;font-size:12px;line-height:1.45;font-weight:400;box-shadow:0 10px 24px rgba(15,23,42,.25);pointer-events:none}.item-status-indicator::before{content:"";position:absolute;display:none;left:5px;top:100%;border:6px solid transparent;border-bottom-color:#111827}.item-status-indicator:hover::after,.item-status-indicator:focus::after,.item-status-indicator:hover::before,.item-status-indicator:focus::before{display:block}.quote-customer-card>.customer-card-body{display:block}.quote-customer-card.collapsed>.customer-card-body{display:none}.customer-summary{display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.quote-customer-card.collapsed .customer-summary{display:block}.customer-card-head,.items-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.customer-card-head h2,.items-toolbar h2{margin:0}.items-toolbar-actions,.status-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status-summary{font-size:12px}.status-pill{display:inline-flex;align-items:center;gap:4px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.status-dot.green{background:#16a34a}.status-dot.yellow{background:#eab308}.status-dot.red{background:#dc2626}.btn.export-all{background:#facc15;color:#111827;border-color:#eab308;font-weight:800;min-width:42px}.btn.export-all:hover{background:#eab308}.quote-top-controls{align-items:end}.quote-top-controls>.btn{height:42px;align-self:end}
+
+#printQuotationDocument{display:none}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
+  body.print-complete .app{display:none!important}
+  body.print-complete #printQuotationDocument{display:block!important}
+  .print-page{box-sizing:border-box;position:relative;width:210mm;height:297mm;padding:8mm 8mm 18mm;background:#fff;color:#111;font-family:Calibri,Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.28;page-break-after:always;overflow:hidden}
+  .print-page:last-child{page-break-after:auto}
+  .print-cover-inner{position:relative;width:194mm;height:271mm;margin:0}
+  .print-company{position:absolute;top:8mm;right:0;width:70mm;line-height:1.38;font-size:10.2pt}
+  .print-company img{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
+  .print-company>strong{display:block;margin-bottom:1mm;font-size:10.2pt}
+  .print-company-email{text-decoration:underline;color:#0645ad}
+  .print-customer-address{position:absolute;top:39mm;left:13.8mm;width:100mm;line-height:1.42}
+  .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:15mm 5mm 1fr;min-height:5mm}
+  .print-date{margin-top:5.5mm;grid-template-columns:11mm 5mm 1fr}
+  .print-revision-date{margin-top:0!important}
+  .print-page h1{position:absolute;top:89mm;left:13.8mm;width:180.2mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
+  .print-meta{position:absolute;top:112mm;left:13.8mm;width:125mm;line-height:1.35}
+  .print-meta>div{grid-template-columns:28mm 5mm 1fr}
+  .print-dear{position:absolute;top:136mm;left:13.8mm;margin:0}
+  .print-intro{position:absolute;top:147mm;left:13.8mm;width:180.2mm;margin:0}
+  .print-terms{position:absolute;top:158mm;left:13.8mm;width:180.2mm;line-height:1.35}
+  .print-terms>div{grid-template-columns:24mm 5mm 1fr}
+  #pProject,#pDelivery{white-space:pre-line}
+  .print-closing{position:absolute;top:194mm;left:8.8mm;width:180.2mm;line-height:1.35}
+  .print-closing p{margin:0 0 6mm}
+  .signatory-block{display:inline-block;width:max-content;max-width:100%}
+  .signature-space{position:relative;height:17mm;width:100%;margin-top:2mm;overflow:hidden;padding-bottom:1mm;box-sizing:border-box}
+  .signature{position:absolute;left:38%;bottom:1mm;transform:translateX(-50%);font-family:"Rage Italic","Segoe Script","Brush Script MT",cursive;font-size:28pt;font-style:italic;font-weight:700;margin:0;line-height:1;text-align:center;white-space:nowrap}
+  .signature-image{display:none;position:absolute;left:38%;bottom:1mm;transform:translateX(-50%);max-width:80%;max-height:15mm;object-fit:contain;object-position:center bottom}
+  .signature-line{width:100%;border-top:1px solid #111;margin-top:0}
+  .signatory-company{white-space:nowrap}
+  .print-cover strong{font-weight:400}
+  .print-revision-date{display:none}
+  .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
+  .print-items-page{padding:8mm 8mm 18mm}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:0;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
+  .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
+  .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
+  .print-items-table{position:absolute;top:52mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
+  .print-items-table thead{position:relative}
+  .print-items-table thead::after{content:"";position:absolute;left:-1.67mm;right:-1.67mm;bottom:0;border-bottom:1.2px solid #111}
+  .print-items-table thead th{border-bottom:0;padding:0 1.5mm 1.8mm;text-align:left;background:#fff;font-weight:700}
+  .print-items-table thead th:nth-child(2){font-size:0}
+  .print-items-table tbody td{vertical-align:top;padding:5mm 1.5mm 0;border:0}
+  .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:13mm}
+  .print-items-table th:nth-child(2),.print-items-table td:nth-child(2){width:auto}
+  .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:22mm;text-align:center;white-space:nowrap}
+  .print-items-table th:nth-child(4),.print-items-table td:nth-child(4){width:27mm;text-align:right}
+  .print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:27mm;text-align:right}
+  .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}
+  .print-summary-spacer td{height:5mm;padding:0!important}
+  .print-summary-line td{height:0;padding:0!important;border:0!important}
+  .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
+  .print-summary-line.bottom-full .print-summary-rule{width:auto;margin-left:-1.67mm;margin-right:-1.67mm}
+  .print-summary-entry td{padding:0!important;height:5.2mm;vertical-align:middle!important}
+  .print-summary-entry .summary-row{display:flex;justify-content:space-between;width:78mm;margin-left:auto;padding:0 1.5mm}
+  .print-summary-entry.grand{font-weight:700}
+}
+
+    .hidden{display:none!important}
     .auth-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top left,#315c88 0,#17365d 34%,#0d2440 100%)}
     .auth-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
     .auth-brand{font-size:31px;font-weight:800;color:var(--navy);letter-spacing:.2px}.auth-brand small{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:6px}
     .auth-card h1{font-size:23px;margin:28px 0 6px}.auth-card>p{margin:0 0 21px;color:var(--muted);line-height:1.5}.auth-card .field{margin-bottom:14px}.auth-card .btn{width:100%;padding:12px}
     .auth-message{display:none;margin:0 0 15px;padding:11px 12px;border-radius:9px;font-size:13px;line-height:1.45}.auth-message.show{display:block}.auth-message.error{background:#fff0f0;border:1px solid #efb3b3;color:#8f1d1d}.auth-message.info{background:#eef6ff;border:1px solid #b7d3ef;color:#214e76}
     .auth-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:400;margin:2px 0 16px}.auth-check input{width:auto}.auth-foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
-    .loading-screen{min-height:100vh;display:grid;place-items:center;background:var(--bg)}.loading-card{text-align:center;color:var(--muted)}.spinner{width:42px;height:42px;border:4px solid #d8e3ef;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}
-    .security-strip{display:flex;align-items:center;gap:8px;margin-top:15px;font-size:12px;color:#47617b}.security-dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 0 4px rgba(22,121,75,.12)}
-    @media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.field-grid{grid-template-columns:repeat(2,1fr)}.span-4{grid-column:1/-1}.toolbar{grid-template-columns:1fr 1fr}.company-layout{grid-template-columns:1fr}.quote-line{grid-template-columns:95px 1fr 80px 120px 120px 42px}}
-    @media(max-width:760px){.app{grid-template-columns:1fr}aside{height:auto;position:static;padding:10px}.brand{padding:5px 10px 10px}nav{display:flex;overflow:auto}nav button{width:auto;white-space:nowrap}main{padding:14px}.grid-4,.grid-3,.grid-2,.field-grid,.toolbar{grid-template-columns:1fr}.span-2,.span-4{grid-column:auto}.quote-line{grid-template-columns:1fr 1fr}.quote-line .desc{grid-column:1/-1}.quote-line .remove{align-self:end}.version{display:none}}
-    @media print{aside,.no-print,main{display:none!important}.print-doc{display:block!important}.print-page{width:210mm;min-height:297mm;padding:16mm;font-family:Calibri,Arial,sans-serif;color:#111;background:#fff}.print-head{display:flex;justify-content:space-between;border-bottom:1px solid #111;padding-bottom:7mm}.print-head h1{margin:0}.print-meta{margin:10mm 0;display:grid;grid-template-columns:35mm 1fr;gap:2mm}.print-table{width:100%;border-collapse:collapse}.print-table th,.print-table td{border-bottom:1px solid #aaa;padding:3mm 2mm}.print-table th{position:static;background:#fff}.print-total{text-align:right;font-size:14pt;font-weight:700;margin-top:8mm}.print-foot{margin-top:18mm;font-size:9pt;color:#555}}
-  </style>
+    .loading-screen{min-height:100vh;display:grid;place-items:center;background:#f6f8fb}.loading-card{text-align:center;color:var(--muted)}.spinner{width:42px;height:42px;border:4px solid #d8e3ef;border-top-color:var(--navy);border-radius:50%;animation:ks-spin .8s linear infinite;margin:0 auto 14px}@keyframes ks-spin{to{transform:rotate(360deg)}}
+    .security-strip{display:flex;align-items:center;gap:8px;margin-top:15px;font-size:12px;color:#47617b}.security-dot{width:8px;height:8px;background:var(--ok);border-radius:50%;box-shadow:0 0 0 4px rgba(21,128,61,.12)}
+    aside{display:flex;flex-direction:column}.user-panel{margin-top:auto;padding:14px 12px 0;border-top:1px solid rgba(255,255,255,.18)}.user-panel b,.user-panel small{display:block;overflow:hidden;text-overflow:ellipsis}.user-panel small{opacity:.75;margin-top:4px}.user-panel button{width:100%;margin-top:11px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:8px;padding:8px}.suite-version{padding:9px 12px 0;font-size:11px;opacity:.72}
+    .pricing-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.pricing-layout{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(430px,1.15fr);gap:16px;margin-top:16px}.pricing-kv{display:grid;grid-template-columns:170px 1fr;gap:8px;border-bottom:1px solid #edf1f6;padding:8px 0}.pricing-kv b{color:#38475c}.pricing-toolbar{display:grid;grid-template-columns:minmax(220px,1.3fr) minmax(150px,.65fr) minmax(160px,.65fr) auto;gap:12px;align-items:end}.pricing-check{display:flex;gap:8px;align-items:center;height:42px;font-weight:400;margin:0}.pricing-check input{width:auto}.pricing-rule{line-height:1.55}.pricing-count{margin-top:10px}.pricing-table td,.pricing-table th{white-space:nowrap}.pricing-table .num{text-align:right}.pricing-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:700}.pricing-badge.ok{background:#dcfce7;color:#166534}.pricing-badge.warn{background:#fff7ed;color:#9a3412}
+    @media(max-width:1050px){.pricing-metrics{grid-template-columns:1fr 1fr}.pricing-layout{grid-template-columns:1fr}.pricing-toolbar{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.pricing-metrics,.pricing-toolbar{grid-template-columns:1fr}.pricing-kv{grid-template-columns:1fr}.user-panel{display:none}}
+    @media print{#loginView,#loadingView{display:none!important}}
+
+</style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>Secure company and pricing system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.01 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
-    <p>Only approved Keylargo users can enter Company, Pricing and Quotation.</p>
+    <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
     <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@keylargo.com.my"></div>
     <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Password"></div>
@@ -57,92 +157,300 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand">KeySuite<small>Company & Pricing Foundation</small></div>
+    <div class="brand">KeySuite<small>Full Suite V1.01</small></div>
     <nav>
-      <button class="active" data-page="dashboard">Dashboard</button>
-      <button data-page="company">Company</button>
-      <button data-page="pricing">Company & Pricing</button>
+      <button data-page="dashboard" class="active">Dashboard</button>
+      <button data-page="customers">Customers</button>
+      <button data-page="selector">CHC Selector</button>
+      <button data-page="companyPricing">Company &amp; Pricing</button>
       <button data-page="quotation">Quotation</button>
-      <button data-page="dataReview">Data Review</button>
+      <button data-page="history">Quote History</button>
     </nav>
-    <div class="user-panel"><b id="sessionUserName">Signed in</b><small id="sessionUserEmail"></small><button id="logoutButton" type="button">Sign out</button></div>
-    <div class="version">Version 1.00 · Secure Login · 29 Jul 2026</div>
+    <div class="user-panel">
+      <b id="sessionUserName">Signed in</b>
+      <small id="sessionUserEmail"></small>
+      <button id="logoutButton" type="button">Sign out</button>
+    </div>
+    <div class="suite-version">KeySuite V1.01 · Restored from V0.38</div>
   </aside>
 
   <main>
     <section id="dashboard" class="page active">
-      <div class="page-title"><div><h1>Dashboard</h1><p>KeySuite V1.00 secure company, category and CHC pricing integration.</p></div></div>
+      <h1>Dashboard</h1>
       <div class="grid grid-4">
-        <div class="card metric"><span>Companies</span><b id="mCompanies">0</b></div>
-        <div class="card metric"><span>Company Users</span><b id="mUsers">0</b></div>
-        <div class="card metric"><span>CHC Models</span><b id="mProducts">0</b></div>
-        <div class="card metric"><span>Priced Variants</span><b id="mPriced">0</b></div>
+        <div class="card metric"><span class="muted">Customers</span><b id="mCustomers">0</b></div>
+        <div class="card metric"><span class="muted">Quotations</span><b id="mQuotes">0</b></div>
+        <div class="card metric"><span class="muted">Quoted Value</span><b id="mValue">RM 0.00</b></div>
+        <div class="card metric"><span class="muted">Pending</span><b id="mPending">0</b></div>
       </div>
       <div class="grid grid-2" style="margin-top:16px">
-        <div class="card"><h2>V1.00 Data Link</h2><div id="linkStatus" class="notice ok">Loading linked data…</div><p class="muted">Relationship: Company → Category → Product series factor → Product price → Final quotation price.</p><div class="actions"><button class="btn green" data-go="pricing">Open Company & Pricing</button><button class="btn secondary" data-go="quotation">Open Quotation</button></div></div>
-        <div class="card"><h2>Pricing Formula</h2><div id="formulaText" class="formula"></div><p class="muted">V1.00 keeps every pricing component visible. The formula can be changed later without changing the source price list.</p></div>
+        <div class="card"><h2>Start</h2><p class="muted">Create a customer first, then select a CHC pump and prepare the quotation.</p><div class="actions"><button class="btn" data-go="customers">Add Customer</button><button class="btn green" data-go="selector">New CHC Quote</button></div></div>
+        <div class="card"><h2>Testing Notes</h2><textarea id="testingNotes" placeholder="Write anything that feels slow, confusing or missing during your one-week trial..."></textarea><div class="actions"><button class="btn secondary" id="saveNotes">Save Notes</button></div></div>
       </div>
-      <div class="card" style="margin-top:16px"><h2>Current Pricing Basis</h2><div id="pricingBasis" class="grid grid-4"></div></div>
+      <div class="card" style="margin-top:16px"><h2>Recent Quotations</h2><div class="table-wrap"><table><thead><tr><th>No.</th><th>Customer</th><th>Model</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentQuotes"></tbody></table></div></div>
     </section>
 
-    <section id="company" class="page">
-      <div class="page-title"><div><h1>Company</h1><p>Company profile and linked users from 002 - Company.</p></div></div>
-      <div class="company-layout">
-        <div class="card"><label>Company</label><select id="companySelect"></select><div id="companySummary" style="margin-top:14px"></div></div>
-        <div class="card"><h2>Linked Users</h2><div id="companyUsers"></div></div>
+    <section id="customers" class="page">
+      <div class="page-title-row">
+        <h1>Customers</h1>
+        <button class="btn" id="addNewCustomer">+ Add New</button>
       </div>
-    </section>
 
-    <section id="pricing" class="page">
-      <div class="page-title"><div><h1>Company & Pricing</h1><p>Uses the selected company category and CHC factor automatically.</p></div><div class="actions"><button class="btn secondary" id="exportPricingCsv">Export Visible CSV</button></div></div>
-      <div class="card">
-        <div class="toolbar">
-          <div><label>Company</label><select id="pricingCompany"></select></div>
-          <div><label>Category</label><select id="pricingCategory"></select></div>
-          <div><label>Search Model</label><input id="modelSearch" placeholder="Example: CHC 15-50"></div>
-          <label class="check"><input id="showUnpriced" type="checkbox"> Show unpriced models</label>
+      <div class="customer-layout">
+        <div class="card">
+          <div class="search-box">
+            <label>Search Customer</label>
+            <input id="customerSearch" placeholder="Search company name, TIN, BRN or phone...">
+          </div>
+          <div id="customerListPanel"></div>
         </div>
-        <div id="categoryRule" class="notice ok" style="margin-top:13px"></div>
+
+        <div>
+          <div id="customerEmpty" class="card">
+            <h2>Customer Details</h2>
+            <p class="muted">Search and click a customer to view the saved contact details, or press Add New.</p>
+          </div>
+
+          <div id="customerDetail" class="card" style="display:none">
+            <div class="page-title-row" style="margin-bottom:12px">
+              <h2 id="detailCompany">Customer Details</h2>
+              <div class="actions" style="margin:0">
+                <button class="btn green" id="selectDetailCustomer">Select Customer</button>
+                <button class="btn secondary" id="editDetailCustomer">Edit</button>
+              </div>
+            </div>
+            <div class="detail-grid">
+              <div class="span-2"><label>Address</label><div class="detail-value" id="detailAddress"></div></div>
+              <div><label>Company Phone</label><div class="detail-value" id="detailPhone"></div></div>
+              <div><label>Terms</label><div class="detail-value" id="detailTerms"></div></div>
+              <div><label>TIN Number</label><div class="detail-value" id="detailTin"></div></div>
+              <div><label>Business Registration No.</label><div class="detail-value" id="detailBrn"></div></div>
+              <div><label>SST Registration No.</label><div class="detail-value" id="detailSst"></div></div>
+              <div><label>MSIC Code</label><div class="detail-value" id="detailMsic"></div></div>
+              <div class="span-2"><label>Business Activity Description</label><div class="detail-value" id="detailBusinessActivity"></div></div>
+              <div class="span-2"><label>Notes</label><div class="detail-value" id="detailNotes"></div></div>
+            </div>
+            <h2 style="margin-top:20px">Contact Persons</h2>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Phone</th><th>Email</th></tr></thead>
+                <tbody id="detailContacts"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="customerEditorCard" class="card" style="display:none">
+            <h2 id="customerEditorTitle">Add New Customer</h2>
+            <input type="hidden" id="customerId">
+            <div class="form-grid">
+              <div class="span-2"><label>Company Name *</label><input id="company"></div>
+              <div><label>Company Phone</label><input id="companyPhone" placeholder="+60 (x) xxxx xxxx"></div>
+              <div class="span-3"><label>Address</label><textarea id="address" style="min-height:110px"></textarea></div>
+              <div class="span-2"><label>Terms</label><input id="customerTerms" placeholder="Example: 30 days"></div>
+              <div><label>TIN Number</label><input id="tinNumber"></div>
+              <div><label>Business Registration No.</label><input id="brnNumber"></div>
+              <div><label>SST Registration No.</label><input id="sstNumber"></div>
+              <div><label>MSIC Code</label><input id="msicCode"></div>
+              <div class="span-2"><label>Business Activity Description</label><input id="businessActivity"></div>
+              <div class="span-3"><label>Notes</label><textarea id="customerNotes"></textarea></div>
+            </div>
+
+            <div class="page-title-row" style="margin-top:20px;margin-bottom:10px">
+              <h2>Contact Persons</h2>
+              <button class="btn secondary" type="button" id="addContact">+ Add Contact</button>
+            </div>
+            <div id="contactEditor"></div>
+
+            <div class="actions">
+              <button class="btn" id="saveCustomer">Save Customer</button>
+              <button class="btn secondary" id="cancelCustomerEdit">Cancel</button>
+              <button class="btn danger" id="deleteCustomerBtn" style="display:none">Delete Customer</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card" style="margin-top:16px;padding:0"><div class="table-wrap" style="border:0;border-radius:13px"><table>
-        <thead><tr><th>Product ID</th><th>Model</th><th>Material</th><th class="num">USD</th><th class="num">Base MYR</th><th class="num">Landed Cost</th><th class="num">Quotation List</th><th class="num">Final Price</th><th></th></tr></thead>
-        <tbody id="pricingRows"></tbody>
-      </table></div></div>
-      <p id="pricingCount" class="muted"></p>
+    </section>
+
+    <section id="selector" class="page">
+      <h1>CHC Selector</h1>
+      <div id="activeCustomerBanner" class="notice">Select an active customer from the Customer page first.</div>
+      <div class="card selector-toolbar">
+        <div><label>Material</label><select id="pumpMaterial"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
+        <div><label>Mechanical Seal</label><select id="sealFaces"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
+        <div><label>Elastomer</label><select id="sealElastomer"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
+        <div><label>Connection</label><select id="connectionType"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
+        <div><label>Supply</label><label style="display:flex;align-items:center;gap:9px;height:42px;margin:0;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff"><input id="bareShaft" type="checkbox" style="width:auto"> Bare Shaft Pump</label></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <iframe id="selectorFrame" src="about:blank" data-src="selector/index.html" title="KeySelector CHC Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+      </div>
     </section>
 
     <section id="quotation" class="page">
-      <div class="page-title"><div><h1>Quotation</h1><p>Products added from Company & Pricing use the calculated V1.00 final price.</p></div><div class="actions no-print"><button class="btn secondary" id="newQuote">New</button><button class="btn green" id="printQuote">Print / PDF</button></div></div>
-      <div class="card">
-        <div class="field-grid">
+      <div class="quote-head">
+        <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
+        <div class="quote-top-controls">
+          <button class="btn green no-print" type="button" id="topPrintQuote">Quotation</button>
           <div><label>Quotation No.</label><input id="quoteNo"></div>
-          <div><label>Date</label><input id="quoteDate" type="date"></div>
-          <div><label>Prepared By</label><select id="preparedBy"></select></div>
-          <div><label>Company Pricing Category</label><select id="quoteCategory"></select></div>
-          <div class="span-2"><label>Customer</label><input id="quoteCustomer" placeholder="Customer company name"></div>
-          <div class="span-2"><label>Project</label><input id="quoteProject" placeholder="Project / reference"></div>
+          <div><label>Prepared By</label><input id="preparedBy" value="Ray"></div>
+          <div class="signature-inline"><label>Signature Attachment</label><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp"></div>
+          <button class="btn secondary no-print" type="button" id="removeSignatureImage">Remove</button>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px"><h2 style="margin:0">Items</h2><button class="btn secondary no-print" id="addBlankItem">+ Add Blank Item</button></div>
+      </div>
+      <div class="card quote-customer-card" id="quoteCustomerCard">
+        <div class="customer-card-head">
+          <div class="customer-head-left"><h2>Customer &amp; Quotation Details</h2></div>
+          <div class="customer-head-right no-print"><div class="customer-head-actions"><button class="btn" id="saveQuote">Save Quotation</button><button class="btn secondary" id="newQuote">New</button></div><button class="btn secondary" type="button" id="collapseCustomer" title="Collapse customer details">▲</button></div>
+        </div>
+        <div class="customer-summary" id="customerSummary">Customer details</div>
+        <div class="customer-card-body">
+        <div class="form-grid">
+          <div><label>Customer</label><select id="qCustomer"></select></div>
+          <div><label>Customer Name</label><select id="qContact"></select></div>
+          <div class="date-rev-row">
+            <div><label>Date</label><input id="qDate" type="date"></div>
+            <div><label>Revision Date</label><input id="qRevisionDate" type="date"></div>
+            <label style="display:flex;align-items:center;gap:8px;margin:0 0 10px;font-weight:700"><input id="showRevision" type="checkbox" style="width:auto"> Revision</label>
+          </div>
+          <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
+          <div class="short-field"><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
+          <div class="short-field"><label>Validity</label><input id="validity" value="14 days"></div>
+          <div class="full-field"><label>Project</label><input id="project" class="popup-input" readonly placeholder="Click to enter up to 2 lines"><input id="project2" type="hidden"></div>
+          <div class="full-field"><label>Delivery</label><input id="delivery" class="popup-input" readonly value="Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order."><input id="delivery2" type="hidden"></div>
+          <div><label>Customer Reference</label><input id="customerReference" placeholder="Optional"></div>
+          <div><label>Payment Terms</label><input id="payment" value="Cash before delivery"></div>
+          <div><label>Remarks</label><input id="remarks"></div>
+          <div class="span-3"><label>Price Basis</label><input id="priceBasis" value="Ex - K.L. only, nett in Ringgit Malaysia."></div>
+        </div>
+        </div>
+        <div class="items-toolbar" style="margin-top:20px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2>Items <span id="itemCount" class="muted"></span></h2><div class="status-summary"><span class="status-pill" title="Complete"><i class="status-dot green"></i><b id="completeCount">0</b></span><span class="status-pill" title="Warning"><i class="status-dot yellow"></i><b id="warningCount">0</b></span><span class="status-pill" title="Error"><i class="status-dot red"></i><b id="errorCount">0</b></span></div></div>
+          <div class="items-toolbar-actions no-print"><button class="btn secondary" type="button" id="expandAllItems">Expand All</button><button class="btn secondary" type="button" id="collapseAllItems">Collapse All</button><button class="btn secondary" type="button" id="addQuoteItem">+ Add Item</button></div>
+        </div>
         <div id="quoteItems"></div>
-        <div class="quote-total">Total: <span id="quoteTotal">RM 0.00</span><small>Final price × quantity</small></div>
-        <div class="actions no-print" style="margin-top:16px"><button class="btn" id="saveQuote">Save Draft</button><button class="btn secondary" data-go="pricing">Add Product from Pricing</button></div>
+        <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
+        <div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
       </div>
     </section>
 
-    <section id="dataReview" class="page">
-      <div class="page-title"><div><h1>Data Review</h1><p>Authenticated database access, source linkage and price availability.</p></div></div>
-      <div class="grid grid-2">
-        <div class="card"><h2>Security Status</h2><div class="kv"><b>Login</b><span>Supabase email and password</span></div><div class="kv"><b>User Access</b><span>Approved-email allowlist</span></div><div class="kv"><b>Database</b><span>Row Level Security enabled</span></div><div class="kv"><b>Public Files</b><span>No company or pricing master data included</span></div></div>
-        <div class="card"><h2>Validation</h2><div id="validationList"></div></div>
+
+    <section id="companyPricing" class="page">
+      <div class="page-title-row">
+        <div><h1>Company &amp; Pricing</h1><div class="muted">Protected Supabase data linked to CHC selection and quotation.</div></div>
+        <button class="btn secondary" id="refreshSecurePricing" type="button">Refresh Data</button>
       </div>
-      <div class="card" style="margin-top:16px"><h2>Price Coverage by Material</h2><div id="coverageTable"></div></div>
+      <div id="pricingAccessNotice" class="notice">Secure pricing is loading.</div>
+      <div class="pricing-metrics" style="margin-top:16px">
+        <div class="card metric"><span class="muted">Companies</span><b id="pricingCompanyCount">0</b></div>
+        <div class="card metric"><span class="muted">Categories</span><b id="pricingCategoryCount">0</b></div>
+        <div class="card metric"><span class="muted">CHC Models</span><b id="pricingModelCount">0</b></div>
+        <div class="card metric"><span class="muted">Priced Variants</span><b id="pricingVariantCount">0</b></div>
+      </div>
+      <div class="pricing-layout">
+        <div class="card">
+          <h2>Company</h2>
+          <div><label>Company</label><select id="pricingCompanySelect"></select></div>
+          <div id="pricingCompanySummary" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h2>Category Pricing Rule</h2>
+          <div><label>Category</label><select id="pricingCategorySelect"></select></div>
+          <div id="pricingCategorySummary" class="pricing-rule" style="margin-top:12px"></div>
+          <div class="formula" id="pricingFormula" style="margin-top:14px"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="pricing-toolbar">
+          <div><label>Search Model</label><input id="pricingModelSearch" placeholder="Example: CHC 15-50"></div>
+          <div><label>Material</label><select id="pricingMaterialFilter"><option value="ALL">All</option><option value="CHC">CHC</option><option value="CHCS">CHCS</option><option value="CHCN">CHCN</option></select></div>
+          <label class="pricing-check"><input id="pricingShowUnpriced" type="checkbox"> Show models without price</label>
+          <button class="btn secondary" id="pricingExportCsv" type="button">Export CSV</button>
+        </div>
+        <div class="table-wrap" style="margin-top:14px;max-height:610px">
+          <table class="pricing-table">
+            <thead><tr><th>Model</th><th>Material</th><th class="num">USD</th><th class="num">Base MYR</th><th class="num">Factor</th><th class="num">Net Cost</th><th class="num">Quotation List</th><th class="num">Final Price</th><th></th></tr></thead>
+            <tbody id="pricingRows"></tbody>
+          </table>
+        </div>
+        <div id="pricingCount" class="muted pricing-count"></div>
+      </div>
+    </section>
+
+    <section id="history" class="page">
+      <h1>Quotation History</h1>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Customer</th><th>Items</th><th>Total</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
     </section>
   </main>
 </div>
 
-<div id="printDoc" class="print-doc"><div class="print-page"><div class="print-head"><div><h1>Quotation</h1><div>KeySuite V1.00</div></div><div class="right"><div id="pQuoteNo"></div><div id="pDate"></div></div></div><div class="print-meta"><b>Customer</b><span id="pCustomer"></span><b>Project</b><span id="pProject"></span><b>Prepared By</b><span id="pPrepared"></span></div><table class="print-table"><thead><tr><th>Pos.</th><th>Description</th><th class="num">Qty</th><th class="num">Unit Price</th><th class="num">Total</th></tr></thead><tbody id="pItems"></tbody></table><div class="print-total">Total: <span id="pTotal"></span></div><div class="print-foot">Prices are generated using the linked Company → Category → CHC pricing rules in KeySuite V1.00.</div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<dialog id="twoLineDialog" class="ks-dialog">
+  <form method="dialog" class="dialog-body">
+    <h2 id="twoLineTitle">Edit</h2>
+    <div><label>Line 1</label><input id="twoLine1"></div>
+    <div style="margin-top:12px"><label>Line 2</label><input id="twoLine2"></div>
+    <div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveTwoLine" value="default">Save</button></div>
+  </form>
+</dialog>
+
+<div id="printQuotationDocument" aria-hidden="true">
+  <section class="print-page print-cover">
+    <div class="print-header">
+      <div class="print-customer-address">
+        <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
+        <div><span>Attn</span><b>:</b><strong id="pAttn"></strong></div>
+        <div><span>Tel</span><b>:</b><strong id="pTel"></strong></div>
+        <div><span>Mobile</span><b>:</b><strong id="pMobile"></strong></div>
+        <div><span>Email</span><b>:</b><strong id="pEmail"></strong></div>
+      </div>
+      <div class="print-company">
+        <img src="keylargo-logo.png" alt="Keylargo">
+        <strong>Keylargo Industrial Sdn. Bhd. (297660-M)</strong>
+        <div>No. 73, Jalan Industri 2/5</div>
+        <div>Rawang Integrated Industrial Park, 48000</div>
+        <div>Rawang, Selangor Darul Ehsan, Malaysia</div>
+        <div>Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
+        <div>Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
+        <div>email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
+        <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
+        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span><b>:</b><strong id="pRevisionDate"></strong></div>
+      </div>
+    </div>
+    <h1 id="pDocTitle">Quotation</h1>
+    <div class="print-meta">
+      <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
+      <div><span>Your reference</span><b>:</b><strong id="pCustomerRef"></strong></div>
+      <div><span>Our reference</span><b>:</b><strong id="pQuoteNo"></strong></div>
+      <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
+    </div>
+    <p class="print-dear" id="pDear">Dear Sir / Madam,</p>
+    <p class="print-intro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
+    <div class="print-terms">
+      <div><span>Delivery</span><b>:</b><strong id="pDelivery"></strong></div>
+      <div><span>Term</span><b>:</b><strong id="pPayment"></strong></div>
+      <div><span>Validity</span><b>:</b><strong id="pValidity"></strong></div>
+      <div><span>Price Basis</span><b>:</b><strong id="pPriceBasis"></strong></div>
+    </div>
+    <div class="print-closing">
+      <p>Please contact us if you have any remaining question(s) or when this quotation is not in line with your requirements.</p>
+      <p>We would appreciate to receive feedback and to keep us informed about the status of this quotation.</p>
+      <p>Your sincerely,</p>
+      <div class="signatory-block">
+        <div class="signature-space">
+          <img id="pSignatureImage" class="signature-image" alt="Signature">
+          <div id="pClosingSignature" class="signature"></div>
+        </div>
+        <div class="signature-line"></div>
+        <div class="signatory-company">Keylargo Industrial Sdn. Bhd.</div>
+      </div>
+    </div>
+    <footer><div>E &amp; O.E.</div><div>Page 1 of 2</div></footer>
+  </section>
+  <div id="pItemPages"></div>
+</div>
 <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
+<script src="pricing.js"></script>
+<script src="auth.js"></script>
 </body>
 </html>

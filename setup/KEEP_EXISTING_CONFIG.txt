@@ -1,0 +1,1 @@
+Keep the working config.js already in the GitHub repository root. Do not replace it when uploading V1.01.

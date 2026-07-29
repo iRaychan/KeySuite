@@ -102,6 +102,26 @@ header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
 #keysuiteBridge{position:static;z-index:9999;width:auto;margin-left:auto;flex:0 0 auto;white-space:nowrap;background:#17365d;color:#fff;border:0;border-radius:10px;padding:12px 17px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 #keysuiteBridge:disabled{opacity:.45;cursor:not-allowed}
 </style>
+
+<style id="keysuite-auth-guard">html{visibility:hidden}</style>
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async()=>{
+  const deny=()=>location.replace('../index.html');
+  try{
+    const cfg=window.KEYSUITE_CONFIG||{};
+    if(!window.supabase?.createClient||!/^https:\/\/.+\.supabase\.co\/?$/i.test(String(cfg.supabaseUrl||''))||String(cfg.supabaseAnonKey||'').length<20)return deny();
+    const c=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+    const {data,error}=await c.auth.getSession();
+    const s=data?.session;if(error||!s)return deny();
+    const {data:rows,error:accessError}=await c.from('ks_user_access').select('active').eq('email',String(s.user.email||'').toLowerCase()).limit(1);
+    if(accessError||!rows?.[0]?.active)return deny();
+    document.documentElement.style.visibility='visible';
+  }catch(error){deny()}
+})();
+</script>
+
 </head>
 <body>
 <header>
