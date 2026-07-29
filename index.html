@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.07</title>
+  <title>KeySuite V1.08</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -41,7 +41,7 @@
     .customer-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .prepared-signature-row{display:contents}
     .date-rev-row{display:grid;grid-template-columns:170px 170px auto;gap:12px;align-items:end}
-    .short-field{max-width:35%}
+    .short-field{max-width:none}
     .full-field{grid-column:1/-1}
     .popup-input{cursor:pointer;background:#fff}
     dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
@@ -97,7 +97,7 @@
   .print-revision-date{display:none}
   .print-page footer{position:absolute;left:0;right:0;bottom:6.5mm;text-align:center;line-height:1.4;font-size:10pt}
   .print-items-page{padding:8mm 8mm 18mm}
-  .print-items-logo-wrap{position:absolute;top:8mm;right:2mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
+  .print-items-logo-wrap{position:absolute;top:8mm;right:2.5mm;width:70mm;height:29.5mm;display:flex;align-items:flex-start;justify-content:center;z-index:5}
   .print-items-logo{width:66mm;height:27mm;object-fit:contain;object-position:center;display:block;margin:0 0 2.5mm -1mm}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
@@ -148,7 +148,7 @@
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.07 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.08 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +163,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.07</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.08</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -177,7 +177,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.07 · V1.02 output base retained</div>
+    <div class="suite-version">KeySuite V1.08 · V1.02 output base retained</div>
   </aside>
 
   <main>

@@ -1,17 +1,15 @@
-# KeySuite V1.07
+# KeySuite V1.08
 
 Upload this package over the existing GitHub repository and keep the current working root `config.js`. This package intentionally excludes the real Supabase URL and publishable key.
 
 No new Supabase SQL is required when the V1.04 migration has already been completed.
 
-## V1.07 changes
+## V1.08 changes
 
-- Moves the Page 2 quotation logo **1 mm right** from the V1.06 position.
-- Places **Add to Quotation** in the embedded CHC Selector header, on the same row as the B.G.Reich logo and at the right side.
-- Removes **Use for Quotation** from the Customers panel.
-- Customers are selected directly in the Quotation page.
-- A CHC pump can be added before selecting the quotation customer.
-- Keeps the V1.02 quotation output base, with only the specifically requested Page 2 logo adjustment.
+- Moves the Page 2 quotation logo **0.5 mm left** from the V1.07 position.
+- Extends the **Document Type** input to the same width as the **Customer** input.
+- Extends the **Validity** input to the same width as the **Customer** input.
+- Keeps all other quotation output positioning and functions unchanged.
 
 ## Upload
 
