@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.08</title>
+  <title>KeySuite V1.10</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -57,7 +57,7 @@
       body.export-single #quoteGrandTotal,body.export-single #quoteTermsBlock{display:none!important}
     }
   
-.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px max-content minmax(220px,1fr) 72px 130px;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;white-space:nowrap;overflow:visible;text-overflow:clip;margin-left:8ch}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-body-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px}.item-body-actions .btn{padding:7px 12px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr .55fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px max-content minmax(140px,1fr) 62px 105px}.item-summary-model{margin-left:4ch}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px max-content minmax(110px,1fr) 54px 90px}.item-summary-model{margin-left:2ch;white-space:normal}}
+.contact-row>div{grid-column:1/-1}.contact-row>div:first-child{grid-column:1/2}.contact-row .remove-contact{grid-column:2/3;justify-self:start}.quote-item{--status:#dc2626;border:1px solid #dbe3ec;border-left:5px solid var(--status);border-radius:10px;padding:0;margin-top:10px;background:#fbfdff;overflow:hidden}.quote-item.status-complete{--status:#16a34a}.quote-item.status-warning{--status:#eab308}.quote-item.status-error{--status:#dc2626}.quote-item.is-dragging{opacity:.5}.quote-item.drag-over{outline:2px solid #2563eb;outline-offset:2px}.quote-page-indicator{margin:18px 0 6px;border-top:2px dashed #dc2626;position:relative;text-align:center}.quote-page-indicator span{position:relative;top:-10px;background:#fff;padding:0 10px;color:#b91c1c;font-weight:700;font-size:12px}.quote-item-head{display:grid;grid-template-columns:28px 30px 48px max-content minmax(220px,1fr) 72px 130px;align-items:center;gap:8px;min-height:44px;padding:5px 10px;background:#fff}.drag-handle{cursor:grab;font-size:20px;text-align:center;user-select:none;color:#64748b}.drag-handle:active{cursor:grabbing}.collapse-item{border:0;background:transparent;font-size:16px;cursor:pointer;padding:4px}.item-summary-model{font-weight:700;white-space:nowrap;overflow:visible;text-overflow:clip;margin-left:8ch}.item-summary-qty,.item-summary-total{white-space:nowrap;text-align:right;font-size:13px}.item-body-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:10px}.item-body-actions .btn{padding:7px 12px}.quote-item-body{padding:12px 14px 14px;border-top:1px solid #e2e8f0}.quote-item.collapsed .quote-item-body{display:none}.quote-item-grid{display:grid;grid-template-columns:1.2fr .45fr .65fr;gap:12px}.quote-item textarea{min-height:105px}@media(max-width:900px){.quote-item-grid{grid-template-columns:1fr 1fr}.quote-item-head{grid-template-columns:24px 28px 42px max-content minmax(140px,1fr) 62px 105px}.item-summary-model{margin-left:4ch}}@media(max-width:560px){.quote-item-grid{grid-template-columns:1fr}.quote-item-head{grid-template-columns:22px 26px 38px max-content minmax(110px,1fr) 54px 90px}.item-summary-model{margin-left:2ch;white-space:normal}}
 .item-status-indicator{position:relative;width:18px;height:32px;border:0;border-radius:5px;background:var(--status);cursor:help;padding:0;justify-self:center}.item-status-indicator::after{content:attr(data-tooltip);position:absolute;left:0;top:calc(100% + 8px);z-index:1000;display:none;width:250px;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#111827;color:#fff;text-align:left;white-space:pre-line;font-size:12px;line-height:1.45;font-weight:400;box-shadow:0 10px 24px rgba(15,23,42,.25);pointer-events:none}.item-status-indicator::before{content:"";position:absolute;display:none;left:5px;top:100%;border:6px solid transparent;border-bottom-color:#111827}.item-status-indicator:hover::after,.item-status-indicator:focus::after,.item-status-indicator:hover::before,.item-status-indicator:focus::before{display:block}.quote-customer-card>.customer-card-body{display:block}.quote-customer-card.collapsed>.customer-card-body{display:none}.customer-summary{display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.quote-customer-card.collapsed .customer-summary{display:block}.customer-card-head,.items-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.customer-card-head h2,.items-toolbar h2{margin:0}.items-toolbar-actions,.status-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status-summary{font-size:12px}.status-pill{display:inline-flex;align-items:center;gap:4px}.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block}.status-dot.green{background:#16a34a}.status-dot.yellow{background:#eab308}.status-dot.red{background:#dc2626}.btn.export-all{background:#facc15;color:#111827;border-color:#eab308;font-weight:800;min-width:42px}.btn.export-all:hover{background:#eab308}.quote-top-controls{align-items:end}.quote-top-controls>.btn{height:42px;align-self:end}
 
 #printQuotationDocument{display:none}
@@ -148,7 +148,7 @@
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.08 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.10 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +163,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.08</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.10</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -177,7 +177,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.08 · V1.02 output base retained</div>
+    <div class="suite-version">KeySuite V1.10 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -230,6 +230,7 @@
               <div><label>Assigned User</label><div class="detail-value" id="detailOwner"></div></div>
               <div class="span-2"><label>Address</label><div class="detail-value" id="detailAddress"></div></div>
               <div><label>Company Phone</label><div class="detail-value" id="detailPhone"></div></div>
+              <div><label>Distance</label><div class="detail-value" id="detailDistance"></div></div>
               <div><label>Terms</label><div class="detail-value" id="detailTerms"></div></div>
               <div><label>TIN Number</label><div class="detail-value" id="detailTin"></div></div>
               <div><label>Business Registration No.</label><div class="detail-value" id="detailBrn"></div></div>
@@ -254,6 +255,7 @@
               <div class="span-2"><label>Company Name *</label><input id="company"></div>
               <div><label>Classification</label><select id="customerClassification"><option>End User</option><option>Contractor</option><option>Dealer</option><option>Distributor</option><option>Consultant</option><option>Government</option><option selected>Other</option></select></div>
               <div id="customerOwnerWrap"><label>Assigned User</label><select id="customerOwner"></select></div>
+              <div id="customerDistanceWrap"><label>Distance (km) · Admin only</label><input id="customerDistance" type="number" min="0" step="0.1" value="0"></div>
               <div><label>Company Phone</label><input id="companyPhone" placeholder="+60 (x) xxxx xxxx"></div>
               <div class="span-3"><label>Address</label><textarea id="address" style="min-height:110px"></textarea></div>
               <div class="span-2"><label>Terms</label><input id="customerTerms" placeholder="Example: 30 days"></div>
@@ -366,6 +368,14 @@
           <h2>Category Pricing Rule</h2>
           <div><label>Category</label><select id="pricingCategorySelect"></select></div>
           <div id="pricingCategorySummary" class="pricing-rule" style="margin-top:12px"></div>
+          <div class="pricing-admin-setting" style="margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">
+            <label>Fuel Price (RM/L) · Admin only</label>
+            <div style="display:grid;grid-template-columns:minmax(130px,1fr) auto;gap:10px;align-items:end">
+              <input id="pricingFuelPrice" type="number" min="0" step="0.01" placeholder="Example: 3.03">
+              <button class="btn" id="saveFuelPrice" type="button">Save Fuel Price</button>
+            </div>
+            <div id="pricingFuelMessage" class="muted" style="margin-top:7px">Base fuel price: RM 2.00/L</div>
+          </div>
           <div class="formula" id="pricingFormula" style="margin-top:14px"></div>
         </div>
       </div>
@@ -378,7 +388,7 @@
         </div>
         <div class="table-wrap" style="margin-top:14px;max-height:610px">
           <table class="pricing-table">
-            <thead><tr><th>Model</th><th>Material</th><th class="num">USD</th><th class="num">Base MYR</th><th class="num">Factor</th><th class="num">Net Cost</th><th class="num">Quotation List</th><th class="num">Final Price</th><th></th></tr></thead>
+            <thead><tr><th>Model</th><th>Material</th><th class="num">USD</th><th class="num">Base MYR</th><th class="num">Margin</th><th class="num">Margin Price</th><th class="num">+ Transport</th><th class="num">Before Fuel</th><th class="num">Fuel Charge</th><th class="num">Final Price</th><th></th></tr></thead>
             <tbody id="pricingRows"></tbody>
           </table>
         </div>
