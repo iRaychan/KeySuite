@@ -864,6 +864,8 @@ run();
        motor_kw:b.motor_kw, motor_hp:b.motor_hp, shaft_kw:b.shaft,
        efficiency:b.eff, npshr:b.npsh, speed_rpm:b.speed,
        frequency_hz:selectionState.hz, flow_m3h:selectionState.q, head_m:selectionState.h,
+       raw_flow:selectionState.rawFlow, raw_head:selectionState.rawHead,
+       flow_unit:selectionState.flowUnit, head_unit:selectionState.headUnit,
        motor_efficiency_class:selectionState.motorEffClass,
        motor_phase:selectionState.motorPhase, motor_voltage:selectionState.motorVoltage,
        export_state:{...selectionState,models:[b],selectedIndex:0}

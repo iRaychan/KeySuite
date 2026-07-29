@@ -1,35 +1,21 @@
-# KeySuite V1.10
+# KeySuite V1.11
 
-Upload this package over the existing GitHub repository and keep the current working root `config.js`. This package intentionally excludes the real Supabase URL and publishable key.
+Secure KeySuite release based on V1.10 with the V1.08 PDF output frozen.
 
-## Before uploading
+## V1.11 changes
 
-Run `setup/V110_SUPABASE_MIGRATION.sql` in Supabase SQL Editor. It adds:
+- Model / Item shows pump model and selected duty point.
+- Non-metric duty inputs show both entered and converted units.
+- Duty point is no longer repeated in Description.
+- Customer and assigned Pricing Category are required before pricing, saving or PDF generation.
+- Key Company & Pricing lists customer/company records and shows the address saved in Customers.
+- Owner/Admin assigns the Pricing Category for each customer/company.
 
-- Customer Distance (km)
-- Owner/Admin-only distance protection
-- CHC Margin field
-- Persistent Fuel Price
-- Owner/Admin-only Fuel Price update access
+## Installation
 
-## V1.10 pricing
+1. Keep the existing working `config.js` in the GitHub repository.
+2. Run `setup/V111_SUPABASE_MIGRATION.sql` in Supabase SQL Editor.
+3. Upload all V1.11 public files to the repository root, replacing matching files.
+4. Refresh the deployed page using `Ctrl + Shift + R`.
 
-1. USD Price × Currency Rate
-2. ÷ (1 − Margin)
-3. + Transport
-4. ÷ (1 − Commission)
-5. ÷ (1 − Set Discount)
-6. ÷ (1 − Final Discount)
-7. + Customer Distance × max(Fuel Price − RM2.00, 0)
-8. Round upward to the next RM10
-
-## Upload
-
-1. Extract the ZIP.
-2. Run the V1.10 Supabase migration.
-3. Upload all files and folders to the GitHub repository root.
-4. Replace matching files.
-5. Keep the existing `config.js`.
-6. After GitHub Pages deploys, refresh with `Ctrl + Shift + R`.
-
-The V1.08 PDF output layout remains frozen on all pages.
+The migration assigns the existing single pricing category to older customers. New customers remain without a pricing category until Owner/Admin assigns one in Key.

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.10</title>
+  <title>KeySuite V1.11</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -148,7 +148,7 @@
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.10 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.11 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -163,7 +163,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.10</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.11</small></div><button id="keyButton" type="button" class="key-button" title="Open Company &amp; Pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -177,7 +177,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.10 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.11 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -348,7 +348,7 @@
 
     <section id="companyPricing" class="page">
       <div class="page-title-row">
-        <div><h1>Company &amp; Pricing</h1><div class="muted">Protected Supabase data linked to CHC selection and quotation.</div></div>
+        <div><h1>Company &amp; Pricing</h1><div class="muted">Customer/company address, pricing category and protected CHC selling prices.</div></div>
         <button class="btn secondary" id="refreshSecurePricing" type="button">Refresh Data</button>
       </div>
       <div id="pricingAccessNotice" class="notice">Secure pricing is loading.</div>
@@ -360,13 +360,13 @@
       </div>
       <div class="pricing-layout">
         <div class="card">
-          <h2>Company</h2>
-          <div><label>Company</label><select id="pricingCompanySelect"></select></div>
+          <h2>Customer / Company</h2>
+          <div><label>Customer / Company</label><select id="pricingCompanySelect"></select></div>
           <div id="pricingCompanySummary" style="margin-top:12px"></div>
         </div>
         <div class="card">
           <h2>Category Pricing Rule</h2>
-          <div><label>Category</label><select id="pricingCategorySelect"></select></div>
+          <div><label>Category</label><div style="display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:10px;align-items:end"><select id="pricingCategorySelect"></select><button class="btn" id="savePricingCategory" type="button">Save Category</button></div><div id="pricingCategoryMessage" class="muted" style="margin-top:7px">Owner/Admin assigns the pricing category to each customer.</div></div>
           <div id="pricingCategorySummary" class="pricing-rule" style="margin-top:12px"></div>
           <div class="pricing-admin-setting" style="margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">
             <label>Fuel Price (RM/L) · Admin only</label>

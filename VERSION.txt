@@ -1,3 +1,3 @@
-KeySuite V1.10
+KeySuite V1.11
 Release date: 2026-07-29
-Base: V1.09 quotation drag handle + V1.08 frozen PDF output
+Base: V1.10 distance/fuel pricing + V1.08 frozen PDF output
