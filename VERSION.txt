@@ -1,3 +1,3 @@
-KeySuite V1.08
+KeySuite V1.09
 Release date: 2026-07-29
-Base: V1.07 with Page 2 logo fine adjustment and quotation input-width correction
+Base: V1.08 with quotation item drag-handle restriction
