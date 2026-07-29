@@ -99,8 +99,10 @@ header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
 <link rel="icon" type="image/png" href="favicon.png">
 
 <style id="keysuite-bridge-style">
-#keysuiteBridge{position:static;z-index:9999;width:auto;margin-left:auto;flex:0 0 auto;white-space:nowrap;background:#17365d;color:#fff;border:0;border-radius:10px;padding:12px 17px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-#keysuiteBridge:disabled{opacity:.45;cursor:not-allowed}
+#keysuiteBridge{position:static;z-index:9999;width:auto;margin-left:auto;flex:0 0 auto;white-space:nowrap;background:linear-gradient(180deg,#d9b642,#b88900);color:#fff;border:1px solid #9f7600;border-radius:10px;padding:11px 17px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.22);display:inline-flex;align-items:center;gap:9px;transition:transform .15s ease,filter .15s ease}
+#keysuiteBridge:hover{filter:brightness(1.07);transform:translateY(-1px)}
+#keysuiteBridge svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#keysuiteBridge:disabled{opacity:.45;cursor:not-allowed;transform:none}
 </style>
 
 <style id="keysuite-auth-guard">html{visibility:hidden}</style>
@@ -131,7 +133,7 @@ header p{margin:5px 0 0;font-size:12px;color:#687b89;letter-spacing:.2px}
       <h1>KeySelector <span>- CHC Series</span></h1>
       <p>Database Version: 260717 · App v3.2.3m</p>
     </div>
-    <button id="keysuiteBridge" type="button">ADD TO QUOTATION</button>
+    <button id="keysuiteBridge" type="button" title="Open the KeySuite pricing and quotation workspace"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>GOLDEN KEY</span></button>
   </div>
 </header>
 <main>
@@ -890,7 +892,7 @@ run();
      window.parent.postMessage({type:'KEYSUITE_ADD_SELECTION',payload:data},'*');
    }else{
      localStorage.setItem('keysuite_pending_selection',JSON.stringify(data));
-     alert('Selection saved for KeySuite quotation.');
+     alert('Selection saved. Open KeySuite to continue pricing and quotation work.');
    }
  });
 })();

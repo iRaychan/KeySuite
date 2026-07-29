@@ -1,19 +1,34 @@
-# KeySuite V1.02 — Full Suite + Secure Login
+# KeySuite V1.03 — Secure Customers, User Settings and Golden Key
 
-This release restores the complete KeySuite V0.38 application and merges the working Supabase login and protected Company & Pricing data.
+This release keeps the V1.02 quotation output frozen except for the approved change that moves **Prepared By** to the **Authorized Signature** area.
 
-## Upload
+## Before uploading the website
 
-Upload all files and folders in this package to the GitHub Pages repository root. Allow existing files to be replaced.
+Run this file once in **Supabase → SQL Editor**:
 
-**Do not delete or replace the working root `config.js` already connected to Supabase.** This update package intentionally does not include a root `config.js`.
+`setup/V103_SUPABASE_MIGRATION.sql`
 
-The Supabase SQL installed for V1.00 remains valid; do not run it again for this update.
+It creates the secure customer table and access rules:
 
-## Included functions
+- Owner/Admin: all customers under the company
+- User: only customers assigned to or created by that user
+- No anonymous customer access
 
-Dashboard, Customers, CHC Selector, Company & Pricing, Quotation, Quote History, quotation PDF layout, pump data PDF export, secure login and sign out.
+## Upload to GitHub Pages
 
+Upload all files and folders in this package to the repository root and allow matching files to be replaced.
 
-## V1.02
-Tablet layout review build with restricted Key pricing access and PDF alignment corrections.
+**Keep the working root `config.js` already present in GitHub.** This package intentionally does not include your real `config.js` or publishable key.
+
+## V1.03 functions
+
+- Secure login and sign out
+- User Settings above Sign Out
+- Display Name, Designation and Contact Number saved in Supabase Auth
+- Password change with current-password verification
+- New quotation Prepared By uses the logged-in user's saved Display Name
+- Prepared By appears only in the Authorized Signature area
+- Secure customer add/edit, classification and assigned user
+- Role-based customer visibility
+- Golden Key button: gold background, white key icon, opens the priced quotation workflow
+- Dashboard, CHC selector, Company & Pricing, quotation, history and frozen print output
