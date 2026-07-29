@@ -10,7 +10,7 @@
   const el=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const role=()=>String(access?.role||'user').toLowerCase();
-  const canManage=()=>['owner','admin'].includes(role());
+  const canManage=()=>isOwner();
   const isOwner=()=>role()==='owner';
   const client=()=>window.KeySuiteAuth?.getClient?.()||null;
   const title=value=>String(value||'').replace(/\b\w/g,ch=>ch.toUpperCase());
@@ -24,12 +24,12 @@
     const notice=el('keyDashboardNotice'),roleButton=el('openRoleModule');
     if(!notice||!roleButton)return;
     if(canManage()){
-      notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'approved user')}</b> · <b>${esc(title(role()))}</b>. Role management is available.`;
+      notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'approved user')}</b> · <b>${esc(title(role()))}</b>. Owner access confirmed. Role management is available.`;
       notice.classList.add('active-customer');
       roleButton.disabled=false;roleButton.style.opacity='1';roleButton.title='Open Role';
     }else{
-      notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'approved user')}</b> · <b>${esc(title(role()))}</b>. Role management is restricted to Owner/Admin.`;
-      roleButton.disabled=true;roleButton.style.opacity='.55';roleButton.title='Owner/Admin only';
+      notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'approved user')}</b> · <b>${esc(title(role()))}</b>. Role management is restricted to Owner only.`;
+      roleButton.disabled=true;roleButton.style.opacity='.55';roleButton.title='Owner only';
     }
   }
 
@@ -43,7 +43,7 @@
     if(!users.length){rows.innerHTML='<tr><td colspan="6" class="muted">No approved users found.</td></tr>';return}
     rows.innerHTML=users.map(user=>{
       const userRole=String(user.role||'user').toLowerCase();
-      const canEdit=isOwner()||(role()==='admin'&&userRole!=='owner');
+      const canEdit=isOwner();
       return `<tr>
         <td><b>${esc(user.display_name||'-')}</b></td>
         <td>${esc(user.email)}</td>
@@ -72,7 +72,7 @@
     renderKeyDashboard();
     const notice=el('roleAccessNotice');
     if(!canManage()){
-      if(notice)notice.textContent='Role management is restricted to Owner/Admin.';
+      if(notice)notice.textContent='Role management is restricted to Owner only.';
       if(typeof showPage==='function')showPage('keyDashboard');
       return;
     }
@@ -125,6 +125,8 @@
   }
 
   function closeDialog(){el('roleUserDialog')?.close()}
+  function openPermissions(){if(!isOwner())return;el('rolePermissionsDialog')?.showModal()}
+  function closePermissions(){el('rolePermissionsDialog')?.close()}
 
   async function save(event){
     event.preventDefault();if(!canManage())return;
@@ -148,7 +150,10 @@
 
   function bind(){
     if(bound)return;bound=true;
-    el('openRoleModule')?.addEventListener('click',()=>{if(!canManage()){alert('Only Owner/Admin can open Role.');return}if(typeof showPage==='function')showPage('roleManagement')});
+    el('openRoleModule')?.addEventListener('click',()=>{if(!canManage()){alert('Only the Owner can open Role.');return}if(typeof showPage==='function')showPage('roleManagement')});
+    el('viewRolePermissions')?.addEventListener('click',openPermissions);
+    el('closeRolePermissions')?.addEventListener('click',closePermissions);
+    el('closeRolePermissionsBottom')?.addEventListener('click',closePermissions);
     el('addRoleUser')?.addEventListener('click',openAdd);
     el('reloadRoles')?.addEventListener('click',load);
     el('roleUserForm')?.addEventListener('submit',save);

@@ -1,8 +1,8 @@
-# KeySuite V1.12
+# KeySuite V1.13
 
 Secure KeySuite release based on V1.11 with the V1.08 PDF output fully frozen.
 
-## V1.12 changes
+## V1.13 changes
 
 - Gold **Key** opens a new Key Dashboard.
 - The first Key module is **Role**.
@@ -20,7 +20,7 @@ Secure KeySuite release based on V1.11 with the V1.08 PDF output fully frozen.
 
 1. Keep the existing working `config.js` in the GitHub repository.
 2. Run `setup/V112_SUPABASE_MIGRATION.sql` in Supabase SQL Editor.
-3. Upload all V1.12 public files to the repository root, replacing matching files.
+3. Upload all V1.13 public files to the repository root, replacing matching files.
 4. Refresh the deployed page using `Ctrl + Shift + R`.
 
 ## Adding a new user

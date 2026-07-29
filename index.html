@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.12</title>
+  <title>KeySuite V1.13</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -145,12 +145,13 @@
     #customerAccessNotice{margin-bottom:16px}.owner-readonly{opacity:.78;background:#f8fafc}
 
     .key-dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:16px}.key-module-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:170px;width:100%;padding:20px;border:1px solid #dbe3ec;border-radius:14px;background:#fff;text-align:left;box-shadow:0 1px 3px rgba(15,23,42,.06)}.key-module-card:hover{border-color:#93a8c2;box-shadow:0 8px 24px rgba(15,23,42,.08);transform:translateY(-1px)}.key-module-card .module-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#eef3f8;color:var(--navy);font-size:22px}.key-module-card h2{margin:0}.key-module-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.key-module-card .module-order{margin-top:auto;font-size:11px;font-weight:700;color:#8a6b00}.role-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.role-table td,.role-table th{vertical-align:middle}.role-select{min-width:120px}.status-toggle{display:inline-flex;align-items:center;gap:8px;font-weight:400;margin:0}.status-toggle input{width:auto}.role-note{font-size:12px;color:var(--muted);line-height:1.45}.role-audit-time{white-space:nowrap}.role-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:700;text-transform:capitalize}.role-badge.owner{background:#fef3c7;color:#92400e}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.role-badge.user{background:#dcfce7;color:#166534}.role-badge.dealer{background:#ede9fe;color:#6d28d9}.role-badge.viewer{background:#f1f5f9;color:#475569}.auth-state{font-size:12px;font-weight:700}.auth-state.ok{color:#15803d}.auth-state.missing{color:#b45309}.key-back-row{display:flex;justify-content:flex-end;margin-bottom:12px}@media(max-width:900px){.key-dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.key-dashboard-grid{grid-template-columns:1fr}}
+    .role-title-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.permissions-dialog{width:min(1100px,calc(100vw - 28px))!important}.permission-table th,.permission-table td{vertical-align:middle;text-align:center;white-space:nowrap}.permission-table th:first-child,.permission-table td:first-child{text-align:left;white-space:normal;min-width:210px}.permission-yes{color:#166534;font-weight:700}.permission-limited{color:#92400e;font-weight:700}.permission-no{color:#991b1b;font-weight:700}.permission-key-row{background:#fffbeb}.permission-key-row td{border-top:2px solid #f3d678;border-bottom:2px solid #f3d678}.permissions-note{margin-top:12px;padding:11px 13px;border-radius:9px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12px;line-height:1.45}@media(max-width:720px){.permission-table{font-size:12px}.role-title-actions{width:100%}.role-title-actions .btn{flex:1}}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.12 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.13 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -165,7 +166,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.12</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.13</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -179,7 +180,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.12 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.13 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -373,7 +374,10 @@
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
       <div class="page-title-row">
         <div><h1>Role</h1><div class="muted">Assign access by user. Internal IDs remain hidden.</div></div>
-        <button class="btn" id="addRoleUser" type="button">+ Add User Access</button>
+        <div class="role-title-actions">
+          <button class="btn secondary" id="viewRolePermissions" type="button">Role Permissions</button>
+          <button class="btn" id="addRoleUser" type="button">+ Add User Access</button>
+        </div>
       </div>
       <div id="roleAccessNotice" class="notice">Loading role access…</div>
       <div class="card">
@@ -473,6 +477,34 @@
     <p class="role-note" style="margin-top:14px">This approves access in KeySuite. To let a new person sign in, create the same email under Supabase → Authentication → Users.</p>
     <div class="dialog-actions"><button class="btn secondary" id="cancelRoleDialog" type="button">Cancel</button><button class="btn" id="saveRoleUser" type="submit">Save User</button></div>
   </form>
+</dialog>
+
+<dialog id="rolePermissionsDialog" class="ks-dialog permissions-dialog">
+  <div class="dialog-body">
+    <div class="page-title-row" style="margin-bottom:14px">
+      <div><h2 style="margin:0">Role Permissions</h2><div class="muted">What each KeySuite role can and cannot access.</div></div>
+      <button id="closeRolePermissions" class="dialog-close" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="table-wrap">
+      <table class="permission-table">
+        <thead><tr><th>Function</th><th>Owner</th><th>Admin</th><th>User</th><th>Dealer</th><th>Viewer</th></tr></thead>
+        <tbody>
+          <tr class="permission-key-row"><td><b>Key button / Key Dashboard</b></td><td class="permission-yes">Visible</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td></tr>
+          <tr><td>Assign roles and account status</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
+          <tr><td>Company &amp; Pricing</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
+          <tr><td>Change Fuel Price</td><td class="permission-yes">Yes</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
+          <tr><td>View customers</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Assigned</td><td class="permission-limited">Own</td><td class="permission-limited">Assigned, view only</td></tr>
+          <tr><td>Add / edit customers</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Assigned only</td><td class="permission-limited">Own only</td><td class="permission-no">No</td></tr>
+          <tr><td>Customer assignment and distance</td><td class="permission-yes">Full</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
+          <tr><td>Create quotations</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-no">No</td></tr>
+          <tr><td>View quotations</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Own / assigned</td><td class="permission-limited">Own</td><td class="permission-limited">Assigned, view only</td></tr>
+          <tr><td>Own profile and password</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="permissions-note"><b>Owner-only protection:</b> the gold Key button is removed from every non-Owner account. Direct navigation to Key pages is also blocked.</div>
+    <div class="dialog-actions"><button class="btn" id="closeRolePermissionsBottom" type="button">Close</button></div>
+  </div>
 </dialog>
 
 <dialog id="settingsDialog" class="ks-dialog settings-dialog">

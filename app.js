@@ -19,7 +19,15 @@ document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
+const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','companyPricing']);
+function syncOwnerKeyVisibility(){
+ const button=$('keyButton'),owner=currentRole()==='owner';
+ if(button){button.hidden=!owner;button.style.display=owner?'inline-flex':'none'}
+ const active=document.querySelector('.page.active');
+ if(!owner&&active&&OWNER_ONLY_PAGES.has(active.id))showPage('dashboard');
+}
 function showPage(id){
+ if(OWNER_ONLY_PAGES.has(id)&&currentRole()!=='owner')id='dashboard';
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
  const page=$(id);if(!page)return;page.classList.add('active');
@@ -669,11 +677,11 @@ window.KeySuiteApp={
  getCustomers(){return customers().slice()},
  async updateCustomerPricingCategory(id,categoryId){const saved=await updateCustomerPricingCategory(id,categoryId);refreshAll();return saved},
  hasQuotationPricingContext(){const customer=selectedQuotationCustomer();return !!(customer&&customer.pricingCategoryId)},
- applyProfile(profile){window.KEYSUITE_PROFILE=profile||window.KEYSUITE_PROFILE;if(!editingQuoteId){$('preparedBy').value=currentProfile().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||''}configureCustomerOwner($('customerOwner')?.value||currentEmail());refreshAll()},
- showBusinessWorkspace(){showPage('keyDashboard')}
+ applyProfile(profile){window.KEYSUITE_PROFILE=profile||window.KEYSUITE_PROFILE;syncOwnerKeyVisibility();if(!editingQuoteId){$('preparedBy').value=currentProfile().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||''}configureCustomerOwner($('customerOwner')?.value||currentEmail());refreshAll()},
+ showBusinessWorkspace(){showPage(currentRole()==='owner'?'keyDashboard':'dashboard')}
 };
 
-newQuote();refreshAll();
+syncOwnerKeyVisibility();newQuote();refreshAll();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 
 

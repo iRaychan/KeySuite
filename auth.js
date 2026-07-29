@@ -15,7 +15,7 @@
   function setView(name){el('loginView').classList.toggle('hidden',name!=='login');el('loadingView').classList.toggle('hidden',name!=='loading');el('appView').classList.toggle('hidden',name!=='app')}
   function message(text,type='error'){const box=el('loginMessage');box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
   function busy(on){el('loginButton').disabled=on;el('loginButton').textContent=on?'Signing in…':'Sign in';el('loginEmail').disabled=on;el('loginPassword').disabled=on}
-  function showLogin(text='',type='error'){setView('login');busy(false);message(text,type);el('loginPassword').value='';lockSelector()}
+  function showLogin(text='',type='error'){const key=el('keyButton');if(key){key.hidden=true;key.style.display='none'}setView('login');busy(false);message(text,type);el('loginPassword').value='';lockSelector()}
   function showLoading(text){el('loadingText').textContent=text||'Checking secure access…';setView('loading')}
   function friendly(error){const text=String(error?.message||'').toLowerCase();if(text.includes('invalid login credentials'))return 'The email or password is incorrect.';if(text.includes('email not confirmed'))return 'This email account has not been confirmed yet.';if(text.includes('rate limit'))return 'Too many attempts. Please try again later.';return error?.message||'Unable to sign in.'}
   function unlockSelector(){const frame=el('selectorFrame');if(frame&&frame.src==='about:blank')frame.src=frame.dataset.src||'selector/index.html'}
