@@ -19,7 +19,7 @@ document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
-const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','categoryManagement','companyPricing']);
+const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','categoryManagement','priceListDashboard','chcPriceList','companyPricing']);
 function syncOwnerKeyVisibility(){
  const button=$('keyButton'),owner=currentRole()==='owner';
  if(button){button.hidden=!owner;button.style.display=owner?'inline-flex':'none'}
@@ -33,6 +33,7 @@ function showPage(id){
  const page=$(id);if(!page)return;page.classList.add('active');
  window.KeySuiteRoles?.pageShown?.(id);
  window.KeySuiteCategories?.pageShown?.(id);
+ window.KeySuitePriceList?.pageShown?.(id);
  refreshAll();
 }
 

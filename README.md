@@ -1,8 +1,8 @@
-# KeySuite V1.15
+# KeySuite V1.16
 
 Base: KeySuite V1.14 with the V1.08 PDF output fully frozen.
 
-## V1.15 changes
+## V1.16 changes
 
 - Fixed the New Category action so the editor visibly resets and opens for input.
 - Reduced the Category list to Category and Edit only.
@@ -20,3 +20,7 @@ Base: KeySuite V1.14 with the V1.08 PDF output fully frozen.
 3. Upload all public files and folders to the GitHub repository root, replacing matching files.
 4. Keep the existing working `config.js`; this package does not include it.
 5. Refresh KeySuite with `Ctrl + Shift + R` after GitHub Pages completes deployment.
+
+
+## V1.16 setup
+Run `setup/V116_SUPABASE_MIGRATION.sql` in Supabase before testing Price List or saving user signatory settings. Keep the existing working `config.js`.

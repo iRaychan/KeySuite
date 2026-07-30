@@ -32,11 +32,15 @@
     ]);
     const failed=[companies,users,categories,products,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
     const setting=settings.data?.[0]||{};
-    return {version:'1.15',release_date:'2026-07-30',currency:setting.currency||'MYR',source_currency:setting.source_currency||'USD',currency_multiplier:Number(setting.currency_multiplier||0),fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
+    const sourceCurrency=String(setting.chc_source_currency||setting.source_currency||'USD').toUpperCase()==='RMB'?'RMB':'USD';
+    const usdMultiplier=Number(setting.usd_multiplier??(sourceCurrency==='USD'?setting.currency_multiplier:5.8)??5.8);
+    const rmbMultiplier=Number(setting.rmb_multiplier??(sourceCurrency==='RMB'?setting.currency_multiplier:.65)??.65);
+    const activeMultiplier=sourceCurrency==='RMB'?rmbMultiplier:usdMultiplier;
+    return {version:'1.16',release_date:'2026-07-30',currency:setting.currency||'MYR',source_currency:sourceCurrency,chc_source_currency:sourceCurrency,currency_multiplier:activeMultiplier,usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
-      categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),source_currency:String(c.source_currency||setting.source_currency||'USD').toUpperCase(),currency_multiplier:Number(c.currency_multiplier??setting.currency_multiplier??1),margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)})),
-      products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,prices_usd:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},source_row:p.source_row}))};
+      categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)})),
+      products:(products.data||[]).map(p=>{const prices={CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)};return {id:p.id,category:p.product_category,model:p.model,prices,prices_usd:prices,source_row:p.source_row}})};
   }
   async function loadUserProfile(email){
     try{
@@ -77,7 +81,7 @@
       const data=await loadData();if(!data.companies.length)throw new Error('No company data was returned. Check the database and RLS policies.');
       session=s;access=userAccess;const savedProfile=await loadUserProfile(s?.user?.email||'');profile=buildProfile(s,access,data,savedProfile);
       window.KEYSUITE_SECURE_DATA=data;window.KEYSUITE_ACCESS=access;applyProfile(profile);
-      window.KeySuitePricing?.init(data,access);window.KeySuiteCategories?.init(data,access);window.KeySuiteRoles?.init(access);unlockSelector();
+      window.KeySuitePricing?.init(data,access);window.KeySuiteCategories?.init(data,access);window.KeySuitePriceList?.init(data,access);window.KeySuiteRoles?.init(access);unlockSelector();
       showLoading('Loading your customer access…');
       try{await window.KeySuiteCustomerStore?.load?.()}catch(error){console.warn('Customer load warning',error)}
       refreshAll();setView('app');
@@ -123,6 +127,15 @@
     });
   }
   function closeSettings(){el('settingsDialog')?.close()}
+  async function ensureActiveSession(){
+    const current=await client.auth.getSession();
+    if(current.data?.session){session=current.data.session;return session}
+    if(session?.access_token&&session?.refresh_token){
+      const restored=await client.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+      if(restored.data?.session){session=restored.data.session;return session}
+    }
+    return null;
+  }
   async function saveSettings(event){
     event.preventDefault();if(!client||!session)return;
     const displayName=el('settingsDisplayName').value.trim(),designation=el('settingsDesignation').value.trim();
@@ -139,20 +152,30 @@
     }
     const button=el('saveSettings');button.disabled=true;button.textContent='Saving…';settingsMessage('');
     try{
+      const activeSession=await ensureActiveSession();
+      if(!activeSession)throw new Error('Your login session has expired. Please sign out and sign in again.');
       if(changingPassword){
         const check=await client.auth.signInWithPassword({email:profile.email,password:currentPassword});
         if(check.error)throw new Error('The current password is incorrect.');
+        if(check.data?.session)session=check.data.session;
       }
-      const metadata={...(session.user.user_metadata||{}),display_name:displayName,designation,phone,signatory_name:signatoryName};
-      const profileResult=await client.auth.updateUser({data:metadata});if(profileResult.error)throw profileResult.error;
-      const savedProfile={email:profile.email,company_id:profile.company_id,display_name:displayName,designation,phone,signatory_name:signatoryName,signature_image:signatureImage,updated_at:new Date().toISOString()};
-      const dbResult=await client.from('ks_user_profiles').upsert(savedProfile,{onConflict:'email'}).select('*').single();
-      if(dbResult.error)throw new Error(`${dbResult.error.message}. Run the V1.04 Supabase migration SQL if the profile table is missing.`);
+      const {data:profileRows,error:profileError}=await client.rpc('keysuite_save_my_profile',{
+        p_display_name:displayName,
+        p_designation:designation,
+        p_phone:phone,
+        p_signatory_name:signatoryName,
+        p_signature_image:signatureImage
+      });
+      if(profileError)throw new Error(`${profileError.message}. Run the V1.16 Supabase migration first.`);
+      const metadata={...(session?.user?.user_metadata||{}),display_name:displayName,designation,phone,signatory_name:signatoryName};
+      const profileResult=await client.auth.updateUser({data:metadata});
+      if(profileResult.error&&!String(profileResult.error.message||'').toLowerCase().includes('auth session missing'))throw profileResult.error;
       if(changingPassword){const passwordResult=await client.auth.updateUser({password:newPassword});if(passwordResult.error)throw passwordResult.error}
       const sessionResult=await client.auth.getSession();if(sessionResult.data?.session)session=sessionResult.data.session;
-      pendingSignatureData=signatureImage;removeSignatureRequested=false;applyProfile({...profile,display_name:displayName,designation,phone,signatory_name:signatoryName,signature_image:signatureImage});
+      const saved=Array.isArray(profileRows)?profileRows[0]:profileRows||{};
+      pendingSignatureData=signatureImage;removeSignatureRequested=false;applyProfile({...profile,...saved,display_name:displayName,designation,phone,signatory_name:signatoryName,signature_image:signatureImage});
       el('settingsPhone').value=phone;el('settingsCurrentPassword').value='';el('settingsNewPassword').value='';el('settingsConfirmPassword').value='';
-      settingsMessage(changingPassword?'Profile and password updated.':'Profile updated.','info');
+      settingsMessage(changingPassword?'Profile and password updated.':'Profile and signatory updated.','info');
       setTimeout(closeSettings,700);
     }catch(error){console.error(error);settingsMessage(error.message||'Settings could not be saved.')}finally{button.disabled=false;button.textContent='Save Settings'}
   }

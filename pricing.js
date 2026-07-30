@@ -7,6 +7,9 @@
     categories:[],
     products:[],
     currency_multiplier:0,
+    chc_source_currency:'USD',
+    usd_multiplier:5.8,
+    rmb_multiplier:.65,
     fuel_price:2,
     fuel_base_price:2
   };
@@ -49,9 +52,13 @@
     const fuelBasePrice=Math.max(0,Number(options.fuelBasePrice??secureData.fuel_base_price??2));
     return {customer,distanceKm,fuelPrice,fuelBasePrice};
   }
+  function priceListCurrency(){return String(secureData.chc_source_currency||secureData.source_currency||'USD').toUpperCase()==='RMB'?'RMB':'USD'}
+  function priceListMultiplier(currency=priceListCurrency()){
+    return Number(currency==='RMB'?(secureData.rmb_multiplier??secureData.currency_multiplier??1):(secureData.usd_multiplier??secureData.currency_multiplier??1));
+  }
   function formula(cat=category()){
-    const source=String(cat?.source_currency||secureData.source_currency||'USD').toUpperCase();
-    return `Final Price = ROUND UP TO RM10 { [ [ [ (${source} Price × Multiply) ÷ (1 − Margin) + Transport ] ÷ (1 − Commission) ] ÷ (1 − Set Discount) ] ÷ (1 − Final Discount) + Distance × max(Fuel Price − RM2.00, 0) }`;
+    const source=priceListCurrency();
+    return `Final Price = ROUND UP TO RM10 { [ [ [ (${source} Price × ${source} Multiply) ÷ (1 − Margin) + Transport ] ÷ (1 − Commission) ] ÷ (1 − Set Discount) ] ÷ (1 − Final Discount) + Distance × max(Fuel Price − RM2.00, 0) }`;
   }
 
   function hasPricingContext(customer=quotationCustomer()){
@@ -62,8 +69,8 @@
     if(!cat)return null;
     if(sourceUsd===null || sourceUsd==='' || !Number.isFinite(Number(sourceUsd)))return null;
     const usd=Number(sourceUsd);
-    const sourceCurrency=String(cat?.source_currency||secureData.source_currency||'USD').toUpperCase();
-    const multiplier=Number(cat?.currency_multiplier??secureData.currency_multiplier??1);
+    const sourceCurrency=priceListCurrency();
+    const multiplier=priceListMultiplier(sourceCurrency);
     const margin=Number(cat?.margins?.[material]??cat?.margins?.CHC??cat?.factors?.[material]??cat?.factors?.CHC??0);
     const transport=Number(cat?.transport||0);
     const commission=Number(cat?.commission||0);
@@ -93,7 +100,7 @@
     const result=[];
     for(const product of secureData.products||[]){
       for(const material of ['CHC','CHCS','CHCN']){
-        const source=product.prices_usd?.[material];
+        const source=(product.prices||product.prices_usd)?.[material];
         const priced=source!==null && source!=='' && Number.isFinite(Number(source));
         if(priced||includeUnpriced)result.push({product,material,sourceUsd:priced?Number(source):null});
       }
@@ -169,8 +176,8 @@
       ['Commission',percent(cat.commission||0)],
       ['Set Discount',percent(cat.set_discount||0)],
       ['Final Discount',percent(cat.final_discount||0)],
-      ['Source Currency',cat.source_currency||secureData.source_currency||'USD'],
-      ['Multiply to MYR',n(cat.currency_multiplier??secureData.currency_multiplier??0,4)],
+      ['Price List Currency',priceListCurrency()],
+      ['Multiply to MYR',n(priceListMultiplier(),4)],
       ['Current Fuel Price',`${cash(ctx.fuelPrice)}/L`],
       ['Base Fuel Price',`${cash(ctx.fuelBasePrice)}/L`],
       ['Customer Distance',`${n(ctx.distanceKm,1)} km`],
@@ -189,7 +196,7 @@
     visibleRows=variants(showUnpriced).filter(row=>(material==='ALL'||row.material===material)&&(!search||row.product.model.toLowerCase().includes(search)||row.material.toLowerCase().includes(search)));
     const c=company(),cat=category();
     const sourceHeader=byId('pricingSourceCurrencyHeader');
-    if(sourceHeader)sourceHeader.textContent=String(cat?.source_currency||secureData.source_currency||'Source').toUpperCase();
+    if(sourceHeader)sourceHeader.textContent=priceListCurrency();
     byId('pricingRows').innerHTML=visibleRows.map((row,index)=>{
       const calc=c&&cat?calculate(row.sourceUsd,row.material,cat,{customer:c}):null;
       const shownModel=row.material==='CHC'?row.product.model:row.product.model.replace(/^CHC\b/,row.material);
@@ -222,7 +229,7 @@
     else if(/^CHCN\b/i.test(text)){material='CHCN';base=text.replace(/^CHCN\b/i,'CHC')}
     const product=(secureData.products||[]).find(p=>String(p.model).toLowerCase()===base.toLowerCase());
     if(!product)return null;
-    const calc=calculate(product.prices_usd?.[material],material,cat,{...options,customer});
+    const calc=calculate((product.prices||product.prices_usd)?.[material],material,cat,{...options,customer});
     return calc?{product,material,calc,category:cat,customer}:null;
   }
 
@@ -266,7 +273,7 @@
       let source={};try{source=JSON.parse(row.dataset.pricingSource||'{}')}catch(_){}
       const product=(secureData.products||[]).find(p=>p.id===source.product_id);
       const material=source.material||'CHC';
-      const usd=product?.prices_usd?.[material]??source.source_usd;
+      const usd=(product?.prices||product?.prices_usd)?.[material]??source.source_price??source.source_usd;
       const calc=calculate(usd,material,cat,{customer});
       if(!calc)continue;
       row.querySelector('.item-price').value=calc.finalPrice.toFixed(2);
@@ -364,7 +371,7 @@
       rows.push([c.company,cat.name,row.product.id,row.product.model,row.material,calc.sourceCurrency,calc.usd,calc.multiplier,calc.baseMyr,calc.margin,calc.marginPrice,calc.withTransport,calc.afterCommission,calc.afterSetDiscount,calc.beforeFuel,calc.distanceKm,calc.fuelPrice,calc.fuelCharge,calc.unroundedPrice,calc.finalPrice]);
     }
     const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
-    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.15_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.16_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
   }
 
   function selectCustomer(id,rerender=true){
@@ -397,6 +404,11 @@
     byId('saveFuelPrice')?.addEventListener('click',saveFuelPrice);
   }
 
+  function syncPriceListSettings(next={}){
+    secureData={...secureData,...next};
+    renderSummary();renderTable();refreshQuotePrices();
+  }
+
   function init(data,userAccess){
     secureData={...secureData,...(data||{})};access=userAccess||access;
     const list=customersList(),quoteId=byId('qCustomer')?.value||'';
@@ -407,7 +419,7 @@
 
   window.KeySuitePricing={
     init,calculate,findPrice,applyPriceToQuoteRow,refreshQuotePrices,
-    selectCustomer,refreshCustomers,hasPricingContext,
+    selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,
     render:()=>{renderSummary();renderTable()}
   };
 })();
