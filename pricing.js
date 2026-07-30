@@ -21,7 +21,7 @@
   const n=(value,d=2)=>Number(value||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d});
   const cash=value=>`RM ${n(value,2)}`;
   const percent=value=>`${n(Number(value||0)*100,1)}%`;
-  const isAdmin=()=>['owner','admin'].includes(String(access?.role||'').toLowerCase());
+  const isOwner=()=>String(access?.role||'').toLowerCase()==='owner';
   const roundUp10=value=>Math.ceil((Number(value||0)-1e-9)/10)*10;
 
   function customersList(){
@@ -114,22 +114,22 @@
     if(cats){
       cats.innerHTML='<option value="">No pricing category assigned</option>'+(secureData.categories||[]).map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join('');
       cats.value=categoryId;
-      cats.disabled=!isAdmin()||!company();
+      cats.disabled=!isOwner()||!company();
     }
     const save=byId('savePricingCategory');
-    if(save){save.style.display=isAdmin()?'inline-block':'none';save.disabled=!company();}
+    if(save){save.style.display=isOwner()?'inline-block':'none';save.disabled=!company();}
   }
 
   function renderFuelSetting(){
     const input=byId('pricingFuelPrice'),button=byId('saveFuelPrice'),message=byId('pricingFuelMessage');
     if(!input||!button||!message)return;
     input.value=Number(secureData.fuel_price??2).toFixed(2);
-    input.disabled=!isAdmin();
-    button.disabled=!isAdmin();
-    button.style.display=isAdmin()?'inline-block':'none';
-    message.textContent=isAdmin()
+    input.disabled=!isOwner();
+    button.disabled=!isOwner();
+    button.style.display=isOwner()?'inline-block':'none';
+    message.textContent=isOwner()
       ?`Saved globally until changed. Base fuel price: ${cash(secureData.fuel_base_price??2)}/L`
-      :`Current fuel price: ${cash(secureData.fuel_price??2)}/L · Only Owner/Admin can change it.`;
+      :`Current fuel price: ${cash(secureData.fuel_price??2)}/L · Only the Owner can change it.`;
   }
 
   function renderSummary(){
@@ -172,7 +172,7 @@
       ['Base Fuel Price',`${cash(ctx.fuelBasePrice)}/L`],
       ['Customer Distance',`${n(ctx.distanceKm,1)} km`],
       ['Fuel Charge per Item',cash(ctx.distanceKm*Math.max(ctx.fuelPrice-ctx.fuelBasePrice,0))]
-    ].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer. Owner/Admin must assign one before prices can be generated.</p>';
+    ].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer. The Owner must assign one before prices can be generated.</p>';
     byId('pricingFormula').textContent=formula();
     renderFuelSetting();
     fillSelects();
@@ -282,7 +282,7 @@
     const customer=quotationCustomer();
     if(!customer){if(typeof showPage==='function')showPage('quotation');byId('qCustomer')?.focus();alert('Select a customer in Quotation first. KeySuite cannot generate a selling price without the customer pricing category.');return}
     const cat=categoryForCustomer(customer);
-    if(!cat){alert(`No Pricing Category is assigned to ${customer.company}. Owner/Admin must assign one in Key before adding priced items.`);return}
+    if(!cat){alert(`No Pricing Category is assigned to ${customer.company}. The Owner must assign one in Key before adding priced items.`);return}
     selectCustomer(customer.id,false);
     const row=visibleRows[index];
     if(!row)return;
@@ -302,7 +302,7 @@
   }
 
   async function savePricingCategory(){
-    if(!isAdmin()){alert('Only an Owner or Admin can assign a Pricing Category.');return}
+    if(!isOwner()){alert('Only the Owner can assign a Pricing Category.');return}
     const c=company(),message=byId('pricingCategoryMessage'),button=byId('savePricingCategory');
     if(!c){alert('Select a customer/company first.');return}
     const next=byId('pricingCategorySelect')?.value||'';
@@ -319,13 +319,13 @@
   }
 
   async function saveFuelPrice(){
-    if(!isAdmin()){alert('Only an Owner or Admin can change Fuel Price.');return}
+    if(!isOwner()){alert('Only the Owner can change Fuel Price.');return}
     const input=byId('pricingFuelPrice'),button=byId('saveFuelPrice'),message=byId('pricingFuelMessage');
     const value=Number(input?.value);
     if(!Number.isFinite(value)||value<0){alert('Enter a valid Fuel Price.');return}
     const client=window.KeySuiteAuth?.getClient?.();
     if(!client){alert('Supabase is not connected.');return}
-    button.disabled=true;button.textContent='Saving…';
+    const originalButton=button.innerHTML;button.disabled=true;button.textContent='…';button.setAttribute('aria-label','Saving Fuel Price');
     try{
       const {data,error}=await client.from('ks_app_settings').update({fuel_price:value}).eq('id','default').select('fuel_price,fuel_base_price').single();
       if(error)throw error;
@@ -335,13 +335,13 @@
         window.KEYSUITE_SECURE_DATA.fuel_price=secureData.fuel_price;
         window.KEYSUITE_SECURE_DATA.fuel_base_price=secureData.fuel_base_price;
       }
-      message.textContent=`Fuel Price saved at ${cash(secureData.fuel_price)}/L. It remains active until an Owner/Admin changes it.`;
+      message.textContent=`Saved: ${cash(secureData.fuel_price)}/L · Base ${cash(secureData.fuel_base_price)}/L`;
       renderSummary();renderTable();refreshQuotePrices();
     }catch(error){
       console.error(error);
-      alert(`Fuel Price could not be saved: ${error.message||error}. Run the V1.10 Supabase migration first.`);
+      alert(`Fuel Price could not be saved: ${error.message||error}. Run the V1.14 Supabase migration first.`);
     }finally{
-      button.disabled=false;button.textContent='Save Fuel Price';
+      button.disabled=!isOwner();button.innerHTML=originalButton;button.setAttribute('aria-label','Save Fuel Price');
     }
   }
 
@@ -353,7 +353,7 @@
       rows.push([c.company,cat.name,row.product.id,row.product.model,row.material,calc.usd,calc.baseMyr,calc.margin,calc.marginPrice,calc.withTransport,calc.afterCommission,calc.afterSetDiscount,calc.beforeFuel,calc.distanceKm,calc.fuelPrice,calc.fuelCharge,calc.unroundedPrice,calc.finalPrice]);
     }
     const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
-    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.12_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.14_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
   }
 
   function selectCustomer(id,rerender=true){

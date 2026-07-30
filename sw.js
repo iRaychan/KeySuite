@@ -1,5 +1,5 @@
-const CACHE='keysuite-v1.13-owner-key-1';
-const SHELL=['./','./index.html','./app.js','./pricing.js','./roles.js','./auth.js','./manifest.json','./keylargo-logo.png'];
+const CACHE='keysuite-v1.14-category-fuel-1';
+const SHELL=['./','./index.html','./app.js','./pricing.js','./categories.js','./roles.js','./auth.js','./manifest.json','./keylargo-logo.png'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
 self.addEventListener('fetch',event=>{

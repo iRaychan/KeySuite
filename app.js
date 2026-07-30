@@ -19,7 +19,7 @@ document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
-const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','companyPricing']);
+const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','categoryManagement','companyPricing']);
 function syncOwnerKeyVisibility(){
  const button=$('keyButton'),owner=currentRole()==='owner';
  if(button){button.hidden=!owner;button.style.display=owner?'inline-flex':'none'}
@@ -32,6 +32,7 @@ function showPage(id){
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
  const page=$(id);if(!page)return;page.classList.add('active');
  window.KeySuiteRoles?.pageShown?.(id);
+ window.KeySuiteCategories?.pageShown?.(id);
  refreshAll();
 }
 
@@ -346,7 +347,7 @@ function refreshItemExportButtons(){
    const b=document.createElement('button');
    b.className='btn secondary';
    b.textContent=`Export Item ${no} - ${model}`;
-   b.onclick=()=>exportPumpDataSheet(row,`Item ${no} - ${model}`);
+   b.onclick=()=>exportPumpDataSheet(row,model);
    box.appendChild(b);
  });
 }
@@ -622,8 +623,7 @@ function exportAllQuotationAndCurves(){
      const row=available[i++];
      let model=row.querySelector('.item-model')?.value.trim()||'Pump Model';
      try{const pump=JSON.parse(row.dataset.pumpData||'{}');model=pump.quotation_model||pump.model||model}catch(_){}
-     const no=String([...document.querySelectorAll('.quote-item')].indexOf(row)+1).padStart(2,'0');
-     exportPumpDataSheet(row,`Item ${no} - ${model}`);
+     exportPumpDataSheet(row,model);
      setTimeout(next,1800);
    };
    setTimeout(next,500);
