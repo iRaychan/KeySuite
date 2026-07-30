@@ -1,4 +1,4 @@
-# KeySuite V1.22
+# KeySuite V1.23
 
 ## V1.20.5 quotation item deletion hotfix
 
@@ -83,7 +83,7 @@ Saved quotations remain editable. Seal locks all quotation fields and enables PD
 Customer pricing is selected inside the quotation. The Customers page no longer carries a Quote/Quoted selection.
 
 
-## V1.22 pricing interface update
+## V1.23 pricing interface update
 
 - Price List USD→MYR and RMB→MYR multipliers are unlocked by holding directly on the input for 3 seconds.
 - The countdown appears below the held input; the separate hold button was removed.

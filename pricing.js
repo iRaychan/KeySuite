@@ -12,6 +12,7 @@
   let visibleRows=[];
   let bound=false;
   let selectedPricingFamily='CHC';
+  let pricingFormulaVisible=false;
 
   const byId=id=>document.getElementById(id);
   const e=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -122,7 +123,10 @@
     document.querySelectorAll('[data-pricing-family]').forEach(button=>{const active=button.dataset.pricingFamily===selectedPricingFamily;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
     const otherRows=[['Current Fuel Price',`${cash(ctx.fuelPrice)}/L`],['Customer Distance',`${n(ctx.distanceKm,1)} km`]];
     byId('pricingCategorySummary').innerHTML=cat?[['Category Name',cat.name],...ruleSummary(cat,selectedPricingFamily),...otherRows].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer.</p>';
-    byId('pricingFormula').textContent=cat?[formula(cat,selectedPricingFamily,'many'),formula(cat,selectedPricingFamily,'common'),formula(cat,selectedPricingFamily,'rare')].join('\n'):'';renderFuelSetting();fillSelects();
+    const formulaBox=byId('pricingFormula'),formulaToggle=byId('togglePricingFormula');
+    if(formulaBox){formulaBox.textContent=cat?[formula(cat,selectedPricingFamily,'many'),formula(cat,selectedPricingFamily,'common'),formula(cat,selectedPricingFamily,'rare')].join('\n'):'';formulaBox.style.display=pricingFormulaVisible&&cat?'block':'none'}
+    if(formulaToggle){formulaToggle.textContent=pricingFormulaVisible?'Hide Formula':'Show Formula';formulaToggle.setAttribute('aria-expanded',String(pricingFormulaVisible));formulaToggle.disabled=!cat}
+    renderFuelSetting();fillSelects();
   }
 
   function renderTable(){
@@ -218,6 +222,7 @@
     byId('savePricingCategory')?.addEventListener('click',savePricingCategory);
     byId('saveFuelPrice')?.addEventListener('click',saveFuelPrice);
     document.querySelectorAll('[data-pricing-family]').forEach(button=>button.addEventListener('click',()=>{selectedPricingFamily=button.dataset.pricingFamily==='GWS'?'GWS':'CHC';renderSummary()}));
+    byId('togglePricingFormula')?.addEventListener('click',()=>{pricingFormulaVisible=!pricingFormulaVisible;renderSummary()});
   }
 
   function syncPriceListSettings(next={}){secureData={...secureData,...next};renderSummary();renderTable();refreshQuotePrices()}

@@ -1,0 +1,15 @@
+<!doctype html><html><body>
+<div id="chcPriceListMessage"></div><div id="gwsPriceListMessage"></div><div id="priceListAccessNotice"></div>
+<select id="chcPriceCurrency"><option>USD</option></select><select id="gwsPriceCurrency"><option>USD</option></select>
+<div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><input id="chcUsdMultiplier" class="multiplier-hold-input" value="5.8" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button data-multiplier-save>Save</button><button data-multiplier-cancel>Cancel</button></div></div>
+<div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><input id="chcRmbMultiplier" class="multiplier-hold-input" value=".65" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button data-multiplier-save>Save</button><button data-multiplier-cancel>Cancel</button></div></div>
+<div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><input id="gwsUsdMultiplier" class="multiplier-hold-input" value="5.8" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button data-multiplier-save>Save</button><button data-multiplier-cancel>Cancel</button></div></div>
+<div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><input id="gwsRmbMultiplier" class="multiplier-hold-input" value=".65" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button data-multiplier-save>Save</button><button data-multiplier-cancel>Cancel</button></div></div>
+<input id="chcPriceSearch"><input id="gwsPriceSearch"><div id="chcPriceListCount"></div><div id="gwsPriceListCount"></div><table><tbody id="chcPriceRows"></tbody></table><table><tbody id="gwsPriceRows"></tbody></table>
+<script>window.KeySuiteAuth={getClient:()=>null};</script><script src="pricelist.js"></script>
+<script>
+window.KeySuitePriceList.init({products:[],gwsProducts:[],productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:6.3,RMB:.7,MYR:1}}},{role:'owner',display_name:'Ray'});
+const input=document.getElementById('chcUsdMultiplier');
+input.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1,pointerType:'mouse',button:0}));
+setTimeout(()=>{document.body.setAttribute('data-unlocked',String(!input.readOnly));document.body.setAttribute('data-feedback',document.querySelector('#chcMultiplierLock_USD .multiplier-hold-feedback').textContent);},3250);
+</script></body></html>

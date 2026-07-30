@@ -58,7 +58,7 @@
       group.classList.toggle('locked',!on);
       group.classList.remove('holding');
       const feedback=group.querySelector('.multiplier-hold-feedback');
-      if(feedback)feedback.textContent=on?'Unlocked — edit, then Save or Cancel':'Hold input 3s to edit';
+      if(feedback)feedback.textContent=on?'(Unlocked — Save or Cancel)':'(Hold 3s to edit)';
       group.querySelector('.multiplier-actions')?.classList.toggle('show',on);
     }
     if(input){
@@ -177,7 +177,7 @@
     const reset=()=>{
       if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;
       group.classList.remove('holding');
-      if(!group.classList.contains('unlocked')){const label=feedback();if(label)label.textContent='Hold input 3s to edit'}
+      if(!group.classList.contains('unlocked')){const label=feedback();if(label)label.textContent='(Hold 3s to edit)'}
     };
     const startHold=event=>{
       if(event.pointerType==='mouse'&&event.button!==0)return;

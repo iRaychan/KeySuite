@@ -32,16 +32,21 @@
     grid.querySelectorAll('[data-product-add]').forEach(button=>button.onclick=()=>{if(!window.KeySuiteApp?.ensureQuotationPricingContext?.('add a product to the quotation'))return;send(button.dataset.productAdd,'add')});
   }
 
+  function gwsSeriesKey(product){
+    const name=String(product?.seriesName||'').trim();
+    return /superflow/i.test(name)?'Superflow Series':name;
+  }
+
   function gwsSeriesOptions(){
     const select=$('gwsProductSeries');if(!select)return;
-    const current=select.value||'ALL',series=[...new Map(gwsProducts().map(p=>[p.seriesCode,p.seriesName])).entries()];
-    select.innerHTML='<option value="ALL">All Series</option>'+series.map(([code,name])=>`<option value="${esc(code)}">${esc(name)}</option>`).join('');select.value=series.some(([code])=>code===current)?current:'ALL';
+    const current=select.value||'ALL',series=[...new Set(gwsProducts().map(gwsSeriesKey).filter(Boolean))];
+    select.innerHTML='<option value="ALL">All Series</option>'+series.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');select.value=series.includes(current)?current:'ALL';
   }
 
   function renderGws(){
     const body=$('gwsProductRows');if(!body)return;gwsSeriesOptions();
     const series=$('gwsProductSeries')?.value||'ALL',query=String($('gwsProductSearch')?.value||'').trim().toLowerCase();
-    const rows=gwsProducts().filter(product=>(series==='ALL'||product.seriesCode===series)&&(!query||[product.seriesName,product.model,product.sizeCode,product.pressureBar].join(' ').toLowerCase().includes(query)));
+    const rows=gwsProducts().filter(product=>(series==='ALL'||gwsSeriesKey(product)===series)&&(!query||[product.seriesName,product.model,product.sizeCode,product.pressureBar].join(' ').toLowerCase().includes(query)));
     body.innerHTML=rows.map(product=>`<tr><td>${esc(product.seriesName)}</td><td><b>${esc(product.model)}</b></td><td>${esc(product.sizeLitres)} Litres</td><td>${esc(product.pressureBar)} Bar</td><td style="text-align:right"><button class="btn" type="button" data-gws-quote="${esc(product.id)}">Quote</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">No matching GWS Tank models.</td></tr>';
     $('gwsProductCount').textContent=`${rows.length} valid tank SKU${rows.length===1?'':'s'}`;
     body.querySelectorAll('[data-gws-quote]').forEach(button=>button.addEventListener('click',()=>window.KeySuitePricing?.addGwsToQuotation?.(button.dataset.gwsQuote,null)));

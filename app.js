@@ -318,7 +318,7 @@ function showCustomerDetail(id){
  $('detailSst').textContent=c.sstNumber||'-';$('detailMsic').textContent=c.msicCode||'-';
  $('detailBusinessActivity').textContent=c.businessActivity||'-';$('detailNotes').textContent=c.notes||'-';
  $('detailContacts').innerHTML=(c.contacts||[]).map(x=>`<tr><td>${esc([x.prefix,x.name].filter(Boolean).join(' '))}</td><td>${esc(formatMYPhone(x.phone)||'-')}</td><td>${esc(x.email||'-')}</td></tr>`).join('')||`<tr><td colspan="3" class="muted">No contact persons saved.</td></tr>`;
- const fields=$('customerDetailFields');if(fields)fields.classList.remove('collapsed');const collapse=$('collapseCustomerDetails');if(collapse){collapse.textContent='▲';collapse.title='Collapse customer information'}
+ const fields=$('customerDetailFields');if(fields)fields.classList.add('collapsed');const collapse=$('collapseCustomerDetails');if(collapse){collapse.textContent='▼';collapse.title='Expand customer information'}
 }
 function refreshCustomerList(){
  const query=($('customerSearch')?.value||'').trim().toLowerCase();
