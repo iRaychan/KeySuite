@@ -163,18 +163,18 @@
     @media(max-width:560px){.product-model-row{grid-template-columns:1fr}.product-model-actions{grid-template-columns:repeat(3,1fr)}.category-product-rule-layout{grid-template-columns:1fr}.category-product-buttons{flex-direction:column;width:100%}.gws-product-toolbar{grid-template-columns:1fr}}
 
     .category-selected-label{font-size:13px;color:var(--muted);margin-left:10px}.category-selected-label b{color:var(--navy)}
-    .category-hold-button,.multiplier-hold-button{width:100%;margin-top:8px;border:1px dashed #d6a400;background:#fff9db;color:#7a5b00;border-radius:7px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer}.category-hold-button.holding,.multiplier-hold-button.holding,#editCategoryRule.holding{box-shadow:inset 0 0 0 3px #f2c94c}.category-hold-button.hidden,.multiplier-hold-button.hidden{display:none}
+    .category-inline-rule-list{display:grid;gap:9px;max-width:720px}.category-inline-rule{display:grid;grid-template-columns:minmax(130px,190px) minmax(150px,240px) minmax(70px,90px);gap:10px;align-items:center;padding:9px 10px}.category-inline-rule>label:first-child{margin:0;font-weight:750;color:var(--text)}.category-inline-input{display:flex;align-items:center;gap:7px}.category-inline-input input{width:100%;min-width:0;text-align:right}.category-inline-input span{font-size:12px;font-weight:800;color:#526275;white-space:nowrap}.category-inline-check{display:flex;align-items:center;justify-content:flex-start;gap:5px;margin:0;font-size:12px;font-weight:750;color:#526275}.category-inline-check input{margin:0}.category-inline-rule>.category-inline-check[aria-hidden="true"]{visibility:hidden}.category-inline-note{grid-column:2/4;color:var(--muted);line-height:1.35;margin-top:-3px}.category-inline-rule.locked{background:#f8fafc}.category-inline-rule.unlocked{border-color:#16a34a;background:#f0fdf4}.category-inline-rule input[data-always-readonly="true"]{background:#f8fafc;color:#526275}.category-form-readonly .category-inline-check span{color:#94a3b8}@media(max-width:620px){.category-inline-rule{grid-template-columns:minmax(105px,1fr) minmax(130px,1.25fr) 68px}.category-inline-note{grid-column:1/4}}
+    .category-hold-button,.multiplier-hold-button{width:100%;margin-top:8px;border:1px dashed #d6a400;background:#fff9db;color:#7a5b00;border-radius:7px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer}.category-hold-button.holding,.multiplier-hold-button.holding{box-shadow:inset 0 0 0 3px #f2c94c}.category-hold-button.hidden,.multiplier-hold-button.hidden{display:none}
     .multiplier-actions{display:none;gap:8px;margin-top:8px}.multiplier-actions.show{display:flex}.multiplier-actions .btn{flex:1;padding:7px 9px}
     .pricelist-table thead .group-head{text-align:center;background:#eef3f8}.pricelist-table thead .sub-head{text-align:center;font-size:11px;color:#526275}.pricelist-table select{min-width:92px}.pricelist-table .currency-price-input{min-width:118px}
     .role-row-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}.role-invite-option{margin-top:14px;padding:11px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc}.role-invite-option label{display:flex;align-items:center;gap:9px;margin:0}.role-invite-option input{width:auto}
     .gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
-    #editCategoryRule{touch-action:none;user-select:none;-webkit-user-select:none}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.20.2 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.20 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -492,7 +492,7 @@
           </div>
         </div>
         <div class="card" id="categoryEditorCard">
-          <div class="category-editor-title-row"><div><h2 id="categoryFormTitle">Edit Category</h2><div class="category-selected-label">Selected Category: <b id="categorySelectedName">-</b></div></div><button class="btn secondary" id="editCategoryRule" type="button">Hold 3s to Edit</button></div>
+          <div class="category-editor-title-row"><div><h2 id="categoryFormTitle">Edit Category</h2><div class="category-selected-label">Selected Category: <b id="categorySelectedName">-</b></div></div><button class="btn secondary" id="editCategoryRule" type="button">Edit</button></div>
           <div id="categoryMessage" class="auth-message"></div>
           <form id="categoryForm" novalidate>
             <div class="category-form-grid">
@@ -505,17 +505,48 @@
                 <div class="category-rule-editor">
                   <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
                   <div id="categoryCurrencySummary" class="category-currency-summary"></div>
-                  <div class="category-rule-grid">
-                    <div class="category-lock-field locked" id="categoryLock_margin" data-lock-key="margin" data-lock-label="Margin"><label><span id="categoryMarginLabel">Margin (%)</span></label><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_normal" data-lock-key="normal" data-lock-label="Normal"><label>Normal (%)</label><input id="categoryNormalInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_rare" data-lock-key="rare" data-lock-label="Rare"><label>Rare (%)</label><input id="categoryRareInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport"><label>Transport (RM)</label><input id="categoryTransportInput" type="number" min="0" step="0.01" value="0.00" readonly></div>
-                  </div>
-                  <div class="category-option-grid">
-                    <div class="category-lock-field locked" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission"><label class="category-check-label"><input id="categoryCommissionEnabled" type="checkbox" disabled> Commission (%)</label><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount"><label class="category-check-label"><input id="categorySetDiscountEnabled" type="checkbox" disabled> Set Discount (%)</label><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount"><label class="category-check-label"><input id="categoryFinalDiscountEnabled" type="checkbox" disabled> Final Discount (%)</label><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge"><label class="category-check-label"><input id="categoryFuelChargeEnabled" type="checkbox" disabled> Fuel Charge</label><div class="category-toggle-note">Uses customer distance × (Fuel Price − RM2.00)</div></div>
+                  <div class="category-inline-rule-list">
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_margin" data-lock-key="margin" data-lock-label="Margin">
+                      <label for="categoryMarginInput"><span id="categoryMarginLabel">CHC Margin</span></label>
+                      <div class="category-inline-input"><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="38.00" readonly><span>%</span></div>
+                      <span class="category-inline-check" aria-hidden="true"></span>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_normal" data-lock-key="normal" data-lock-label="Normal">
+                      <label for="categoryNormalInput">Normal</label>
+                      <div class="category-inline-input"><input id="categoryNormalInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly><span>%</span></div>
+                      <span class="category-inline-check" aria-hidden="true"></span>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_rare" data-lock-key="rare" data-lock-label="Rare">
+                      <label for="categoryRareInput">Rare</label>
+                      <div class="category-inline-input"><input id="categoryRareInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly><span>%</span></div>
+                      <span class="category-inline-check" aria-hidden="true"></span>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport">
+                      <label for="categoryTransportInput">Transport</label>
+                      <div class="category-inline-input"><span>RM</span><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly></div>
+                      <span class="category-inline-check" aria-hidden="true"></span>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission">
+                      <label for="categoryCommissionInput">Commission</label>
+                      <div class="category-inline-input"><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" readonly><span>%</span></div>
+                      <label class="category-inline-check" title="Include Commission"><input id="categoryCommissionEnabled" type="checkbox" checked disabled><span>Use</span></label>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount">
+                      <label for="categorySetDiscountInput">Set Discount</label>
+                      <div class="category-inline-input"><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" readonly><span>%</span></div>
+                      <label class="category-inline-check" title="Include Set Discount"><input id="categorySetDiscountEnabled" type="checkbox" checked disabled><span>Use</span></label>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount">
+                      <label for="categoryFinalDiscountInput">Final</label>
+                      <div class="category-inline-input"><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" readonly><span>%</span></div>
+                      <label class="category-inline-check" title="Include Final Discount"><input id="categoryFinalDiscountEnabled" type="checkbox" checked disabled><span>Use</span></label>
+                    </div>
+                    <div class="category-lock-field locked category-inline-rule category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge">
+                      <label for="categoryFuelChargeInput">Fuel Charge</label>
+                      <div class="category-inline-input"><span>RM</span><input id="categoryFuelChargeInput" type="number" min="0" step="0.01" value="0.00" readonly data-always-readonly="true" title="Calculated automatically from customer distance and the saved Fuel Price"></div>
+                      <label class="category-inline-check" title="Include automatic Fuel Charge"><input id="categoryFuelChargeEnabled" type="checkbox" checked disabled><span>Use</span></label>
+                      <small class="category-inline-note">Auto: customer distance × (Fuel Price − RM2.00)</small>
+                    </div>
                   </div>
                   <div class="formula" id="categoryFormulaPreview" style="margin-top:14px"></div>
                 </div>
@@ -803,12 +834,12 @@
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
-<script src="pricing.js"></script>
-<script src="categories.js"></script>
-<script src="pricelist.js"></script>
-<script src="product.js"></script>
-<script src="roles.js"></script>
+<script src="app.js?v=1203"></script>
+<script src="pricing.js?v=1203"></script>
+<script src="categories.js?v=1203"></script>
+<script src="pricelist.js?v=1203"></script>
+<script src="product.js?v=1203"></script>
+<script src="roles.js?v=1203"></script>
 
 <dialog id="productCurveDialog" class="ks-dialog product-curve-dialog">
   <div class="dialog-body">
@@ -816,6 +847,6 @@
     <div id="productCurveHost"></div>
   </div>
 </dialog>
-<script src="auth.js"></script>
+<script src="auth.js?v=1203"></script>
 </body>
 </html>

@@ -1,8 +1,13 @@
-# KeySuite V1.20.2
+# KeySuite V1.20.3
 
-Category editor usability update. No Supabase migration is required. Keep the existing `config.js`.
+## V1.20.3 category layout update
 
-# KeySuite V1.20
+- Compact inline rows for CHC and GWS pricing rules.
+- Margin, Normal, Rare and Transport inputs sit beside their labels.
+- Commission, Set Discount, Final and Fuel Charge show input and Use checkbox in one row.
+- The single Hold 3s to Edit control unlocks the complete Category editor.
+- No new Supabase SQL is required when V1.20 migration is already installed.
+
 
 Base: KeySuite V1.19. The approved V1.08 quotation PDF/print layout remains fully frozen and unchanged.
 

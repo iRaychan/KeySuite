@@ -1,2 +1,2 @@
-KeySuite V1.20.2
-Category editor: hold the Edit button for 3 seconds to unlock all fields.
+KeySuite V1.20.3
+Category Pricing Rule uses compact inline label, input and optional Use checkbox rows.

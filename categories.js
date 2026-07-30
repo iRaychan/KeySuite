@@ -48,7 +48,7 @@
   function setRuleFieldsEditable(on){
     document.querySelectorAll('#categoryForm .category-lock-field').forEach(group=>{
       group.classList.toggle('unlocked',!!on);group.classList.toggle('locked',!on);
-      group.querySelectorAll('input').forEach(input=>{if(input.type==='checkbox')input.disabled=!on;else input.readOnly=!on});
+      group.querySelectorAll('input').forEach(input=>{if(input.type==='checkbox')input.disabled=!on;else input.readOnly=input.dataset.alwaysReadonly==='true'?true:!on});
     });
   }
 
@@ -83,8 +83,9 @@
   function fillRule(category){
     const rule=category?ruleFor(category,selectedProduct):newCategoryRule();
     byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');byId('categoryCommissionInput').value=num(rule.commission*100,2).replace(/,/g,'');byId('categorySetDiscountInput').value=num(rule.setDiscount*100,2).replace(/,/g,'');byId('categoryFinalDiscountInput').value=num(rule.finalDiscount*100,2).replace(/,/g,'');
+    if(byId('categoryFuelChargeInput'))byId('categoryFuelChargeInput').value='0.00';
     byId('categoryCommissionEnabled').checked=!!rule.includeCommission;byId('categorySetDiscountEnabled').checked=!!rule.includeSetDiscount;byId('categoryFinalDiscountEnabled').checked=!!rule.includeFinalDiscount;byId('categoryFuelChargeEnabled').checked=!!rule.includeFuelCharge;
-    byId('categoryProductHeading').textContent=`${selectedProduct} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${selectedProduct} Margin (%)`;
+    byId('categoryProductHeading').textContent=`${selectedProduct} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${selectedProduct} Margin`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
     setRuleFieldsEditable(editing);showCurrencySummary();updateFormula();
   }
