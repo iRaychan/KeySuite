@@ -16,6 +16,8 @@
 
   const defaultRule=()=>({
     margin:.38,
+    normal:0,
+    rare:0,
     transport:30,
     commission:.03,
     setDiscount:.068,
@@ -33,23 +35,46 @@
     box.className=text?`auth-message show ${type}`:'auth-message';
   }
 
-  function ruleFor(category,product=selectedProduct){
-    const rule=category?.productRules?.[product]||{};
-    const fallback=defaultRule();
+  function normalizeRule(rule={},fallback=defaultRule()){
     return {
-      margin:Number(rule.margin??(product==='CHC'?(category?.margins?.CHC??category?.factors?.CHC):fallback.margin)??fallback.margin),
-      transport:Number(rule.transport??category?.transport??fallback.transport),
-      commission:Number(rule.commission??category?.commission??fallback.commission),
-      setDiscount:Number(rule.setDiscount??category?.set_discount??fallback.setDiscount),
-      finalDiscount:Number(rule.finalDiscount??category?.final_discount??fallback.finalDiscount),
-      includeCommission:rule.includeCommission!==false,
-      includeSetDiscount:rule.includeSetDiscount!==false,
-      includeFinalDiscount:rule.includeFinalDiscount!==false,
-      includeFuelCharge:rule.includeFuelCharge!==false
+      margin:Number(rule.margin??fallback.margin),
+      normal:Number(rule.normal??fallback.normal??0),
+      rare:Number(rule.rare??fallback.rare??0),
+      transport:Number(rule.transport??fallback.transport),
+      commission:Number(rule.commission??fallback.commission),
+      setDiscount:Number(rule.setDiscount??rule.set_discount??fallback.setDiscount),
+      finalDiscount:Number(rule.finalDiscount??rule.final_discount??fallback.finalDiscount),
+      includeCommission:rule.includeCommission??rule.include_commission??fallback.includeCommission,
+      includeSetDiscount:rule.includeSetDiscount??rule.include_set_discount??fallback.includeSetDiscount,
+      includeFinalDiscount:rule.includeFinalDiscount??rule.include_final_discount??fallback.includeFinalDiscount,
+      includeFuelCharge:rule.includeFuelCharge??rule.include_fuel_charge??fallback.includeFuelCharge
     };
   }
 
-  function currentCategory(){return categories().find(x=>x.id===selectedId)||null}
+  function ruleFor(category,product=selectedProduct){
+    const fallback=defaultRule();
+    if(product==='CHC'){
+      fallback.margin=Number(category?.margins?.CHC??category?.factors?.CHC??fallback.margin);
+      fallback.transport=Number(category?.transport??fallback.transport);
+      fallback.commission=Number(category?.commission??fallback.commission);
+      fallback.setDiscount=Number(category?.set_discount??fallback.setDiscount);
+      fallback.finalDiscount=Number(category?.final_discount??fallback.finalDiscount);
+    }
+    return normalizeRule(category?.productRules?.[product]||{},fallback);
+  }
+
+  function currentCategory(){return categories().find(item=>item.id===selectedId)||null}
+
+  function productRates(product=selectedProduct){
+    const data=window.KEYSUITE_SECURE_DATA||{};
+    const family=String(product||'CHC').toUpperCase();
+    const rates=data.productMultipliers?.[family]||{};
+    return {
+      USD:Number(rates.USD??data.usd_multiplier??5.8),
+      RMB:Number(rates.RMB??data.rmb_multiplier??.65),
+      MYR:1
+    };
+  }
 
   function setUnlockedState(key,on){
     if(on)unlocked.add(key);else unlocked.delete(key);
@@ -67,7 +92,7 @@
 
   function resetLocks(){
     unlocked.clear();
-    ['margin','transport','commission','setDiscount','finalDiscount','fuelCharge'].forEach(key=>setUnlockedState(key,false));
+    ['margin','normal','rare','transport','commission','setDiscount','finalDiscount','fuelCharge'].forEach(key=>setUnlockedState(key,false));
   }
 
   function setEditable(on){
@@ -85,40 +110,53 @@
   }
 
   function showCurrencySummary(){
-    const data=window.KEYSUITE_SECURE_DATA||{};
-    const usd=Number(data.usd_multiplier??5.8);
-    const rmb=Number(data.rmb_multiplier??.65);
+    const rates=productRates();
     const box=byId('categoryCurrencySummary');
-    if(box)box.innerHTML=`<b>Price List Currency</b><span>USD (MYR ${num(usd,2)})</span><span>RMB (MYR ${num(rmb,2)})</span><span>MYR (MYR 1.00)</span>`;
+    if(box)box.innerHTML=`<b>${esc(selectedProduct)} Price List Currency</b><span>USD (MYR ${num(rates.USD,2)})</span><span>RMB (MYR ${num(rates.RMB,2)})</span><span>MYR (MYR 1.00)</span>`;
   }
 
-  function formulaText(rule){
-    const parts=['Highest of USD × USD rate / RMB × RMB rate / MYR','÷ (1 − Margin)','+ Transport'];
+  function optionalFormulaParts(rule){
+    const parts=[];
     if(rule.includeCommission)parts.push('÷ (1 − Commission)');
     if(rule.includeSetDiscount)parts.push('÷ (1 − Set Discount)');
     if(rule.includeFinalDiscount)parts.push('÷ (1 − Final Discount)');
     if(rule.includeFuelCharge)parts.push('+ Fuel Charge');
     parts.push('Round up to RM10');
+    return parts;
+  }
+
+  function formulaText(rule,rarity){
+    const parts=['Highest of USD × USD rate / RMB × RMB rate / MYR','÷ (1 − Margin)'];
+    if(rarity==='common'||rarity==='rare')parts.push('÷ (1 − Normal)');
+    if(rarity==='rare')parts.push('÷ (1 − Rare)');
+    parts.push('+ Transport',...optionalFormulaParts(rule));
     return parts.join('  →  ');
   }
 
   function updateFormula(){
     const rule=readRule(false);
     const box=byId('categoryFormulaPreview');
-    if(box)box.textContent=formulaText(rule);
+    if(!box)return;
+    box.innerHTML=`<div class="category-formula-lines">
+      <div class="category-formula-line"><b>Many</b>${esc(formulaText(rule,'many'))}</div>
+      <div class="category-formula-line"><b>Common</b>${esc(formulaText(rule,'common'))}</div>
+      <div class="category-formula-line"><b>Rare</b>${esc(formulaText(rule,'rare'))}</div>
+    </div>`;
   }
 
   function fillRule(category){
     const rule=ruleFor(category,selectedProduct);
     byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');
+    byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');
+    byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');
     byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
     byId('categoryCommissionInput').value=num(rule.commission*100,2).replace(/,/g,'');
     byId('categorySetDiscountInput').value=num(rule.setDiscount*100,2).replace(/,/g,'');
     byId('categoryFinalDiscountInput').value=num(rule.finalDiscount*100,2).replace(/,/g,'');
-    byId('categoryCommissionEnabled').checked=rule.includeCommission;
-    byId('categorySetDiscountEnabled').checked=rule.includeSetDiscount;
-    byId('categoryFinalDiscountEnabled').checked=rule.includeFinalDiscount;
-    byId('categoryFuelChargeEnabled').checked=rule.includeFuelCharge;
+    byId('categoryCommissionEnabled').checked=!!rule.includeCommission;
+    byId('categorySetDiscountEnabled').checked=!!rule.includeSetDiscount;
+    byId('categoryFinalDiscountEnabled').checked=!!rule.includeFinalDiscount;
+    byId('categoryFuelChargeEnabled').checked=!!rule.includeFuelCharge;
     byId('categoryProductHeading').textContent=`${selectedProduct} Pricing Rule`;
     if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${selectedProduct} Margin (%)`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
@@ -136,9 +174,10 @@
   }
 
   function openCategory(category,forEdit=false){
+    if(!category)return;
     fill(category);
     setEditable(forEdit);
-    message(forEdit?'Category is ready. Hold a protected field for 3 seconds to edit it.':'Saved category loaded. Press Edit to make changes.','info');
+    message(forEdit?'Editing enabled. Hold any protected field for 3 seconds to unlock it.':'Saved category loaded. Hold a protected field for 3 seconds, or press Edit, to make changes.','info');
   }
 
   function newCategory(){
@@ -153,11 +192,7 @@
     const body=byId('categoryRows');if(!body)return;
     const rows=categories();
     if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
-    body.innerHTML=rows.map(category=>`<tr><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}">${esc(category.name)}</button></td></tr>`).join('');
-    body.querySelectorAll('[data-category-open]').forEach(button=>button.addEventListener('click',()=>{
-      const category=categories().find(item=>item.id===button.dataset.categoryOpen);
-      if(category)openCategory(category,false);
-    }));
+    body.innerHTML=rows.map(category=>`<tr class="${category.id===selectedId?'category-row-selected':''}"><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}">${esc(category.name)}</button></td></tr>`).join('');
   }
 
   function mapRows(rows){
@@ -166,24 +201,36 @@
       if(typeof rules==='string'){try{rules=JSON.parse(rules)}catch(_){rules={}}}
       const normalize=code=>{
         const r=rules?.[code]||{};
-        return {
-          margin:Number(r.margin??(code==='CHC'?(c.chc_margin??c.chc_factor):.38)??.38),
-          transport:Number(r.transport??c.transport??30),
-          commission:Number(r.commission??c.commission??.03),
-          setDiscount:Number(r.set_discount??r.setDiscount??c.set_discount??.068),
-          finalDiscount:Number(r.final_discount??r.finalDiscount??c.final_discount??.08),
-          includeCommission:r.include_commission??r.includeCommission??true,
-          includeSetDiscount:r.include_set_discount??r.includeSetDiscount??true,
-          includeFinalDiscount:r.include_final_discount??r.includeFinalDiscount??true,
-          includeFuelCharge:r.include_fuel_charge??r.includeFuelCharge??true
-        };
+        return normalizeRule(r,{
+          margin:Number(code==='CHC'?(c.chc_margin??c.chc_factor??.38):.38),
+          normal:0,
+          rare:0,
+          transport:Number(c.transport??30),
+          commission:Number(c.commission??.03),
+          setDiscount:Number(c.set_discount??.068),
+          finalDiscount:Number(c.final_discount??.08),
+          includeCommission:true,
+          includeSetDiscount:true,
+          includeFinalDiscount:true,
+          includeFuelCharge:true
+        });
       };
-      return {id:c.id,name:c.category_name,productRules:{CHC:normalize('CHC'),GWS:normalize('GWS')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0),commission:Number(c.commission||0),set_discount:Number(c.set_discount||0),final_discount:Number(c.final_discount||0)};
+      return {
+        id:c.id,
+        name:c.category_name,
+        productRules:{CHC:normalize('CHC'),GWS:normalize('GWS')},
+        margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},
+        factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},
+        transport:Number(c.transport||0),
+        commission:Number(c.commission||0),
+        set_discount:Number(c.set_discount||0),
+        final_discount:Number(c.final_discount||0)
+      };
     });
   }
 
   async function reload(){
-    const client=window.KeySuiteAuth?.getClient?.();if(!client)return;
+    const client=window.KeySuiteAuth?.getClient?.();if(!client)return [];
     const {data,error}=await client.from('ks_pricing_categories').select('*').order('category_name');
     if(error)throw error;
     const mapped=mapRows(data);
@@ -204,6 +251,8 @@
     if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');
     return {
       margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),
+      normal:percentValue('categoryNormalInput','Normal',validate),
+      rare:percentValue('categoryRareInput','Rare',validate),
       transport:Number.isFinite(transport)?transport:0,
       commission:percentValue('categoryCommissionInput','Commission',validate),
       setDiscount:percentValue('categorySetDiscountInput','Set Discount',validate),
@@ -227,11 +276,13 @@
     const button=byId('saveCategoryRule'),original=button.textContent;
     button.disabled=true;button.textContent='Saving…';message('');
     try{
-      const {error}=await client.rpc('keysuite_manage_pricing_category_v118',{
+      const {error}=await client.rpc('keysuite_manage_pricing_category_v119',{
         p_category_id:selectedId||null,
         p_category_name:name,
         p_product_code:selectedProduct,
         p_margin:rule.margin,
+        p_normal:rule.normal,
+        p_rare:rule.rare,
         p_transport:rule.transport,
         p_commission:rule.commission,
         p_set_discount:rule.setDiscount,
@@ -244,34 +295,54 @@
       if(error)throw error;
       const rows=await reload();
       const saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());
-      openCategory(saved||null,false);
+      openCategory(saved||rows[0],false);
       message(`${selectedProduct} pricing rule for “${name}” saved.`,'info');
     }catch(error){
       console.error(error);
-      message(`${error.message||error}. Run the V1.18 Supabase migration first.`,'error');
+      message(`${error.message||error}. Run the V1.19 Supabase migration first.`,'error');
     }finally{button.disabled=false;button.textContent=original}
   }
 
   function cancel(){
-    if(selectedId){const category=categories().find(x=>x.id===selectedId);if(category)openCategory(category,false)}
+    if(selectedId){const category=currentCategory();if(category)openCategory(category,false)}
     else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}
+  }
+
+  function beginProtectedEdit(group,key){
+    if(!isOwner()||unlocked.has(key))return;
+    if(!editing){
+      editing=true;
+      const name=byId('categoryNameInput');if(name)name.disabled=false;
+      const save=byId('saveCategoryRule');if(save)save.disabled=false;
+      const cancelButton=byId('cancelCategoryEdit');if(cancelButton)cancelButton.disabled=false;
+      const edit=byId('editCategoryRule');if(edit)edit.style.display='none';
+      byId('categoryForm')?.classList.remove('category-form-readonly');
+    }
+    setUnlockedState(key,true);
+    message(`${group.dataset.lockLabel||key} unlocked for editing.`,'info');
+    group.querySelector('input:not([type="checkbox"])')?.focus();
   }
 
   function bindLongPress(group){
     let timer=null;
+    let pointerId=null;
     const key=group.dataset.lockKey;
-    const cancel=()=>{if(timer){clearTimeout(timer);timer=null}group.classList.remove('holding')};
+    const cancel=()=>{
+      if(timer){clearTimeout(timer);timer=null}
+      group.classList.remove('holding');
+      if(pointerId!==null){try{group.releasePointerCapture(pointerId)}catch(_){ }pointerId=null}
+    };
     group.addEventListener('pointerdown',event=>{
-      if(!editing||unlocked.has(key))return;
+      if(!isOwner()||unlocked.has(key))return;
       if(event.pointerType==='mouse'&&event.button!==0)return;
+      pointerId=event.pointerId;
+      try{group.setPointerCapture(pointerId)}catch(_){ }
       group.classList.add('holding');
       timer=setTimeout(()=>{
-        timer=null;group.classList.remove('holding');setUnlockedState(key,true);
-        message(`${group.dataset.lockLabel||key} unlocked for editing.`,'info');
-        group.querySelector('input:not([type="checkbox"])')?.focus();
+        timer=null;group.classList.remove('holding');beginProtectedEdit(group,key);
       },3000);
     });
-    ['pointerup','pointercancel','pointerleave'].forEach(type=>group.addEventListener(type,cancel));
+    ['pointerup','pointercancel'].forEach(type=>group.addEventListener(type,cancel));
     group.addEventListener('contextmenu',event=>event.preventDefault());
   }
 
@@ -284,21 +355,33 @@
       if(!selectedId)return;
       setEditable(true);message('Editing enabled. Hold a protected field for 3 seconds to unlock it.','info');byId('categoryNameInput')?.focus();
     });
+    byId('categoryRows')?.addEventListener('click',event=>{
+      const button=event.target.closest('[data-category-open]');
+      if(!button)return;
+      const category=categories().find(item=>item.id===button.dataset.categoryOpen);
+      if(category)openCategory(category,false);
+    });
     document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{
       selectedProduct=button.dataset.categoryProduct;
       fillRule(currentCategory());
-      message(`${selectedProduct} pricing rule loaded.${editing?' Hold a protected field for 3 seconds to edit it.':''}`,'info');
+      message(`${selectedProduct} pricing rule loaded. Hold a protected field for 3 seconds to edit it.`,'info');
     }));
     document.querySelectorAll('.category-lock-field').forEach(bindLongPress);
-    ['categoryMarginInput','categoryTransportInput','categoryCommissionInput','categorySetDiscountInput','categoryFinalDiscountInput','categoryCommissionEnabled','categorySetDiscountEnabled','categoryFinalDiscountEnabled','categoryFuelChargeEnabled'].forEach(id=>byId(id)?.addEventListener('input',updateFormula));
+    ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTransportInput','categoryCommissionInput','categorySetDiscountInput','categoryFinalDiscountInput','categoryCommissionEnabled','categorySetDiscountEnabled','categoryFinalDiscountEnabled','categoryFuelChargeEnabled'].forEach(id=>{
+      byId(id)?.addEventListener('input',updateFormula);
+      byId(id)?.addEventListener('change',updateFormula);
+    });
   }
 
   function render(){
     if(!isOwner())return;
+    const list=categories();
+    if(selectedId&&!list.some(item=>item.id===selectedId))selectedId='';
     renderRows();showCurrencySummary();
-    if(!selectedId&&categories().length)openCategory(categories()[0],false);
+    if(!selectedId&&list.length)openCategory(list[0],false);
+    else if(selectedId){const category=currentCategory();if(category&&!editing){fill(category);setEditable(false)}}
     const notice=byId('categoryAccessNotice');
-    if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Select a category, then choose CHC or GWS.`;
+    if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Choose any category on the left to display it on the right.`;
   }
 
   function init(data,userAccess){access=userAccess||access;bind();render()}

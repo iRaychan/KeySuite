@@ -37,8 +37,10 @@
     ]);
     const failed=[companies,users,categories,products,gwsProducts,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
     const setting=settings.data?.[0]||{};
-    const usdMultiplier=Number(setting.usd_multiplier??5.8);
-    const rmbMultiplier=Number(setting.rmb_multiplier??.65);
+    const chcUsdMultiplier=Number(setting.chc_usd_multiplier??setting.usd_multiplier??5.8);
+    const chcRmbMultiplier=Number(setting.chc_rmb_multiplier??setting.rmb_multiplier??.65);
+    const gwsUsdMultiplier=Number(setting.gws_usd_multiplier??setting.usd_multiplier??5.8);
+    const gwsRmbMultiplier=Number(setting.gws_rmb_multiplier??setting.rmb_multiplier??.65);
     const parseRules=value=>{if(!value)return{};if(typeof value==='object')return value;try{return JSON.parse(value)}catch(_){return{}}};
     const normalizeRule=(raw={},fallback={})=>({
       margin:Number(raw.margin??fallback.margin??.38),
@@ -49,19 +51,23 @@
       includeCommission:raw.include_commission??raw.includeCommission??true,
       includeSetDiscount:raw.include_set_discount??raw.includeSetDiscount??true,
       includeFinalDiscount:raw.include_final_discount??raw.includeFinalDiscount??true,
-      includeFuelCharge:raw.include_fuel_charge??raw.includeFuelCharge??true
+      includeFuelCharge:raw.include_fuel_charge??raw.includeFuelCharge??true,
+      normal:Number(raw.normal??fallback.normal??0),
+      rare:Number(raw.rare??fallback.rare??0)
     });
     return {
-      version:'1.18',release_date:'2026-07-30',currency:setting.currency||'MYR',usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,myr_multiplier:1,
+      version:'1.19',release_date:'2026-07-30',currency:setting.currency||'MYR',
+      usd_multiplier:chcUsdMultiplier,rmb_multiplier:chcRmbMultiplier,myr_multiplier:1,
+      productMultipliers:{CHC:{USD:chcUsdMultiplier,RMB:chcRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1}},
       fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>{
-        const rules=parseRules(c.product_rules),fallback={margin:Number(c.chc_margin??c.chc_factor??.38),transport:Number(c.transport??30),commission:Number(c.commission??.03),setDiscount:Number(c.set_discount??.068),finalDiscount:Number(c.final_discount??.08)};
+        const rules=parseRules(c.product_rules),fallback={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),commission:Number(c.commission??.03),setDiscount:Number(c.set_discount??.068),finalDiscount:Number(c.final_discount??.08)};
         return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,fallback),GWS:normalizeRule(rules.GWS,fallback)},final_discount:fallback.finalDiscount,set_discount:fallback.setDiscount,commission:fallback.commission,margins:{CHC:fallback.margin},factors:{CHC:fallback.margin},transport:fallback.transport};
       }),
-      products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,pricesByCurrency:{USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},MYR:{CHC:p.chc_myr===null?null:Number(p.chc_myr),CHCS:p.chcs_myr===null?null:Number(p.chcs_myr),CHCN:p.chcn_myr===null?null:Number(p.chcn_myr)}}})),
-      gwsProducts:(gwsProducts.data||[]).map(p=>({id:p.id,model:p.model,source_row:p.source_row,pricesByCurrency:{USD:{'10':p.price_10_usd===null?null:Number(p.price_10_usd),'16':p.price_16_usd===null?null:Number(p.price_16_usd),'25':p.price_25_usd===null?null:Number(p.price_25_usd)},RMB:{'10':p.price_10_rmb===null?null:Number(p.price_10_rmb),'16':p.price_16_rmb===null?null:Number(p.price_16_rmb),'25':p.price_25_rmb===null?null:Number(p.price_25_rmb)},MYR:{'10':p.price_10_myr===null?null:Number(p.price_10_myr),'16':p.price_16_myr===null?null:Number(p.price_16_myr),'25':p.price_25_myr===null?null:Number(p.price_25_myr)}}}))
+      products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,rarityByVariant:{CHC:String(p.chc_rarity||'many').toLowerCase(),CHCS:String(p.chcs_rarity||'many').toLowerCase(),CHCN:String(p.chcn_rarity||'many').toLowerCase()},pricesByCurrency:{USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},MYR:{CHC:p.chc_myr===null?null:Number(p.chc_myr),CHCS:p.chcs_myr===null?null:Number(p.chcs_myr),CHCN:p.chcn_myr===null?null:Number(p.chcn_myr)}}})),
+      gwsProducts:(gwsProducts.data||[]).map(p=>({id:p.id,model:p.model,source_row:p.source_row,rarityByVariant:{'10':String(p.rarity_10||'many').toLowerCase(),'16':String(p.rarity_16||'many').toLowerCase(),'25':String(p.rarity_25||'many').toLowerCase()},pricesByCurrency:{USD:{'10':p.price_10_usd===null?null:Number(p.price_10_usd),'16':p.price_16_usd===null?null:Number(p.price_16_usd),'25':p.price_25_usd===null?null:Number(p.price_25_usd)},RMB:{'10':p.price_10_rmb===null?null:Number(p.price_10_rmb),'16':p.price_16_rmb===null?null:Number(p.price_16_rmb),'25':p.price_25_rmb===null?null:Number(p.price_25_rmb)},MYR:{'10':p.price_10_myr===null?null:Number(p.price_10_myr),'16':p.price_16_myr===null?null:Number(p.price_16_myr),'25':p.price_25_myr===null?null:Number(p.price_25_myr)}}}))
     };
   }
   async function loadUserProfile(email){

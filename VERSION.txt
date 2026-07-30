@@ -1,3 +1,3 @@
-KeySuite V1.18
+KeySuite V1.19
 PDF output base: V1.08 frozen
-Release: CHC/GWS multi-currency price lists, product-specific category rules, fixed quotation pricing customer, and mobile/product layout updates
+Release: Category switching and long-press fixes, per-product multipliers, and Common/Many/Rare pricing
