@@ -6,7 +6,6 @@
   let selectedProduct='CHC';
   let editing=false;
   let bound=false;
-  const unlocked=new Set();
 
   const byId=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -15,6 +14,7 @@
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
 
   const defaultRule=()=>({margin:.38,normal:0,rare:0,transport:30,commission:.03,setDiscount:.068,finalDiscount:.08,includeCommission:true,includeSetDiscount:true,includeFinalDiscount:true,includeFuelCharge:true});
+  const newCategoryRule=()=>({margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false});
 
   function message(text,type='info'){
     const box=byId('categoryMessage');if(!box)return;
@@ -45,24 +45,20 @@
     return {USD:Number(rates.USD??data.usd_multiplier??5.8),RMB:Number(rates.RMB??data.rmb_multiplier??.65),MYR:1};
   }
 
-  function setUnlockedState(key,on){
-    if(on)unlocked.add(key);else unlocked.delete(key);
-    const group=byId(`categoryLock_${key}`);if(!group)return;
-    group.classList.toggle('unlocked',on);group.classList.toggle('locked',!on);
-    group.querySelectorAll('input').forEach(input=>{if(input.type==='checkbox')input.disabled=!on;else input.readOnly=!on});
-    group.querySelector('.category-hold-button')?.classList.toggle('hidden',on);
-    const hint=group.querySelector('.hold-edit-hint');if(hint)hint.textContent=on?'Unlocked':'Hold 3s to edit';
+  function setRuleFieldsEditable(on){
+    document.querySelectorAll('#categoryForm .category-lock-field').forEach(group=>{
+      group.classList.toggle('unlocked',!!on);group.classList.toggle('locked',!on);
+      group.querySelectorAll('input').forEach(input=>{if(input.type==='checkbox')input.disabled=!on;else input.readOnly=!on});
+    });
   }
-
-  function resetLocks(){unlocked.clear();['margin','normal','rare','transport','commission','setDiscount','finalDiscount','fuelCharge'].forEach(key=>setUnlockedState(key,false))}
 
   function setEditable(on){
     editing=!!on;
     const name=byId('categoryNameInput');if(name)name.disabled=!editing;
-    const edit=byId('editCategoryRule');if(edit)edit.style.display=selectedId&&!editing?'inline-block':'none';
+    const edit=byId('editCategoryRule');if(edit){edit.style.display=selectedId&&!editing?'inline-block':'none';edit.textContent='Hold 3s to Edit'}
     const save=byId('saveCategoryRule');if(save)save.disabled=!editing;
     const cancel=byId('cancelCategoryEdit');if(cancel)cancel.disabled=!editing;
-    byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);resetLocks();
+    byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);setRuleFieldsEditable(editing);
   }
 
   function showCurrencySummary(){
@@ -85,12 +81,12 @@
   }
 
   function fillRule(category){
-    const rule=ruleFor(category,selectedProduct);
+    const rule=category?ruleFor(category,selectedProduct):newCategoryRule();
     byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');byId('categoryCommissionInput').value=num(rule.commission*100,2).replace(/,/g,'');byId('categorySetDiscountInput').value=num(rule.setDiscount*100,2).replace(/,/g,'');byId('categoryFinalDiscountInput').value=num(rule.finalDiscount*100,2).replace(/,/g,'');
     byId('categoryCommissionEnabled').checked=!!rule.includeCommission;byId('categorySetDiscountEnabled').checked=!!rule.includeSetDiscount;byId('categoryFinalDiscountEnabled').checked=!!rule.includeFinalDiscount;byId('categoryFuelChargeEnabled').checked=!!rule.includeFuelCharge;
     byId('categoryProductHeading').textContent=`${selectedProduct} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${selectedProduct} Margin (%)`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
-    resetLocks();showCurrencySummary();updateFormula();
+    setRuleFieldsEditable(editing);showCurrencySummary();updateFormula();
   }
 
   function fill(category=null){
@@ -98,9 +94,9 @@
     byId('categoryFormTitle').textContent=category?'Edit Category':'New Category';byId('categorySelectedName').textContent=category?name:'New Category';byId('categoryNameInput').value=name;fillRule(category);renderRows();
   }
 
-  function openCategory(category,forEdit=false){if(!category)return;fill(category);setEditable(forEdit);message(forEdit?'Editing enabled. Hold the lock control for 3 seconds to unlock a protected value.':'Category loaded. Hold a lock control for 3 seconds to edit a protected value.','info')}
+  function openCategory(category,forEdit=false){if(!category)return;fill(category);setEditable(forEdit);message(forEdit?'Editing enabled. All category fields are unlocked.':'Category loaded. Hold the Edit button for 3 seconds to unlock all fields.','info')}
 
-  function newCategory(){selectedProduct='CHC';fill(null);setEditable(true);message('New category ready. Enter the Category Name, then hold a protected field for 3 seconds to change its default.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
+  function newCategory(){selectedProduct='CHC';fill(null);setEditable(true);message('New category ready. All values start at 0.00 and are ready to edit.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
 
   function renderRows(){
     const body=byId('categoryRows');if(!body)return;const rows=categories();
@@ -140,26 +136,25 @@
 
   function cancel(){if(selectedId){const category=currentCategory();if(category)openCategory(category,false)}else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}}
 
-  function beginProtectedEdit(group,key){
-    if(!isOwner()||unlocked.has(key))return;
-    if(!editing){editing=true;const name=byId('categoryNameInput');if(name)name.disabled=false;const save=byId('saveCategoryRule');if(save)save.disabled=false;const cancelButton=byId('cancelCategoryEdit');if(cancelButton)cancelButton.disabled=false;const edit=byId('editCategoryRule');if(edit)edit.style.display='none';byId('categoryForm')?.classList.remove('category-form-readonly')}
-    setUnlockedState(key,true);message(`${group.dataset.lockLabel||key} unlocked. Edit the value, then press Save Category or Cancel.`,'info');const input=group.querySelector('input:not([type="checkbox"])');input?.focus();input?.select();
+  function unlockCategoryEditor(){
+    if(!isOwner()||!selectedId)return;
+    setEditable(true);message('All category fields unlocked. Edit the values, then press Save Category or Cancel.','info');byId('categoryNameInput')?.focus();byId('categoryNameInput')?.select();
   }
 
-  function bindLongHold(target,callback){
-    let timer=null,progress=null,start=0;
-    const stop=()=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');const hint=target.querySelector('.hold-edit-hint');if(hint&&!target.closest('.unlocked'))hint.textContent='Hold 3s to edit'};
-    target.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();start=Date.now();target.classList.add('holding');const hint=target.querySelector('.hold-edit-hint');progress=setInterval(()=>{if(hint)hint.textContent=`Hold ${Math.min(3,Math.max(1,Math.ceil((Date.now()-start)/1000)))}/3s`;},250);timer=setTimeout(()=>{stop();callback()},3000)});
-    ['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,stop));target.addEventListener('contextmenu',event=>event.preventDefault());
+  function bindEditLongHold(target,callback){
+    let timer=null,progress=null,start=0;const idle='Hold 3s to Edit';
+    const stop=(restore=true)=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');if(restore&&target.style.display!=='none')target.textContent=idle};
+    target.textContent=idle;
+    target.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();if(editing||!selectedId||!isOwner())return;start=Date.now();target.classList.add('holding');target.textContent='Hold 1/3s';progress=setInterval(()=>{const elapsed=Math.min(3,Math.max(1,Math.ceil((Date.now()-start)/1000)));target.textContent=`Hold ${elapsed}/3s`;},200);timer=setTimeout(()=>{stop(false);callback()},3000)});
+    ['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>stop(true)));target.addEventListener('click',event=>event.preventDefault());target.addEventListener('contextmenu',event=>event.preventDefault());
   }
 
   function bind(){
     if(bound)return;bound=true;
     byId('categoryForm')?.addEventListener('submit',save);byId('newPricingCategory')?.addEventListener('click',newCategory);byId('cancelCategoryEdit')?.addEventListener('click',cancel);
-    byId('editCategoryRule')?.addEventListener('click',()=>{if(!selectedId)return;setEditable(true);message('Editing enabled. Hold a lock control for 3 seconds to unlock a protected value.','info');byId('categoryNameInput')?.focus()});
+    const editButton=byId('editCategoryRule');if(editButton)bindEditLongHold(editButton,unlockCategoryEditor);
     byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
-    document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(`${selectedProduct} pricing rule loaded. Hold a lock control for 3 seconds to edit it.`,'info')}));
-    document.querySelectorAll('.category-lock-field').forEach(group=>{const key=group.dataset.lockKey,target=group.querySelector('.category-hold-button')||group;bindLongHold(target,()=>beginProtectedEdit(group,key))});
+    document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(editing?`${selectedProduct} pricing rule loaded. All fields are unlocked.`:`${selectedProduct} pricing rule loaded. Hold the Edit button for 3 seconds to unlock all fields.`,'info')}));
     ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTransportInput','categoryCommissionInput','categorySetDiscountInput','categoryFinalDiscountInput','categoryCommissionEnabled','categorySetDiscountEnabled','categoryFinalDiscountEnabled','categoryFuelChargeEnabled'].forEach(id=>{byId(id)?.addEventListener('input',updateFormula);byId(id)?.addEventListener('change',updateFormula)});
   }
 

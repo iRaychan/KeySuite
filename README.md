@@ -1,3 +1,7 @@
+# KeySuite V1.20.2
+
+Category editor usability update. No Supabase migration is required. Keep the existing `config.js`.
+
 # KeySuite V1.20
 
 Base: KeySuite V1.19. The approved V1.08 quotation PDF/print layout remains fully frozen and unchanged.

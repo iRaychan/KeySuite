@@ -1,3 +1,2 @@
-KeySuite V1.20.1
-PDF output base: V1.08 frozen
-Release: Category Name visibility hotfix
+KeySuite V1.20.2
+Category editor: hold the Edit button for 3 seconds to unlock all fields.
