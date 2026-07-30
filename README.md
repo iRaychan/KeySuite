@@ -1,3 +1,16 @@
+# KeySuite V1.21
+
+## V1.20.5 quotation item deletion hotfix
+
+- Allows deletion of the final remaining quotation item.
+- An empty quotation can remain open; use **+ Add Item** to add a new item.
+- Saving still requires at least one valid item.
+- No Supabase SQL update is required.
+- Keep the existing working `config.js`.
+- Frozen V1.08 PDF output layout remains unchanged.
+
+---
+
 # KeySuite V1.20.4
 
 
@@ -61,3 +74,10 @@ The invited user opens the email link and sets a password in KeySuite. Role/acce
 - Customer ID and Category ID remain database-only and are not shown on dashboards.
 - Source prices, rarity and multipliers are stored in Supabase, not embedded in public GitHub files.
 - Never upload a secret or service-role key into `config.js` or GitHub.
+
+
+## V1.21 quotation status
+
+Saved quotations remain editable. Seal locks all quotation fields and enables PDF output. Hold the Sealed button for five seconds to return it to Saved. Revise creates a separate v01/v02 revision with the original customer and date locked.
+
+Customer pricing is selected inside the quotation. The Customers page no longer carries a Quote/Quoted selection.
