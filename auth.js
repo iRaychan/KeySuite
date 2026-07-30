@@ -19,7 +19,7 @@
   function showLoading(text){el('loadingText').textContent=text||'Checking secure access…';setView('loading')}
   function friendly(error){const text=String(error?.message||'').toLowerCase();if(text.includes('invalid login credentials'))return 'The email or password is incorrect.';if(text.includes('email not confirmed'))return 'This email account has not been confirmed yet.';if(text.includes('rate limit'))return 'Too many attempts. Please try again later.';return error?.message||'Unable to sign in.'}
   function unlockSelector(){const frame=el('selectorFrame');if(frame&&frame.src==='about:blank')frame.src=frame.dataset.src||'selector/index.html'}
-  function lockSelector(){const frame=el('selectorFrame');if(frame&&frame.getAttribute('src')!=='about:blank')frame.src='about:blank'}
+  function lockSelector(){['selectorFrame','productSelectorFrame'].forEach(id=>{const frame=el(id);if(frame&&frame.getAttribute('src')!=='about:blank')frame.src='about:blank'})}
 
   async function verify(email){
     const {data,error}=await client.from('ks_user_access').select('email,employee_id,company_id,role,display_name,active').eq('email',String(email||'').toLowerCase()).limit(1);
@@ -36,7 +36,7 @@
     const usdMultiplier=Number(setting.usd_multiplier??(sourceCurrency==='USD'?setting.currency_multiplier:5.8)??5.8);
     const rmbMultiplier=Number(setting.rmb_multiplier??(sourceCurrency==='RMB'?setting.currency_multiplier:.65)??.65);
     const activeMultiplier=sourceCurrency==='RMB'?rmbMultiplier:usdMultiplier;
-    return {version:'1.16',release_date:'2026-07-30',currency:setting.currency||'MYR',source_currency:sourceCurrency,chc_source_currency:sourceCurrency,currency_multiplier:activeMultiplier,usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
+    return {version:'1.17',release_date:'2026-07-30',currency:setting.currency||'MYR',source_currency:sourceCurrency,chc_source_currency:sourceCurrency,currency_multiplier:activeMultiplier,usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)})),

@@ -1,26 +1,35 @@
-# KeySuite V1.16
+# KeySuite V1.17
 
-Base: KeySuite V1.14 with the V1.08 PDF output fully frozen.
+Base: KeySuite V1.16. The approved V1.08 quotation PDF layout remains frozen.
 
-## V1.16 changes
+## Changes in V1.17
 
-- Fixed the New Category action so the editor visibly resets and opens for input.
-- Reduced the Category list to Category and Edit only.
-- Enlarged the Edit Category area.
-- Commission, Set Discount and Final Discount are on one row.
-- Currency, Multiply, CHC Margin and Transport are on one row.
-- Added USD/RMB selection and a multiplier saved separately for every category.
-- Company & Pricing uses the selected customer's category currency and multiplier.
-- The PDF output layout remains unchanged.
+- Dashboard navigation changed to `Selector > CHC`.
+- Added `Product > CHC` for direct model browsing by CHC series.
+- Product CHC supports View Curve, Export / Share PDF and Add to Quotation without a duty point.
+- Added a mobile Export / Share PDF control beside Add to Quotation.
+- Category list now shows only category names. Selecting a category loads its saved values; Edit is in the editor header.
+- Customer details from Classification through Notes can be collapsed.
+- Added Quote selection beside each contact email.
+- Quote selection automatically updates the quotation Customer and Customer Name.
+- Customer & Quotation Details opens collapsed by default.
+
+## Supabase
+
+V1.17 has no new database migration. The V1.16 migration must already be installed for Price List and signatory profile saving:
+
+`setup/V116_SUPABASE_MIGRATION.sql`
+
+Do not rerun older migrations unless the corresponding earlier version was never installed.
 
 ## Installation
 
-1. Run `setup/V115_SUPABASE_MIGRATION.sql` in Supabase SQL Editor.
-2. Extract this package.
-3. Upload all public files and folders to the GitHub repository root, replacing matching files.
-4. Keep the existing working `config.js`; this package does not include it.
-5. Refresh KeySuite with `Ctrl + Shift + R` after GitHub Pages completes deployment.
+1. Extract this package.
+2. Upload all files and folders to the GitHub repository root, replacing matching files.
+3. Keep the existing working `config.js`; this package intentionally does not include it.
+4. Wait for GitHub Pages deployment to finish.
+5. Refresh KeySuite using `Ctrl + Shift + R`.
 
+## Mobile PDF sharing
 
-## V1.16 setup
-Run `setup/V116_SUPABASE_MIGRATION.sql` in Supabase before testing Price List or saving user signatory settings. Keep the existing working `config.js`.
+On supported mobile browsers, Export / Share PDF opens the device's native PDF/print sharing workflow, where WhatsApp or email may be selected. Browser and device support varies; standard PDF save/print remains the fallback.
