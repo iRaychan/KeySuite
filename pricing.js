@@ -19,7 +19,11 @@
   const n=(value,d=2)=>Number(value||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d});
   const cash=value=>`RM ${n(value,2)}`;
   const percent=value=>`${n(Number(value||0)*100,1)}%`;
-  const isOwner=()=>String(access?.role||'').toLowerCase()==='owner';
+  const role=()=>String(access?.role||window.KEYSUITE_ACCESS?.role||'viewer').toLowerCase();
+  const permissionLevel=key=>window.KeySuitePermissions?.level?.(key,role())||(role()==='owner'?'full':'none');
+  const canViewPricing=()=>permissionLevel('company_pricing')!=='none';
+  const canEditPricing=()=>permissionLevel('company_pricing')==='full';
+  const canChangeFuel=()=>permissionLevel('change_fuel_price')==='full';
   const roundUp10=value=>Math.ceil((Number(value||0)-1e-9)/10)*10;
   const normalizeRarity=value=>['common','many','rare'].includes(String(value||'').toLowerCase())?String(value).toLowerCase():'common';
   const rarityLabel=value=>({common:'Common',many:'Many',rare:'Rare'})[normalizeRarity(value)];
@@ -101,13 +105,13 @@
   function fillSelects(){
     const cs=byId('pricingCompanySelect'),cats=byId('pricingCategorySelect'),list=customersList();
     if(cs){cs.innerHTML='<option value="">Select customer/company</option>'+list.map(x=>`<option value="${e(x.id)}">${e(x.company)}</option>`).join('');cs.value=list.some(x=>x.id===companyId)?companyId:''}
-    if(cats){cats.innerHTML='<option value="">No pricing category assigned</option>'+(secureData.categories||[]).map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join('');cats.value=categoryId;cats.disabled=!isOwner()||!company()}
-    const save=byId('savePricingCategory');if(save){save.style.display=isOwner()?'inline-block':'none';save.disabled=!company()}
+    if(cats){cats.innerHTML='<option value="">No pricing category assigned</option>'+(secureData.categories||[]).map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join('');cats.value=categoryId;cats.disabled=!canEditPricing()||!company()}
+    const save=byId('savePricingCategory');if(save){save.style.display=canEditPricing()?'inline-block':'none';save.disabled=!company()}
   }
 
   function renderFuelSetting(){
     const input=byId('pricingFuelPrice'),button=byId('saveFuelPrice'),message=byId('pricingFuelMessage');if(!input||!button||!message)return;
-    if(document.activeElement!==input)input.value=Number(secureData.fuel_price??2).toFixed(2);input.disabled=!isOwner();button.disabled=!isOwner();button.style.display=isOwner()?'inline-block':'none';message.textContent=isOwner()?`Saved globally until changed. Base fuel price: ${cash(secureData.fuel_base_price??2)}/L`:`Current fuel price: ${cash(secureData.fuel_price??2)}/L`;
+    if(document.activeElement!==input)input.value=Number(secureData.fuel_price??2).toFixed(2);input.disabled=!canChangeFuel();button.disabled=!canChangeFuel();button.style.display=canChangeFuel()?'inline-block':'none';message.textContent=canChangeFuel()?`Saved globally until changed. Base fuel price: ${cash(secureData.fuel_base_price??2)}/L`:`Current fuel price: ${cash(secureData.fuel_price??2)}/L`;
   }
 
   function ruleSummary(cat,family){
@@ -194,16 +198,16 @@
   }
 
   async function savePricingCategory(){
-    if(!isOwner()){alert('Only the Owner can assign a Pricing Category.');return}
+    if(!canEditPricing()){alert('Your role is not allowed to assign a Pricing Category.');return}
     const c=company(),message=byId('pricingCategoryMessage'),button=byId('savePricingCategory');if(!c){alert('Select a customer/company first.');return}
     const next=byId('pricingCategorySelect')?.value||'';button.disabled=true;button.textContent='Saving…';try{await window.KeySuiteApp?.updateCustomerPricingCategory?.(c.id,next);categoryId=next;if(message)message.textContent=next?`Pricing Category saved for ${c.company}.`:`Pricing Category removed from ${c.company}.`;renderSummary();renderTable();refreshQuotePrices()}catch(error){console.error(error);alert(`Pricing Category could not be saved: ${error.message||error}`)}finally{button.disabled=false;button.textContent='Save Category'}
   }
 
   async function saveFuelPrice(){
-    if(!isOwner()){alert('Only the Owner can change Fuel Price.');return}
+    if(!canChangeFuel()){alert('Your role is not allowed to change Fuel Price.');return}
     const input=byId('pricingFuelPrice'),button=byId('saveFuelPrice'),message=byId('pricingFuelMessage'),value=Number(input?.value);if(!Number.isFinite(value)||value<0){alert('Enter a valid Fuel Price.');return}
     const client=window.KeySuiteAuth?.getClient?.();if(!client){alert('Supabase is not connected.');return}
-    const originalButton=button.innerHTML;button.disabled=true;button.textContent='…';try{const {data,error}=await client.from('ks_app_settings').update({fuel_price:value}).eq('id','default').select('fuel_price,fuel_base_price').single();if(error)throw error;secureData.fuel_price=Number(data?.fuel_price??value);secureData.fuel_base_price=Number(data?.fuel_base_price??secureData.fuel_base_price??2);if(window.KEYSUITE_SECURE_DATA){window.KEYSUITE_SECURE_DATA.fuel_price=secureData.fuel_price;window.KEYSUITE_SECURE_DATA.fuel_base_price=secureData.fuel_base_price}message.textContent=`Saved: ${cash(secureData.fuel_price)}/L · Base ${cash(secureData.fuel_base_price)}/L`;renderSummary();renderTable();refreshQuotePrices()}catch(error){console.error(error);alert(`Fuel Price could not be saved: ${error.message||error}`)}finally{button.disabled=!isOwner();button.innerHTML=originalButton}
+    const originalButton=button.innerHTML;button.disabled=true;button.textContent='…';try{const {data,error}=await client.rpc('keysuite_save_fuel_price_v124',{p_fuel_price:value});if(error)throw error;const saved=Array.isArray(data)?data[0]:data||{};secureData.fuel_price=Number(saved?.fuel_price??value);secureData.fuel_base_price=Number(saved?.fuel_base_price??secureData.fuel_base_price??2);if(window.KEYSUITE_SECURE_DATA){window.KEYSUITE_SECURE_DATA.fuel_price=secureData.fuel_price;window.KEYSUITE_SECURE_DATA.fuel_base_price=secureData.fuel_base_price}message.textContent=`Saved: ${cash(secureData.fuel_price)}/L · Base ${cash(secureData.fuel_base_price)}/L`;renderSummary();renderTable();refreshQuotePrices()}catch(error){console.error(error);alert(`Fuel Price could not be saved: ${error.message||error}. Run the V1.24 Supabase migration.`)}finally{button.disabled=!canChangeFuel();button.innerHTML=originalButton}
   }
 
   function exportCsv(){

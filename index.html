@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.22</title>
+  <title>KeySuite V1.24</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -31,7 +31,7 @@
     @media(max-width:900px){.customer-layout{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap;width:auto}.grid-4,.grid-2,.form-grid{grid-template-columns:1fr 1fr}main{padding:14px}}
     @media(max-width:560px){.grid-4,.grid-2,.form-grid,.selector-toolbar,.contact-row{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.quote-head{display:block}}
 
-    .quote-top-controls{display:grid;grid-template-columns:110px 380px;gap:10px;align-items:end;justify-content:end;flex:none;margin-left:auto}
+    .quote-top-controls{display:grid;grid-template-columns:110px 190px;gap:10px;align-items:end;justify-content:end;flex:none;margin-left:auto}
     .quote-top-controls>.btn{height:42px;padding:8px 12px;white-space:nowrap}
     .quote-top-controls>div>label{white-space:nowrap}
     .signature-inline{min-width:0}
@@ -47,7 +47,7 @@
     dialog.ks-dialog{border:0;border-radius:12px;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,calc(100vw - 32px))}
     dialog.ks-dialog::backdrop{background:rgba(15,23,42,.45)}
     .dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-    @media(max-width:900px){.quote-top-controls{grid-template-columns:110px minmax(240px,380px)}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
+    @media(max-width:900px){.quote-top-controls{grid-template-columns:110px minmax(160px,190px)}.date-rev-row{grid-template-columns:1fr}.short-field{max-width:none}}
     @media print{
       aside,.no-print,#dashboard,#customers,#selector,#history{display:none!important}
       .app{display:block}.page{display:none!important}#quotation{display:block!important}main{padding:0}.card{border:0;box-shadow:none}.print-hide{display:none!important}
@@ -135,6 +135,12 @@
     .pricing-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.pricing-layout{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(430px,1.15fr);gap:16px;margin-top:16px}.pricing-kv{display:grid;grid-template-columns:170px 1fr;gap:8px;border-bottom:1px solid #edf1f6;padding:8px 0}.pricing-kv b{color:#38475c}.pricing-toolbar{display:grid;grid-template-columns:minmax(220px,1.3fr) minmax(150px,.65fr) minmax(160px,.65fr) auto;gap:12px;align-items:end}.pricing-check{display:flex;gap:8px;align-items:center;height:42px;font-weight:400;margin:0}.pricing-check input{width:auto}.pricing-rule{line-height:1.55}.pricing-count{margin-top:10px}.pricing-table td,.pricing-table th{white-space:nowrap}.pricing-table .num{text-align:right}.pricing-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:700}.pricing-badge.ok{background:#dcfce7;color:#166534}.pricing-badge.warn{background:#fff7ed;color:#9a3412}
     @media(max-width:1050px){.pricing-metrics{grid-template-columns:1fr 1fr}.pricing-layout{grid-template-columns:1fr}.pricing-toolbar{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){.pricing-metrics,.pricing-toolbar{grid-template-columns:1fr}.pricing-kv{grid-template-columns:1fr}.user-panel{display:none}}
+
+    .quote-number-field{min-width:380px}.quote-number-field input{width:100%}.quote-top-controls{grid-template-columns:110px minmax(380px,380px)}
+    .pricelist-settings{grid-template-columns:repeat(3,minmax(220px,1fr));align-items:stretch}.pricelist-settings>div{min-height:100%}.pricelist-settings>div:first-child{display:grid;align-content:end}.pricelist-multiplier-lock{display:grid;grid-template-rows:auto 42px auto auto;align-content:end}.pricelist-multiplier-lock input{height:42px}
+    .permission-title-actions{display:flex;align-items:center;gap:10px}.permission-edit-hold{min-width:150px}.permission-edit-hold.counting{background:#fff7ed;border-color:#f59e0b;color:#92400e}.permission-table select{min-width:104px;padding:7px 8px}.permission-table.editing td{background:#fffdf5}.permission-fixed{font-size:11px;font-weight:800;color:#92400e}.permission-value{font-weight:700;text-transform:capitalize}.permission-value.none{color:#991b1b}.permission-value.full,.permission-value.all{color:#166534}.permission-value.own,.permission-value.assigned,.permission-value.view{color:#92400e}
+    @media(max-width:900px){.quote-number-field{min-width:0}.quote-top-controls{grid-template-columns:110px minmax(260px,1fr)}.pricelist-settings{grid-template-columns:1fr}}
+
     @media print{#loginView,#loadingView{display:none!important}}
 
 
@@ -148,7 +154,7 @@
     .pricing-title-tools{display:flex;align-items:flex-end;gap:10px;min-width:250px}.fuel-inline-setting{display:grid;gap:5px}.fuel-inline-setting label{margin:0;font-size:12px}.fuel-inline-row{display:flex;align-items:stretch;gap:7px}.fuel-money-input{display:flex;align-items:center;width:122px;height:42px;border:1px solid #ccd6e2;border-radius:8px;background:#fff;overflow:hidden}.fuel-money-input:focus-within{border-color:#557ca8;box-shadow:0 0 0 3px rgba(37,99,235,.10)}.fuel-money-input span{padding-left:10px;font-weight:700;color:#526275}.fuel-money-input input{width:78px;height:40px;border:0!important;box-shadow:none!important;padding:9px 8px 9px 5px}.icon-save-button{display:grid;place-items:center;width:42px;min-width:42px;height:42px;padding:0}.icon-save-button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.pricing-fuel-note{font-size:11px;color:var(--muted);min-height:14px;max-width:250px}
     .category-layout{display:grid;grid-template-columns:minmax(220px,.35fr) minmax(650px,1.65fr);gap:16px;align-items:start}.category-form-grid{display:grid;gap:14px}.category-discount-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.category-cost-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.category-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.category-table{table-layout:fixed}.category-table td,.category-table th{vertical-align:middle}.category-table th:last-child,.category-table td:last-child{width:74px;text-align:right}.category-table .btn{padding:9px 14px}.category-row-selected{background:#eef6ff}.category-empty{padding:28px;text-align:center;color:var(--muted)}.category-editor-active{outline:3px solid rgba(26,86,153,.16);box-shadow:0 0 0 5px rgba(26,86,153,.06)}
     @media(max-width:1050px){.category-layout{grid-template-columns:minmax(190px,.45fr) minmax(500px,1.55fr)}.category-cost-row{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:900px){.key-dashboard-grid{grid-template-columns:1fr 1fr}.category-layout{grid-template-columns:1fr}.pricing-title-tools{width:100%;justify-content:flex-start}.page-title-row{flex-wrap:wrap}}@media(max-width:620px){.category-discount-row,.category-cost-row{grid-template-columns:1fr}.key-dashboard-grid{grid-template-columns:1fr}.fuel-money-input{width:118px}}
-    .pricelist-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,320px));gap:16px}.pricelist-settings{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(220px,1fr) minmax(220px,1fr);gap:14px;align-items:end}.pricelist-setting-row{display:grid;grid-template-columns:1fr 42px;gap:8px;align-items:end}.pricelist-table input{min-width:118px;text-align:right}.pricelist-table td,.pricelist-table th{vertical-align:middle;white-space:nowrap}.currency-price-input{display:flex;align-items:center;border:1px solid #ccd6e2;border-radius:8px;background:#fff;overflow:hidden;min-width:132px}.currency-price-input span{padding-left:9px;font-size:12px;font-weight:700;color:#526275}.currency-price-input input{border:0!important;box-shadow:none!important;min-width:88px;padding-left:6px}.pricelist-row-actions{width:54px;text-align:right}.pricelist-note{font-size:12px;color:var(--muted);line-height:1.45}.price-list-search{max-width:360px}.price-rarity-cell{display:grid;grid-template-columns:minmax(118px,1fr) minmax(92px,110px);gap:7px;align-items:center}.price-rarity-cell select{min-width:92px;padding-left:8px}.pricelist-multiplier-lock{position:relative;border:1px solid #dbe3ec;border-radius:9px;padding:9px;background:#f8fafc;transition:.2s}.pricelist-multiplier-lock.holding{box-shadow:inset 0 0 0 3px #f2c94c}.pricelist-multiplier-lock.unlocked{border-color:#16a34a;background:#f0fdf4}.pricelist-multiplier-lock label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.pricelist-multiplier-lock input[readonly]{background:#f8fafc;color:#526275;cursor:pointer;user-select:none}.multiplier-hold-feedback{min-height:0;margin-top:0;font-size:11px;font-weight:700;color:#7a5b00}.pricelist-multiplier-lock.unlocked .multiplier-hold-feedback{color:#15803d}.pricing-family-tabs{display:flex;gap:8px;margin-top:14px;border-bottom:1px solid #e2e8f0;padding-bottom:10px}.pricing-family-tab{min-width:92px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155;border-radius:8px;padding:9px 18px;font-weight:800;cursor:pointer}.pricing-family-tab.active{background:#17365d;border-color:#17365d;color:#fff}.pricing-formula-toggle{margin-left:auto}.pricing-family-formulas{white-space:pre-line;line-height:1.65}.category-formula-lines{display:grid;gap:8px}.category-formula-line{padding:8px 10px;border-radius:7px;background:#f8fafc}.category-formula-line b{display:inline-block;min-width:68px;color:var(--navy)}@media(max-width:850px){.pricelist-settings{grid-template-columns:1fr}.key-dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.pricelist-settings,.key-dashboard-grid{grid-template-columns:1fr}.pricing-formula-toggle{margin-left:0}}
+    .pricelist-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,320px));gap:16px}.pricelist-settings{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(220px,1fr) minmax(220px,1fr);gap:14px;align-items:end}.pricelist-setting-row{display:grid;grid-template-columns:1fr 42px;gap:8px;align-items:end}.pricelist-table input{min-width:118px;text-align:right}.pricelist-table td,.pricelist-table th{vertical-align:middle;white-space:nowrap}.currency-price-input{display:flex;align-items:center;border:1px solid #ccd6e2;border-radius:8px;background:#fff;overflow:hidden;min-width:132px}.currency-price-input span{padding-left:9px;font-size:12px;font-weight:700;color:#526275}.currency-price-input input{border:0!important;box-shadow:none!important;min-width:88px;padding-left:6px}.pricelist-row-actions{width:54px;text-align:right}.pricelist-note{font-size:12px;color:var(--muted);line-height:1.45}.price-list-search{max-width:360px}.price-rarity-cell{display:grid;grid-template-columns:minmax(118px,1fr) minmax(92px,110px);gap:7px;align-items:center}.price-rarity-cell select{min-width:92px;padding-left:8px}.pricelist-multiplier-lock{position:relative;border:1px solid #dbe3ec;border-radius:9px;padding:9px;background:#f8fafc;transition:.2s}.pricelist-multiplier-lock.holding{box-shadow:inset 0 0 0 3px #f2c94c}.pricelist-multiplier-lock.unlocked{border-color:#16a34a;background:#f0fdf4}.pricelist-multiplier-lock label{display:block}.pricelist-multiplier-lock input[readonly]{background:#f8fafc;color:#526275;cursor:pointer;user-select:none}.multiplier-hold-feedback{min-height:16px;margin-top:5px;font-size:11px;font-weight:700;color:#7a5b00}.pricelist-multiplier-lock.unlocked .multiplier-hold-feedback{color:#15803d}.pricing-family-tabs{display:flex;gap:8px;margin-top:14px;border-bottom:1px solid #e2e8f0;padding-bottom:10px}.pricing-family-tab{min-width:92px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155;border-radius:8px;padding:9px 18px;font-weight:800;cursor:pointer}.pricing-family-tab.active{background:#17365d;border-color:#17365d;color:#fff}.pricing-family-formulas{white-space:pre-line;line-height:1.65}.category-formula-lines{display:grid;gap:8px}.category-formula-line{padding:8px 10px;border-radius:7px;background:#f8fafc}.category-formula-line b{display:inline-block;min-width:68px;color:var(--navy)}@media(max-width:850px){.pricelist-settings{grid-template-columns:1fr}.key-dashboard-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.pricelist-settings,.key-dashboard-grid{grid-template-columns:1fr}}
     .role-title-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.permissions-dialog{width:min(1100px,calc(100vw - 28px))!important}.permission-table th,.permission-table td{vertical-align:middle;text-align:center;white-space:nowrap}.permission-table th:first-child,.permission-table td:first-child{text-align:left;white-space:normal;min-width:210px}.permission-yes{color:#166534;font-weight:700}.permission-limited{color:#92400e;font-weight:700}.permission-no{color:#991b1b;font-weight:700}.permission-key-row{background:#fffbeb}.permission-key-row td{border-top:2px solid #f3d678;border-bottom:2px solid #f3d678}.permissions-note{margin-top:12px;padding:11px 13px;border-radius:9px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:12px;line-height:1.45}@media(max-width:720px){.permission-table{font-size:12px}.role-title-actions{width:100%}.role-title-actions .btn{flex:1}}
 
     .nav-group{margin:5px 0}.nav-toggle{display:flex!important;align-items:center;justify-content:space-between}.nav-toggle .nav-chevron{transition:transform .18s ease}.nav-group.open .nav-chevron{transform:rotate(180deg)}.nav-submenu{display:none;padding-left:12px}.nav-group.open .nav-submenu{display:block}.nav-submenu button{font-size:13px;padding:9px 14px;margin:3px 0;background:rgba(255,255,255,.06)}
@@ -171,12 +177,23 @@
     .gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
 
     .quote-status-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.quote-status-badge{display:inline-flex;align-items:center;justify-content:center;min-width:78px;height:34px;padding:0 12px;border-radius:999px;background:#e2e8f0;color:#334155;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.quote-status-badge.saved{background:#dbeafe;color:#1d4ed8}.quote-status-badge.sealed{background:#dcfce7;color:#166534}.quote-status-badge.revision{background:#fef3c7;color:#92400e}.locked-customer-field,.quotation-locked input:disabled,.quotation-locked select:disabled,.quotation-locked textarea:disabled{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important;opacity:1!important}.customer-name-locked{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important}.seal-button.sealed{background:#166534;color:#fff;border-color:#166534}.seal-button.counting{background:#b45309;color:#fff;border-color:#b45309}.revision-note{font-size:12px;color:#92400e;font-weight:700}.export-center-hidden{display:none!important}
+
+    /* V1.24 final UI alignment overrides */
+    .pricelist-currency-setting{border:1px solid #dbe3ec;border-radius:9px;padding:9px;background:#f8fafc;display:grid!important;grid-template-rows:auto 42px auto;align-content:end}.pricelist-currency-setting label{display:block}.pricelist-currency-setting select{height:42px}
+
+    .pricelist-settings{display:grid!important;grid-template-columns:repeat(3,minmax(220px,1fr))!important;gap:14px!important;align-items:stretch!important}
+    .pricelist-settings>div{min-height:100%}
+    .pricelist-settings>div:first-child{display:grid;align-content:end}
+    .pricelist-multiplier-lock{display:grid;grid-template-rows:auto 42px auto auto;align-content:end}
+    .pricelist-multiplier-lock input{height:42px}
+    @media(max-width:850px){.pricelist-settings{grid-template-columns:1fr!important}}
+
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.23 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.24 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -191,7 +208,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.23</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.24</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -212,7 +229,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.23 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.24 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -225,7 +242,7 @@
         <div class="card metric"><span class="muted">Pending</span><b id="mPending">0</b></div>
       </div>
       <div class="grid grid-2" style="margin-top:16px">
-        <div class="card"><h2>Start</h2><p class="muted">Create a customer first, then select a CHC pump and prepare the quotation.</p><div class="actions"><button class="btn" data-go="customers">Add Customer</button><button class="btn green" data-go="quotation">Quote</button></div></div>
+        <div class="card"><h2>Start</h2><p class="muted">Create a customer first, then select a CHC pump and prepare the quotation.</p><div class="actions"><button class="btn" data-go="customers">Add Customer</button><button class="btn green" data-go="selector">New CHC Quote</button></div></div>
         <div class="card"><h2>Testing Notes</h2><textarea id="testingNotes" placeholder="Write anything that feels slow, confusing or missing during your one-week trial..."></textarea><div class="actions"><button class="btn secondary" id="saveNotes">Save Notes</button></div></div>
       </div>
       <div class="card" style="margin-top:16px"><h2>Recent Quotations</h2><div class="table-wrap"><table><thead><tr><th>No.</th><th>Customer</th><th>Model</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentQuotes"></tbody></table></div></div>
@@ -371,7 +388,7 @@
         <div><h1>Quotation</h1></div>
         <div class="quote-top-controls">
           <button class="btn green no-print export-center-hidden" type="button" id="topPrintQuote">PDF</button>
-          <div><label>Quotation No.</label><input id="quoteNo"></div>
+          <div class="quote-number-field"><label>Quotation No.</label><input id="quoteNo"></div>
           <input id="preparedBy" type="hidden">
           <input id="preparedByDesignation" type="hidden">
         </div>
@@ -386,8 +403,8 @@
         <div class="form-grid">
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Customer Name</label><select id="qContact"></select></div>
-          <div><label>Printed Customer</label><input id="qPrintedCompany" placeholder="Customer shown on PDF"></div>
-          <div><label>Printed Contact Name</label><input id="qPrintedContact" placeholder="Contact shown on PDF"></div>
+          <input id="qPrintedCompany" type="hidden">
+          <input id="qPrintedContact" type="hidden">
           <div class="date-rev-row">
             <div><label>Date</label><input id="qDate" type="date"></div>
             <div><label>Revision Date</label><input id="qRevisionDate" type="date"></div>
@@ -591,9 +608,9 @@
       <div id="chcPriceListMessage" class="auth-message"></div>
       <div class="card">
         <div class="pricelist-settings">
-          <div><label>Currency Selection</label><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
-          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><label>USD → MYR <span class="multiplier-hold-feedback" id="chcUsdMultiplierHint">(Hold 3s to edit)</span></label><input id="chcUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="chcUsdMultiplierHint"><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
-          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><label>RMB → MYR <span class="multiplier-hold-feedback" id="chcRmbMultiplierHint">(Hold 3s to edit)</span></label><input id="chcRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="chcRmbMultiplierHint"><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><label>USD → MYR</label><input id="chcUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="chcUsdMultiplierHint"><div class="multiplier-hold-feedback" id="chcUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="chcRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="chcRmbMultiplierHint"><div class="multiplier-hold-feedback" id="chcRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
         <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to view and save that currency's independent prices. CHC keeps its own rates. Press and hold directly on a locked USD or RMB input for 3 seconds; the countdown appears below the input.</div>
       </div>
@@ -614,9 +631,9 @@
       <div id="gwsPriceListMessage" class="auth-message"></div>
       <div class="card">
         <div class="pricelist-settings">
-          <div><label>Currency Selection</label><select id="gwsPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
-          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><label>USD → MYR <span class="multiplier-hold-feedback" id="gwsUsdMultiplierHint">(Hold 3s to edit)</span></label><input id="gwsUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="gwsUsdMultiplierHint"><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
-          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><label>RMB → MYR <span class="multiplier-hold-feedback" id="gwsRmbMultiplierHint">(Hold 3s to edit)</span></label><input id="gwsRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="gwsRmbMultiplierHint"><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="gwsPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><label>USD → MYR</label><input id="gwsUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="gwsUsdMultiplierHint"><div class="multiplier-hold-feedback" id="gwsUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="gwsRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="gwsRmbMultiplierHint"><div class="multiplier-hold-feedback" id="gwsRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
         <div class="pricelist-note" style="margin-top:12px">GWS keeps its own USD and RMB rates. Press and hold directly on a locked input for 3 seconds, then edit and press Save. Each currency keeps an independent GWS price list.</div>
       </div>
@@ -662,10 +679,9 @@
           <div class="pricing-family-tabs" id="pricingFamilyTabs" role="tablist" aria-label="Product pricing rule">
             <button class="pricing-family-tab active" type="button" role="tab" aria-selected="true" data-pricing-family="CHC">CHC</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="GWS">GWS</button>
-            <button class="btn secondary pricing-formula-toggle" id="togglePricingFormula" type="button" aria-expanded="false">Show Formula</button>
           </div>
           <div id="pricingCategorySummary" class="pricing-rule" style="margin-top:12px"></div>
-          <div class="formula pricing-family-formulas" id="pricingFormula" style="margin-top:14px;display:none"></div>
+          <div class="formula pricing-family-formulas" id="pricingFormula" style="margin-top:14px"></div>
         </div>
       </div>
 
@@ -694,7 +710,7 @@
     <div class="form-grid">
       <div class="span-2"><label>Email *</label><input id="roleUserEmail" type="email" autocomplete="off" placeholder="name@keylargo.com.my" required></div>
       <div class="span-2"><label>Display Name *</label><input id="roleUserDisplayName" autocomplete="off" required></div>
-      <div><label>Role</label><select id="roleUserRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="user" selected>User</option><option value="dealer">Dealer</option><option value="viewer">Viewer</option></select></div>
+      <div><label>Role</label><select id="roleUserRole"><option value="viewer">Viewer</option><option value="dealer">Dealer</option><option value="user" selected>User</option><option value="admin">Admin</option><option value="owner">Owner</option></select></div>
       <div><label>Status</label><select id="roleUserActive"><option value="true" selected>Active</option><option value="false">Inactive</option></select></div>
     </div>
     <div id="roleInviteRow" class="role-invite-option"><label><input id="roleSendInvite" type="checkbox" checked> Send login invitation email so the user can create their own password</label><div class="role-note" style="margin-top:7px">Requires the included Supabase Edge Function <b>keysuite-invite-user</b>.</div></div>
@@ -705,29 +721,18 @@
 <dialog id="rolePermissionsDialog" class="ks-dialog permissions-dialog">
   <div class="dialog-body">
     <div class="page-title-row" style="margin-bottom:14px">
-      <div><h2 style="margin:0">Role Permissions</h2><div class="muted">What each KeySuite role can and cannot access.</div></div>
-      <button id="closeRolePermissions" class="dialog-close" type="button" aria-label="Close">×</button>
+      <div><h2 style="margin:0">Role Permissions</h2><div class="muted">Viewer to Owner. The Owner can customise each role's authority.</div></div>
+      <div class="permission-title-actions"><button id="editRolePermissions" class="btn secondary permission-edit-hold" type="button">Hold 5s to Edit</button><button id="closeRolePermissions" class="dialog-close" type="button" aria-label="Close">×</button></div>
     </div>
+    <div id="rolePermissionsMessage" class="auth-message"></div>
     <div class="table-wrap">
       <table class="permission-table">
-        <thead><tr><th>Function</th><th>Owner</th><th>Admin</th><th>User</th><th>Dealer</th><th>Viewer</th></tr></thead>
-        <tbody>
-          <tr class="permission-key-row"><td><b>Key button / Key Dashboard</b></td><td class="permission-yes">Visible</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td><td class="permission-no">Hidden</td></tr>
-          <tr><td>Assign roles and account status</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
-          <tr><td>Company &amp; Pricing</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
-          <tr><td>Create / edit pricing categories</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
-          <tr><td>Change Fuel Price</td><td class="permission-yes">Yes</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
-          <tr><td>View customers</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Assigned</td><td class="permission-limited">Own</td><td class="permission-limited">Assigned, view only</td></tr>
-          <tr><td>Add / edit customers</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Assigned only</td><td class="permission-limited">Own only</td><td class="permission-no">No</td></tr>
-          <tr><td>Customer assignment and distance</td><td class="permission-yes">Full</td><td class="permission-yes">Full</td><td class="permission-no">No</td><td class="permission-no">No</td><td class="permission-no">No</td></tr>
-          <tr><td>Create quotations</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-no">No</td></tr>
-          <tr><td>View quotations</td><td class="permission-yes">All</td><td class="permission-yes">All</td><td class="permission-limited">Own / assigned</td><td class="permission-limited">Own</td><td class="permission-limited">Assigned, view only</td></tr>
-          <tr><td>Own profile and password</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td><td class="permission-yes">Yes</td></tr>
-        </tbody>
+        <thead><tr><th>Function</th><th>Viewer</th><th>Dealer</th><th>User</th><th>Admin</th><th>Owner</th></tr></thead>
+        <tbody id="rolePermissionsRows"></tbody>
       </table>
     </div>
-    <div class="permissions-note"><b>Owner-only protection:</b> the gold Key button is removed from every non-Owner account. Direct navigation to Key pages is also blocked.</div>
-    <div class="dialog-actions"><button class="btn" id="closeRolePermissionsBottom" type="button">Close</button></div>
+    <div class="permissions-note"><b>Safety:</b> Owner access to the Key Dashboard and Role management cannot be removed, preventing the system from being locked without an administrator.</div>
+    <div class="dialog-actions"><button class="btn secondary" id="cancelRolePermissions" type="button" style="display:none">Cancel</button><button class="btn" id="saveRolePermissions" type="button" style="display:none">Save Permissions</button><button class="btn" id="closeRolePermissionsBottom" type="button">Close</button></div>
   </div>
 </dialog>
 
@@ -828,12 +833,13 @@
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js?v=122"></script>
-<script src="pricing.js?v=122"></script>
-<script src="categories.js?v=122"></script>
-<script src="pricelist.js?v=122"></script>
-<script src="product.js?v=122"></script>
-<script src="roles.js?v=122"></script>
+<script src="permissions.js?v=124"></script>
+<script src="app.js?v=124"></script>
+<script src="pricing.js?v=124"></script>
+<script src="categories.js?v=124"></script>
+<script src="pricelist.js?v=124"></script>
+<script src="product.js?v=124"></script>
+<script src="roles.js?v=124"></script>
 
 <dialog id="productCurveDialog" class="ks-dialog product-curve-dialog">
   <div class="dialog-body">
@@ -841,6 +847,6 @@
     <div id="productCurveHost"></div>
   </div>
 </dialog>
-<script src="auth.js?v=122"></script>
+<script src="auth.js?v=124"></script>
 </body>
 </html>

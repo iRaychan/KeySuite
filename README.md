@@ -1,4 +1,30 @@
-# KeySuite V1.23
+# KeySuite V1.24
+
+## Required Supabase update
+
+Run `setup/V124_SUPABASE_MIGRATION.sql` before testing the custom Role Permissions editor. The migration stores the permission matrix per company and keeps Owner safeguards for Key Dashboard, Role management and own profile access.
+
+## V1.24 changes
+
+- Removed the visible Printed Customer and Printed Contact Name inputs from Quotation. The internal customer/contact values remain available for the frozen PDF output.
+- Quotation No. input is approximately twice the previous width.
+- Price List Currency Selection, USD → MYR and RMB → MYR controls are aligned.
+- Role Permission columns now run from Viewer to Owner.
+- Owner can hold the Edit button for five seconds; a live countdown unlocks the complete permission matrix.
+- Save Permissions stores the authority settings in Supabase.
+- Owner Key Dashboard, Role management and own profile permissions remain fixed to avoid accidental lockout.
+- The V1.08 quotation PDF layout remains fully frozen and unchanged.
+
+## Upload
+
+1. Run the V1.24 Supabase migration.
+2. Upload all public files and folders to the GitHub repository root.
+3. Keep the existing working `config.js`.
+4. Refresh with `Ctrl + Shift + R`.
+
+---
+
+# KeySuite V1.22
 
 ## V1.20.5 quotation item deletion hotfix
 
@@ -83,7 +109,7 @@ Saved quotations remain editable. Seal locks all quotation fields and enables PD
 Customer pricing is selected inside the quotation. The Customers page no longer carries a Quote/Quoted selection.
 
 
-## V1.23 pricing interface update
+## V1.22 pricing interface update
 
 - Price List USD→MYR and RMB→MYR multipliers are unlocked by holding directly on the input for 3 seconds.
 - The countdown appears below the held input; the separate hold button was removed.

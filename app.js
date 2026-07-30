@@ -22,15 +22,30 @@ document.querySelectorAll('[data-nav-toggle]').forEach(button=>button.addEventLi
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
-const OWNER_ONLY_PAGES=new Set(['keyDashboard','roleManagement','categoryManagement','priceListDashboard','chcPriceList','gwsPriceList','companyPricing']);
+const KEY_PAGE_PERMISSIONS={keyDashboard:'key_dashboard',roleManagement:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',chcPriceList:'manage_price_list',gwsPriceList:'manage_price_list',companyPricing:'company_pricing'};
+function permissionLevel(key){return window.KeySuitePermissions?.level?.(key,currentRole())||(currentRole()==='owner'?'full':'none')}
+function hasPermission(key){return permissionLevel(key)!=='none'}
 function syncOwnerKeyVisibility(){
- const button=$('keyButton'),owner=currentRole()==='owner';
- if(button){button.hidden=!owner;button.style.display=owner?'inline-flex':'none'}
- const active=document.querySelector('.page.active');
- if(!owner&&active&&OWNER_ONLY_PAGES.has(active.id))showPage('dashboard');
+ const button=$('keyButton'),allowed=hasPermission('key_dashboard');
+ if(button){button.hidden=!allowed;button.style.display=allowed?'inline-flex':'none'}
+ const modulePermissions={openRoleModule:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',companyPricing:'company_pricing'};
+ const roleModule=$('openRoleModule');if(roleModule)roleModule.style.display=hasPermission('manage_roles')?'flex':'none';
+ Object.entries(modulePermissions).forEach(([target,key])=>{if(target==='openRoleModule')return;document.querySelectorAll(`#keyDashboard [data-go="${target}"]`).forEach(card=>card.style.display=hasPermission(key)?'flex':'none')});
+ document.querySelectorAll('nav button[data-page="customers"]').forEach(b=>b.style.display=hasPermission('view_customers')?'block':'none');
+ document.querySelectorAll('nav button[data-page="quotation"]').forEach(b=>b.style.display=(hasPermission('create_quotations')||hasPermission('view_quotations'))?'block':'none');
+ document.querySelectorAll('nav button[data-page="history"]').forEach(b=>b.style.display=hasPermission('view_quotations')?'block':'none');
+ document.querySelectorAll('[data-go="quotation"]').forEach(b=>b.style.display=hasPermission('create_quotations')?'':'none');
+ const settingsButton=$('settingsButton');if(settingsButton)settingsButton.style.display=hasPermission('own_profile')?'block':'none';
+ const active=document.querySelector('.page.active');if(active&&!canOpenPage(active.id))showPage('dashboard');
+}
+function canOpenPage(id){
+ if(id==='customers')return hasPermission('view_customers');
+ if(id==='quotation')return hasPermission('create_quotations')||hasPermission('view_quotations');
+ if(id==='history')return hasPermission('view_quotations');
+ const required=KEY_PAGE_PERMISSIONS[id];return !required||hasPermission(required);
 }
 function showPage(id){
- if(OWNER_ONLY_PAGES.has(id)&&currentRole()!=='owner')id='dashboard';
+ if(!canOpenPage(id))id='dashboard';
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
  const page=$(id);if(!page)return;page.classList.add('active');
@@ -52,7 +67,7 @@ function currentAccess(){return window.KEYSUITE_ACCESS||{}}
 function currentProfile(){return window.KEYSUITE_PROFILE||{display_name:currentAccess().display_name||'',designation:'',phone:'',signatory_name:'',signature_image:'',email:currentAccess().email||''}}
 function currentEmail(){return String(currentProfile().email||currentAccess().email||'').toLowerCase()}
 function currentRole(){return String(currentAccess().role||'user').toLowerCase()}
-function isCustomerAdmin(){return ['owner','admin'].includes(currentRole())}
+function isCustomerAdmin(){return ['all','full'].includes(permissionLevel('edit_customers'))||hasPermission('customer_assignment')}
 function customerOwnerName(email){const e=String(email||'').toLowerCase();const user=(window.KEYSUITE_SECURE_DATA?.users||[]).find(x=>String(x.email||'').toLowerCase()===e);return user?.name||((e===currentEmail())?currentProfile().display_name:'')||email||'-'}
 function normalizeCustomerRecord(row){
  let contacts=row.contacts||[];if(typeof contacts==='string'){try{contacts=JSON.parse(contacts)}catch(_){contacts=[]}}
@@ -101,7 +116,12 @@ async function saveCustomerRemote(c){
 }
 async function updateCustomerPricingCategory(id,pricingCategoryId){
  const customer=customers().find(x=>x.id===id);if(!customer)throw new Error('Customer was not found.');
- if(!isCustomerAdmin())throw new Error('Only an Owner or Admin can assign a pricing category.');
+ if(permissionLevel('company_pricing')!=='full')throw new Error('Your role is not allowed to assign a pricing category.');
+ const client=customerClient();
+ if(customerSyncMode==='supabase'&&client){
+   const {data,error}=await client.rpc('keysuite_assign_customer_pricing_category_v124',{p_customer_id:id,p_category_id:pricingCategoryId||''});if(error)throw error;
+   const saved={...customer,pricingCategoryId:pricingCategoryId||''},i=secureCustomers.findIndex(x=>x.id===id);if(i>=0)secureCustomers[i]=saved;return saved;
+ }
  return saveCustomerRemote({...customer,pricingCategoryId:pricingCategoryId||''});
 }
 async function archiveCustomerRemote(id){
@@ -170,6 +190,7 @@ function currentQuote(){return editingQuoteId?quotes().find(q=>q.id===editingQuo
 function isQuotationSealed(){return quotationStatus==='sealed'}
 function isRevisionCopy(){return Number(quotationRevisionNumber||0)>0||!!quotationRevisionOf}
 function canEditQuotation(showMessage=false){
+ if(!hasPermission('create_quotations')){if(showMessage)alert('Your role is not allowed to create or edit quotations.');return false}
  const allowed=!isQuotationSealed();
  if(!allowed&&showMessage)alert('This quotation is Sealed and cannot be edited. Hold the Sealed button for 5 seconds to unseal it, or press Revise to create an editable revision.');
  return allowed;
@@ -844,9 +865,11 @@ window.KeySuiteApp={
  isQuotationSealed,
  showPage,
  applyProfile(profile){window.KEYSUITE_PROFILE=profile||window.KEYSUITE_PROFILE;syncOwnerKeyVisibility();if(!editingQuoteId){$('preparedBy').value=currentProfile().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||''}configureCustomerOwner($('customerOwner')?.value||currentEmail());refreshAll()},
- showBusinessWorkspace(){showPage(currentRole()==='owner'?'keyDashboard':'dashboard')}
+ showBusinessWorkspace(){showPage(hasPermission('key_dashboard')?'keyDashboard':'dashboard')},
+ applyPermissions(){syncOwnerKeyVisibility();refreshAll()} 
 };
 
+window.addEventListener('keysuite-permissions-changed',()=>{syncOwnerKeyVisibility();refreshAll()});
 syncOwnerKeyVisibility();newQuote();refreshAll();updateQuotationStateUi();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 

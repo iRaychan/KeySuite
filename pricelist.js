@@ -9,7 +9,9 @@
 
   const el=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const isOwner=()=>String(access?.role||window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner';
+  const permissionLevel=()=>window.KeySuitePermissions?.level?.('manage_price_list',String(access?.role||window.KEYSUITE_ACCESS?.role||'viewer').toLowerCase())||'none';
+  const canView=()=>permissionLevel()!=='none';
+  const isOwner=()=>permissionLevel()==='full';
   const chcProducts=()=>secureData.products||[];
   const gwsProducts=()=>secureData.gwsProducts||[];
   const validCurrency=value=>['USD','RMB','MYR'].includes(String(value||'').toUpperCase())?String(value).toUpperCase():'USD';
@@ -131,7 +133,7 @@
   }
 
   async function saveMultiplier(prefix,currency){
-    if(!isOwner()){message(prefix,'Only the Owner can maintain Price List settings.','error');return}
+    if(!isOwner()){message(prefix,'Your role is not allowed to maintain Price List settings.','error');return}
     const key=`${prefix}:${currency}`;
     if(!unlockedMultipliers.has(key))return;
     let value;
@@ -206,7 +208,7 @@
   function rowRarity(row,variant){return validRarity(row.querySelector(`[data-rarity-variant="${CSS.escape(variant)}"]`)?.value||'common')}
 
   async function saveChcRow(productId,button){
-    if(!isOwner()){message('chc','Only the Owner can maintain product prices.','error');return}
+    if(!isOwner()){message('chc','Your role is not allowed to maintain product prices.','error');return}
     const row=document.querySelector(`[data-chc-pricelist-row="${CSS.escape(productId)}"]`);if(!row)return;
     const currency=currentCurrency('chc');
     let chc,chcs,chcn;
@@ -235,7 +237,7 @@
   }
 
   async function saveGwsRow(productId,button){
-    if(!isOwner()){message('gws','Only the Owner can maintain product prices.','error');return}
+    if(!isOwner()){message('gws','Your role is not allowed to maintain product prices.','error');return}
     const row=document.querySelector(`[data-gws-pricelist-row="${CSS.escape(productId)}"]`);if(!row)return;
     const currency=currentCurrency('gws');
     let price;
@@ -278,10 +280,21 @@
     document.querySelectorAll('.pricelist-multiplier-lock').forEach(bindMultiplierGroup);
   }
 
+  function applyAuthorityMode(){
+    const editable=isOwner();
+    ['chcPriceList','gwsPriceList'].forEach(pageId=>{
+      const page=el(pageId);if(!page)return;
+      page.querySelectorAll('.pricelist-table input,.pricelist-table select').forEach(control=>control.disabled=!editable);
+      page.querySelectorAll('[data-save-chc-row],[data-save-gws-row]').forEach(button=>button.style.display=editable?'grid':'none');
+      page.querySelectorAll('.multiplier-hold-input').forEach(input=>{if(!editable){input.readOnly=true;input.disabled=true}else input.disabled=false});
+      page.querySelectorAll('.multiplier-actions').forEach(actions=>{if(!editable)actions.style.display='none'});
+    });
+  }
+
   function render(){
-    if(!isOwner())return;
-    renderSettings('chc');renderSettings('gws');renderChcRows();renderGwsRows();
-    const notice=el('priceListAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Each product family keeps its own USD/RMB rates. Price rarity is stored per currency and defaults to Common.`;
+    if(!canView())return;
+    renderSettings('chc');renderSettings('gws');renderChcRows();renderGwsRows();applyAuthorityMode();
+    const notice=el('priceListAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'user')}</b>. Each product family keeps its own USD/RMB rates. Price rarity is stored per currency and defaults to Common.${isOwner()?'':' View-only access.'}`;
   }
 
   function init(data,userAccess){secureData={...secureData,...(data||{})};access=userAccess||access;bind();render()}

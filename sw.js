@@ -1,5 +1,5 @@
-const CACHE='keysuite-v122';
-const SHELL=['./','./index.html','./app.js','./pricing.js','./categories.js','./pricelist.js','./product.js','./roles.js','./auth.js','./manifest.json','./keylargo-logo.png'];
+const CACHE='keysuite-v124';
+const SHELL=['./','./index.html','./permissions.js','./app.js','./pricing.js','./categories.js','./pricelist.js','./product.js','./roles.js','./auth.js','./manifest.json','./keylargo-logo.png'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
 self.addEventListener('fetch',event=>{

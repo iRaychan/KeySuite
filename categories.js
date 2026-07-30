@@ -10,7 +10,9 @@
   const byId=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const num=(value,d=2)=>Number(value||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d});
-  const isOwner=()=>String(access?.role||window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner';
+  const permissionLevel=key=>window.KeySuitePermissions?.level?.(key,String(access?.role||window.KEYSUITE_ACCESS?.role||'viewer').toLowerCase())||'none';
+  const canView=()=>permissionLevel('manage_categories')!=='none';
+  const isOwner=()=>permissionLevel('manage_categories')==='full';
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
 
   const defaultRule=()=>({margin:.38,normal:0,rare:0,transport:30,commission:.03,setDiscount:.068,finalDiscount:.08,includeCommission:true,includeSetDiscount:true,includeFinalDiscount:true,includeFuelCharge:true});
@@ -55,7 +57,7 @@
   function setEditable(on){
     editing=!!on;
     const name=byId('categoryNameInput');if(name)name.disabled=!editing;
-    const edit=byId('editCategoryRule');if(edit){edit.style.display=selectedId&&!editing?'inline-block':'none';edit.textContent='Hold 3s to Edit'}
+    const edit=byId('editCategoryRule');if(edit){edit.style.display=isOwner()&&selectedId&&!editing?'inline-block':'none';edit.textContent='Hold 3s to Edit'}
     const save=byId('saveCategoryRule');if(save)save.disabled=!editing;
     const cancel=byId('cancelCategoryEdit');if(cancel)cancel.disabled=!editing;
     byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);setRuleFieldsEditable(editing);
@@ -97,7 +99,7 @@
 
   function openCategory(category,forEdit=false){if(!category)return;fill(category);setEditable(forEdit);message(forEdit?'Editing enabled. All category fields are unlocked.':'Category loaded. Hold the Edit button for 3 seconds to unlock all fields.','info')}
 
-  function newCategory(){selectedProduct='CHC';fill(null);setEditable(true);message('New category ready. All values start at 0.00 and are ready to edit.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
+  function newCategory(){if(!isOwner()){message('Your role has view-only Category access.','error');return}selectedProduct='CHC';fill(null);setEditable(true);message('New category ready. All values start at 0.00 and are ready to edit.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
 
   function renderRows(){
     const body=byId('categoryRows');if(!body)return;const rows=categories();
@@ -123,7 +125,7 @@
   function readRule(validate=true){const transport=Number(byId('categoryTransportInput')?.value||0);if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');return {margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),normal:percentValue('categoryNormalInput','Normal',validate),rare:percentValue('categoryRareInput','Rare',validate),transport:Number.isFinite(transport)?transport:0,commission:percentValue('categoryCommissionInput','Commission',validate),setDiscount:percentValue('categorySetDiscountInput','Set Discount',validate),finalDiscount:percentValue('categoryFinalDiscountInput','Final Discount',validate),includeCommission:!!byId('categoryCommissionEnabled')?.checked,includeSetDiscount:!!byId('categorySetDiscountEnabled')?.checked,includeFinalDiscount:!!byId('categoryFinalDiscountEnabled')?.checked,includeFuelCharge:!!byId('categoryFuelChargeEnabled')?.checked}}
 
   async function save(event){
-    event.preventDefault();if(!editing)return;if(!isOwner()){message('Only the Owner can manage pricing categories.','error');return}
+    event.preventDefault();if(!editing)return;if(!isOwner()){message('Your role is not allowed to edit pricing categories.','error');return}
     const name=byId('categoryNameInput').value.trim();if(!name){message('Category Name is required.','error');return}
     let rule;try{rule=readRule(true)}catch(error){message(error.message,'error');return}
     const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}
@@ -160,9 +162,9 @@
   }
 
   function render(){
-    if(!isOwner())return;const list=categories();if(selectedId&&!list.some(item=>item.id===selectedId))selectedId='';renderRows();showCurrencySummary();
+    if(!canView())return;const add=byId('newPricingCategory');if(add)add.style.display=isOwner()?'inline-flex':'none';const list=categories();if(selectedId&&!list.some(item=>item.id===selectedId))selectedId='';renderRows();showCurrencySummary();
     if(!selectedId&&list.length)openCategory(list[0],false);else if(selectedId){const category=currentCategory();if(category&&!editing){fill(category);setEditable(false)}}
-    const notice=byId('categoryAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Select a Category Name on the left; its saved CHC/GWS rules will appear on the right.`;
+    const notice=byId('categoryAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'user')}</b>. Select a Category Name on the left; its saved CHC/GWS rules will appear on the right.`;
   }
 
   function init(data,userAccess){access=userAccess||access;bind();render()}

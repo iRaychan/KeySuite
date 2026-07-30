@@ -57,7 +57,7 @@
       rare:Number(raw.rare??fallback.rare??0)
     });
     return {
-      version:'1.20',release_date:'2026-07-30',currency:setting.currency||'MYR',
+      version:'1.24',release_date:'2026-07-30',currency:setting.currency||'MYR',
       usd_multiplier:chcUsdMultiplier,rmb_multiplier:chcRmbMultiplier,myr_multiplier:1,
       productMultipliers:{CHC:{USD:chcUsdMultiplier,RMB:chcRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1}},
       fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
@@ -88,6 +88,20 @@
       }))
     };
   }
+
+  async function loadRolePermissions(){
+    try{
+      const {data,error}=await client.rpc('keysuite_get_role_permissions');
+      if(error)throw error;
+      window.KeySuitePermissions?.setMatrix?.(data||[]);
+      return data||[];
+    }catch(error){
+      console.warn('Custom role permissions are not available yet',error);
+      window.KeySuitePermissions?.setMatrix?.(window.KeySuitePermissions?.DEFAULTS||{});
+      return [];
+    }
+  }
+
   async function loadUserProfile(email){
     try{
       const {data,error}=await client.from('ks_user_profiles').select('*').eq('email',String(email||'').toLowerCase()).maybeSingle();
@@ -125,8 +139,8 @@
       if(!userAccess){await client.auth.signOut({scope:'local'});showLogin('This account is valid, but it is not approved for KeySuite.');return}
       showLoading('Loading protected company and pricing data…');
       const data=await loadData();if(!data.companies.length)throw new Error('No company data was returned. Check the database and RLS policies.');
-      session=s;access=userAccess;const savedProfile=await loadUserProfile(s?.user?.email||'');profile=buildProfile(s,access,data,savedProfile);
-      window.KEYSUITE_SECURE_DATA=data;window.KEYSUITE_ACCESS=access;applyProfile(profile);
+      session=s;access=userAccess;window.KEYSUITE_ACCESS=access;await loadRolePermissions();const savedProfile=await loadUserProfile(s?.user?.email||'');profile=buildProfile(s,access,data,savedProfile);
+      window.KEYSUITE_SECURE_DATA=data;applyProfile(profile);
       window.KeySuitePricing?.init(data,access);window.KeySuiteCategories?.init(data,access);window.KeySuitePriceList?.init(data,access);window.KeySuiteRoles?.init(access);unlockSelector();
       showLoading('Loading your customer access…');
       try{await window.KeySuiteCustomerStore?.load?.()}catch(error){console.warn('Customer load warning',error)}
@@ -139,7 +153,7 @@
     const email=el('loginEmail').value.trim().toLowerCase(),password=el('loginPassword').value;if(!email||!password){message('Enter both email and password.');return}
     busy(true);const {data,error}=await client.auth.signInWithPassword({email,password});if(error||!data?.session){busy(false);message(friendly(error));return}await enter(data.session)
   }
-  async function signOut(){el('logoutButton').disabled=true;try{await client?.auth.signOut()}catch(error){console.warn(error)}session=null;access=null;profile=null;window.KEYSUITE_SECURE_DATA=null;window.KEYSUITE_ACCESS=null;window.KEYSUITE_PROFILE=null;el('logoutButton').disabled=false;showLogin('You have signed out.','info')}
+  async function signOut(){el('logoutButton').disabled=true;try{await client?.auth.signOut()}catch(error){console.warn(error)}session=null;access=null;profile=null;window.KEYSUITE_SECURE_DATA=null;window.KEYSUITE_ACCESS=null;window.KEYSUITE_PROFILE=null;window.KeySuitePermissions?.setMatrix?.(window.KeySuitePermissions?.DEFAULTS||{});el('logoutButton').disabled=false;showLogin('You have signed out.','info')}
   async function refreshSecure(){if(!session)return;await enter(session)}
 
   function invitePasswordMessage(text,type='error'){
