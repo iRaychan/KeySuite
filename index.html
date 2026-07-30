@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.19</title>
+  <title>KeySuite V1.20</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -161,12 +161,19 @@
     @media(max-width:1000px){.product-layout{grid-template-columns:1fr}.product-series-list{flex-direction:row;flex-wrap:wrap;max-height:none;overflow:visible}.product-series-button{flex:0 0 auto}.product-model-grid{max-height:none}.category-product-rule-layout{grid-template-columns:100px minmax(0,1fr)}}
     @media(max-width:900px){.category-rule-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.product-model-row{grid-template-columns:1fr 210px}.category-rule-grid,.category-option-grid{grid-template-columns:1fr}.gws-product-toolbar{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){.product-model-row{grid-template-columns:1fr}.product-model-actions{grid-template-columns:repeat(3,1fr)}.category-product-rule-layout{grid-template-columns:1fr}.category-product-buttons{flex-direction:column;width:100%}.gws-product-toolbar{grid-template-columns:1fr}}
+
+    .category-selected-label{font-size:13px;color:var(--muted);margin-left:10px}.category-selected-label b{color:var(--navy)}
+    .category-hold-button,.multiplier-hold-button{width:100%;margin-top:8px;border:1px dashed #d6a400;background:#fff9db;color:#7a5b00;border-radius:7px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer}.category-hold-button.holding,.multiplier-hold-button.holding{box-shadow:inset 0 0 0 3px #f2c94c}.category-hold-button.hidden,.multiplier-hold-button.hidden{display:none}
+    .multiplier-actions{display:none;gap:8px;margin-top:8px}.multiplier-actions.show{display:flex}.multiplier-actions .btn{flex:1;padding:7px 9px}
+    .pricelist-table thead .group-head{text-align:center;background:#eef3f8}.pricelist-table thead .sub-head{text-align:center;font-size:11px;color:#526275}.pricelist-table select{min-width:92px}.pricelist-table .currency-price-input{min-width:118px}
+    .role-row-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}.role-invite-option{margin-top:14px;padding:11px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc}.role-invite-option label{display:flex;align-items:center;gap:9px;margin:0}.role-invite-option input{width:auto}
+    .gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.19 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.20 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -181,7 +188,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.19</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.20</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -202,7 +209,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.19 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.20 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -345,14 +352,14 @@
     </section>
 
     <section id="productGws" class="page">
-      <div class="page-title-row"><div><h1>Product · GWS Tank</h1><div class="muted">Choose a tank model and working pressure, then add the priced item to a quotation.</div></div></div>
+      <div class="page-title-row"><div><h1>Product · GWS Tank</h1><div class="muted">Choose an actual GWS series/model/pressure SKU, then add the priced item to a quotation.</div></div></div>
       <div class="card gws-product-toolbar">
-        <div><label>Working Pressure</label><select id="gwsProductPressure"><option value="10">10 Bar</option><option value="16">16 Bar</option><option value="25">25 Bar</option></select></div>
+        <div><label>Series</label><select id="gwsProductSeries"><option value="ALL">All Series</option></select></div>
         <div><label>Search Model</label><input id="gwsProductSearch" placeholder="Example: 100LV"></div>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsProductCount" class="muted"></div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>Model</th><th>Pressure</th><th></th></tr></thead><tbody id="gwsProductRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Series</th><th>Model</th><th>Size</th><th>Pressure</th><th></th></tr></thead><tbody id="gwsProductRows"></tbody></table></div>
       </div>
     </section>
 
@@ -450,7 +457,7 @@
       <div id="roleAccessNotice" class="notice">Loading role access…</div>
       <div class="card">
         <div class="role-toolbar">
-          <div><h2 style="margin-bottom:4px">Users</h2><div class="role-note">A matching login must also exist under Supabase Authentication. Role changes apply after the user refreshes or signs in again.</div></div>
+          <div><h2 style="margin-bottom:4px">Users</h2><div class="role-note">New users can receive an invitation email and set their own password. Role changes apply after refresh or next sign-in.</div></div>
           <button id="reloadRoles" type="button" class="btn secondary">Reload</button>
         </div>
         <div class="table-wrap" style="margin-top:14px">
@@ -484,7 +491,7 @@
           </div>
         </div>
         <div class="card" id="categoryEditorCard">
-          <div class="category-editor-title-row"><h2 id="categoryFormTitle">Edit Category</h2><button class="btn secondary" id="editCategoryRule" type="button">Edit</button></div>
+          <div class="category-editor-title-row"><div><h2 id="categoryFormTitle">Edit Category</h2><div class="category-selected-label">Selected Category: <b id="categorySelectedName">-</b></div></div><button class="btn secondary" id="editCategoryRule" type="button">Edit</button></div>
           <div id="categoryMessage" class="auth-message"></div>
           <form id="categoryForm" novalidate>
             <div class="category-form-grid">
@@ -498,16 +505,16 @@
                   <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
                   <div id="categoryCurrencySummary" class="category-currency-summary"></div>
                   <div class="category-rule-grid">
-                    <div class="category-lock-field locked" id="categoryLock_margin" data-lock-key="margin" data-lock-label="Margin"><label><span id="categoryMarginLabel">Margin (%)</span><small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="38.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_normal" data-lock-key="normal" data-lock-label="Normal"><label>Normal (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryNormalInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_rare" data-lock-key="rare" data-lock-label="Rare"><label>Rare (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryRareInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport"><label>Transport (RM)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly></div>
+                    <div class="category-lock-field locked" id="categoryLock_margin" data-lock-key="margin" data-lock-label="Margin"><label><span id="categoryMarginLabel">Margin (%)</span><small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="38.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked" id="categoryLock_normal" data-lock-key="normal" data-lock-label="Normal"><label>Normal (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryNormalInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked" id="categoryLock_rare" data-lock-key="rare" data-lock-label="Rare"><label>Rare (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryRareInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport"><label>Transport (RM)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
                   </div>
                   <div class="category-option-grid">
-                    <div class="category-lock-field locked" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission"><label class="category-check-label"><input id="categoryCommissionEnabled" type="checkbox" checked disabled> Commission (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount"><label class="category-check-label"><input id="categorySetDiscountEnabled" type="checkbox" checked disabled> Set Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" readonly></div>
-                    <div class="category-lock-field locked" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount"><label class="category-check-label"><input id="categoryFinalDiscountEnabled" type="checkbox" checked disabled> Final Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" readonly></div>
-                    <div class="category-lock-field locked category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge"><label class="category-check-label"><input id="categoryFuelChargeEnabled" type="checkbox" checked disabled> Fuel Charge<small class="hold-edit-hint">Hold 3s to edit</small></label><div class="category-toggle-note">Uses customer distance × (Fuel Price − RM2.00)</div></div>
+                    <div class="category-lock-field locked" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission"><label class="category-check-label"><input id="categoryCommissionEnabled" type="checkbox" checked disabled> Commission (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount"><label class="category-check-label"><input id="categorySetDiscountEnabled" type="checkbox" checked disabled> Set Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount"><label class="category-check-label"><input id="categoryFinalDiscountEnabled" type="checkbox" checked disabled> Final Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" readonly><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
+                    <div class="category-lock-field locked category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge"><label class="category-check-label"><input id="categoryFuelChargeEnabled" type="checkbox" checked disabled> Fuel Charge<small class="hold-edit-hint">Hold 3s to edit</small></label><div class="category-toggle-note">Uses customer distance × (Fuel Price − RM2.00)</div><button class="category-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button></div>
                   </div>
                   <div class="formula" id="categoryFormulaPreview" style="margin-top:14px"></div>
                 </div>
@@ -535,7 +542,7 @@
         <button type="button" class="key-module-card" data-go="gwsPriceList">
           <span class="module-icon">GWS</span>
           <h2>GWS Tank</h2>
-          <p>Maintain 10 Bar, 16 Bar and 25 Bar source prices for every GWS tank model.</p>
+          <p>Maintain only valid GWS series, model and pressure SKUs; unavailable pressure combinations are not shown.</p>
           <span class="module-order">OPEN PRICE LIST</span>
         </button>
       </div>
@@ -550,8 +557,8 @@
       <div class="card">
         <div class="pricelist-settings">
           <div><label>Currency Selection</label><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
-          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><label>USD → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="chcUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly></div>
-          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><label>RMB → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="chcRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly></div>
+          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><label>USD → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="chcUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly><button class="multiplier-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><label>RMB → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="chcRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly><button class="multiplier-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
         <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to view and save that currency's independent prices. CHC keeps its own rates; hold a rate for 3 seconds to edit it.</div>
       </div>
@@ -559,7 +566,7 @@
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">CHC Models</h2><div id="chcPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="chcPriceSearch" placeholder="Example: CHC 15-30"></div></div>
         <div class="table-wrap" style="max-height:650px">
           <table class="pricelist-table">
-            <thead><tr><th>Model</th><th>CHC Price / Rarity</th><th>CHCS Price / Rarity</th><th>CHCN Price / Rarity</th><th></th></tr></thead>
+            <thead><tr><th rowspan="2">Model</th><th class="group-head" colspan="2">CHC</th><th class="group-head" colspan="2">CHCS</th><th class="group-head" colspan="2">CHCN</th><th rowspan="2"></th></tr><tr><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th></tr></thead>
             <tbody id="chcPriceRows"></tbody>
           </table>
         </div>
@@ -568,19 +575,19 @@
 
     <section id="gwsPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
-      <div class="page-title-row"><div><h1>GWS Tank Price List</h1><div class="muted">Maintain separate USD, RMB and MYR prices for 10 Bar, 16 Bar and 25 Bar tanks.</div></div></div>
+      <div class="page-title-row"><div><h1>GWS Tank Price List</h1><div class="muted">Maintain separate USD, RMB and MYR prices only for valid GWS series/model/pressure combinations.</div></div></div>
       <div id="gwsPriceListMessage" class="auth-message"></div>
       <div class="card">
         <div class="pricelist-settings">
           <div><label>Currency Selection</label><select id="gwsPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
-          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><label>USD → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="gwsUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly></div>
-          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><label>RMB → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="gwsRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly></div>
+          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><label>USD → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="gwsUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly><button class="multiplier-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><label>RMB → MYR <small class="hold-edit-hint">Hold 3s to edit</small></label><input id="gwsRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly><button class="multiplier-hold-button" type="button"><span class="hold-edit-hint">Hold 3s to edit</span></button><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
-        <div class="pricelist-note" style="margin-top:12px">GWS keeps its own USD and RMB rates. Hold a rate for 3 seconds to edit it; changes save automatically. Each currency keeps an independent GWS price list.</div>
+        <div class="pricelist-note" style="margin-top:12px">GWS keeps its own USD and RMB rates. Hold a rate for 3 seconds to edit it; press Save after editing. Each currency keeps an independent GWS price list.</div>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="gwsPriceSearch" placeholder="Example: 100LV"></div></div>
-        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Model</th><th>10 Bar Price / Rarity</th><th>16 Bar Price / Rarity</th><th>25 Bar Price / Rarity</th><th></th></tr></thead><tbody id="gwsPriceRows"></tbody></table></div>
+        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Series</th><th>Model</th><th>Size</th><th>Pressure</th><th>Price</th><th>Rarity</th><th></th></tr></thead><tbody id="gwsPriceRows"></tbody></table></div>
       </div>
     </section>
 
@@ -664,7 +671,7 @@
       <div><label>Role</label><select id="roleUserRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="user" selected>User</option><option value="dealer">Dealer</option><option value="viewer">Viewer</option></select></div>
       <div><label>Status</label><select id="roleUserActive"><option value="true" selected>Active</option><option value="false">Inactive</option></select></div>
     </div>
-    <p class="role-note" style="margin-top:14px">This approves access in KeySuite. To let a new person sign in, create the same email under Supabase → Authentication → Users.</p>
+    <div id="roleInviteRow" class="role-invite-option"><label><input id="roleSendInvite" type="checkbox" checked> Send login invitation email so the user can create their own password</label><div class="role-note" style="margin-top:7px">Requires the included Supabase Edge Function <b>keysuite-invite-user</b>.</div></div>
     <div class="dialog-actions"><button class="btn secondary" id="cancelRoleDialog" type="button">Cancel</button><button class="btn" id="saveRoleUser" type="submit">Save User</button></div>
   </form>
 </dialog>
@@ -696,6 +703,17 @@
     <div class="permissions-note"><b>Owner-only protection:</b> the gold Key button is removed from every non-Owner account. Direct navigation to Key pages is also blocked.</div>
     <div class="dialog-actions"><button class="btn" id="closeRolePermissionsBottom" type="button">Close</button></div>
   </div>
+</dialog>
+
+
+<dialog id="invitePasswordDialog" class="ks-dialog">
+  <form id="invitePasswordForm" class="dialog-body" novalidate>
+    <div class="page-title-row" style="margin-bottom:14px"><div><h2 style="margin:0">Create KeySuite Password</h2><div class="muted">Complete your invitation.</div></div></div>
+    <div id="invitePasswordMessage" class="auth-message"></div>
+    <div><label>New Password</label><input id="inviteNewPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+    <div style="margin-top:12px"><label>Confirm Password</label><input id="inviteConfirmPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+    <div class="dialog-actions"><button class="btn" id="saveInvitePassword" type="submit">Set Password</button></div>
+  </form>
 </dialog>
 
 <dialog id="settingsDialog" class="ks-dialog settings-dialog">

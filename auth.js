@@ -7,6 +7,7 @@
   let profile=null;
   let pendingSignatureData=null;
   let removeSignatureRequested=false;
+  let inviteFlowPending=/(?:[?#&])type=invite(?:&|$)/i.test(location.href)||/(?:access_token|refresh_token)=/i.test(location.hash)&&/type=invite/i.test(location.hash);
 
   function configReady(){
     const cfg=window.KEYSUITE_CONFIG||{};
@@ -32,7 +33,7 @@
       client.from('ks_company_users').select('*').order('full_name'),
       client.from('ks_pricing_categories').select('*').order('category_name'),
       client.from('ks_products_chc').select('*').order('source_row'),
-      client.from('ks_products_gws').select('*').order('source_row'),
+      client.from('ks_products_gws').select('*').eq('status','active').order('source_row'),
       client.from('ks_app_settings').select('*').eq('id','default').limit(1)
     ]);
     const failed=[companies,users,categories,products,gwsProducts,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
@@ -56,7 +57,7 @@
       rare:Number(raw.rare??fallback.rare??0)
     });
     return {
-      version:'1.19',release_date:'2026-07-30',currency:setting.currency||'MYR',
+      version:'1.20',release_date:'2026-07-30',currency:setting.currency||'MYR',
       usd_multiplier:chcUsdMultiplier,rmb_multiplier:chcRmbMultiplier,myr_multiplier:1,
       productMultipliers:{CHC:{USD:chcUsdMultiplier,RMB:chcRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1}},
       fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
@@ -66,8 +67,25 @@
         const rules=parseRules(c.product_rules),fallback={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),commission:Number(c.commission??.03),setDiscount:Number(c.set_discount??.068),finalDiscount:Number(c.final_discount??.08)};
         return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,fallback),GWS:normalizeRule(rules.GWS,fallback)},final_discount:fallback.finalDiscount,set_discount:fallback.setDiscount,commission:fallback.commission,margins:{CHC:fallback.margin},factors:{CHC:fallback.margin},transport:fallback.transport};
       }),
-      products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,rarityByVariant:{CHC:String(p.chc_rarity||'many').toLowerCase(),CHCS:String(p.chcs_rarity||'many').toLowerCase(),CHCN:String(p.chcn_rarity||'many').toLowerCase()},pricesByCurrency:{USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},MYR:{CHC:p.chc_myr===null?null:Number(p.chc_myr),CHCS:p.chcs_myr===null?null:Number(p.chcs_myr),CHCN:p.chcn_myr===null?null:Number(p.chcn_myr)}}})),
-      gwsProducts:(gwsProducts.data||[]).map(p=>({id:p.id,model:p.model,source_row:p.source_row,rarityByVariant:{'10':String(p.rarity_10||'many').toLowerCase(),'16':String(p.rarity_16||'many').toLowerCase(),'25':String(p.rarity_25||'many').toLowerCase()},pricesByCurrency:{USD:{'10':p.price_10_usd===null?null:Number(p.price_10_usd),'16':p.price_16_usd===null?null:Number(p.price_16_usd),'25':p.price_25_usd===null?null:Number(p.price_25_usd)},RMB:{'10':p.price_10_rmb===null?null:Number(p.price_10_rmb),'16':p.price_16_rmb===null?null:Number(p.price_16_rmb),'25':p.price_25_rmb===null?null:Number(p.price_25_rmb)},MYR:{'10':p.price_10_myr===null?null:Number(p.price_10_myr),'16':p.price_16_myr===null?null:Number(p.price_16_myr),'25':p.price_25_myr===null?null:Number(p.price_25_myr)}}}))
+      products:(products.data||[]).map(p=>({
+        id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,
+        pricesByCurrency:{
+          USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},
+          RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},
+          MYR:{CHC:p.chc_myr===null?null:Number(p.chc_myr),CHCS:p.chcs_myr===null?null:Number(p.chcs_myr),CHCN:p.chcn_myr===null?null:Number(p.chcn_myr)}
+        },
+        rarityByCurrency:{
+          USD:{CHC:String(p.chc_rarity_usd||'common').toLowerCase(),CHCS:String(p.chcs_rarity_usd||'common').toLowerCase(),CHCN:String(p.chcn_rarity_usd||'common').toLowerCase()},
+          RMB:{CHC:String(p.chc_rarity_rmb||'common').toLowerCase(),CHCS:String(p.chcs_rarity_rmb||'common').toLowerCase(),CHCN:String(p.chcn_rarity_rmb||'common').toLowerCase()},
+          MYR:{CHC:String(p.chc_rarity_myr||'common').toLowerCase(),CHCS:String(p.chcs_rarity_myr||'common').toLowerCase(),CHCN:String(p.chcn_rarity_myr||'common').toLowerCase()}
+        }
+      })),
+      gwsProducts:(gwsProducts.data||[]).map(p=>({
+        id:p.id,model:p.model,source_row:p.source_row,seriesCode:p.series_code||'',seriesName:p.series_name||'',sizeCode:p.size_code||p.model,sizeLitres:Number(p.size_litres||String(p.size_code||p.model).replace(/\D/g,'')||0),pressureBar:Number(p.pressure_bar||0),
+        systemConnection:p.system_connection||'',prechargeText:p.precharge_text||'',maxWorkingPressureText:p.max_working_pressure_text||'',maxWorkingTemperatureText:p.max_working_temperature_text||'',
+        pricesByCurrency:{USD:{SKU:p.price_usd===null?null:Number(p.price_usd)},RMB:{SKU:p.price_rmb===null?null:Number(p.price_rmb)},MYR:{SKU:p.price_myr===null?null:Number(p.price_myr)}},
+        rarityByCurrency:{USD:{SKU:String(p.rarity_usd||'common').toLowerCase()},RMB:{SKU:String(p.rarity_rmb||'common').toLowerCase()},MYR:{SKU:String(p.rarity_myr||'common').toLowerCase()}}
+      }))
     };
   }
   async function loadUserProfile(email){
@@ -113,6 +131,7 @@
       showLoading('Loading your customer access…');
       try{await window.KeySuiteCustomerStore?.load?.()}catch(error){console.warn('Customer load warning',error)}
       refreshAll();setView('app');
+      if(inviteFlowPending)setTimeout(openInvitePassword,250);
     }catch(error){console.error(error);try{await client.auth.signOut({scope:'local'})}catch(_){ }showLogin(`Secure data could not be loaded: ${error.message}`)}
   }
   async function signIn(event){
@@ -122,6 +141,20 @@
   }
   async function signOut(){el('logoutButton').disabled=true;try{await client?.auth.signOut()}catch(error){console.warn(error)}session=null;access=null;profile=null;window.KEYSUITE_SECURE_DATA=null;window.KEYSUITE_ACCESS=null;window.KEYSUITE_PROFILE=null;el('logoutButton').disabled=false;showLogin('You have signed out.','info')}
   async function refreshSecure(){if(!session)return;await enter(session)}
+
+  function invitePasswordMessage(text,type='error'){
+    const box=el('invitePasswordMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message';
+  }
+  function openInvitePassword(){
+    if(!session)return;invitePasswordMessage('Create your KeySuite password to complete the invitation.','info');el('inviteNewPassword').value='';el('inviteConfirmPassword').value='';el('invitePasswordDialog')?.showModal();
+  }
+  async function saveInvitePassword(event){
+    event.preventDefault();const password=el('inviteNewPassword').value,confirm=el('inviteConfirmPassword').value;
+    if(password.length<8){invitePasswordMessage('The password must contain at least 8 characters.');return}
+    if(password!==confirm){invitePasswordMessage('The passwords do not match.');return}
+    const button=el('saveInvitePassword');button.disabled=true;button.textContent='Saving…';
+    try{const activeSession=await ensureActiveSession();if(!activeSession)throw new Error('The invitation session has expired. Request a new invitation.');const result=await client.auth.updateUser({password});if(result.error)throw result.error;inviteFlowPending=false;history.replaceState(null,'',`${location.pathname}${location.search.replace(/([?&])type=invite(&|$)/,'$1').replace(/[?&]$/,'')}`);invitePasswordMessage('Password created. You can now use this email and password to sign in.','info');setTimeout(()=>el('invitePasswordDialog')?.close(),900)}catch(error){invitePasswordMessage(error.message||'The password could not be created.')}finally{button.disabled=false;button.textContent='Set Password'}
+  }
 
   function settingsMessage(text,type='error'){
     const box=el('settingsMessage');box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message';
@@ -210,6 +243,7 @@
 
   async function init(){
     el('loginForm').addEventListener('submit',signIn);el('logoutButton').addEventListener('click',signOut);el('showPassword').addEventListener('change',event=>el('loginPassword').type=event.target.checked?'text':'password');
+    el('invitePasswordForm')?.addEventListener('submit',saveInvitePassword);
     el('settingsButton')?.addEventListener('click',openSettings);el('settingsForm')?.addEventListener('submit',saveSettings);el('closeSettings')?.addEventListener('click',closeSettings);el('cancelSettings')?.addEventListener('click',closeSettings);
     el('settingsSignatureUpload')?.addEventListener('change',async event=>{
       const file=event.target.files?.[0];if(!file)return;

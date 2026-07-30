@@ -1,3 +1,3 @@
-KeySuite V1.19
+KeySuite V1.20
 PDF output base: V1.08 frozen
-Release: Category switching and long-press fixes, per-product multipliers, and Common/Many/Rare pricing
+Release: User invitations, reliable category controls, per-currency rarity, and actual GWS Tank SKUs
