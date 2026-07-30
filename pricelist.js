@@ -146,7 +146,7 @@
       window.KeySuitePricing?.syncPriceListSettings?.({productMultipliers:secureData.productMultipliers});
       window.KeySuiteCategories?.render?.();
       message(prefix,`${family} ${currency} saved: MYR ${Number(currency==='USD'?secureData.productMultipliers[family].USD:secureData.productMultipliers[family].RMB).toFixed(4)}.`,'info');
-    }catch(error){console.error(error);message(prefix,`${error.message||error}. Run the V1.20 Supabase migration first.`,'error')}
+    }catch(error){console.error(error);message(prefix,`${error.message||error}. Run the V1.20.4 Supabase hotfix first.`,'error')}
   }
 
   function cancelMultiplier(prefix,currency){
@@ -215,7 +215,7 @@
         product.rarityByCurrency=product.rarityByCurrency||{};product.rarityByCurrency[currency]={...product.rarityByCurrency[currency],...rarities};
       }
       window.KeySuitePricing?.render?.();message('chc',`${product?.model||'CHC model'} ${currency} prices and rarity saved.`,'info');
-    }catch(error){console.error(error);message('chc',`${error.message||error}. Run the V1.20 Supabase migration first.`,'error')}
+    }catch(error){console.error(error);message('chc',`${error.message||error}. Run the V1.20.4 Supabase hotfix first.`,'error')}
     finally{button.disabled=false;button.innerHTML=original}
   }
 
@@ -237,7 +237,7 @@
         product.rarityByCurrency=product.rarityByCurrency||{};product.rarityByCurrency[currency]={SKU:rarity};
       }
       window.KeySuitePricing?.render?.();message('gws',`${product?.model||'GWS Tank'} ${currency} price and rarity saved.`,'info');
-    }catch(error){console.error(error);message('gws',`${error.message||error}. Run the V1.20 Supabase migration first.`,'error')}
+    }catch(error){console.error(error);message('gws',`${error.message||error}. Run the V1.20.4 Supabase hotfix first.`,'error')}
     finally{button.disabled=false;button.innerHTML=original}
   }
 

@@ -5,6 +5,8 @@
 begin;
 
 alter table public.ks_app_settings add column if not exists v120_rarity_initialized boolean not null default false;
+alter table public.ks_products_chc add column if not exists updated_at timestamptz not null default now();
+alter table public.ks_products_gws add column if not exists updated_at timestamptz not null default now();
 
 -- ---------------------------------------------------------------------------
 -- CHC rarity is stored per currency and per material variant.
@@ -67,16 +69,15 @@ alter table public.ks_products_gws add constraint ks_products_gws_rarity_rmb_che
 alter table public.ks_products_gws drop constraint if exists ks_products_gws_rarity_myr_check;
 alter table public.ks_products_gws add constraint ks_products_gws_rarity_myr_check check (rarity_myr in ('common','many','rare'));
 
--- E-Wave, 10 Bar, 8L to 35L.
+-- E-Wave, 10 Bar. Only PEB 24LX is available.
 insert into public.ks_products_gws
 (id,model,series_code,series_name,size_code,size_litres,pressure_bar,system_connection,precharge_text,max_working_pressure_text,max_working_temperature_text,source_row,status)
 values
-('GWS-PEB-8LX','PEB 8LX','PEB','E-Wave Series','8LX',8,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',1,'active'),
-('GWS-PEB-12LX','PEB 12LX','PEB','E-Wave Series','12LX',12,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',2,'active'),
-('GWS-PEB-18LX','PEB 18LX','PEB','E-Wave Series','18LX',18,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',3,'active'),
-('GWS-PEB-24LX','PEB 24LX','PEB','E-Wave Series','24LX',24,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',4,'active'),
-('GWS-PEB-35LX','PEB 35LX','PEB','E-Wave Series','35LX',35,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',5,'active')
+('GWS-PEB-24LX','PEB 24LX','PEB','E-Wave Series','24LX',24,10,'1"','1.9 bar / 28 psi','10 bar / 150 psi','90°C / 194°F',4,'active')
 on conflict (model) do update set series_code=excluded.series_code,series_name=excluded.series_name,size_code=excluded.size_code,size_litres=excluded.size_litres,pressure_bar=excluded.pressure_bar,system_connection=excluded.system_connection,precharge_text=excluded.precharge_text,max_working_pressure_text=excluded.max_working_pressure_text,max_working_temperature_text=excluded.max_working_temperature_text,source_row=excluded.source_row,status='active';
+
+update public.ks_products_gws set status='inactive',updated_at=now()
+where series_code='PEB' and model in ('PEB 8LX','PEB 12LX','PEB 18LX','PEB 35LX');
 
 -- Pressure Wave, 10 Bar, up to 150L.
 insert into public.ks_products_gws

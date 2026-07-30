@@ -1,2 +1,2 @@
-KeySuite V1.20.3
-Category Pricing Rule uses compact inline label, input and optional Use checkbox rows.
+KeySuite V1.20.4
+Fixes Price List price/rarity saving, compacts the Category hold-to-edit button, and keeps only PEB 24LX in E-Wave.

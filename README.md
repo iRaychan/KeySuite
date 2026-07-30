@@ -1,4 +1,14 @@
-# KeySuite V1.20.3
+# KeySuite V1.20.4
+
+
+## V1.20.4 required hotfix
+
+Run `setup/V1204_SUPABASE_HOTFIX.sql` before uploading this GitHub package. It adds the missing audit column required by the CHC price/rarity save function and retires unsupported E-Wave models.
+
+- CHC price and rarity saving no longer fails with `column updated_at does not exist`.
+- The Category `Hold 3s to Edit` countdown is compact enough to stay beside the editor title.
+- E-Wave contains only `PEB 24LX`.
+- No quotation PDF/print layout code was changed.
 
 ## V1.20.3 category layout update
 
