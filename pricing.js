@@ -11,6 +11,7 @@
   let categoryId='';
   let visibleRows=[];
   let bound=false;
+  let selectedPricingFamily='CHC';
 
   const byId=id=>document.getElementById(id);
   const e=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -118,9 +119,10 @@
     let notice=`Signed in as <b>${e(access?.display_name||access?.email||'approved user')}</b>. `;if(!quoteCustomer)notice+='No quotation pricing customer selected.';else if(!hasPricingContext(quoteCustomer))notice+=`Quotation pricing customer: <b>${e(quoteCustomer.company)}</b>. No Pricing Category is assigned.`;else notice+=`Quotation pricing customer: <b>${e(quoteCustomer.company)}</b> · Category: <b>${e(categoryForCustomer(quoteCustomer)?.name||'-')}</b> · Distance: <b>${n(quoteCustomer.distanceKm,1)} km</b>.`;
     byId('pricingAccessNotice').innerHTML=notice;byId('pricingAccessNotice').classList.add('active-customer');
     byId('pricingCompanySummary').innerHTML=c?[[ 'Company Name',c.company],['Classification',c.classification||'-'],['Pricing Category',categoryForCustomer(c)?.name||'Not assigned'],['Assigned User',typeof customerOwnerName==='function'?customerOwnerName(c.assignedUserEmail):(c.assignedUserEmail||'-')],['Phone',c.companyPhone||'-'],['Payment Term',c.terms||'-'],['TIN',c.tinNumber||'-'],['Business Registration No.',c.brnNumber||'-'],['SST No.',c.sstNumber||'-'],['Address',c.address||'-'],['Distance',`${n(c.distanceKm,1)} km`]].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">Select a customer/company to view its saved details.</p>';
+    document.querySelectorAll('[data-pricing-family]').forEach(button=>{const active=button.dataset.pricingFamily===selectedPricingFamily;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
     const otherRows=[['Current Fuel Price',`${cash(ctx.fuelPrice)}/L`],['Customer Distance',`${n(ctx.distanceKm,1)} km`]];
-    byId('pricingCategorySummary').innerHTML=cat?[['Category Name',cat.name],...ruleSummary(cat,'CHC'),...ruleSummary(cat,'GWS'),...otherRows].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer.</p>';
-    byId('pricingFormula').textContent=cat?[formula(cat,'CHC','many'),formula(cat,'CHC','common'),formula(cat,'CHC','rare'),formula(cat,'GWS','many'),formula(cat,'GWS','common'),formula(cat,'GWS','rare')].join('\n'):'';renderFuelSetting();fillSelects();
+    byId('pricingCategorySummary').innerHTML=cat?[['Category Name',cat.name],...ruleSummary(cat,selectedPricingFamily),...otherRows].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer.</p>';
+    byId('pricingFormula').textContent=cat?[formula(cat,selectedPricingFamily,'many'),formula(cat,selectedPricingFamily,'common'),formula(cat,selectedPricingFamily,'rare')].join('\n'):'';renderFuelSetting();fillSelects();
   }
 
   function renderTable(){
@@ -211,7 +213,11 @@
 
   function bind(){
     if(bound)return;bound=true;
-    byId('pricingCompanySelect')?.addEventListener('change',event=>selectCustomer(event.target.value));byId('pricingCategorySelect')?.addEventListener('change',event=>{categoryId=event.target.value;renderSummary();renderTable()});byId('savePricingCategory')?.addEventListener('click',savePricingCategory);byId('pricingModelSearch')?.addEventListener('input',renderTable);byId('pricingMaterialFilter')?.addEventListener('change',renderTable);byId('pricingShowUnpriced')?.addEventListener('change',renderTable);byId('pricingExportCsv')?.addEventListener('click',exportCsv);byId('saveFuelPrice')?.addEventListener('click',saveFuelPrice);
+    byId('pricingCompanySelect')?.addEventListener('change',event=>selectCustomer(event.target.value));
+    byId('pricingCategorySelect')?.addEventListener('change',event=>{categoryId=event.target.value;renderSummary();renderTable()});
+    byId('savePricingCategory')?.addEventListener('click',savePricingCategory);
+    byId('saveFuelPrice')?.addEventListener('click',saveFuelPrice);
+    document.querySelectorAll('[data-pricing-family]').forEach(button=>button.addEventListener('click',()=>{selectedPricingFamily=button.dataset.pricingFamily==='GWS'?'GWS':'CHC';renderSummary()}));
   }
 
   function syncPriceListSettings(next={}){secureData={...secureData,...next};renderSummary();renderTable();refreshQuotePrices()}

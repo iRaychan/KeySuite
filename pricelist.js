@@ -56,11 +56,15 @@
     if(group){
       group.classList.toggle('unlocked',on);
       group.classList.toggle('locked',!on);
-      const hint=group.querySelector('.hold-edit-hint');if(hint)hint.textContent=on?'Unlocked':'Hold 3s to edit';
+      group.classList.remove('holding');
+      const feedback=group.querySelector('.multiplier-hold-feedback');
+      if(feedback)feedback.textContent=on?'Unlocked — edit, then Save or Cancel':'Hold input 3s to edit';
       group.querySelector('.multiplier-actions')?.classList.toggle('show',on);
-      group.querySelector('.multiplier-hold-button')?.classList.toggle('hidden',on);
     }
-    if(input)input.readOnly=!on;
+    if(input){
+      input.readOnly=!on;
+      input.setAttribute('aria-readonly',String(!on));
+    }
   }
 
   function renderMultiplierInputs(prefix){
@@ -167,18 +171,29 @@
   }
 
   function bindLongHold(target,callback){
-    let timer=null,progress=null,start=0;
-    const stop=()=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');const label=target.querySelector?.('.hold-edit-hint');if(label&&!target.closest('.unlocked'))label.textContent='Hold 3s to edit'};
-    const startHold=event=>{
-      if(event.type==='mousedown'&&event.button!==0)return;
-      if(target.closest('.unlocked'))return;
-      event.preventDefault();start=Date.now();target.classList.add('holding');
-      const label=target.querySelector?.('.hold-edit-hint');
-      progress=setInterval(()=>{if(label)label.textContent=`Hold ${Math.min(3,Math.max(1,Math.ceil((Date.now()-start)/1000)))}/3s`;},250);
-      timer=setTimeout(()=>{stop();callback();},3000);
+    let timer=null,progress=null,start=0,completed=false;
+    const group=target.closest('.pricelist-multiplier-lock')||target;
+    const feedback=()=>group.querySelector?.('.multiplier-hold-feedback');
+    const reset=()=>{
+      if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;
+      group.classList.remove('holding');
+      if(!group.classList.contains('unlocked')){const label=feedback();if(label)label.textContent='Hold input 3s to edit'}
     };
+    const startHold=event=>{
+      if(event.pointerType==='mouse'&&event.button!==0)return;
+      if(group.classList.contains('unlocked'))return;
+      event.preventDefault();completed=false;start=Date.now();group.classList.add('holding');
+      const label=feedback();if(label)label.textContent='Unlock in 3…';
+      progress=setInterval(()=>{
+        const remaining=Math.max(1,Math.ceil((3000-(Date.now()-start))/1000));
+        const hint=feedback();if(hint)hint.textContent=`Unlock in ${remaining}…`;
+      },150);
+      timer=setTimeout(()=>{completed=true;reset();callback();},3000);
+      try{target.setPointerCapture?.(event.pointerId)}catch(_){ }
+    };
+    const stop=event=>{if(completed)return;reset();try{if(event?.pointerId!==undefined)target.releasePointerCapture?.(event.pointerId)}catch(_){ }};
     target.addEventListener('pointerdown',startHold);
-    ['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,stop));
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>target.addEventListener(type,stop));
     target.addEventListener('contextmenu',event=>event.preventDefault());
   }
 
@@ -249,8 +264,8 @@
 
   function bindMultiplierGroup(group){
     const prefix=group.dataset.multiplierPrefix,currency=group.dataset.multiplierCurrency;
-    const hold=group.querySelector('.multiplier-hold-button')||group;
-    bindLongHold(hold,()=>beginMultiplierUnlock(prefix,currency));
+    const input=group.querySelector('.multiplier-hold-input')||group.querySelector('input');
+    if(input)bindLongHold(input,()=>beginMultiplierUnlock(prefix,currency));
     group.querySelector('[data-multiplier-save]')?.addEventListener('click',()=>saveMultiplier(prefix,currency));
     group.querySelector('[data-multiplier-cancel]')?.addEventListener('click',()=>cancelMultiplier(prefix,currency));
   }

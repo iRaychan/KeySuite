@@ -1,4 +1,4 @@
-# KeySuite V1.21
+# KeySuite V1.22
 
 ## V1.20.5 quotation item deletion hotfix
 
@@ -81,3 +81,14 @@ The invited user opens the email link and sets a password in KeySuite. Role/acce
 Saved quotations remain editable. Seal locks all quotation fields and enables PDF output. Hold the Sealed button for five seconds to return it to Saved. Revise creates a separate v01/v02 revision with the original customer and date locked.
 
 Customer pricing is selected inside the quotation. The Customers page no longer carries a Quote/Quoted selection.
+
+
+## V1.22 pricing interface update
+
+- Price List USD→MYR and RMB→MYR multipliers are unlocked by holding directly on the input for 3 seconds.
+- The countdown appears below the held input; the separate hold button was removed.
+- Save and Cancel appear only after the multiplier is unlocked.
+- Company & Pricing now has CHC and GWS tabs and displays only the selected product family's rule and formulas.
+- Removed the Search Model toolbar and the full calculated-price table from Company & Pricing.
+- No Supabase SQL migration is required.
+- V1.08 PDF output remains frozen and unchanged.

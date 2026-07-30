@@ -1,2 +1,2 @@
-KeySuite V1.21
-V1.08 PDF output layout frozen
+KeySuite V1.22
+V1.08 PDF output frozen
