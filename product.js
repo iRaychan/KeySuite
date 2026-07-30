@@ -1,20 +1,80 @@
 (() => {
   'use strict';
-  let selectedSeries='', frameReady=false, queued=null;
+
   const $=id=>document.getElementById(id);
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  let selectedSeries='', frameReady=false, queued=null;
+
   const products=()=>window.KEYSUITE_SECURE_DATA?.products||[];
-  function baseModelName(value){return String(value||'').replace(/^CHC[SN]?\s+/i,'CHC ')}
-  function seriesName(model){const m=String(model||'').match(/^CHC\s+(\d+)/i);return m?`CHC ${m[1]}`:'Other'}
-  function orderedSeries(){return [...new Set(products().map(p=>seriesName(p.model)).filter(x=>x!=='Other'))].sort((a,b)=>Number(a.split(' ')[1])-Number(b.split(' ')[1]))}
-  function options(){return {material:$('productMaterial').value,seal:$('productSeal').value,elastomer:$('productElastomer').value,connection:$('productConnection').value,bare:!!$('productBareShaft').checked}}
+  const gwsProducts=()=>window.KEYSUITE_SECURE_DATA?.gwsProducts||[];
+  const seriesName=model=>{const m=String(model||'').match(/^CHC\s+(\d+)/i);return m?`CHC ${m[1]}`:'Other'};
+  const orderedSeries=()=>[...new Set(products().map(p=>seriesName(p.model)))].sort((a,b)=>Number((a.match(/\d+/)||[999])[0])-Number((b.match(/\d+/)||[999])[0]));
+  const materialCode=()=>{const value=$('productMaterial')?.value||'';return value==='SS316'?'CHCN':value==='SS304'?'CHCS':'CHC'};
+
   function ensureFrame(){const frame=$('productSelectorFrame');if(frame&&frame.src==='about:blank')frame.src=frame.dataset.src;return frame}
-  function send(model,action){const frame=ensureFrame();if(!frame)return;queued={type:'KEYSUITE_PRODUCT_MODEL',model:baseModelName(model),action,options:options()};if(frameReady)frame.contentWindow.postMessage(queued,'*')}
-  function renderSeries(){const series=orderedSeries();if(!selectedSeries||!series.includes(selectedSeries))selectedSeries=series[0]||'';$('productSeriesList').innerHTML=series.map(name=>`<button type="button" class="product-series-button ${name===selectedSeries?'active':''}" data-product-series="${esc(name)}">${esc(name)}</button>`).join('');$('productSeriesList').querySelectorAll('[data-product-series]').forEach(b=>b.onclick=()=>{selectedSeries=b.dataset.productSeries;renderSeries();renderModels()})}
-  function renderModels(){const query=String($('productModelInput').value||'').trim().toLowerCase();let rows=products().filter(p=>seriesName(p.model)===selectedSeries);if(query)rows=rows.filter(p=>String(p.model).toLowerCase().includes(query));$('productSeriesTitle').textContent=selectedSeries||'Models';$('productModelCount').textContent=`${rows.length} model${rows.length===1?'':'s'}`;$('productModelGrid').innerHTML=rows.length?rows.map(p=>`<div class="product-model-card"><h3>${esc(p.model)}</h3><div class="product-model-actions"><button class="btn secondary" type="button" data-product-view="${esc(p.model)}">View Curve</button><button class="btn green" type="button" data-product-export="${esc(p.model)}">Export PDF</button><button class="btn" type="button" data-product-add="${esc(p.model)}">Add to Quotation</button></div></div>`).join(''):'<div class="product-empty">No matching CHC models.</div>';const grid=$('productModelGrid');grid.querySelectorAll('[data-product-view]').forEach(b=>b.onclick=()=>{const model=b.dataset.productView;$('productCurveTitle').textContent=model;const frame=ensureFrame();const host=$('productCurveHost');if(frame.parentNode!==host)host.appendChild(frame);frame.style.display='block';$('productCurveDialog').showModal();send(model,'view')});grid.querySelectorAll('[data-product-export]').forEach(b=>b.onclick=()=>send(b.dataset.productExport,'export'));grid.querySelectorAll('[data-product-add]').forEach(b=>b.onclick=()=>{if(!window.KeySuiteApp?.ensureQuotationPricingContext?.('add a product to the quotation'))return;send(b.dataset.productAdd,'add')})}
-  function render(){const list=$('productModelOptions');if(!list)return;list.innerHTML=products().map(p=>`<option value="${esc(p.model)}"></option>`).join('');renderSeries();renderModels()}
-  function pageShown(id){if(id!=='productChc')return;ensureFrame();render()}
-  window.addEventListener('message',event=>{if(event.source===$('productSelectorFrame')?.contentWindow&&event.data?.type==='KEYSUITE_PRODUCT_FRAME_READY'){frameReady=true;if(queued)$('productSelectorFrame').contentWindow.postMessage(queued,'*')}})
-  document.addEventListener('DOMContentLoaded',()=>{$('productModelInput')?.addEventListener('input',()=>{const exact=products().find(p=>p.model.toLowerCase()===$('productModelInput').value.trim().toLowerCase());if(exact)selectedSeries=seriesName(exact.model);renderSeries();renderModels()});$('closeProductCurve')?.addEventListener('click',()=>$('productCurveDialog')?.close())});
+  function options(){return {material:$('productMaterial')?.value||'SS304 (Cast Iron Connection)',seal:$('productSeal')?.value||'Car/Cer',elastomer:$('productElastomer')?.value||'Viton',connection:$('productConnection')?.value||'round',bare:!!$('productBareShaft')?.checked}}
+  function send(model,action){const frame=ensureFrame();if(!frame)return;queued={type:'KEYSUITE_PRODUCT_ACTION',model,action,options:options()};if(frameReady)frame.contentWindow.postMessage(queued,'*')}
+
+  function renderSeries(){
+    const series=orderedSeries();
+    if(!selectedSeries||!series.includes(selectedSeries))selectedSeries=series[0]||'';
+    $('productSeriesList').innerHTML=series.map(name=>`<button type="button" class="product-series-button ${name===selectedSeries?'active':''}" data-product-series="${esc(name)}">${esc(name)}</button>`).join('');
+    $('productSeriesList').querySelectorAll('[data-product-series]').forEach(button=>button.onclick=()=>{selectedSeries=button.dataset.productSeries;renderSeries();renderModels()});
+  }
+
+  function curveIcon(){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c4-10 8 2 12-8 2-4 4-5 6-5"></path><path d="M3 20h18"></path></svg>'}
+
+  function renderModels(){
+    const query=String($('productModelInput')?.value||'').trim().toLowerCase();
+    let rows=products().filter(p=>seriesName(p.model)===selectedSeries);
+    if(query)rows=rows.filter(p=>String(p.model).toLowerCase().includes(query));
+    $('productSeriesTitle').textContent=selectedSeries||'Models';
+    $('productModelCount').textContent=`${rows.length} model${rows.length===1?'':'s'}`;
+    $('productModelGrid').innerHTML=rows.length?rows.map(p=>`<div class="product-model-row"><h3>${esc(p.model)}</h3><div class="product-model-actions"><button class="btn secondary product-action-button icon-only" type="button" data-product-view="${esc(p.model)}" title="View Curve" aria-label="View Curve">${curveIcon()}</button><button class="btn green product-action-button" type="button" data-product-export="${esc(p.model)}">PDF</button><button class="btn product-action-button" type="button" data-product-add="${esc(p.model)}">Quote</button></div></div>`).join(''):'<div class="product-empty">No matching CHC models.</div>';
+    const grid=$('productModelGrid');
+    grid.querySelectorAll('[data-product-view]').forEach(button=>button.onclick=()=>{
+      const model=button.dataset.productView;
+      $('productCurveTitle').textContent=model;
+      const frame=ensureFrame(),host=$('productCurveHost');
+      if(frame.parentNode!==host)host.appendChild(frame);
+      frame.style.display='block';$('productCurveDialog').showModal();send(model,'view');
+    });
+    grid.querySelectorAll('[data-product-export]').forEach(button=>button.onclick=()=>send(button.dataset.productExport,'export'));
+    grid.querySelectorAll('[data-product-add]').forEach(button=>button.onclick=()=>{
+      if(!window.KeySuiteApp?.ensureQuotationPricingContext?.('add a product to the quotation'))return;
+      send(button.dataset.productAdd,'add');
+    });
+  }
+
+  function renderGws(){
+    const body=$('gwsProductRows');if(!body)return;
+    const pressure=String($('gwsProductPressure')?.value||'10');
+    const query=String($('gwsProductSearch')?.value||'').trim().toLowerCase();
+    const rows=gwsProducts().filter(product=>!query||String(product.model||'').toLowerCase().includes(query));
+    body.innerHTML=rows.map(product=>`<tr><td><b>${esc(product.model)}</b></td><td>${esc(pressure)} Bar</td><td style="text-align:right"><button class="btn" type="button" data-gws-quote="${esc(product.model)}">Quote</button></td></tr>`).join('')||'<tr><td colspan="3" class="muted">No matching GWS Tank models.</td></tr>';
+    $('gwsProductCount').textContent=`${rows.length} model${rows.length===1?'':'s'} · ${pressure} Bar`;
+    body.querySelectorAll('[data-gws-quote]').forEach(button=>button.addEventListener('click',()=>window.KeySuitePricing?.addGwsToQuotation?.(button.dataset.gwsQuote,pressure)));
+  }
+
+  function render(){
+    if($('productModelOptions'))$('productModelOptions').innerHTML=products().map(p=>`<option value="${esc(p.model)}"></option>`).join('');
+    renderSeries();renderModels();renderGws();
+  }
+
+  function pageShown(id){if(id==='productChc'||id==='productGws')render()}
+
+  window.addEventListener('message',event=>{
+    if(event.source===$('productSelectorFrame')?.contentWindow&&event.data?.type==='KEYSUITE_PRODUCT_FRAME_READY'){
+      frameReady=true;if(queued)$('productSelectorFrame').contentWindow.postMessage(queued,'*');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    $('productModelInput')?.addEventListener('input',()=>{const exact=products().find(p=>p.model.toLowerCase()===$('productModelInput').value.trim().toLowerCase());if(exact)selectedSeries=seriesName(exact.model);renderSeries();renderModels()});
+    $('closeProductCurve')?.addEventListener('click',()=>$('productCurveDialog')?.close());
+    $('gwsProductPressure')?.addEventListener('change',renderGws);
+    $('gwsProductSearch')?.addEventListener('input',renderGws);
+  });
+
   window.KeySuiteProduct={pageShown,render};
 })();

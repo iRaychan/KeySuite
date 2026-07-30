@@ -27,20 +27,42 @@
     return data?.[0]?.active?data[0]:null;
   }
   async function loadData(){
-    const [companies,users,categories,products,settings]=await Promise.all([
-      client.from('ks_companies').select('*').order('company_name'),client.from('ks_company_users').select('*').order('full_name'),client.from('ks_pricing_categories').select('*').order('category_name'),client.from('ks_products_chc').select('*').order('source_row'),client.from('ks_app_settings').select('*').eq('id','default').limit(1)
+    const [companies,users,categories,products,gwsProducts,settings]=await Promise.all([
+      client.from('ks_companies').select('*').order('company_name'),
+      client.from('ks_company_users').select('*').order('full_name'),
+      client.from('ks_pricing_categories').select('*').order('category_name'),
+      client.from('ks_products_chc').select('*').order('source_row'),
+      client.from('ks_products_gws').select('*').order('source_row'),
+      client.from('ks_app_settings').select('*').eq('id','default').limit(1)
     ]);
-    const failed=[companies,users,categories,products,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
+    const failed=[companies,users,categories,products,gwsProducts,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
     const setting=settings.data?.[0]||{};
-    const sourceCurrency=String(setting.chc_source_currency||setting.source_currency||'USD').toUpperCase()==='RMB'?'RMB':'USD';
-    const usdMultiplier=Number(setting.usd_multiplier??(sourceCurrency==='USD'?setting.currency_multiplier:5.8)??5.8);
-    const rmbMultiplier=Number(setting.rmb_multiplier??(sourceCurrency==='RMB'?setting.currency_multiplier:.65)??.65);
-    const activeMultiplier=sourceCurrency==='RMB'?rmbMultiplier:usdMultiplier;
-    return {version:'1.17',release_date:'2026-07-30',currency:setting.currency||'MYR',source_currency:sourceCurrency,chc_source_currency:sourceCurrency,currency_multiplier:activeMultiplier,usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
+    const usdMultiplier=Number(setting.usd_multiplier??5.8);
+    const rmbMultiplier=Number(setting.rmb_multiplier??.65);
+    const parseRules=value=>{if(!value)return{};if(typeof value==='object')return value;try{return JSON.parse(value)}catch(_){return{}}};
+    const normalizeRule=(raw={},fallback={})=>({
+      margin:Number(raw.margin??fallback.margin??.38),
+      transport:Number(raw.transport??fallback.transport??30),
+      commission:Number(raw.commission??fallback.commission??.03),
+      setDiscount:Number(raw.set_discount??raw.setDiscount??fallback.setDiscount??.068),
+      finalDiscount:Number(raw.final_discount??raw.finalDiscount??fallback.finalDiscount??.08),
+      includeCommission:raw.include_commission??raw.includeCommission??true,
+      includeSetDiscount:raw.include_set_discount??raw.includeSetDiscount??true,
+      includeFinalDiscount:raw.include_final_discount??raw.includeFinalDiscount??true,
+      includeFuelCharge:raw.include_fuel_charge??raw.includeFuelCharge??true
+    });
+    return {
+      version:'1.18',release_date:'2026-07-30',currency:setting.currency||'MYR',usd_multiplier:usdMultiplier,rmb_multiplier:rmbMultiplier,myr_multiplier:1,
+      fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
-      categories:(categories.data||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)})),
-      products:(products.data||[]).map(p=>{const prices={CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)};return {id:p.id,category:p.product_category,model:p.model,prices,prices_usd:prices,source_row:p.source_row}})};
+      categories:(categories.data||[]).map(c=>{
+        const rules=parseRules(c.product_rules),fallback={margin:Number(c.chc_margin??c.chc_factor??.38),transport:Number(c.transport??30),commission:Number(c.commission??.03),setDiscount:Number(c.set_discount??.068),finalDiscount:Number(c.final_discount??.08)};
+        return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,fallback),GWS:normalizeRule(rules.GWS,fallback)},final_discount:fallback.finalDiscount,set_discount:fallback.setDiscount,commission:fallback.commission,margins:{CHC:fallback.margin},factors:{CHC:fallback.margin},transport:fallback.transport};
+      }),
+      products:(products.data||[]).map(p=>({id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,pricesByCurrency:{USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},MYR:{CHC:p.chc_myr===null?null:Number(p.chc_myr),CHCS:p.chcs_myr===null?null:Number(p.chcs_myr),CHCN:p.chcn_myr===null?null:Number(p.chcn_myr)}}})),
+      gwsProducts:(gwsProducts.data||[]).map(p=>({id:p.id,model:p.model,source_row:p.source_row,pricesByCurrency:{USD:{'10':p.price_10_usd===null?null:Number(p.price_10_usd),'16':p.price_16_usd===null?null:Number(p.price_16_usd),'25':p.price_25_usd===null?null:Number(p.price_25_usd)},RMB:{'10':p.price_10_rmb===null?null:Number(p.price_10_rmb),'16':p.price_16_rmb===null?null:Number(p.price_16_rmb),'25':p.price_25_rmb===null?null:Number(p.price_25_rmb)},MYR:{'10':p.price_10_myr===null?null:Number(p.price_10_myr),'16':p.price_16_myr===null?null:Number(p.price_16_myr),'25':p.price_25_myr===null?null:Number(p.price_25_myr)}}}))
+    };
   }
   async function loadUserProfile(email){
     try{

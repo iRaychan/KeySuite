@@ -1,35 +1,36 @@
-# KeySuite V1.17
+# KeySuite V1.18
 
-Base: KeySuite V1.16. The approved V1.08 quotation PDF layout remains frozen.
+Base: KeySuite V1.17. The approved V1.08 quotation PDF/print layout remains fully frozen.
 
-## Changes in V1.17
+## Install in this order
 
-- Dashboard navigation changed to `Selector > CHC`.
-- Added `Product > CHC` for direct model browsing by CHC series.
-- Product CHC supports View Curve, Export / Share PDF and Add to Quotation without a duty point.
-- Added a mobile Export / Share PDF control beside Add to Quotation.
-- Category list now shows only category names. Selecting a category loads its saved values; Edit is in the editor header.
-- Customer details from Classification through Notes can be collapsed.
-- Added Quote selection beside each contact email.
-- Quote selection automatically updates the quotation Customer and Customer Name.
-- Customer & Quotation Details opens collapsed by default.
+1. In Supabase, open **SQL Editor → New query**.
+2. Run the complete file: `setup/V118_SUPABASE_MIGRATION.sql`.
+3. Extract this GitHub package.
+4. Upload all files and folders to the root of the existing KeySuite repository, replacing matching files.
+5. Keep the existing working `config.js`. This package intentionally does not include it.
+6. Wait for GitHub Pages to deploy, then refresh using `Ctrl + Shift + R`.
 
-## Supabase
+## V1.18 highlights
 
-V1.17 has no new database migration. The V1.16 migration must already be installed for Price List and signatory profile saving:
+- Category Name at the top, with vertically stacked `CHC` and `GWS` pricing-rule buttons.
+- Separate CHC and GWS rules for margin, transport, commission, set discount, final discount and fuel charge.
+- Hold a protected field for 3 seconds to unlock it for editing.
+- Optional formula components are controlled by checkboxes; unchecked components are omitted from costing.
+- Independent USD, RMB and MYR source prices for each model/variant.
+- Highest converted MYR source price is used before margin and the remaining category formula.
+- GWS Tank models: 8LX, 12LX, 18LX, 24LX, 35LX, 60LV, 80LV, 100LV, 130LV, 150LV, 200LV and 300LV.
+- GWS pressure prices: 10 Bar, 16 Bar and 25 Bar.
+- Product > CHC uses one model per row with Curve, PDF and Quote controls.
+- Product > GWS Tank can add the selected model and pressure to a quotation.
+- Mobile landscape now shows Export / Share PDF beside Add to Quotation.
+- Quotation items open collapsed and Export Center labels are shortened.
+- A saved quotation keeps its internal pricing customer even when another customer is selected for the next quotation.
+- Printed customer/contact wording can be edited independently.
 
-`setup/V116_SUPABASE_MIGRATION.sql`
+## Security and data
 
-Do not rerun older migrations unless the corresponding earlier version was never installed.
-
-## Installation
-
-1. Extract this package.
-2. Upload all files and folders to the GitHub repository root, replacing matching files.
-3. Keep the existing working `config.js`; this package intentionally does not include it.
-4. Wait for GitHub Pages deployment to finish.
-5. Refresh KeySuite using `Ctrl + Shift + R`.
-
-## Mobile PDF sharing
-
-On supported mobile browsers, Export / Share PDF opens the device's native PDF/print sharing workflow, where WhatsApp or email may be selected. Browser and device support varies; standard PDF save/print remains the fallback.
+- Only the Owner sees the gold Key button and the protected Key modules.
+- Customer ID and Category ID remain database-only and are not shown on dashboards.
+- Source prices are stored in Supabase, not embedded in the public GitHub files.
+- Do not upload SQL, Excel source files or secret/service-role keys into the public repository.

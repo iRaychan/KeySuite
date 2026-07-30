@@ -1,26 +1,308 @@
 (() => {
   'use strict';
-  let access=null, selectedId='', bound=false, editing=false;
+
+  let access=null;
+  let selectedId='';
+  let selectedProduct='CHC';
+  let editing=false;
+  let bound=false;
+  const unlocked=new Set();
+
   const byId=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const num=(value,d=2)=>Number(value||0).toLocaleString('en-MY',{minimumFractionDigits:d,maximumFractionDigits:d});
   const isOwner=()=>String(access?.role||window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner';
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
-  const fields=['categoryNameInput','categoryCommissionInput','categorySetDiscountInput','categoryFinalDiscountInput','categoryMarginInput','categoryTransportInput'];
-  function message(text,type='info'){const box=byId('categoryMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
-  function setEditable(on){editing=!!on;const form=byId('categoryForm');form?.classList.toggle('category-form-readonly',!editing);fields.forEach(id=>{const el=byId(id);if(el)el.disabled=!editing});const edit=byId('editCategoryRule');if(edit)edit.style.display=selectedId&&!editing?'inline-block':'none';const save=byId('saveCategoryRule');if(save)save.disabled=!editing}
-  function fill(category=null){selectedId=category?.id||'';byId('categoryFormTitle').textContent=category?'Edit Category':'New Category';byId('categoryNameInput').value=category?.name||'';byId('categoryCommissionInput').value=num(Number(category?.commission??.03)*100,2).replace(/,/g,'');byId('categorySetDiscountInput').value=num(Number(category?.set_discount??.068)*100,2).replace(/,/g,'');byId('categoryFinalDiscountInput').value=num(Number(category?.final_discount??.08)*100,2).replace(/,/g,'');byId('categoryMarginInput').value=num(Number(category?.margins?.CHC??category?.factors?.CHC??.38)*100,2).replace(/,/g,'');byId('categoryTransportInput').value=num(category?.transport??30,2).replace(/,/g,'');renderRows()}
-  function openCategory(category,forEdit=false){fill(category);setEditable(forEdit);message(forEdit?'Category is ready for editing.':'Saved category loaded. Press Edit to make changes.','info')}
-  function newCategory(){fill(null);setEditable(true);message('New category form is ready.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
-  function renderRows(){const body=byId('categoryRows');if(!body)return;const rows=categories();if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}body.innerHTML=rows.map(category=>`<tr><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}">${esc(category.name)}</button></td></tr>`).join('');body.querySelectorAll('[data-category-open]').forEach(button=>button.addEventListener('click',()=>{const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)}))}
-  function mapRows(rows){return (rows||[]).map(c=>({id:c.id,name:c.category_name,final_discount:Number(c.final_discount||0),set_discount:Number(c.set_discount||0),commission:Number(c.commission||0),margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)}))}
-  async function reload(){const client=window.KeySuiteAuth?.getClient?.();if(!client)return;const {data,error}=await client.from('ks_pricing_categories').select('*').order('category_name');if(error)throw error;const mapped=mapRows(data);const target=window.KEYSUITE_SECURE_DATA?.categories;if(Array.isArray(target))target.splice(0,target.length,...mapped);window.KeySuitePricing?.render?.();return mapped}
-  function fieldPercent(id,label){const value=Number(byId(id)?.value);if(!Number.isFinite(value)||value<0||value>=100)throw new Error(`${label} must be from 0% to below 100%.`);return value/100}
-  async function save(event){event.preventDefault();if(!editing)return;if(!isOwner()){message('Only the Owner can manage pricing categories.','error');return}const name=byId('categoryNameInput').value.trim(),transport=Number(byId('categoryTransportInput').value);if(!name){message('Category Name is required.','error');return}if(!Number.isFinite(transport)||transport<0){message('Transport must be RM0.00 or more.','error');return}let margin,commission,setDiscount,finalDiscount;try{commission=fieldPercent('categoryCommissionInput','Commission');setDiscount=fieldPercent('categorySetDiscountInput','Set Discount');finalDiscount=fieldPercent('categoryFinalDiscountInput','Final Discount');margin=fieldPercent('categoryMarginInput','CHC Margin')}catch(error){message(error.message,'error');return}const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}const button=byId('saveCategoryRule'),original=button.textContent;button.disabled=true;button.textContent='Saving…';message('');try{const {error}=await client.rpc('keysuite_manage_pricing_category',{p_category_id:selectedId||null,p_category_name:name,p_chc_margin:margin,p_transport:transport,p_commission:commission,p_set_discount:setDiscount,p_final_discount:finalDiscount});if(error)throw error;const rows=await reload();const saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());openCategory(saved||null,false);message(`Category “${name}” saved.`,'info')}catch(error){console.error(error);message(`${error.message||error}. Run the V1.16 Supabase migration first.`,'error')}finally{button.disabled=false;button.textContent=original}}
-  function cancel(){if(selectedId){const category=categories().find(x=>x.id===selectedId);if(category)openCategory(category,false)}else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}}
-  function bind(){if(bound)return;bound=true;byId('categoryForm')?.addEventListener('submit',save);byId('newPricingCategory')?.addEventListener('click',newCategory);byId('cancelCategoryEdit')?.addEventListener('click',cancel);byId('editCategoryRule')?.addEventListener('click',()=>{if(!selectedId)return;setEditable(true);message('Editing enabled.','info');byId('categoryNameInput')?.focus()})}
-  function render(){if(!isOwner())return;renderRows();if(!selectedId&&categories().length)openCategory(categories()[0],false);const notice=byId('categoryAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Select a category to view it, then press Edit to change it.`}
+
+  const defaultRule=()=>({
+    margin:.38,
+    transport:30,
+    commission:.03,
+    setDiscount:.068,
+    finalDiscount:.08,
+    includeCommission:true,
+    includeSetDiscount:true,
+    includeFinalDiscount:true,
+    includeFuelCharge:true
+  });
+
+  function message(text,type='info'){
+    const box=byId('categoryMessage');
+    if(!box)return;
+    box.textContent=text||'';
+    box.className=text?`auth-message show ${type}`:'auth-message';
+  }
+
+  function ruleFor(category,product=selectedProduct){
+    const rule=category?.productRules?.[product]||{};
+    const fallback=defaultRule();
+    return {
+      margin:Number(rule.margin??(product==='CHC'?(category?.margins?.CHC??category?.factors?.CHC):fallback.margin)??fallback.margin),
+      transport:Number(rule.transport??category?.transport??fallback.transport),
+      commission:Number(rule.commission??category?.commission??fallback.commission),
+      setDiscount:Number(rule.setDiscount??category?.set_discount??fallback.setDiscount),
+      finalDiscount:Number(rule.finalDiscount??category?.final_discount??fallback.finalDiscount),
+      includeCommission:rule.includeCommission!==false,
+      includeSetDiscount:rule.includeSetDiscount!==false,
+      includeFinalDiscount:rule.includeFinalDiscount!==false,
+      includeFuelCharge:rule.includeFuelCharge!==false
+    };
+  }
+
+  function currentCategory(){return categories().find(x=>x.id===selectedId)||null}
+
+  function setUnlockedState(key,on){
+    if(on)unlocked.add(key);else unlocked.delete(key);
+    const group=byId(`categoryLock_${key}`);
+    if(!group)return;
+    group.classList.toggle('unlocked',on);
+    group.classList.toggle('locked',!on);
+    group.querySelectorAll('input').forEach(input=>{
+      if(input.type==='checkbox')input.disabled=!editing||!on;
+      else input.readOnly=!editing||!on;
+    });
+    const hint=group.querySelector('.hold-edit-hint');
+    if(hint)hint.textContent=on?'Unlocked':'Hold 3s to edit';
+  }
+
+  function resetLocks(){
+    unlocked.clear();
+    ['margin','transport','commission','setDiscount','finalDiscount','fuelCharge'].forEach(key=>setUnlockedState(key,false));
+  }
+
+  function setEditable(on){
+    editing=!!on;
+    const name=byId('categoryNameInput');
+    if(name)name.disabled=!editing;
+    const edit=byId('editCategoryRule');
+    if(edit)edit.style.display=selectedId&&!editing?'inline-block':'none';
+    const save=byId('saveCategoryRule');
+    if(save)save.disabled=!editing;
+    const cancel=byId('cancelCategoryEdit');
+    if(cancel)cancel.disabled=!editing;
+    byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);
+    resetLocks();
+  }
+
+  function showCurrencySummary(){
+    const data=window.KEYSUITE_SECURE_DATA||{};
+    const usd=Number(data.usd_multiplier??5.8);
+    const rmb=Number(data.rmb_multiplier??.65);
+    const box=byId('categoryCurrencySummary');
+    if(box)box.innerHTML=`<b>Price List Currency</b><span>USD (MYR ${num(usd,2)})</span><span>RMB (MYR ${num(rmb,2)})</span><span>MYR (MYR 1.00)</span>`;
+  }
+
+  function formulaText(rule){
+    const parts=['Highest of USD × USD rate / RMB × RMB rate / MYR','÷ (1 − Margin)','+ Transport'];
+    if(rule.includeCommission)parts.push('÷ (1 − Commission)');
+    if(rule.includeSetDiscount)parts.push('÷ (1 − Set Discount)');
+    if(rule.includeFinalDiscount)parts.push('÷ (1 − Final Discount)');
+    if(rule.includeFuelCharge)parts.push('+ Fuel Charge');
+    parts.push('Round up to RM10');
+    return parts.join('  →  ');
+  }
+
+  function updateFormula(){
+    const rule=readRule(false);
+    const box=byId('categoryFormulaPreview');
+    if(box)box.textContent=formulaText(rule);
+  }
+
+  function fillRule(category){
+    const rule=ruleFor(category,selectedProduct);
+    byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');
+    byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
+    byId('categoryCommissionInput').value=num(rule.commission*100,2).replace(/,/g,'');
+    byId('categorySetDiscountInput').value=num(rule.setDiscount*100,2).replace(/,/g,'');
+    byId('categoryFinalDiscountInput').value=num(rule.finalDiscount*100,2).replace(/,/g,'');
+    byId('categoryCommissionEnabled').checked=rule.includeCommission;
+    byId('categorySetDiscountEnabled').checked=rule.includeSetDiscount;
+    byId('categoryFinalDiscountEnabled').checked=rule.includeFinalDiscount;
+    byId('categoryFuelChargeEnabled').checked=rule.includeFuelCharge;
+    byId('categoryProductHeading').textContent=`${selectedProduct} Pricing Rule`;
+    if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${selectedProduct} Margin (%)`;
+    document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
+    resetLocks();
+    showCurrencySummary();
+    updateFormula();
+  }
+
+  function fill(category=null){
+    selectedId=category?.id||'';
+    byId('categoryFormTitle').textContent=category?'Edit Category':'New Category';
+    byId('categoryNameInput').value=category?.name||'';
+    fillRule(category);
+    renderRows();
+  }
+
+  function openCategory(category,forEdit=false){
+    fill(category);
+    setEditable(forEdit);
+    message(forEdit?'Category is ready. Hold a protected field for 3 seconds to edit it.':'Saved category loaded. Press Edit to make changes.','info');
+  }
+
+  function newCategory(){
+    selectedProduct='CHC';
+    fill(null);
+    setEditable(true);
+    message('New category ready. Enter the name, then hold protected fields for 3 seconds to change their defaults.','info');
+    setTimeout(()=>byId('categoryNameInput')?.focus(),0);
+  }
+
+  function renderRows(){
+    const body=byId('categoryRows');if(!body)return;
+    const rows=categories();
+    if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
+    body.innerHTML=rows.map(category=>`<tr><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}">${esc(category.name)}</button></td></tr>`).join('');
+    body.querySelectorAll('[data-category-open]').forEach(button=>button.addEventListener('click',()=>{
+      const category=categories().find(item=>item.id===button.dataset.categoryOpen);
+      if(category)openCategory(category,false);
+    }));
+  }
+
+  function mapRows(rows){
+    return (rows||[]).map(c=>{
+      let rules=c.product_rules||{};
+      if(typeof rules==='string'){try{rules=JSON.parse(rules)}catch(_){rules={}}}
+      const normalize=code=>{
+        const r=rules?.[code]||{};
+        return {
+          margin:Number(r.margin??(code==='CHC'?(c.chc_margin??c.chc_factor):.38)??.38),
+          transport:Number(r.transport??c.transport??30),
+          commission:Number(r.commission??c.commission??.03),
+          setDiscount:Number(r.set_discount??r.setDiscount??c.set_discount??.068),
+          finalDiscount:Number(r.final_discount??r.finalDiscount??c.final_discount??.08),
+          includeCommission:r.include_commission??r.includeCommission??true,
+          includeSetDiscount:r.include_set_discount??r.includeSetDiscount??true,
+          includeFinalDiscount:r.include_final_discount??r.includeFinalDiscount??true,
+          includeFuelCharge:r.include_fuel_charge??r.includeFuelCharge??true
+        };
+      };
+      return {id:c.id,name:c.category_name,productRules:{CHC:normalize('CHC'),GWS:normalize('GWS')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0),commission:Number(c.commission||0),set_discount:Number(c.set_discount||0),final_discount:Number(c.final_discount||0)};
+    });
+  }
+
+  async function reload(){
+    const client=window.KeySuiteAuth?.getClient?.();if(!client)return;
+    const {data,error}=await client.from('ks_pricing_categories').select('*').order('category_name');
+    if(error)throw error;
+    const mapped=mapRows(data);
+    const target=window.KEYSUITE_SECURE_DATA?.categories;
+    if(Array.isArray(target))target.splice(0,target.length,...mapped);
+    window.KeySuitePricing?.render?.();
+    return mapped;
+  }
+
+  function percentValue(id,label,validate=true){
+    const value=Number(byId(id)?.value);
+    if(validate&&(!Number.isFinite(value)||value<0||value>=100))throw new Error(`${label} must be from 0% to below 100%.`);
+    return Number.isFinite(value)?value/100:0;
+  }
+
+  function readRule(validate=true){
+    const transport=Number(byId('categoryTransportInput')?.value||0);
+    if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');
+    return {
+      margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),
+      transport:Number.isFinite(transport)?transport:0,
+      commission:percentValue('categoryCommissionInput','Commission',validate),
+      setDiscount:percentValue('categorySetDiscountInput','Set Discount',validate),
+      finalDiscount:percentValue('categoryFinalDiscountInput','Final Discount',validate),
+      includeCommission:!!byId('categoryCommissionEnabled')?.checked,
+      includeSetDiscount:!!byId('categorySetDiscountEnabled')?.checked,
+      includeFinalDiscount:!!byId('categoryFinalDiscountEnabled')?.checked,
+      includeFuelCharge:!!byId('categoryFuelChargeEnabled')?.checked
+    };
+  }
+
+  async function save(event){
+    event.preventDefault();
+    if(!editing)return;
+    if(!isOwner()){message('Only the Owner can manage pricing categories.','error');return}
+    const name=byId('categoryNameInput').value.trim();
+    if(!name){message('Category Name is required.','error');return}
+    let rule;
+    try{rule=readRule(true)}catch(error){message(error.message,'error');return}
+    const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}
+    const button=byId('saveCategoryRule'),original=button.textContent;
+    button.disabled=true;button.textContent='Saving…';message('');
+    try{
+      const {error}=await client.rpc('keysuite_manage_pricing_category_v118',{
+        p_category_id:selectedId||null,
+        p_category_name:name,
+        p_product_code:selectedProduct,
+        p_margin:rule.margin,
+        p_transport:rule.transport,
+        p_commission:rule.commission,
+        p_set_discount:rule.setDiscount,
+        p_final_discount:rule.finalDiscount,
+        p_include_commission:rule.includeCommission,
+        p_include_set_discount:rule.includeSetDiscount,
+        p_include_final_discount:rule.includeFinalDiscount,
+        p_include_fuel_charge:rule.includeFuelCharge
+      });
+      if(error)throw error;
+      const rows=await reload();
+      const saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());
+      openCategory(saved||null,false);
+      message(`${selectedProduct} pricing rule for “${name}” saved.`,'info');
+    }catch(error){
+      console.error(error);
+      message(`${error.message||error}. Run the V1.18 Supabase migration first.`,'error');
+    }finally{button.disabled=false;button.textContent=original}
+  }
+
+  function cancel(){
+    if(selectedId){const category=categories().find(x=>x.id===selectedId);if(category)openCategory(category,false)}
+    else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}
+  }
+
+  function bindLongPress(group){
+    let timer=null;
+    const key=group.dataset.lockKey;
+    const cancel=()=>{if(timer){clearTimeout(timer);timer=null}group.classList.remove('holding')};
+    group.addEventListener('pointerdown',event=>{
+      if(!editing||unlocked.has(key))return;
+      if(event.pointerType==='mouse'&&event.button!==0)return;
+      group.classList.add('holding');
+      timer=setTimeout(()=>{
+        timer=null;group.classList.remove('holding');setUnlockedState(key,true);
+        message(`${group.dataset.lockLabel||key} unlocked for editing.`,'info');
+        group.querySelector('input:not([type="checkbox"])')?.focus();
+      },3000);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(type=>group.addEventListener(type,cancel));
+    group.addEventListener('contextmenu',event=>event.preventDefault());
+  }
+
+  function bind(){
+    if(bound)return;bound=true;
+    byId('categoryForm')?.addEventListener('submit',save);
+    byId('newPricingCategory')?.addEventListener('click',newCategory);
+    byId('cancelCategoryEdit')?.addEventListener('click',cancel);
+    byId('editCategoryRule')?.addEventListener('click',()=>{
+      if(!selectedId)return;
+      setEditable(true);message('Editing enabled. Hold a protected field for 3 seconds to unlock it.','info');byId('categoryNameInput')?.focus();
+    });
+    document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{
+      selectedProduct=button.dataset.categoryProduct;
+      fillRule(currentCategory());
+      message(`${selectedProduct} pricing rule loaded.${editing?' Hold a protected field for 3 seconds to edit it.':''}`,'info');
+    }));
+    document.querySelectorAll('.category-lock-field').forEach(bindLongPress);
+    ['categoryMarginInput','categoryTransportInput','categoryCommissionInput','categorySetDiscountInput','categoryFinalDiscountInput','categoryCommissionEnabled','categorySetDiscountEnabled','categoryFinalDiscountEnabled','categoryFuelChargeEnabled'].forEach(id=>byId(id)?.addEventListener('input',updateFormula));
+  }
+
+  function render(){
+    if(!isOwner())return;
+    renderRows();showCurrencySummary();
+    if(!selectedId&&categories().length)openCategory(categories()[0],false);
+    const notice=byId('categoryAccessNotice');
+    if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'Owner')}</b>. Select a category, then choose CHC or GWS.`;
+  }
+
   function init(data,userAccess){access=userAccess||access;bind();render()}
   function pageShown(id){if(id==='categoryManagement')render()}
+
   window.KeySuiteCategories={init,pageShown,reload,render};
 })();

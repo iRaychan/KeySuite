@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.17</title>
+  <title>KeySuite V1.18</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -156,12 +156,17 @@
     .category-editor-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.category-editor-title-row h2{margin:0}.category-name-button{width:100%;border:0;background:transparent;text-align:left;padding:10px 8px;font-weight:700;color:var(--text);border-radius:8px}.category-name-button:hover,.category-name-button.active{background:#eef6ff}.category-table th:last-child,.category-table td:last-child{display:none}.category-layout{grid-template-columns:minmax(190px,260px) minmax(620px,1fr)}.category-form-readonly input{background:#f8fafc;color:#475569}.category-form-readonly .category-actions{display:none}
     .product-toolbar{display:grid;grid-template-columns:1.05fr 1.25fr 1.35fr .8fr 1fr 1fr;gap:12px;align-items:end}.product-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;margin-top:16px}.product-series-list{display:flex;flex-direction:column;gap:6px;max-height:680px;overflow:auto}.product-series-button{border:1px solid #dbe3ec;background:#fff;border-radius:8px;padding:10px 12px;text-align:left;font-weight:700}.product-series-button.active,.product-series-button:hover{background:#eef6ff;border-color:#93c5fd}.product-model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;max-height:680px;overflow:auto;padding-right:4px}.product-model-card{border:1px solid #dbe3ec;border-radius:10px;padding:12px;background:#fff}.product-model-card h3{margin:0 0 10px;font-size:16px}.product-model-actions{display:flex;gap:7px;flex-wrap:wrap}.product-model-actions .btn{padding:7px 10px;font-size:12px}.product-curve-dialog{width:min(1240px,calc(100vw - 24px))!important}.product-curve-dialog iframe{width:100%;height:min(78vh,900px);border:0;background:#fff}.product-empty{padding:28px;text-align:center;color:var(--muted)}
     @media(max-width:1050px){.product-toolbar{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.product-layout{grid-template-columns:1fr}.product-series-list{flex-direction:row;max-height:none;overflow:auto}.product-series-button{white-space:nowrap}.product-toolbar{grid-template-columns:1fr 1fr}}@media(max-width:560px){.product-toolbar{grid-template-columns:1fr}.product-model-grid{grid-template-columns:1fr}.product-model-actions .btn{flex:1}.nav-submenu{padding-left:0}}
+
+    .category-product-rule-layout{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;margin-top:14px}.category-product-buttons{display:flex;flex-direction:column;gap:10px}.category-product-button{border:1px solid #d5dee9;background:#fff;border-radius:9px;padding:13px 10px;font-weight:800;text-align:center}.category-product-button.active{background:#0f4c81;color:#fff;border-color:#0f4c81}.category-rule-editor{border:1px solid #dbe3ec;border-radius:10px;padding:14px;background:#fbfdff}.category-rule-editor h3{margin:0 0 12px}.category-currency-summary{display:flex;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:8px;background:#eef6ff;margin-bottom:14px}.category-currency-summary span{padding:4px 8px;background:#fff;border-radius:6px;font-size:12px;font-weight:700}.category-rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.category-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.category-lock-field{position:relative;border:1px solid #dbe3ec;border-radius:9px;padding:10px;background:#fff;transition:.2s}.category-lock-field.locked{background:#f8fafc}.category-lock-field.holding{box-shadow:inset 0 0 0 3px #f2c94c}.category-lock-field.unlocked{border-color:#16a34a;background:#f0fdf4}.category-lock-field label{display:flex;justify-content:space-between;gap:8px;align-items:center}.category-check-label{justify-content:flex-start!important;flex-wrap:wrap}.category-check-label small{margin-left:auto}.hold-edit-hint{font-size:10px;color:#92400e;font-weight:700}.category-toggle-note{font-size:12px;color:var(--muted);padding-top:8px}.gws-product-toolbar{display:grid;grid-template-columns:minmax(160px,240px) minmax(220px,420px);gap:14px}.product-model-grid{display:flex;flex-direction:column;gap:8px}.product-model-row{display:grid;grid-template-columns:minmax(160px,1fr) 252px;gap:12px;align-items:center;border:1px solid #dbe3ec;border-radius:10px;padding:10px 12px;background:#fff}.product-model-row h3{margin:0;font-size:15px}.product-model-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.product-action-button{width:100%;min-width:0;padding:8px!important}.product-action-button.icon-only svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.pricing-rule+.formula{white-space:pre-line}
+    @media(max-width:1000px){.product-layout{grid-template-columns:1fr}.product-series-list{flex-direction:row;flex-wrap:wrap;max-height:none;overflow:visible}.product-series-button{flex:0 0 auto}.product-model-grid{max-height:none}.category-product-rule-layout{grid-template-columns:100px minmax(0,1fr)}}
+    @media(max-width:760px){.product-model-row{grid-template-columns:1fr 210px}.category-rule-grid,.category-option-grid{grid-template-columns:1fr}.gws-product-toolbar{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.product-model-row{grid-template-columns:1fr}.product-model-actions{grid-template-columns:repeat(3,1fr)}.category-product-rule-layout{grid-template-columns:1fr}.category-product-buttons{flex-direction:column;width:100%}.gws-product-toolbar{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.17 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V1.18 secure quotation and pump selection system</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -176,7 +181,7 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.17</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.18</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -186,7 +191,7 @@
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="productChc">CHC</button></div>
+        <div class="nav-submenu"><button data-page="productChc">CHC</button><button data-page="productGws">GWS Tank</button></div>
       </div>
       <button data-page="quotation">Quotation</button>
       <button data-page="history">Quote History</button>
@@ -197,7 +202,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.17 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V1.18 · V1.08 PDF output frozen</div>
   </aside>
 
   <main>
@@ -339,6 +344,18 @@
       <iframe id="productSelectorFrame" src="about:blank" data-src="selector/index.html?product=1" title="CHC Product Curve" style="display:none"></iframe>
     </section>
 
+    <section id="productGws" class="page">
+      <div class="page-title-row"><div><h1>Product · GWS Tank</h1><div class="muted">Choose a tank model and working pressure, then add the priced item to a quotation.</div></div></div>
+      <div class="card gws-product-toolbar">
+        <div><label>Working Pressure</label><select id="gwsProductPressure"><option value="10">10 Bar</option><option value="16">16 Bar</option><option value="25">25 Bar</option></select></div>
+        <div><label>Search Model</label><input id="gwsProductSearch" placeholder="Example: 100LV"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsProductCount" class="muted"></div></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Model</th><th>Pressure</th><th></th></tr></thead><tbody id="gwsProductRows"></tbody></table></div>
+      </div>
+    </section>
+
     <section id="quotation" class="page">
       <div class="quote-head">
         <div><h1>Quotation</h1><div class="muted">Keylargo Industrial Sdn. Bhd. · B.G.Reich Pumps</div></div>
@@ -359,6 +376,8 @@
         <div class="form-grid">
           <div><label>Customer</label><select id="qCustomer"></select></div>
           <div><label>Customer Name</label><select id="qContact"></select></div>
+          <div><label>Printed Customer</label><input id="qPrintedCompany" placeholder="Customer shown on PDF"></div>
+          <div><label>Printed Contact Name</label><input id="qPrintedContact" placeholder="Contact shown on PDF"></div>
           <div class="date-rev-row">
             <div><label>Date</label><input id="qDate" type="date"></div>
             <div><label>Revision Date</label><input id="qRevisionDate" type="date"></div>
@@ -381,7 +400,7 @@
         </div>
         <div id="quoteItems"></div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
-        <div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">Export Complete Quotation PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Individual PDF filename follows the quotation item number and displayed model.</p></div>
+        <div class="card no-print" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Item buttons export the selected item PDF.</p></div>
       </div>
     </section>
 
@@ -407,7 +426,7 @@
         <button type="button" class="key-module-card" data-go="priceListDashboard">
           <span class="module-icon">$</span>
           <h2>Price List</h2>
-          <p>Maintain source currency, USD/RMB multipliers and product source prices.</p>
+          <p>Maintain USD, RMB and MYR source prices for CHC and GWS Tank.</p>
           <span class="module-order">03</span>
         </button>
         <button type="button" class="key-module-card" data-go="companyPricing">
@@ -469,18 +488,29 @@
           <div id="categoryMessage" class="auth-message"></div>
           <form id="categoryForm" novalidate>
             <div class="category-form-grid">
-              <div><label>Category Name *</label><input id="categoryNameInput" maxlength="80" placeholder="Example: Dealer" required></div>
-              <div class="category-discount-row">
-                <div><label>Commission (%) *</label><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" required></div>
-                <div><label>Set Discount (%) *</label><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" required></div>
-                <div><label>Final Discount (%) *</label><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" required></div>
-              </div>
-              <div class="category-cost-row">
-                <div><label>CHC Margin (%) *</label><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="38.00" required></div>
-                <div><label>Transport (RM) *</label><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" required></div>
+              <div><label>Category Name *</label><input id="categoryNameInput" maxlength="80" placeholder="Example: Special" required></div>
+              <div class="category-product-rule-layout">
+                <div class="category-product-buttons" aria-label="Product pricing rules">
+                  <button class="category-product-button active" type="button" data-category-product="CHC">CHC</button>
+                  <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
+                </div>
+                <div class="category-rule-editor">
+                  <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
+                  <div id="categoryCurrencySummary" class="category-currency-summary"></div>
+                  <div class="category-rule-grid">
+                    <div class="category-lock-field locked" id="categoryLock_margin" data-lock-key="margin" data-lock-label="Margin"><label><span id="categoryMarginLabel">Margin (%)</span><small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryMarginInput" type="number" min="0" max="99.99" step="0.01" value="38.00" readonly></div>
+                    <div class="category-lock-field locked" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport"><label>Transport (RM)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly></div>
+                  </div>
+                  <div class="category-option-grid">
+                    <div class="category-lock-field locked" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission"><label class="category-check-label"><input id="categoryCommissionEnabled" type="checkbox" checked disabled> Commission (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" readonly></div>
+                    <div class="category-lock-field locked" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount"><label class="category-check-label"><input id="categorySetDiscountEnabled" type="checkbox" checked disabled> Set Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" readonly></div>
+                    <div class="category-lock-field locked" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount"><label class="category-check-label"><input id="categoryFinalDiscountEnabled" type="checkbox" checked disabled> Final Discount (%)<small class="hold-edit-hint">Hold 3s to edit</small></label><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" readonly></div>
+                    <div class="category-lock-field locked category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge"><label class="category-check-label"><input id="categoryFuelChargeEnabled" type="checkbox" checked disabled> Fuel Charge<small class="hold-edit-hint">Hold 3s to edit</small></label><div class="category-toggle-note">Uses customer distance × (Fuel Price − RM2.00)</div></div>
+                  </div>
+                  <div class="formula" id="categoryFormulaPreview" style="margin-top:14px"></div>
+                </div>
               </div>
             </div>
-            <div class="formula" style="margin-top:14px">The Price List supplies the source currency and multiplier. This category supplies margin, transport, commission and discount allowances. Final prices round upward to the next RM10.</div>
             <div class="category-actions"><button class="btn secondary" id="cancelCategoryEdit" type="button">Cancel</button><button class="btn" id="saveCategoryRule" type="submit">Save Category</button></div>
           </form>
         </div>
@@ -500,6 +530,12 @@
           <p>Maintain CHC, CHCS and CHCN source prices and the source-currency multipliers.</p>
           <span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="gwsPriceList">
+          <span class="module-icon">GWS</span>
+          <h2>GWS Tank</h2>
+          <p>Maintain 10 Bar, 16 Bar and 25 Bar source prices for every GWS tank model.</p>
+          <span class="module-order">OPEN PRICE LIST</span>
+        </button>
       </div>
     </section>
 
@@ -511,20 +547,11 @@
       <div id="chcPriceListMessage" class="auth-message"></div>
       <div class="card">
         <div class="pricelist-settings">
-          <div>
-            <label>Currency Selection</label>
-            <div class="pricelist-setting-row"><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option></select><button class="btn icon-save-button" id="saveChcCurrency" type="button" title="Save Currency" aria-label="Save Currency"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5z"></path><path d="M8 4v6h8V4"></path><path d="M8 20v-6h8v6"></path></svg></button></div>
-          </div>
-          <div>
-            <label>USD Multiply</label>
-            <div class="pricelist-setting-row"><input id="chcUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000"><button class="btn icon-save-button" id="saveChcUsdMultiplier" type="button" title="Save USD Multiply" aria-label="Save USD Multiply"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5z"></path><path d="M8 4v6h8V4"></path><path d="M8 20v-6h8v6"></path></svg></button></div>
-          </div>
-          <div>
-            <label>RMB Multiply</label>
-            <div class="pricelist-setting-row"><input id="chcRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500"><button class="btn icon-save-button" id="saveChcRmbMultiplier" type="button" title="Save RMB Multiply" aria-label="Save RMB Multiply"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5z"></path><path d="M8 4v6h8V4"></path><path d="M8 20v-6h8v6"></path></svg></button></div>
-          </div>
+          <div><label>Currency Selection</label><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
+          <div><label>USD → MYR</label><input id="chcUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000"></div>
+          <div><label>RMB → MYR</label><input id="chcRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500"></div>
         </div>
-        <div class="pricelist-note" style="margin-top:12px">Changing Currency Selection does not convert the stored numbers. It changes how the complete CHC source price list is interpreted and displayed.</div>
+        <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to view and save that currency's independent prices. Currency rates save automatically after editing.</div>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">CHC Models</h2><div id="chcPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="chcPriceSearch" placeholder="Example: CHC 15-30"></div></div>
@@ -537,10 +564,28 @@
       </div>
     </section>
 
+    <section id="gwsPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>GWS Tank Price List</h1><div class="muted">Maintain separate USD, RMB and MYR prices for 10 Bar, 16 Bar and 25 Bar tanks.</div></div></div>
+      <div id="gwsPriceListMessage" class="auth-message"></div>
+      <div class="card">
+        <div class="pricelist-settings">
+          <div><label>Currency Selection</label><select id="gwsPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
+          <div><label>USD → MYR</label><input id="gwsUsdMultiplier" type="number" min="0.0001" step="0.0001" placeholder="5.8000"></div>
+          <div><label>RMB → MYR</label><input id="gwsRmbMultiplier" type="number" min="0.0001" step="0.0001" placeholder="0.6500"></div>
+        </div>
+        <div class="pricelist-note" style="margin-top:12px">Currency rates are shared with CHC and save automatically. Each currency keeps an independent GWS price list.</div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="gwsPriceSearch" placeholder="Example: 100LV"></div></div>
+        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Model</th><th>10 Bar</th><th>16 Bar</th><th>25 Bar</th><th></th></tr></thead><tbody id="gwsPriceRows"></tbody></table></div>
+      </div>
+    </section>
+
     <section id="companyPricing" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
       <div class="page-title-row">
-        <div><h1>Company &amp; Pricing</h1><div class="muted">Customer/company address, pricing category and protected CHC selling prices.</div></div>
+        <div><h1>Company &amp; Pricing</h1><div class="muted">Customer/company address, pricing category and protected product selling prices.</div></div>
         <div class="pricing-title-tools">
           <div class="fuel-inline-setting">
             <label for="pricingFuelPrice">Fuel Price (RM/L)</label>
