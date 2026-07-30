@@ -49,8 +49,9 @@
     const fuelBasePrice=Math.max(0,Number(options.fuelBasePrice??secureData.fuel_base_price??2));
     return {customer,distanceKm,fuelPrice,fuelBasePrice};
   }
-  function formula(){
-    return 'Final Price = ROUND UP TO RM10 { [ [ [ (USD × Rate) ÷ (1 − Margin) + Transport ] ÷ (1 − Commission) ] ÷ (1 − Set Discount) ] ÷ (1 − Final Discount) + Distance × max(Fuel Price − RM2.00, 0) }';
+  function formula(cat=category()){
+    const source=String(cat?.source_currency||secureData.source_currency||'USD').toUpperCase();
+    return `Final Price = ROUND UP TO RM10 { [ [ [ (${source} Price × Multiply) ÷ (1 − Margin) + Transport ] ÷ (1 − Commission) ] ÷ (1 − Set Discount) ] ÷ (1 − Final Discount) + Distance × max(Fuel Price − RM2.00, 0) }`;
   }
 
   function hasPricingContext(customer=quotationCustomer()){
@@ -61,7 +62,8 @@
     if(!cat)return null;
     if(sourceUsd===null || sourceUsd==='' || !Number.isFinite(Number(sourceUsd)))return null;
     const usd=Number(sourceUsd);
-    const multiplier=Number(secureData.currency_multiplier||1);
+    const sourceCurrency=String(cat?.source_currency||secureData.source_currency||'USD').toUpperCase();
+    const multiplier=Number(cat?.currency_multiplier??secureData.currency_multiplier??1);
     const margin=Number(cat?.margins?.[material]??cat?.margins?.CHC??cat?.factors?.[material]??cat?.factors?.CHC??0);
     const transport=Number(cat?.transport||0);
     const commission=Number(cat?.commission||0);
@@ -80,7 +82,7 @@
     const finalPrice=roundUp10(unroundedPrice);
 
     return {
-      usd,multiplier,margin,transport,commission,setDiscount,finalDiscount,
+      usd,sourceCurrency,multiplier,margin,transport,commission,setDiscount,finalDiscount,
       baseMyr,marginPrice,withTransport,afterCommission,afterSetDiscount,beforeFuel,
       distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,
       fuelBasePrice:priceContext.fuelBasePrice,fuelCharge,unroundedPrice,finalPrice
@@ -167,13 +169,14 @@
       ['Commission',percent(cat.commission||0)],
       ['Set Discount',percent(cat.set_discount||0)],
       ['Final Discount',percent(cat.final_discount||0)],
-      ['USD → MYR Rate',n(secureData.currency_multiplier||0,2)],
+      ['Source Currency',cat.source_currency||secureData.source_currency||'USD'],
+      ['Multiply to MYR',n(cat.currency_multiplier??secureData.currency_multiplier??0,4)],
       ['Current Fuel Price',`${cash(ctx.fuelPrice)}/L`],
       ['Base Fuel Price',`${cash(ctx.fuelBasePrice)}/L`],
       ['Customer Distance',`${n(ctx.distanceKm,1)} km`],
       ['Fuel Charge per Item',cash(ctx.distanceKm*Math.max(ctx.fuelPrice-ctx.fuelBasePrice,0))]
     ].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer. The Owner must assign one before prices can be generated.</p>';
-    byId('pricingFormula').textContent=formula();
+    byId('pricingFormula').textContent=formula(cat);
     renderFuelSetting();
     fillSelects();
   }
@@ -185,6 +188,8 @@
     const showUnpriced=byId('pricingShowUnpriced').checked;
     visibleRows=variants(showUnpriced).filter(row=>(material==='ALL'||row.material===material)&&(!search||row.product.model.toLowerCase().includes(search)||row.material.toLowerCase().includes(search)));
     const c=company(),cat=category();
+    const sourceHeader=byId('pricingSourceCurrencyHeader');
+    if(sourceHeader)sourceHeader.textContent=String(cat?.source_currency||secureData.source_currency||'Source').toUpperCase();
     byId('pricingRows').innerHTML=visibleRows.map((row,index)=>{
       const calc=c&&cat?calculate(row.sourceUsd,row.material,cat,{customer:c}):null;
       const shownModel=row.material==='CHC'?row.product.model:row.product.model.replace(/^CHC\b/,row.material);
@@ -227,6 +232,9 @@
       material:found.material,
       customer_id:found.customer?.id||'',
       category_id:found.category?.id||'',
+      source_currency:found.calc.sourceCurrency,
+      currency_multiplier:found.calc.multiplier,
+      source_price:found.calc.usd,
       source_usd:found.calc.usd,
       distance_km:found.calc.distanceKm,
       fuel_price:found.calc.fuelPrice,
@@ -266,6 +274,9 @@
         ...source,
         customer_id:customer.id,
         category_id:cat.id,
+        source_currency:calc.sourceCurrency,
+        currency_multiplier:calc.multiplier,
+        source_price:calc.usd,
         source_usd:calc.usd,
         distance_km:calc.distanceKm,
         fuel_price:calc.fuelPrice,
@@ -346,14 +357,14 @@
   }
 
   function exportCsv(){
-    const rows=[['Customer','Category','Product ID','Model','Material','USD','Base MYR','Margin','Margin Price','With Transport','After Commission','After Set Discount','Before Fuel','Distance KM','Fuel Price','Fuel Charge','Unrounded Price','Final Price']];
+    const rows=[['Customer','Category','Product ID','Model','Material','Source Currency','Source Price','Multiply','Base MYR','Margin','Margin Price','With Transport','After Commission','After Set Discount','Before Fuel','Distance KM','Fuel Price','Fuel Charge','Unrounded Price','Final Price']];
     const c=company(),cat=category();
     for(const row of visibleRows){
       const calc=c&&cat?calculate(row.sourceUsd,row.material,cat,{customer:c}):null;if(!calc)continue;
-      rows.push([c.company,cat.name,row.product.id,row.product.model,row.material,calc.usd,calc.baseMyr,calc.margin,calc.marginPrice,calc.withTransport,calc.afterCommission,calc.afterSetDiscount,calc.beforeFuel,calc.distanceKm,calc.fuelPrice,calc.fuelCharge,calc.unroundedPrice,calc.finalPrice]);
+      rows.push([c.company,cat.name,row.product.id,row.product.model,row.material,calc.sourceCurrency,calc.usd,calc.multiplier,calc.baseMyr,calc.margin,calc.marginPrice,calc.withTransport,calc.afterCommission,calc.afterSetDiscount,calc.beforeFuel,calc.distanceKm,calc.fuelPrice,calc.fuelCharge,calc.unroundedPrice,calc.finalPrice]);
     }
     const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
-    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.14_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+    const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.15_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
   }
 
   function selectCustomer(id,rerender=true){
