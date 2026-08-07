@@ -2,9 +2,9 @@
   'use strict';
 
   let secureData={
-    companies:[],users:[],categories:[],products:[],gwsProducts:[],
-    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1}},
-    fuel_price:2,fuel_base_price:2
+    companies:[],users:[],categories:[],products:[],esProducts:[],gwsProducts:[],keyplcProducts:[],manifoldProducts:[],motorProducts:[],couplingProducts:[],
+    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},
+    fuel_price:2,fuel_base_price:2,customerPricing:null,customerPricingRows:[]
   };
   let access=null;
   let companyId='';
@@ -13,6 +13,7 @@
   let bound=false;
   let selectedPricingFamily='CHC';
   let pricingFormulaVisible=false;
+  let selectedFactorMode='quotation';
 
   const byId=id=>document.getElementById(id);
   const e=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -27,6 +28,7 @@
   const roundUp10=value=>Math.ceil((Number(value||0)-1e-9)/10)*10;
   const normalizeRarity=value=>['common','many','rare'].includes(String(value||'').toLowerCase())?String(value).toLowerCase():'common';
   const rarityLabel=value=>({common:'Common',many:'Many',rare:'Rare'})[normalizeRarity(value)];
+  const normMaterial=value=>String(value||'').toUpperCase().replace(/[^A-Z0-9]+/g,'');
 
   function customersList(){return window.KeySuiteApp?.getCustomers?.()||[]}
   function company(){return customersList().find(x=>x.id===companyId)||null}
@@ -40,25 +42,31 @@
   }
 
   function multipliers(family='CHC'){
-    const code=String(family||'CHC').toUpperCase()==='GWS'?'GWS':'CHC',rates=secureData.productMultipliers?.[code]||{};
+    const raw=String(family||'CHC').toUpperCase();const code=['CHC','ES','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING'].includes(raw)?raw:'CHC',rates=secureData.productMultipliers?.[code]||{};
     return {USD:Number(rates.USD??secureData.usd_multiplier??5.8),RMB:Number(rates.RMB??secureData.rmb_multiplier??.65),MYR:1};
   }
 
+  const normalizePricingMode=value=>String(value||'quotation').toLowerCase()==='assembly'?'assembly':'quotation';
   function normalizeRule(raw={},family='CHC',cat=null){
-    const fallback={margin:.38,normal:0,rare:0,transport:30,commission:.03,setDiscount:.068,finalDiscount:.08,includeCommission:true,includeSetDiscount:true,includeFinalDiscount:true,includeFuelCharge:true};
-    return {
-      margin:Number(raw.margin??(family==='CHC'?(cat?.margins?.CHC??cat?.factors?.CHC):fallback.margin)??fallback.margin),normal:Number(raw.normal??fallback.normal),rare:Number(raw.rare??fallback.rare),transport:Number(raw.transport??cat?.transport??fallback.transport),commission:Number(raw.commission??cat?.commission??fallback.commission),
-      setDiscount:Number(raw.setDiscount??raw.set_discount??cat?.set_discount??fallback.setDiscount),finalDiscount:Number(raw.finalDiscount??raw.final_discount??cat?.final_discount??fallback.finalDiscount),
-      includeCommission:raw.includeCommission??raw.include_commission??true,includeSetDiscount:raw.includeSetDiscount??raw.include_set_discount??true,includeFinalDiscount:raw.includeFinalDiscount??raw.include_final_discount??true,includeFuelCharge:raw.includeFuelCharge??raw.include_fuel_charge??true
-    };
+    const fallback={margin:.38,normal:0,rare:0,transport:30,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true};
+    const bool=(value,defaultValue=true)=>value===undefined||value===null?defaultValue:!!value;
+    return {margin:Number(raw.margin??(family==='CHC'?(cat?.margins?.CHC??cat?.factors?.CHC):fallback.margin)??fallback.margin),normal:Number(raw.normal??fallback.normal),rare:Number(raw.rare??fallback.rare),transport:Number(raw.transport??cat?.transport??fallback.transport),useCommission:bool(raw.useCommission??raw.use_commission??raw.includeCommission??raw.include_commission,fallback.useCommission),useSetDiscount:bool(raw.useSetDiscount??raw.use_set_discount??raw.includeSetDiscount??raw.include_set_discount,fallback.useSetDiscount),useFinalDiscount:bool(raw.useFinalDiscount??raw.use_final_discount??raw.includeFinalDiscount??raw.include_final_discount,fallback.useFinalDiscount),useFuelCharge:bool(raw.useFuelCharge??raw.use_fuel_charge??raw.includeFuelCharge??raw.include_fuel_charge,fallback.useFuelCharge)};
   }
-
-  function categoryRule(cat,family='CHC'){const code=String(family||'CHC').toUpperCase()==='GWS'?'GWS':'CHC';return normalizeRule(cat?.productRules?.[code]||{},code,code==='CHC'?cat:null)}
-
-  function formula(cat=category(),family='CHC',rarity='many'){
-    const rule=categoryRule(cat,family),level=normalizeRarity(rarity),parts=['Highest of (USD × USD rate), (RMB × RMB rate), MYR','÷ (1 − Margin)'];
-    if(level==='common'||level==='rare')parts.push('÷ (1 − Normal)');if(level==='rare')parts.push('÷ (1 − Rare)');parts.push('+ Transport');if(rule.includeCommission)parts.push('÷ (1 − Commission)');if(rule.includeSetDiscount)parts.push('÷ (1 − Set Discount)');if(rule.includeFinalDiscount)parts.push('÷ (1 − Final Discount)');if(rule.includeFuelCharge)parts.push('+ Fuel Charge');parts.push('Round up to RM10');
-    return `${family} ${rarityLabel(level)} = ${parts.join(' → ')}`;
+  function categoryRule(cat,family='CHC'){const raw=String(family||'CHC').toUpperCase();const code=['CHC','ES','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING'].includes(raw)?raw:'CHC';return normalizeRule(cat?.productRules?.[code]||{},code,code==='CHC'?cat:null)}
+  function customerPricingFor(customer=selectedCustomer()){
+    const id=String(customer?.id||'');
+    const rows=secureData.customerPricingRows||window.KEYSUITE_SECURE_DATA?.customerPricingRows||[];
+    return rows.find(row=>String(row.customerId||row.customer_id||'')===id)||((String(secureData.customerPricing?.customerId||'')===id)?secureData.customerPricing:null)||{};
+  }
+  function companyFactors(mode='quotation',cat=category(),family='CHC',customer=selectedCustomer()){
+    const pricingMode=normalizePricingMode(mode),master=customerPricingFor(customer),quotation=master.quotation||{},rule=categoryRule(cat,family);
+    const commission=Number(master.commission??quotation.commission??0),setDiscount=pricingMode==='quotation'?Number(master.setDiscount??master.set_discount??quotation.setDiscount??0):0,finalDiscount=Number(master.finalDiscount??master.final_discount??quotation.finalDiscount??0);
+    return {customerId:String(customer?.id||''),commission,setDiscount,finalDiscount,includeCommission:!!rule.useCommission,includeSetDiscount:pricingMode==='quotation'&&!!rule.useSetDiscount,includeFinalDiscount:!!rule.useFinalDiscount,includeFuelCharge:!!rule.useFuelCharge};
+  }
+  function formula(cat=category(),family='CHC',rarity='many',mode='quotation',customer=selectedCustomer()){
+    const rule=categoryRule(cat,family),company=companyFactors(mode,cat,family,customer),level=normalizeRarity(rarity),pricingMode=normalizePricingMode(mode),parts=['Highest of (USD × USD rate), (RMB × RMB rate), MYR','÷ (1 − Margin)'];
+    if(level==='common'||level==='rare')parts.push('÷ (1 − Normal)');if(level==='rare')parts.push('÷ (1 − Rare)');parts.push('+ Transport');if(company.includeCommission)parts.push('÷ (1 − Customer Commission)');if(pricingMode==='quotation'&&company.includeSetDiscount)parts.push('÷ (1 − Customer Set Discount)');if(company.includeFinalDiscount)parts.push('÷ (1 − Customer Final Discount)');if(company.includeFuelCharge)parts.push('+ Fuel Charge');parts.push('Round up to RM10');
+    return `${family} ${rarityLabel(level)} · ${pricingMode==='assembly'?'Assembly':'Quotation'} = ${parts.join(' → ')}`;
   }
 
   function hasPricingContext(customer=quotationCustomer()){return !!(customer&&customer.pricingCategoryId&&secureData.categories.some(x=>x.id===customer.pricingCategoryId))}
@@ -74,22 +82,64 @@
   function calculatePrice(priceBook,variant,cat=category(),family='CHC',options={}){
     if(!cat)return null;
     const candidates=currencyCandidates(priceBook,options.rarityBook||{},variant,family);if(!candidates.length)return null;
-    const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),rule=categoryRule(cat,family),priceContext=context(options),rarity=normalizeRarity(options.rarity||chosen.rarity);
+    const pricingMode=normalizePricingMode(options.pricingMode),chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),rule=categoryRule(cat,family),priceContext=context(options),company=companyFactors(pricingMode,cat,family,priceContext.customer),rarity=normalizeRarity(options.rarity||chosen.rarity);
     const marginPrice=chosen.baseMyr/Math.max(.0001,1-rule.margin);
     const afterNormal=(rarity==='common'||rarity==='rare')?marginPrice/Math.max(.0001,1-rule.normal):marginPrice;
     const afterRare=rarity==='rare'?afterNormal/Math.max(.0001,1-rule.rare):afterNormal;
     const withTransport=afterRare+rule.transport;
-    const afterCommission=rule.includeCommission?withTransport/Math.max(.0001,1-rule.commission):withTransport;
-    const afterSetDiscount=rule.includeSetDiscount?afterCommission/Math.max(.0001,1-rule.setDiscount):afterCommission;
-    const beforeFuel=rule.includeFinalDiscount?afterSetDiscount/Math.max(.0001,1-rule.finalDiscount):afterSetDiscount;
-    const fuelCharge=rule.includeFuelCharge?priceContext.distanceKm*Math.max(priceContext.fuelPrice-priceContext.fuelBasePrice,0):0;
+    const afterCommission=company.includeCommission?withTransport/Math.max(.0001,1-company.commission):withTransport;
+    const afterSetDiscount=pricingMode==='quotation'&&company.includeSetDiscount?afterCommission/Math.max(.0001,1-company.setDiscount):afterCommission;
+    const beforeFuel=company.includeFinalDiscount?afterSetDiscount/Math.max(.0001,1-company.finalDiscount):afterSetDiscount;
+    const fuelCharge=company.includeFuelCharge?priceContext.distanceKm*Math.max(priceContext.fuelPrice-priceContext.fuelBasePrice,0):0;
     const unroundedPrice=beforeFuel+fuelCharge,finalPrice=roundUp10(unroundedPrice);
-    return {family,variant,rarity,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,transport:rule.transport,commission:rule.commission,setDiscount:rule.setDiscount,finalDiscount:rule.finalDiscount,includeCommission:rule.includeCommission,includeSetDiscount:rule.includeSetDiscount,includeFinalDiscount:rule.includeFinalDiscount,includeFuelCharge:rule.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelCharge,unroundedPrice,finalPrice};
+    return {family,variant,rarity,pricingMode,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,transport:rule.transport,commission:company.commission,setDiscount:company.setDiscount,finalDiscount:company.finalDiscount,includeCommission:company.includeCommission,includeSetDiscount:company.includeSetDiscount,includeFinalDiscount:company.includeFinalDiscount,includeFuelCharge:company.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelCharge,unroundedPrice,finalPrice};
   }
 
   function calculate(sourceOrBook,material='CHC',cat=category(),options={}){
     if(sourceOrBook&&typeof sourceOrBook==='object')return calculatePrice(sourceOrBook,material,cat,options.productFamily||'CHC',options);
     return calculatePrice({USD:{[material]:sourceOrBook},RMB:{},MYR:{}},material,cat,options.productFamily||'CHC',options);
+  }
+
+  function calculateManual(sourcePrice,currency='USD',rarity='common',cat=category(),family='CHC',options={}){
+    const code=['USD','RMB','MYR'].includes(String(currency||'').toUpperCase())?String(currency).toUpperCase():'USD';
+    const value=Number(sourcePrice);if(!cat||!Number.isFinite(value)||value<=0)return null;
+    const variant='MANUAL',book={USD:{},RMB:{},MYR:{}};book[code][variant]=value;
+    return calculatePrice(book,variant,cat,family,{...options,rarity:normalizeRarity(rarity)});
+  }
+
+  function quoteBlockReason(calc){
+    if(!calc||!(Number(calc.baseMyr)>0))return 'Cannot quote: No valid USD, RMB or MYR cost is available.';
+    if(!(Number(calc.margin)>0))return 'Cannot quote: Category Margin is 0%.';
+    return '';
+  }
+  function ensureQuoteableCalculation(calc,label='item'){
+    const reason=quoteBlockReason(calc);if(!reason)return true;
+    alert(`${reason}${label?`\n\nItem: ${label}`:''}`);return false;
+  }
+  function pricingSourceBlockReason(source={}){
+    const family=String(source.product_family||source.family||'CHC').toUpperCase();
+    if(family==='MANUAL')return '';
+    if(family==='ASSEMBLY'){
+      for(const entry of source.assembly_items||[]){
+        const reason=pricingSourceBlockReason(entry?.pricingSource||entry?.source||entry||{});if(reason)return reason;
+      }
+      return '';
+    }
+    const customer=quotationCustomer(),cat=(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||categoryForCustomer(customer)||category();
+    const rule=cat?categoryRule(cat,family):null;
+    const multiplier=Number(source.currency_multiplier??source.multiplier??1),sourcePrice=Number(source.source_price??0);
+    const baseMyr=Number(source.base_myr??source.baseMyr??(sourcePrice*multiplier));
+    const margin=Number(source.margin??rule?.margin??0);
+    if(!(baseMyr>0))return 'Cannot quote: No valid USD, RMB or MYR cost is available.';
+    if(!(margin>0))return 'Cannot quote: Category Margin is 0%.';
+    return '';
+  }
+  function pricingSourceMarginBlockReason(input={}){
+    const source=input?.pricingSource||input?.pricing_source||input?.source||input||{},family=String(source.product_family||source.family||input?.productFamily||'').toUpperCase();
+    const nested=source.assembly_items||source.items||[];if(nested.length){for(const entry of nested){const reason=pricingSourceMarginBlockReason(entry);if(reason)return reason}if(family==='ASSEMBLY'||family==='MANUAL'||!family)return ''}
+    if(!family||family==='MANUAL')return '';
+    const customer=quotationCustomer(),cat=categoryForCustomer(customer)||(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||category(),rule=cat?categoryRule(cat,family):null,margin=Number(rule?.margin??source.margin??0);
+    return margin>0?'':'Margin is blank or 0%. Please update the Category Pricing Rule before adding this item.';
   }
 
   function variants(includeUnpriced=false){
@@ -104,7 +154,7 @@
 
   function fillSelects(){
     const cs=byId('pricingCompanySelect'),cats=byId('pricingCategorySelect'),list=customersList();
-    if(cs){cs.innerHTML='<option value="">Select customer/company</option>'+list.map(x=>`<option value="${e(x.id)}">${e(x.company)}</option>`).join('');cs.value=list.some(x=>x.id===companyId)?companyId:''}
+    if(cs){cs.innerHTML='<option value="">Select customer</option>'+list.map(x=>`<option value="${e(x.id)}">${e(x.company)}</option>`).join('');cs.value=list.some(x=>x.id===companyId)?companyId:''}
     if(cats){cats.innerHTML='<option value="">No pricing category assigned</option>'+(secureData.categories||[]).map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join('');cats.value=categoryId;cats.disabled=!canEditPricing()||!company()}
     const save=byId('savePricingCategory');if(save){save.style.display=canEditPricing()?'inline-block':'none';save.disabled=!company()}
   }
@@ -114,23 +164,40 @@
     if(document.activeElement!==input)input.value=Number(secureData.fuel_price??2).toFixed(2);input.disabled=!canChangeFuel();button.disabled=!canChangeFuel();button.style.display=canChangeFuel()?'inline-block':'none';message.textContent=canChangeFuel()?`Saved globally until changed. Base fuel price: ${cash(secureData.fuel_base_price??2)}/L`:`Current fuel price: ${cash(secureData.fuel_price??2)}/L`;
   }
 
-  function ruleSummary(cat,family){
-    const rule=categoryRule(cat,family),rates=multipliers(family);
-    return [[`${family} Margin`,percent(rule.margin)],['Normal',percent(rule.normal)],['Rare',percent(rule.rare)],['Transport',cash(rule.transport)],['Commission',rule.includeCommission?percent(rule.commission):'Not included'],['Set Discount',rule.includeSetDiscount?percent(rule.setDiscount):'Not included'],['Final Discount',rule.includeFinalDiscount?percent(rule.finalDiscount):'Not included'],['Fuel Charge',rule.includeFuelCharge?'Included':'Not included'],[`${family} Currency`,`USD (MYR ${n(rates.USD,2)}) · RMB (MYR ${n(rates.RMB,2)}) · MYR (MYR 1.00)`]];
+  function ruleSummary(cat,family,mode=selectedFactorMode,customer=company()||quotationCustomer()){
+    const rule=categoryRule(cat,family),rates=multipliers(family),company=companyFactors(mode,cat,family,customer),rows=[[`${family} Margin`,percent(rule.margin)],['Normal',percent(rule.normal)],['Rare',percent(rule.rare)],['Transport',cash(rule.transport)]];
+    if(company.includeCommission)rows.push(['Commission',percent(company.commission)]);
+    if(normalizePricingMode(mode)==='quotation'&&company.includeSetDiscount)rows.push(['Set Discount',percent(company.setDiscount)]);
+    if(company.includeFinalDiscount)rows.push(['Final Discount',percent(company.finalDiscount)]);
+    if(company.includeFuelCharge)rows.push(['Fuel Charge','Customer distance × fuel price variance']);
+    rows.push([`${family} Currency`,`USD (MYR ${n(rates.USD,2)}) · RMB (MYR ${n(rates.RMB,2)}) · MYR (MYR 1.00)`]);return rows;
+  }
+
+  function renderPricingManualQuote(){
+    const valueBox=byId('pricingManualQuotedValue'),detail=byId('pricingManualBreakdown');if(!valueBox||!detail)return;
+    const source=Number(byId('pricingManualCost')?.value),currency=String(byId('pricingManualCurrency')?.value||'USD').toUpperCase(),rarity=String(byId('pricingManualRarity')?.value||'common').toLowerCase();
+    const c=company()||quotationCustomer(),cat=category()||categoryForCustomer(c);
+    if(!c||!cat){valueBox.textContent='RM 0.00';detail.textContent='Select a customer with a Pricing Category.';return}
+    if(!Number.isFinite(source)||source<=0){valueBox.textContent='RM 0.00';detail.textContent='Enter a cost figure to calculate.';return}
+    const calc=calculateManual(source,currency,rarity,cat,selectedPricingFamily,{customer:c,pricingMode:selectedFactorMode});
+    if(!calc){valueBox.textContent='RM 0.00';detail.textContent='Unable to calculate with the selected rule.';detail.style.color='';return}
+    const blocked=quoteBlockReason(calc);if(blocked){valueBox.textContent='RM 0.00';detail.textContent=blocked;detail.style.color='#b91c1c';return}
+    detail.style.color='';valueBox.textContent=cash(calc.finalPrice);detail.textContent=`${currency} ${n(source,2)} × ${n(calc.multiplier,4)} = ${cash(calc.baseMyr)} · ${rarityLabel(rarity)} · ${selectedFactorMode==='assembly'?'Assembly':'Quote'} factors · Fuel ${cash(calc.fuelCharge)} · rounded up to RM10`;
   }
 
   function renderSummary(){
     const c=company(),cat=category(),quoteCustomer=quotationCustomer(),ctx=context({customer:c||quoteCustomer});byId('pricingCompanyCount').textContent=customersList().length;byId('pricingCategoryCount').textContent=(secureData.categories||[]).length;byId('pricingModelCount').textContent=(secureData.products||[]).length;byId('pricingVariantCount').textContent=variants(false).length;
     let notice=`Signed in as <b>${e(access?.display_name||access?.email||'approved user')}</b>. `;if(!quoteCustomer)notice+='No quotation pricing customer selected.';else if(!hasPricingContext(quoteCustomer))notice+=`Quotation pricing customer: <b>${e(quoteCustomer.company)}</b>. No Pricing Category is assigned.`;else notice+=`Quotation pricing customer: <b>${e(quoteCustomer.company)}</b> · Category: <b>${e(categoryForCustomer(quoteCustomer)?.name||'-')}</b> · Distance: <b>${n(quoteCustomer.distanceKm,1)} km</b>.`;
     byId('pricingAccessNotice').innerHTML=notice;byId('pricingAccessNotice').classList.add('active-customer');
-    byId('pricingCompanySummary').innerHTML=c?[[ 'Company Name',c.company],['Classification',c.classification||'-'],['Pricing Category',categoryForCustomer(c)?.name||'Not assigned'],['Assigned User',typeof customerOwnerName==='function'?customerOwnerName(c.assignedUserEmail):(c.assignedUserEmail||'-')],['Phone',c.companyPhone||'-'],['Payment Term',c.terms||'-'],['TIN',c.tinNumber||'-'],['Business Registration No.',c.brnNumber||'-'],['SST No.',c.sstNumber||'-'],['Address',c.address||'-'],['Distance',`${n(c.distanceKm,1)} km`]].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">Select a customer/company to view its saved details.</p>';
+    byId('pricingCompanySummary').innerHTML=c?[[ 'Customer Name',c.company],['Classification',c.classification||'-'],['Pricing Category',categoryForCustomer(c)?.name||'Not assigned'],['Assigned User',typeof customerOwnerName==='function'?customerOwnerName(c.assignedUserEmail):(c.assignedUserEmail||'-')],['Phone',c.companyPhone||'-'],['Payment Term',c.terms||'-'],['TIN',c.tinNumber||'-'],['Business Registration No.',c.brnNumber||'-'],['SST No.',c.sstNumber||'-'],['Address',c.address||'-'],['Distance',`${n(c.distanceKm,1)} km`]].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">Select a customer to view its saved details.</p>';
     document.querySelectorAll('[data-pricing-family]').forEach(button=>{const active=button.dataset.pricingFamily===selectedPricingFamily;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
     const otherRows=[['Current Fuel Price',`${cash(ctx.fuelPrice)}/L`],['Customer Distance',`${n(ctx.distanceKm,1)} km`]];
-    byId('pricingCategorySummary').innerHTML=cat?[['Category Name',cat.name],...ruleSummary(cat,selectedPricingFamily),...otherRows].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer.</p>';
+    byId('pricingCategorySummary').innerHTML=cat?[['Category Name',cat.name],['Factor View',selectedFactorMode==='assembly'?'Assembly':'Quote'],...ruleSummary(cat,selectedPricingFamily,selectedFactorMode),...otherRows].map(([k,v])=>`<div class="pricing-kv"><b>${e(k)}</b><span>${e(v)}</span></div>`).join(''):'<p class="muted">No pricing category is assigned to this customer.</p>';
+    document.querySelectorAll('[data-pricing-factor-mode]').forEach(button=>{const active=button.dataset.pricingFactorMode===selectedFactorMode;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
     const formulaBox=byId('pricingFormula'),formulaToggle=byId('togglePricingFormula');
-    if(formulaBox){formulaBox.textContent=cat?[formula(cat,selectedPricingFamily,'many'),formula(cat,selectedPricingFamily,'common'),formula(cat,selectedPricingFamily,'rare')].join('\n'):'';formulaBox.style.display=pricingFormulaVisible&&cat?'block':'none'}
+    if(formulaBox){formulaBox.textContent=cat?[formula(cat,selectedPricingFamily,'many',selectedFactorMode,c||quoteCustomer),formula(cat,selectedPricingFamily,'common',selectedFactorMode,c||quoteCustomer),formula(cat,selectedPricingFamily,'rare',selectedFactorMode,c||quoteCustomer)].join('\n'):'';formulaBox.style.display=pricingFormulaVisible&&cat?'block':'none'}
     if(formulaToggle){formulaToggle.textContent=pricingFormulaVisible?'Hide Formula':'Show Formula';formulaToggle.setAttribute('aria-expanded',String(pricingFormulaVisible));formulaToggle.disabled=!cat}
-    renderFuelSetting();fillSelects();
+    renderFuelSetting();fillSelects();renderPricingManualQuote();
   }
 
   function renderTable(){
@@ -142,7 +209,7 @@
       const calc=c&&cat?calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer:c,rarityBook:row.product.rarityByCurrency||{}}):null;
       return `<tr><td><b>${e(row.product.model)}</b></td><td><span class="pricing-badge ${calc?'ok':'warn'}">${e(row.material)}</span></td><td><span class="pricing-badge">${e(calc?rarityLabel(calc.rarity):'-')}</span></td><td class="num">${calc?`${e(calc.sourceCurrency)} ${n(calc.sourcePrice,2)}`:'-'}</td><td class="num">${calc?cash(calc.baseMyr):'-'}</td><td class="num">${calc?percent(calc.margin):'-'}</td><td class="num">${calc?cash(calc.marginPrice):'-'}</td><td class="num">${calc?cash(calc.withTransport):'-'}</td><td class="num">${calc?cash(calc.beforeFuel):'-'}</td><td class="num">${calc?cash(calc.fuelCharge):'-'}</td><td class="num"><b>${calc?cash(calc.finalPrice):'-'}</b></td><td>${calc?`<button type="button" class="btn green" data-pricing-add="${index}">Add to Quotation</button>`:''}</td></tr>`;
     }).join('')||'<tr><td colspan="12" class="muted">No matching products.</td></tr>';
-    const contextText=!c?'Select a customer/company in Key.':!cat?'Assign a Pricing Category to generate prices.':'The highest converted currency is used together with that winning currency record’s rarity; final prices round upward to RM10.';byId('pricingCount').textContent=`Showing ${visibleRows.length.toLocaleString('en-MY')} variants. ${contextText}`;document.querySelectorAll('[data-pricing-add]').forEach(button=>button.addEventListener('click',()=>addToQuotation(Number(button.dataset.pricingAdd))));
+    const contextText=!c?'Select a customer in Key.':!cat?'Assign a Pricing Category to generate prices.':'The highest converted currency is used together with that winning currency record’s rarity; final prices round upward to RM10.';byId('pricingCount').textContent=`Showing ${visibleRows.length.toLocaleString('en-MY')} variants. ${contextText}`;document.querySelectorAll('[data-pricing-add]').forEach(button=>button.addEventListener('click',()=>addToQuotation(Number(button.dataset.pricingAdd))));
   }
 
   function findPrice(model,options={}){
@@ -158,16 +225,70 @@
     const calc=calculatePrice(product.pricesByCurrency||{},'SKU',cat,'GWS',{...options,customer,rarityBook:product.rarityByCurrency||{}});return calc?{product,material:'SKU',variant:'SKU',rarity:calc.rarity,calc,category:cat,customer,family:'GWS'}:null;
   }
 
-  function sourceSnapshot(found){return {product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:found.variant||found.material,rarity:found.calc.rarity,customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice}}
+  function findAutoGwsTank(sizeLitres,minimumPressureBar=0,options={}){
+    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const size=Number(sizeLitres),minimum=Math.max(0,Number(minimumPressureBar)||0);
+    const candidates=(secureData.gwsProducts||[]).filter(product=>Number(product.sizeLitres||0)===size&&Number(product.pressureBar||0)>minimum+1e-9).sort((a,b)=>Number(a.pressureBar||0)-Number(b.pressureBar||0)||String(a.seriesCode||'').localeCompare(String(b.seriesCode||'')));
+    for(const product of candidates){const found=findGwsPrice(product.id,null,{...options,customer,category:cat});if(found)return found}
+    return null;
+  }
 
-  function applyPriceToQuoteRow(row,model,options={}){if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return false;const found=options.productFamily==='GWS'?findGwsPrice(model,options.pressure,options):findPrice(model,options);if(!row||!found)return false;const input=row.querySelector('.item-price');if(!input)return false;input.value=found.calc.finalPrice.toFixed(2);row.dataset.pricingSource=JSON.stringify(sourceSnapshot(found));if(typeof calcTotal==='function')calcTotal();return true}
+  function sourceSnapshot(found){return {product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:found.variant||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_final_discount:found.calc.includeFinalDiscount,include_fuel_charge:found.calc.includeFuelCharge,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
+
+
+  function repriceSource(source={},mode='quotation',options={}){
+    const pricingMode=normalizePricingMode(mode),customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const family=String(source.product_family||source.family||'CHC').toUpperCase();
+    if(family==='GWS')return findGwsPrice(source.product_id||source.model,null,{...options,customer,category:cat,pricingMode});
+    if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode});
+    if(family==='KEYPLC'){
+      const qty=Math.max(1,Number(String(source.variant||source.material||'1').replace(/\D/g,''))||1);
+      return findKeyplcPrice(source.product_id,qty,{...options,customer,category:cat,pricingMode,enclosure:source.panel_type||'indoor'});
+    }
+    if(family==='MANIFOLD')return window.KeySuiteManifold?.findConfiguredPrice?.(source.configuration||{}, {...options,customer,category:cat,pricingMode})||null;
+    if(family==='MOTOR')return window.KeySuiteMotor?.findPrice?.(source.product_id||source.model,{...options,customer,category:cat,pricingMode})||null;
+    if(family==='COUPLING')return window.KeySuiteCoupling?.findConfiguredPrice?.(source.configuration||{}, {...options,customer,category:cat,pricingMode})||null;
+    const product=(secureData.products||[]).find(row=>String(row.id)===String(source.product_id));if(!product)return null;
+    const material=source.material||source.variant||'CHC',model=material==='CHC'?product.model:product.model.replace(/^CHC\b/,material);
+    return findPrice(model,{...options,customer,category:cat,pricingMode});
+  }
+
+  function priceAssemblyForQuotation(items=[],options={}){
+    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return {error:'Select a quotation customer with a Pricing Category first.',total:0,items:[]};
+    const priced=[];let total=0;
+    for(const item of items||[]){
+      const source=typeof item?.pricingSource==='string'?(()=>{try{return JSON.parse(item.pricingSource)}catch(_){return {}}})():item?.pricingSource||{};
+      if(!source.product_family||String(source.product_family).toUpperCase()==='MANUAL'){
+        const qty=Math.max(0,Number(item?.qty||0)),unitPrice=Math.max(0,Number(item?.unitPrice||0));priced.push({id:item?.id||'',model:item?.model||'',qty,unitPrice,pricingSource:{product_family:'MANUAL',pricing_mode:'quotation'}});total+=qty*unitPrice;continue;
+      }
+      const found=repriceSource(source,'quotation',{...options,customer,category:cat});
+      if(!found)return {error:`No Quotation price is available for ${item?.model||'a BOM item'}.`,total:0,items:priced};
+      const blocked=quoteBlockReason(found.calc);if(blocked)return {error:`${blocked}
+
+BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
+      const qty=Math.max(0,Number(item?.qty||0));const snapshot=sourceSnapshot(found);
+      if(String(snapshot.product_family).toUpperCase()==='ES'){snapshot.seal_material=source.seal_material||ES_DEFAULT_SEAL;snapshot.elastomer=source.elastomer||ES_DEFAULT_ELASTOMER}
+      if(source.auto_sized_panel)snapshot.auto_sized_panel=true;if(source.auto_sized_manifold)snapshot.auto_sized_manifold=true;if(source.auto_sized_tank)snapshot.auto_sized_tank=true;
+      priced.push({id:item?.id||'',model:item?.model||'',qty,unitPrice:found.calc.finalPrice,pricingSource:snapshot});total+=qty*Number(found.calc.finalPrice||0);
+    }
+    return {total,items:priced,source:{product_family:'ASSEMBLY',pricing_mode:'quotation',customer_id:customer.id||'',category_id:cat.id||'',assembly_items:priced,calculated_price:total}};
+  }
+
+  function applyPriceToQuoteRow(row,model,options={}){if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return false;const found=options.productFamily==='GWS'?findGwsPrice(model,options.pressure,options):findPrice(model,options);if(!row||!found||!ensureQuoteableCalculation(found.calc,model))return false;const input=row.querySelector('.item-price');if(!input)return false;input.value=found.calc.finalPrice.toFixed(2);row.dataset.pricingSource=JSON.stringify(sourceSnapshot(found));if(typeof calcTotal==='function')calcTotal();return true}
 
   function refreshQuotePrices(){
+    if(window.KeySuiteApp?.isQuotationSealed?.())return;
     const customer=quotationCustomer(),cat=categoryForCustomer(customer);if(!customer||!cat)return;
     for(const row of [...document.querySelectorAll('.quote-item[data-pricing-source]')]){
       let source={};try{source=JSON.parse(row.dataset.pricingSource||'{}')}catch(_){ }
-      let found=null;if(source.product_family==='GWS'){const product=(secureData.gwsProducts||[]).find(p=>p.id===source.product_id);if(product)found=findGwsPrice(product.id,null,{customer,category:cat})}else{const product=(secureData.products||[]).find(p=>p.id===source.product_id);if(product){const model=(source.material==='CHC'?product.model:product.model.replace(/^CHC\b/,source.material||'CHC'));found=findPrice(model,{customer,category:cat})}}
-      if(!found)continue;row.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);row.dataset.pricingSource=JSON.stringify(sourceSnapshot(found));
+      if(String(source.product_family||'').toUpperCase()==='ASSEMBLY'){
+        const result=priceAssemblyForQuotation((source.assembly_items||[]).map(entry=>({id:entry.id,model:entry.model,qty:entry.qty,pricingSource:entry.pricingSource||entry.source||entry})),{customer,category:cat});
+        if(result.error){row.querySelector('.item-price').value='0.00';row.dataset.pricingValidationError=result.error;continue}
+        delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=Number(result.total||0).toFixed(2);row.dataset.pricingSource=JSON.stringify(result.source);continue;
+      }
+      const found=repriceSource(source,'quotation',{customer,category:cat});if(!found)continue;
+      const blocked=quoteBlockReason(found.calc);if(blocked){row.querySelector('.item-price').value='0.00';row.dataset.pricingValidationError=blocked;continue}
+      delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);const refreshed=sourceSnapshot(found);if(source.product_family==='ES'){refreshed.seal_material=source.seal_material||ES_DEFAULT_SEAL;refreshed.elastomer=source.elastomer||ES_DEFAULT_ELASTOMER}row.dataset.pricingSource=JSON.stringify(refreshed);
     }
     if(typeof calcTotal==='function')calcTotal();
   }
@@ -178,9 +299,9 @@
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
     const customer=quotationCustomer();if(!customer){if(typeof showPage==='function')showPage('quotation');alert('Select a pricing customer before adding an item.');return}
     const cat=categoryForCustomer(customer);if(!cat){alert(`No Pricing Category is assigned to ${customer.company}.`);return}
-    const row=visibleRows[index];if(!row)return;const calc=calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer,rarityBook:row.product.rarityByCurrency||{}});if(!calc)return;
+    const row=visibleRows[index];if(!row)return;const calc=calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer,rarityBook:row.product.rarityByCurrency||{}});if(!ensureQuoteableCalculation(calc,row.product.model))return;
     const shownModel=row.material==='CHC'?row.product.model:row.product.model.replace(/^CHC\b/,row.material),description=`B.G.Reich Vertical Multistage Pump Model: ${shownModel}`;
-    const quoteRow=quoteRowForNewItem();quoteRow.querySelector('.item-model').value=shownModel;quoteRow.querySelector('.item-qty').value=1;quoteRow.querySelector('.item-price').value=calc.finalPrice.toFixed(2);quoteRow.querySelector('.item-description').value=description;quoteRow.dataset.pricingSource=JSON.stringify(sourceSnapshot({product:row.product,material:row.material,rarity:calc.rarity,calc,category:cat,customer,family:'CHC'}));calcTotal();refreshItemExportButtons();showPage('quotation');
+    const quoteRow=window.KeySuiteApp?.addExternalQuoteItem?.({model:shownModel,qty:1,unitPrice:calc.finalPrice,description,pricingSource:sourceSnapshot({product:row.product,material:row.material,rarity:calc.rarity,calc,category:cat,customer,family:'CHC'}),productFamily:'CHC'});if(quoteRow)showPage('quotation');
   }
 
   function gwsQuoteTitle(product){const litres=Number(product?.sizeLitres||String(product?.sizeCode||'').replace(/\D/g,'')||0);return `${litres.toLocaleString('en-MY')} Litres (${Number(product?.pressureBar||0)} Bar)`}
@@ -193,13 +314,13 @@
   function addGwsToQuotation(model,pressure){
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
     const customer=quotationCustomer();if(!customer){if(typeof showPage==='function')showPage('quotation');alert('Select a pricing customer before adding a GWS Tank.');return}
-    const found=findGwsPrice(model,pressure,{customer});if(!found){alert('No price is available for this GWS Tank SKU, or the customer has no pricing category.');return}
-    const quoteRow=quoteRowForNewItem();quoteRow.querySelector('.item-model').value=gwsQuoteTitle(found.product);quoteRow.querySelector('.item-qty').value=1;quoteRow.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);quoteRow.querySelector('.item-description').value=gwsDescription(found.product);quoteRow.dataset.pricingSource=JSON.stringify(sourceSnapshot(found));calcTotal();refreshItemExportButtons();showPage('quotation');
+    const found=findGwsPrice(model,pressure,{customer});if(!found){alert('No price is available for this GWS Tank SKU, or the customer has no pricing category.');return}if(!ensureQuoteableCalculation(found.calc,gwsQuoteTitle(found.product)))return
+    const quoteRow=window.KeySuiteApp?.addExternalQuoteItem?.({model:gwsQuoteTitle(found.product),qty:1,unitPrice:found.calc.finalPrice,description:gwsDescription(found.product),pricingSource:sourceSnapshot(found),productFamily:'GWS',tankData:{sizeLitres:Number(found.product?.sizeLitres||0),pressureBar:Number(found.product?.pressureBar||0)}});if(quoteRow)showPage('quotation');
   }
 
   async function savePricingCategory(){
     if(!canEditPricing()){alert('Your role is not allowed to assign a Pricing Category.');return}
-    const c=company(),message=byId('pricingCategoryMessage'),button=byId('savePricingCategory');if(!c){alert('Select a customer/company first.');return}
+    const c=company(),message=byId('pricingCategoryMessage'),button=byId('savePricingCategory');if(!c){alert('Select a customer first.');return}
     const next=byId('pricingCategorySelect')?.value||'';button.disabled=true;button.textContent='Saving…';try{await window.KeySuiteApp?.updateCustomerPricingCategory?.(c.id,next);categoryId=next;if(message)message.textContent=next?`Pricing Category saved for ${c.company}.`:`Pricing Category removed from ${c.company}.`;renderSummary();renderTable();refreshQuotePrices()}catch(error){console.error(error);alert(`Pricing Category could not be saved: ${error.message||error}`)}finally{button.disabled=false;button.textContent='Save Category'}
   }
 
@@ -225,12 +346,127 @@
     byId('pricingCategorySelect')?.addEventListener('change',event=>{categoryId=event.target.value;renderSummary();renderTable()});
     byId('savePricingCategory')?.addEventListener('click',savePricingCategory);
     byId('saveFuelPrice')?.addEventListener('click',saveFuelPrice);
-    document.querySelectorAll('[data-pricing-family]').forEach(button=>button.addEventListener('click',()=>{selectedPricingFamily=button.dataset.pricingFamily==='GWS'?'GWS':'CHC';renderSummary()}));
+    ['pricingManualCost','pricingManualCurrency','pricingManualRarity'].forEach(id=>{byId(id)?.addEventListener('input',renderPricingManualQuote);byId(id)?.addEventListener('change',renderPricingManualQuote)});
+    document.querySelectorAll('[data-pricing-family]').forEach(button=>button.addEventListener('click',()=>{selectedPricingFamily=['CHC','ES','GWS','KEYPLC','MANIFOLD','MOTOR'].includes(button.dataset.pricingFamily)?button.dataset.pricingFamily:'CHC';renderSummary()}));
+    document.querySelectorAll('[data-pricing-factor-mode]').forEach(button=>button.addEventListener('click',()=>{selectedFactorMode=button.dataset.pricingFactorMode==='assembly'?'assembly':'quotation';renderSummary()}));
     byId('togglePricingFormula')?.addEventListener('click',()=>{pricingFormulaVisible=!pricingFormulaVisible;renderSummary()});
   }
 
   function syncPriceListSettings(next={}){secureData={...secureData,...next};renderSummary();renderTable();refreshQuotePrices()}
-  function init(data,userAccess){secureData={...secureData,...(data||{})};access=userAccess||access;const list=customersList(),quoteId=quotationCustomer()?.id||'';companyId=(quoteId&&list.some(x=>x.id===quoteId))?quoteId:(list[0]?.id||'');syncCompanyCategory();fillSelects();bind();renderSummary();renderTable()}
+  function init(data,userAccess){secureData={...secureData,...(data||{})};access=userAccess||access;window.addEventListener('keysuite-customer-pricing-changed',()=>{secureData.customerPricingRows=window.KEYSUITE_SECURE_DATA?.customerPricingRows||secureData.customerPricingRows;secureData.customerPricing=window.KEYSUITE_SECURE_DATA?.customerPricing||secureData.customerPricing;renderSummary();renderTable();refreshQuotePrices()});const list=customersList(),quoteId=quotationCustomer()?.id||'';companyId=(quoteId&&list.some(x=>x.id===quoteId))?quoteId:(list[0]?.id||'');syncCompanyCategory();fillSelects();bind();renderSummary();renderTable()}
 
-  window.KeySuitePricing={init,calculate,calculatePrice,findPrice,findGwsPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+
+
+  function esPriceBook(product){
+    const book={USD:{},RMB:{},MYR:{}};
+    (product?.variants||[]).forEach(variant=>{
+      const material=String(variant.material||'').trim();if(!material)return;
+      book.USD[material]=variant.priceUsd===null||variant.priceUsd===''?null:Number(variant.priceUsd);
+      book.RMB[material]=variant.priceRmb===null||variant.priceRmb===''?null:Number(variant.priceRmb);
+      book.MYR[material]=variant.priceMyr===null||variant.priceMyr===''?null:Number(variant.priceMyr);
+    });
+    return book;
+  }
+
+  function findEsPrice(id,material=null,options={}){
+    const product=(secureData.esProducts||[]).find(x=>x.id===id);if(!product)return null;
+    const cat=options.category||categoryForCustomer(options.customer||selectedCustomer());if(!cat)return null;
+    const variants=product.variants||[];
+    const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
+    if(!variant)return null;
+    const calc=calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'});
+    return calc?{product,variant,material:variant.material,calc,category:cat,customer:options.customer||selectedCustomer(),family:'ES'}:null;
+  }
+
+  const ES_DEFAULT_SEAL='Carbon Ceramic (Ca Ce)';
+  const ES_DEFAULT_ELASTOMER='Viton';
+  function esModelName(model){return String(model||'').replace(/^ES\s+/i,'').trim()}
+  function esConnectionSizes(model){
+    const discharge=Number((esModelName(model).match(/^(\d+)/)||[])[1]||0),suctionMap={32:50,40:65,50:65,65:80,80:100,100:125,125:150,150:200,200:250,250:300};
+    return {suction:suctionMap[discharge]||discharge,discharge};
+  }
+  function esMaterialDescription(material){
+    const raw=String(material||'').trim(),parts=raw.split('/').map(x=>x.trim()).filter(Boolean);
+    if(parts.length>=4){const ending=/^GP$/i.test(parts[3])?'Gland Packing':'Mech Seal';return `${parts[0]} / ${parts[1]} / ${parts[2]} / ${ending}`}
+    if(/^SS\s*304$/i.test(raw))return 'SS304';if(/^SS\s*316$/i.test(raw))return 'SS316';
+    return raw.replace(/\bMS\b/gi,'Mech Seal').replace(/\bGP\b/gi,'Gland Packing');
+  }
+  function esDescription(product,material,options={}){
+    const seal=String(options.seal||ES_DEFAULT_SEAL),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),sizes=esConnectionSizes(product?.model),isGland=/\bGP\b/i.test(String(material||''));
+    const lines=[`B.G.Reich End Suction Pump Model: ${esModelName(product?.model)}`,`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
+    if(!isGland&&seal!==ES_DEFAULT_SEAL)lines.push(`Mech Seal Material: ${seal}`);
+    if(elastomer!==ES_DEFAULT_ELASTOMER)lines.push(`Elastomer: ${elastomer}`);
+    lines.push('(Bare shaft pump only)');return lines.join('\n');
+  }
+  function addEs(id,route='quotation',material='CI / SS / SS / MS',options={}){
+    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add an ES pump to the ${route==='assembly'?'Assembly':'quotation'}`))return;
+    const found=findEsPrice(id,material,{...options,pricingMode:route==='assembly'?'assembly':'quotation'});if(!found){alert(`No ES source price or ES Category Pricing Rule is available for ${material}.`);return}
+    const {product,variant,calc}=found;if(route!=='assembly'&&!ensureQuoteableCalculation(calc,product?.model||'End Suction Pump'))return;const seal=String(options.seal||ES_DEFAULT_SEAL),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),description=esDescription(product,variant.material,{seal,elastomer});
+    const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const item={model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
+    if(route==='assembly'){window.KeySuiteAssembly?.addItem?.(item);return}
+    if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
+    const row=window.KeySuiteApp?.addExternalQuoteItem?.({...item,productFamily:'ES'});if(row)showPage('quotation');
+  }
+  function buildChcAssemblyItem(model,options={}){
+    const found=findPrice(model,{...options,pricingMode:'assembly'});if(!found)return null;
+    const shownModel=found.material==='CHC'?found.product.model:found.product.model.replace(/^CHC\b/,found.material);
+    return {model:shownModel,description:`B.G.Reich Vertical Multistage Pump Model: ${shownModel}`,qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'CHC'};
+  }
+  function gwsAssemblyDescription(product,qty=1){
+    const litres=Number(product?.sizeLitres||String(product?.sizeCode||'').replace(/\D/g,'')||0);
+    const pressureBar=Number(product?.pressureBar||0);
+    const quantity=Math.max(0,Number(qty)||1);
+    const clean=value=>Number.isInteger(value)?value.toFixed(0):String(value);
+    return `c/w\t${clean(litres)} litres (${clean(pressureBar)} bar) non-jkkp approved tank @ ${clean(quantity)} ${quantity===1?'unit':'units'}`;
+  }
+  function buildGwsAssemblyItem(model,pressure,options={}){
+    const found=findGwsPrice(model,pressure,{...options,pricingMode:'assembly'});if(!found)return null;
+    return {model:gwsQuoteTitle(found.product),description:gwsAssemblyDescription(found.product,1),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'GWS',tankData:{sizeLitres:Number(found.product?.sizeLitres||0),pressureBar:Number(found.product?.pressureBar||0)}};
+  }
+
+  function keyplcPriceBook(product){
+    const book={USD:{},RMB:{},MYR:{}};
+    (product?.variants||[]).forEach(variant=>{
+      const qty=Math.max(1,Math.min(6,Number(variant.pumpQty||variant.pump_qty||String(variant.label||'').match(/\d+/)?.[0]||0)));if(!qty)return;
+      const key=`P${qty}`;
+      book.USD[key]=variant.priceUsd===null||variant.priceUsd===''?null:Number(variant.priceUsd);
+      book.RMB[key]=variant.priceRmb===null||variant.priceRmb===''?null:Number(variant.priceRmb);
+      book.MYR[key]=variant.priceMyr===null||variant.priceMyr===''?null:Number(variant.priceMyr);
+    });
+    return book;
+  }
+
+  function normalizePanelType(value){return /^shelter/i.test(String(value||''))?'sheltered':'indoor'}
+  function keyplcPanelLabel(value){return normalizePanelType(value)==='sheltered'?'Sheltered':'Indoor Type'}
+
+  function findKeyplcPrice(id,pumpQty=1,options={}){
+    const product=(secureData.keyplcProducts||[]).find(x=>String(x.id)===String(id)||String(x.model).toLowerCase()===String(id||'').toLowerCase());if(!product)return null;
+    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const qty=Math.max(1,Math.min(6,Number(pumpQty)||1)),variant=`P${qty}`,enclosure=normalizePanelType(options.enclosure);
+    const baseCalc=calculatePrice(keyplcPriceBook(product),variant,cat,'KEYPLC',{...options,customer,rarity:product.rarity||'common'});if(!baseCalc)return null;
+    const enclosureSurcharge=enclosure==='sheltered'?1000:0;
+    const calc={...baseCalc,indoorPrice:baseCalc.finalPrice,enclosureSurcharge,unroundedPrice:Number(baseCalc.unroundedPrice||0)+enclosureSurcharge,finalPrice:Number(baseCalc.finalPrice||0)+enclosureSurcharge};
+    return {product,material:variant,variant,rarity:calc.rarity,pumpQty:qty,enclosure,calc,category:cat,customer,family:'KEYPLC'};
+  }
+
+  function keyplcTitle(product,pumpQty,enclosure='indoor'){const qty=Math.max(1,Number(pumpQty)||1);return `KeyPLC ${product?.model||''} · ${qty} ${qty===1?'Pump':'Pumps'} · ${keyplcPanelLabel(enclosure)}`}
+  function keyplcDescription(product,pumpQty,enclosure='indoor',options={}){
+    const qty=Math.max(1,Math.min(6,Number(pumpQty)||1)),numberWord=qty===1?'no':'nos',includeCw=!!options.includeCw,indent=includeCw?'\t\t':'';
+    const first=`${includeCw?'c/w\t':''}KeyPLC Control Panel (${keyplcPanelLabel(enclosure)})`;
+    return `${first}
+${indent}Pump Controller & HMI Touch Screen @ 1 Lot
+${indent}${product?.model||''} VFD @ ${qty} ${numberWord} & Pressure Transmitter @ 1 no
+${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
+  }
+
+  function addKeyplc(id,pumpQty=1,route='quotation',enclosure='indoor'){
+    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add a KeyPLC panel to the ${route==='assembly'?'Assembly':'quotation'}`))return;
+    const found=findKeyplcPrice(id,pumpQty,{enclosure,pricingMode:route==='assembly'?'assembly':'quotation'});if(!found){alert('No KeyPLC source price or KeyPLC Category Pricing Rule is available for this panel.');return}if(route!=='assembly'&&!ensureQuoteableCalculation(found.calc,keyplcTitle(found.product,found.pumpQty,found.enclosure)))return
+    const item={model:keyplcTitle(found.product,found.pumpQty,found.enclosure),description:keyplcDescription(found.product,found.pumpQty,found.enclosure,{includeCw:route==='assembly'}),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'KEYPLC',assemblyLevel:'SYSTEM_COMPONENT',assemblySection:'control_panel',keyplcData:{productId:found.product.id,motorRating:found.product.model,pumpQty:found.pumpQty,enclosure:found.enclosure,indoorUnitPrice:found.calc.indoorPrice,shelteredSurcharge:1000}};
+    if(route==='assembly'){window.KeySuiteAssembly?.addItem?.(item);return}
+    if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
+    const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
+  }
+
+  window.KeySuitePricing={init,calculate,calculatePrice,calculateManual,companyFactors,formula,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,priceAssemblyForQuotation,findPrice,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,buildChcAssemblyItem,buildGwsAssemblyItem,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();
