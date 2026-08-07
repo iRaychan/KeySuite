@@ -1,0 +1,67 @@
+KeySuite V2.23 QA Report
+========================
+Build basis: KeySuite_V2.22_GitHub(1).zip
+Build date: 2026-08-03
+
+RESULT: SOURCE QA PASSED
+
+Motor catalogue
+- PASS: IE1 prefix BM.
+- PASS: IE2 prefix 2BM.
+- PASS: IE3 prefix 3BM.
+- PASS: IE4 prefix 4BM.
+- PASS: IE5 prefix 5BM.
+- PASS: 680 standard catalogue rows.
+- PASS: 136 rows in each efficiency class.
+- PASS: 680 unique Motor model names.
+- PASS: Workbook KeySuite Import catalogue and SQL seed contain the same 680 models in the same order.
+- NOTE: Supplied workbook source prices are placeholders/zero values and remain editable in KeySuite.
+
+Motor model decoding
+- PASS: BM20-2 -> 20HP 2Pole IE1 Motor.
+- PASS: 2BM20-4 -> 20HP 4Pole IE2 Motor.
+- PASS: 3BM50-5 -> 50HP 5Pole IE3 Motor.
+- PASS: 4BM20-6 -> 20HP 6Pole IE4 Motor.
+- PASS: 5BM20-8 -> 20HP 8Pole IE5 Motor.
+
+Motor workflow
+- PASS: Product > Motor page exists.
+- PASS: Key > Price List > Motor page exists.
+- PASS: Motor category selector exists.
+- PASS: Motor Company Pricing family selector exists.
+- PASS: A rendered Motor Assembly action was clicked using the real motor.js event handler.
+- PASS: Captured route was type=pumpset, section=motor.
+- PASS: Captured item metadata was PUMPSET_COMPONENT / motor.
+- PASS: Motor Quote action produced a MOTOR quotation item.
+
+Quotation references
+- PASS: Settings includes a per-user quotation-prefix field.
+- PASS: Prefix input normalizes to uppercase.
+- PASS: Invalid punctuation is rejected.
+- PASS: SQL duplicate protection is case-insensitive through both validation and a unique lower(trim(prefix)) index.
+- PASS: Reference format is Prefix-YYMM-Running Number.
+- PASS: Local 2026 floor test found 0128 across different months.
+- PASS: A 2027 reference was treated as a separate calendar-year sequence.
+- PASS: The 2026 floor 128 was sent to keysuite_next_quotation_reference_v223.
+
+Source and package checks
+- PASS: All 15 root JavaScript files pass node --check.
+- PASS: index.html has no duplicate element IDs.
+- PASS: Motor and quotation-reference scripts are loaded.
+- PASS: Service-worker cache is V2.23 and every listed local shell file exists.
+- PASS: manifest.json is valid and identifies KeySuite V2.23.
+- PASS: Root and setup copies of V223_SUPABASE_MIGRATION.sql are identical.
+- PASS: No V2.22 source files were removed; V2.23 adds 7 files and modifies 9 files.
+
+Not executed in this workspace
+- The Supabase migration was not run against the user's live database.
+- GitHub deployment was not performed.
+- Full Chromium navigation was blocked by the execution environment, so final visual testing must be done after deployment.
+
+Required installation order
+1. Back up KeySuite V2.22 and Supabase.
+2. Run V223_SUPABASE_MIGRATION.sql.
+3. Upload the complete V2.23 source while preserving the working config.js.
+4. Deploy and hard-refresh with Ctrl+F5.
+5. Save a unique quotation prefix for each user.
+6. Enter Motor source prices and run the testing checklist.

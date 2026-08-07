@@ -1,0 +1,5 @@
+KeySuite V3.00
+
+No new Supabase/database migration is required for V3.00.
+V3.00 changes are UI/layout and Quote History navigation changes only.
+Preserve the existing production configuration. config.js is intentionally not included.

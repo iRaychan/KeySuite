@@ -1,0 +1,27 @@
+KeySuite V3.00
+==============
+
+Amendments
+----------
+1. Coupling Card Layout V2
+   - Auto-height coupling cards.
+   - Resolution message visually separated below the coupling controls.
+   - Bush details have their own spacing.
+   - Manual coupling card has proper bottom spacing.
+   - Responsive 3/2/1-column coupling controls.
+
+2. Quote History - Year Expand / Collapse
+   - Each year can expand/collapse independently.
+   - Expanding a year shows all 12 months.
+   - Current year opens by default on first load.
+   - Previous years start collapsed.
+   - Existing month checkboxes and Select/Clear actions remain.
+
+Deployment
+----------
+Upload every file in this ZIP to the same location in the GitHub repository and replace the old files.
+Keep the existing config.js unchanged.
+
+Database
+--------
+No new Supabase migration is required.

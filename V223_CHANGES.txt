@@ -1,0 +1,18 @@
+KeySuite V2.23 Changes
+======================
+
+Motor IE1–IE5
+- IE1 = BM, IE2 = 2BM, IE3 = 3BM, IE4 = 4BM, IE5 = 5BM.
+- Adds 680 standard models and custom model decoding such as 3BM50-5.
+- Adds Product, Price List, Category Pricing, Assembly and Quote integration.
+
+Motor Assembly Routing
+- Motor Assembly actions route only to Assembly → Pumpset → Motor.
+- Motor items do not route to System.
+
+Quotation References
+- Unique per-user prefix, case-insensitive duplicate blocking.
+- Format [Prefix]-[YYMM]-[Running Number].
+- Running number resets only when the calendar year changes.
+
+Run V223_SUPABASE_MIGRATION.sql before publishing the V2.23 application files.
