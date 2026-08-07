@@ -1,18 +1,24 @@
-# KeySuite V3.00
+# KeySuite V3.5
 
-Complete GitHub-ready source built from the supplied KeySuite V2.38 full source.
+Combined KeySuite + KeyES + KeyAI build.
 
-## V3.00 amendments
+## V3.5
+- Fixes the KeyAI Telegram Inbox renderer so AI results display as friendly structured requirement cards instead of raw/truncated JSON.
+- Older V3.3/V3.4 enquiries are also normalized for display where enough information exists in the original Telegram message.
+- KeyAI OpenAI extraction now requests schema-constrained Structured Output for Telegram processing.
+- Telegram clarification is enforced server-side for real blocking ambiguities, including multi-duty-pump flow basis (total system flow vs flow per duty pump).
+- Customer follow-up replies continue in the same enquiry and resolved clarification items are removed.
+- KeyAI normalizes System Type separately from Duty Configuration (for example Transfer System vs 2 Duty + 1 Standby).
+- Dashboard Customer (company) and Customer Name (contact/employee) are aligned on the same row with equal-height inputs and remain linked to Quotation.
+- Existing OpenAI ON/OFF, usage, cost estimate, monthly request limit, Telegram OFF manual-review path and V3.4 conversation database are retained.
 
-- **Coupling Card Layout V2** — coupling cards use automatic height, the resolution message is separated from the selection controls, bush details have their own spacing, and the layout responds cleanly across desktop/tablet/mobile widths.
-- **Quote History – Year Expand / Collapse** — quotation history years can be expanded or collapsed independently; an expanded year shows all 12 months. The current year opens by default while previous years start collapsed.
+## Required V3.5 setup
+1. Upload/replace the V3.5 GitHub files.
+2. No new Supabase SQL migration is required if V310, V330 and V340 were already run.
+3. Redeploy BOTH Edge Functions from this package: `keyai-openai` and `telegram-webhook`.
+4. Keep existing secrets: `OPENAI_API_KEY`, `KEYAI_INTERNAL_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`.
+5. Keep platform JWT verification OFF for both functions. Each function performs its own handler-level authentication.
+6. No Telegram webhook re-registration is required if its URL and secret have not changed.
+7. Ctrl+F5 / restart the installed PWA after deployment.
 
-## Deployment
-
-1. Extract `KeySuite_V3.00_GitHub.zip`.
-2. Upload all extracted files and folders to the root of the existing GitHub repository and replace the old files.
-3. Preserve the existing production `config.js`; it is intentionally not included in this package.
-4. No new Supabase migration is required for V3.00.
-5. After deployment, close/reopen KeySuite and press `Ctrl+F5`.
-
-See `V300_CHANGES.txt`, `INSTALL_V300.txt`, `V300_NO_DATABASE_MIGRATION.txt`, and `V300_QA_REPORT.txt`.
+See `INSTALL_V350.txt` for the test sequence.
