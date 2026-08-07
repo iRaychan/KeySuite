@@ -1,0 +1,19 @@
+KeySuite V3.00 - Full GitHub Package
+====================================
+
+This ZIP is a complete GitHub-ready source package based on the supplied KeySuite V2.38 full source and updated to V3.00.
+
+Deployment
+----------
+1. Back up the current GitHub repository if required.
+2. Extract KeySuite_V3.00_GitHub.zip.
+3. Upload ALL extracted files/folders to the root of the existing KeySuite GitHub repository.
+4. Replace existing files when prompted.
+5. Preserve the deployment's existing config.js. config.js is intentionally not included in this package.
+6. No new Supabase migration is required.
+7. After GitHub Pages finishes deploying, close/reopen KeySuite and press Ctrl+F5.
+
+V3.00 amendments
+----------------
+- Coupling Card Layout V2.
+- Quote History - Year Expand / Collapse showing all months under each expanded year.

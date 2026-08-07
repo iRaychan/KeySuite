@@ -27,45 +27,54 @@
     if(error)throw new Error(`Access check failed: ${error.message}`);
     return data?.[0]?.active?data[0]:null;
   }
-  async function loadData(){
-    const [companies,users,categories,products,gwsProducts,settings]=await Promise.all([
+  async function loadData(userAccess=null){
+    const [companies,users,categories,products,esProducts,gwsProducts,keyplcProducts,manifoldProducts,motorProducts,couplingProducts,settings]=await Promise.all([
       client.from('ks_companies').select('*').order('company_name'),
       client.from('ks_company_users').select('*').order('full_name'),
       client.from('ks_pricing_categories').select('*').order('category_name'),
       client.from('ks_products_chc').select('*').order('source_row'),
+      client.from('ks_products_es').select('*').order('source_row'),
       client.from('ks_products_gws').select('*').eq('status','active').order('source_row'),
+      client.from('ks_products_keyplc').select('*').eq('status','active').order('source_row'),
+      client.from('ks_products_manifold').select('*').eq('status','active').order('section').order('source_row'),
+      client.from('ks_products_motor').select('*').eq('active',true).order('efficiency_class').order('hp').order('pole'),
+      client.from('ks_products_coupling').select('*').eq('active',true).order('component_type').order('source_row'),
       client.from('ks_app_settings').select('*').eq('id','default').limit(1)
     ]);
-    const failed=[companies,users,categories,products,gwsProducts,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
+    const failed=[companies,users,categories,products,esProducts,gwsProducts,keyplcProducts,manifoldProducts,motorProducts,couplingProducts,settings].find(x=>x.error);if(failed?.error)throw new Error(failed.error.message);
+    let customerPricingRows=[];
+    try{const result=await client.rpc('keysuite_get_customer_pricing_v222');if(result.error)throw result.error;customerPricingRows=Array.isArray(result.data)?result.data:(result.data?[result.data]:[])}catch(error){
+      console.warn('V2.22 Customer pricing is not available yet. Customer-specific percentages will remain zero until the migration is run.',error);
+    }
     const setting=settings.data?.[0]||{};
     const chcUsdMultiplier=Number(setting.chc_usd_multiplier??setting.usd_multiplier??5.8);
     const chcRmbMultiplier=Number(setting.chc_rmb_multiplier??setting.rmb_multiplier??.65);
     const gwsUsdMultiplier=Number(setting.gws_usd_multiplier??setting.usd_multiplier??5.8);
     const gwsRmbMultiplier=Number(setting.gws_rmb_multiplier??setting.rmb_multiplier??.65);
+    const esUsdMultiplier=Number(setting.es_usd_multiplier??setting.usd_multiplier??5.8);
+    const esRmbMultiplier=Number(setting.es_rmb_multiplier??setting.rmb_multiplier??.65);
+    const keyplcUsdMultiplier=Number(setting.keyplc_usd_multiplier??setting.usd_multiplier??5.8);
+    const keyplcRmbMultiplier=Number(setting.keyplc_rmb_multiplier??setting.rmb_multiplier??.65);
+    const manifoldUsdMultiplier=Number(setting.manifold_usd_multiplier??setting.usd_multiplier??5.8);
+    const manifoldRmbMultiplier=Number(setting.manifold_rmb_multiplier??setting.rmb_multiplier??.65);
+    const motorUsdMultiplier=Number(setting.motor_usd_multiplier??setting.usd_multiplier??5.8);
+    const motorRmbMultiplier=Number(setting.motor_rmb_multiplier??setting.rmb_multiplier??.65);
+    const couplingUsdMultiplier=Number(setting.coupling_usd_multiplier??setting.usd_multiplier??5.8);
+    const couplingRmbMultiplier=Number(setting.coupling_rmb_multiplier??setting.rmb_multiplier??.65);
     const parseRules=value=>{if(!value)return{};if(typeof value==='object')return value;try{return JSON.parse(value)}catch(_){return{}}};
-    const normalizeRule=(raw={},fallback={})=>({
-      margin:Number(raw.margin??fallback.margin??.38),
-      transport:Number(raw.transport??fallback.transport??30),
-      commission:Number(raw.commission??fallback.commission??.03),
-      setDiscount:Number(raw.set_discount??raw.setDiscount??fallback.setDiscount??.068),
-      finalDiscount:Number(raw.final_discount??raw.finalDiscount??fallback.finalDiscount??.08),
-      includeCommission:raw.include_commission??raw.includeCommission??true,
-      includeSetDiscount:raw.include_set_discount??raw.includeSetDiscount??true,
-      includeFinalDiscount:raw.include_final_discount??raw.includeFinalDiscount??true,
-      includeFuelCharge:raw.include_fuel_charge??raw.includeFuelCharge??true,
-      normal:Number(raw.normal??fallback.normal??0),
-      rare:Number(raw.rare??fallback.rare??0)
-    });
+    const bool=(value,fallback=true)=>value===undefined||value===null?fallback:!!value;
+    const normalizeRule=(raw={},fallback={})=>({margin:Number(raw.margin??fallback.margin??.38),transport:Number(raw.transport??fallback.transport??30),normal:Number(raw.normal??fallback.normal??0),rare:Number(raw.rare??fallback.rare??0),useCommission:bool(raw.useCommission??raw.use_commission??raw.includeCommission??raw.include_commission,fallback.useCommission??true),useSetDiscount:bool(raw.useSetDiscount??raw.use_set_discount??raw.includeSetDiscount??raw.include_set_discount,fallback.useSetDiscount??true),useFinalDiscount:bool(raw.useFinalDiscount??raw.use_final_discount??raw.includeFinalDiscount??raw.include_final_discount,fallback.useFinalDiscount??true),useFuelCharge:bool(raw.useFuelCharge??raw.use_fuel_charge??raw.includeFuelCharge??raw.include_fuel_charge,fallback.useFuelCharge??true)});
+    const normalizedCustomerRows=window.KeySuiteCustomerSettings?.normalizeRows?.(customerPricingRows)||window.KeySuiteCompanySettings?.normalizeRows?.(customerPricingRows)||customerPricingRows.map(row=>window.KeySuiteCompanySettings?.normalizeRow?.(row)||row);
     return {
-      version:'1.24',release_date:'2026-07-30',currency:setting.currency||'MYR',
+      version:'2.28',release_date:'2026-08-05',currency:setting.currency||'MYR',
       usd_multiplier:chcUsdMultiplier,rmb_multiplier:chcRmbMultiplier,myr_multiplier:1,
-      productMultipliers:{CHC:{USD:chcUsdMultiplier,RMB:chcRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1}},
-      fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),
+      productMultipliers:{CHC:{USD:chcUsdMultiplier,RMB:chcRmbMultiplier,MYR:1},ES:{USD:esUsdMultiplier,RMB:esRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1},KEYPLC:{USD:keyplcUsdMultiplier,RMB:keyplcRmbMultiplier,MYR:1},MANIFOLD:{USD:manifoldUsdMultiplier,RMB:manifoldRmbMultiplier,MYR:1},MOTOR:{USD:motorUsdMultiplier,RMB:motorRmbMultiplier,MYR:1},COUPLING:{USD:couplingUsdMultiplier,RMB:couplingRmbMultiplier,MYR:1}},
+      fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),customerPricing:null,customerPricingRows:normalizedCustomerRows,
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>{
-        const rules=parseRules(c.product_rules),chcFallback={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),commission:Number(c.commission??.03),setDiscount:Number(c.set_discount??.068),finalDiscount:Number(c.final_discount??.08),includeCommission:true,includeSetDiscount:true,includeFinalDiscount:true,includeFuelCharge:true},gwsFallback={margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false};
-        return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,chcFallback),GWS:normalizeRule(rules.GWS,gwsFallback)},final_discount:chcFallback.finalDiscount,set_discount:chcFallback.setDiscount,commission:chcFallback.commission,margins:{CHC:chcFallback.margin},factors:{CHC:chcFallback.margin},transport:chcFallback.transport};
+        const rules=parseRules(c.product_rules),chcFallback={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true},otherFallback={margin:0,normal:0,rare:0,transport:0,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true};
+        return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,chcFallback),ES:normalizeRule(rules.ES,otherFallback),GWS:normalizeRule(rules.GWS,otherFallback),KEYPLC:normalizeRule(rules.KEYPLC,otherFallback),MANIFOLD:normalizeRule(rules.MANIFOLD,otherFallback),MOTOR:normalizeRule(rules.MOTOR,otherFallback),COUPLING:normalizeRule(rules.COUPLING,otherFallback)},margins:{CHC:chcFallback.margin},factors:{CHC:chcFallback.margin},transport:chcFallback.transport};
       }),
       products:(products.data||[]).map(p=>({
         id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,
@@ -80,12 +89,17 @@
           MYR:{CHC:String(p.chc_rarity_myr||'common').toLowerCase(),CHCS:String(p.chcs_rarity_myr||'common').toLowerCase(),CHCN:String(p.chcn_rarity_myr||'common').toLowerCase()}
         }
       })),
+      esProducts:(esProducts.data||[]).map(p=>({id:p.id,model:p.model,source_row:p.source_row,rarity:String(p.rarity||'common').toLowerCase(),variants:Array.isArray(p.variants)?p.variants:(typeof p.variants==='object'?p.variants:[])})),
       gwsProducts:(gwsProducts.data||[]).map(p=>({
         id:p.id,model:p.model,source_row:p.source_row,seriesCode:p.series_code||'',seriesName:p.series_name||'',sizeCode:p.size_code||p.model,sizeLitres:Number(p.size_litres||String(p.size_code||p.model).replace(/\D/g,'')||0),pressureBar:Number(p.pressure_bar||0),
         systemConnection:p.system_connection||'',prechargeText:p.precharge_text||'',maxWorkingPressureText:p.max_working_pressure_text||'',maxWorkingTemperatureText:p.max_working_temperature_text||'',
         pricesByCurrency:{USD:{SKU:p.price_usd===null?null:Number(p.price_usd)},RMB:{SKU:p.price_rmb===null?null:Number(p.price_rmb)},MYR:{SKU:p.price_myr===null?null:Number(p.price_myr)}},
         rarityByCurrency:{USD:{SKU:String(p.rarity_usd||'common').toLowerCase()},RMB:{SKU:String(p.rarity_rmb||'common').toLowerCase()},MYR:{SKU:String(p.rarity_myr||'common').toLowerCase()}}
-      }))
+      })),
+      keyplcProducts:(keyplcProducts.data||[]).map(p=>({id:p.id,model:p.model,motorKw:Number(p.motor_kw||String(p.model||'').replace(/[^0-9.]/g,'')||0),source_row:p.source_row,rarity:String(p.rarity||'common').toLowerCase(),variants:Array.isArray(p.variants)?p.variants:(typeof p.variants==='object'?p.variants:[])})),
+      manifoldProducts:(manifoldProducts.data||[]).map(p=>({id:p.id,section:p.section,model:p.model,source_row:p.source_row,rarity:String(p.rarity||'common').toLowerCase(),variants:Array.isArray(p.variants)?p.variants:(typeof p.variants==='object'?p.variants:[])})),
+      motorProducts:(motorProducts.data||[]).map(p=>({id:p.id,model:p.model,efficiencyClass:p.efficiency_class,modelPrefix:p.model_prefix,hp:Number(p.hp),pole:Number(p.pole),description:p.description,sourceSheet:p.source_sheet,sourceRow:p.source_row,priceUsd:Number(p.price_usd||0),priceRmb:Number(p.price_rmb||0),priceMyr:Number(p.price_myr||0),rarity:String(p.rarity||'common').toLowerCase(),active:p.active!==false,pricesByCurrency:{USD:{MOTOR:Number(p.price_usd||0)},RMB:{MOTOR:Number(p.price_rmb||0)},MYR:{MOTOR:Number(p.price_myr||0)}},rarityByCurrency:{USD:{MOTOR:String(p.rarity||'common').toLowerCase()},RMB:{MOTOR:String(p.rarity||'common').toLowerCase()},MYR:{MOTOR:String(p.rarity||'common').toLowerCase()}}})),
+      couplingProducts:(couplingProducts.data||[]).map(p=>({id:p.id,componentType:p.component_type,model:p.model,torqueNm:Number(p.torque_nm||0),maxSpeedRpm:Number(p.max_speed_rpm||0),maxShaftMm:Number(p.max_shaft_mm||0),pumpBush:p.pump_bush||'',motorBush:p.motor_bush||'',sourceSheet:p.source_sheet,sourceRow:p.source_row,priceUsd:Number(p.price_usd||0),priceRmb:Number(p.price_rmb||0),priceMyr:Number(p.price_myr||0),rarity:String(p.rarity||'common').toLowerCase(),active:p.active!==false,pricesByCurrency:{USD:{COUPLING:Number(p.price_usd||0)},RMB:{COUPLING:Number(p.price_rmb||0)},MYR:{COUPLING:Number(p.price_myr||0)}},rarityByCurrency:{USD:{COUPLING:String(p.rarity||'common').toLowerCase()},RMB:{COUPLING:String(p.rarity||'common').toLowerCase()},MYR:{COUPLING:String(p.rarity||'common').toLowerCase()}}}))
     };
   }
 
@@ -121,6 +135,7 @@
       phone:String(saved.phone||meta.phone||directory.phone||'').trim(),
       signatory_name:String(saved.signatory_name||meta.signatory_name||'').trim(),
       signature_image:String(saved.signature_image||'').trim(),
+      quotation_prefix:String(saved.quotation_prefix||'').trim().toUpperCase(),
       email:String(s?.user?.email||userAccess?.email||'').toLowerCase(),
       role:userAccess?.role||'user',
       company_id:userAccess?.company_id||''
@@ -138,12 +153,14 @@
       const userAccess=await verify(s?.user?.email||'');
       if(!userAccess){await client.auth.signOut({scope:'local'});showLogin('This account is valid, but it is not approved for KeySuite.');return}
       showLoading('Loading protected company and pricing data…');
-      const data=await loadData();if(!data.companies.length)throw new Error('No company data was returned. Check the database and RLS policies.');
+      const data=await loadData(userAccess);if(!data.companies.length)throw new Error('No company data was returned. Check the database and RLS policies.');
       session=s;access=userAccess;window.KEYSUITE_ACCESS=access;await loadRolePermissions();const savedProfile=await loadUserProfile(s?.user?.email||'');profile=buildProfile(s,access,data,savedProfile);
       window.KEYSUITE_SECURE_DATA=data;applyProfile(profile);
-      window.KeySuitePricing?.init(data,access);window.KeySuiteCategories?.init(data,access);window.KeySuitePriceList?.init(data,access);window.KeySuiteRoles?.init(access);unlockSelector();
+      window.KeySuitePricing?.init(data,access);window.KeySuiteCategories?.init(data,access);window.KeySuiteCompanySettings?.init(data,access);window.KeySuitePriceList?.init(data,access);window.KeySuiteManifold?.init(data,access);window.KeySuiteMotor?.init(data,access);window.KeySuiteCoupling?.init(data,access);window.KeySuiteRoles?.init(access);await window.KeySuiteTemplates?.init?.(access);await window.KeySuiteQuotationReferences?.init?.(profile);window.KeySuiteApp?.refreshNewQuotationReference?.();unlockSelector();
       showLoading('Loading your customer access…');
       try{await window.KeySuiteCustomerStore?.load?.()}catch(error){console.warn('Customer load warning',error)}
+      showLoading('Loading secure quotation history…');
+      try{await window.KeySuiteQuotationStore?.load?.()}catch(error){console.warn('Quotation history load warning',error)}
       refreshAll();setView('app');
       if(inviteFlowPending)setTimeout(openInvitePassword,250);
     }catch(error){console.error(error);try{await client.auth.signOut({scope:'local'})}catch(_){ }showLogin(`Secure data could not be loaded: ${error.message}`)}

@@ -1,0 +1,11 @@
+KeySuite V2.23 Installation
+===========================
+
+1. Back up V2.22 and the Supabase database.
+2. Run V223_SUPABASE_MIGRATION.sql in Supabase SQL Editor.
+3. Upload the complete V2.23 source to GitHub, keeping the existing working config.js.
+4. Wait for deployment and hard refresh with Ctrl+F5.
+5. Each user opens Settings and saves a unique quotation prefix.
+6. Test Motor Product, Motor Price List, Category > Motor, Pumpset routing and quotation numbering.
+
+The migration is included but is not executed automatically.

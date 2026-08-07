@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V1.24</title>
+  <title>KeySuite V2.27</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -112,7 +112,8 @@
   .print-items-table th:nth-child(3),.print-items-table td:nth-child(3){width:22mm;text-align:center;white-space:nowrap}
   .print-items-table th:nth-child(4),.print-items-table td:nth-child(4){width:27mm;text-align:right}
   .print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:27mm;text-align:right}
-  .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{white-space:pre-line;line-height:1.35}
+  .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{font-size:10pt;white-space:pre-wrap;line-height:1.35;tab-size:4;overflow-wrap:normal;word-break:normal}
+  .print-system-item-head td{padding-bottom:0}.print-system-item-head .print-item-model{margin-bottom:0}.print-system-item-desc-row td{padding-top:1.5mm}.print-system-item-desc-row .print-system-desc-cell{width:auto!important;text-align:left!important;white-space:normal!important}.print-system-item-desc-row .print-system-price-spacer,.print-system-item-desc-row .print-system-total-spacer{width:27mm!important}.print-system-item-desc-row .print-item-desc{width:100%}
   .print-summary-spacer td{height:5mm;padding:0!important}
   .print-summary-line td{height:0;padding:0!important;border:0!important}
   .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
@@ -137,6 +138,7 @@
     @media(max-width:560px){.pricing-metrics,.pricing-toolbar{grid-template-columns:1fr}.pricing-kv{grid-template-columns:1fr}.user-panel{display:none}}
 
     .quote-number-field{min-width:380px}.quote-number-field input{width:100%}.quote-top-controls{grid-template-columns:110px minmax(380px,380px)}
+    .quote-number-input{font-weight:800;letter-spacing:.04em;text-transform:uppercase}.quote-number-input.prefix-restored{box-shadow:0 0 0 2px rgba(245,158,11,.28)}.quote-number-help{font-size:11px;color:var(--muted);margin-top:5px}.customer-pricing-lock-tools{display:flex;align-items:center;gap:10px}.customer-pricing-hold.counting{background:#fff7ed;border-color:#f59e0b;color:#92400e}.company-pricing-locked .company-factor-grid{opacity:.72}.company-pricing-locked input{background:#f1f5f9;cursor:not-allowed}.role-prefix-input{text-transform:uppercase;max-width:110px;font-weight:800;letter-spacing:.05em}
     .pricelist-settings{grid-template-columns:repeat(3,minmax(220px,1fr));align-items:stretch}.pricelist-settings>div{min-height:100%}.pricelist-settings>div:first-child{display:grid;align-content:end}.pricelist-multiplier-lock{display:grid;grid-template-rows:auto 42px auto auto;align-content:end}.pricelist-multiplier-lock input{height:42px}
     .permission-title-actions{display:flex;align-items:center;gap:10px}.permission-edit-hold{min-width:150px}.permission-edit-hold.counting{background:#fff7ed;border-color:#f59e0b;color:#92400e}.permission-table select{min-width:104px;padding:7px 8px}.permission-table.editing td{background:#fffdf5}.permission-fixed{font-size:11px;font-weight:800;color:#92400e}.permission-value{font-weight:700;text-transform:capitalize}.permission-value.none{color:#991b1b}.permission-value.full,.permission-value.all{color:#166534}.permission-value.own,.permission-value.assigned,.permission-value.view{color:#92400e}
     @media(max-width:900px){.quote-number-field{min-width:0}.quote-top-controls{grid-template-columns:110px minmax(260px,1fr)}.pricelist-settings{grid-template-columns:1fr}}
@@ -176,7 +178,7 @@
     .role-row-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}.role-invite-option{margin-top:14px;padding:11px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc}.role-invite-option label{display:flex;align-items:center;gap:9px;margin:0}.role-invite-option input{width:auto}
     .gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
 
-    .quote-status-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.quote-status-badge{display:inline-flex;align-items:center;justify-content:center;min-width:78px;height:34px;padding:0 12px;border-radius:999px;background:#e2e8f0;color:#334155;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.quote-status-badge.saved{background:#dbeafe;color:#1d4ed8}.quote-status-badge.sealed{background:#dcfce7;color:#166534}.quote-status-badge.revision{background:#fef3c7;color:#92400e}.locked-customer-field,.quotation-locked input:disabled,.quotation-locked select:disabled,.quotation-locked textarea:disabled{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important;opacity:1!important}.customer-name-locked{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important}.seal-button.sealed{background:#166534;color:#fff;border-color:#166534}.seal-button.counting{background:#b45309;color:#fff;border-color:#b45309}.revision-note{font-size:12px;color:#92400e;font-weight:700}.export-center-hidden{display:none!important}
+    .quote-status-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.quote-status-badge{display:inline-flex;align-items:center;justify-content:center;min-width:78px;height:34px;padding:0 12px;border-radius:999px;background:#e2e8f0;color:#334155;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.quote-status-badge.saved{background:#dbeafe;color:#1d4ed8}.quote-status-badge.sealed{background:#dcfce7;color:#166534}.quote-status-badge.revision{background:#fef3c7;color:#92400e}.locked-customer-field,.quotation-locked input:disabled,.quotation-locked select:disabled,.quotation-locked textarea:disabled{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important;opacity:1!important}.customer-name-locked{background:#d8dee8!important;color:#334155!important;border-color:#aab4c3!important}.seal-button.sealed{background:#b91c1c;color:#fff;border-color:#991b1b}.seal-button.counting{background:#b45309;color:#fff;border-color:#b45309}.revision-note{font-size:12px;color:#92400e;font-weight:700}.export-center-hidden{display:none!important}
 
     /* V1.24 final UI alignment overrides */
     .pricelist-currency-setting{border:1px solid #dbe3ec;border-radius:9px;padding:9px;background:#f8fafc;display:grid!important;grid-template-rows:auto 42px auto;align-content:end}.pricelist-currency-setting label{display:block}.pricelist-currency-setting select{height:42px}
@@ -188,12 +190,97 @@
     .pricelist-multiplier-lock input{height:42px}
     @media(max-width:850px){.pricelist-settings{grid-template-columns:1fr!important}}
 
-</style>
+
+    .assembly-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}.assembly-choice{min-height:190px;text-align:left;padding:24px;border:1px solid #cbd5e1;border-radius:16px;background:linear-gradient(145deg,#fff,#f8fafc);cursor:pointer}.assembly-choice:hover{border-color:#2563eb;box-shadow:0 12px 30px rgba(15,23,42,.09)}.assembly-choice h2{font-size:28px;margin:12px 0 8px}.assembly-choice-icon{font-size:34px}.assembly-workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:16px}.assembly-list{display:grid;gap:8px}.assembly-list button{text-align:left;padding:12px;border:1px solid #dbe2ea;border-radius:10px;background:#fff}.assembly-list button.active{border-color:#2563eb;background:#eff6ff}.assembly-item{display:grid;grid-template-columns:1.2fr 90px 130px 130px auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #e2e8f0}.assembly-total{font-size:22px;font-weight:800;text-align:right}.route-actions{display:flex;gap:6px;flex-wrap:wrap}.route-actions .btn{padding:7px 10px;font-size:12px}@media(max-width:900px){.assembly-home-grid,.assembly-workspace{grid-template-columns:1fr}.assembly-item{grid-template-columns:1fr 70px 110px}.assembly-item .assembly-line-total,.assembly-item .assembly-delete{grid-column:auto}}
+
+    .action-assembly{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}.action-assembly:hover{background:#d97706!important}
+    .action-quote{background:#16a34a!important;border-color:#15803d!important;color:#fff!important}.action-quote:hover{background:#15803d!important}
+    .action-pdf{background:#198754!important;border-color:#157347!important;color:#fff!important}.action-pdf:hover{background:#157347!important}
+    .assembly-nav-gap{height:38px}.nav-assembly{background:#fff3cd!important;border-left:4px solid #f59e0b!important;color:#7c4a03!important}
+    .assembly-description-large{min-height:260px!important;resize:vertical}.assembly-top-actions{margin:0 0 14px}dialog#assemblyDescriptionDialog{width:min(1200px,calc(100vw - 24px));max-width:none}.assembly-description-dialog{width:100%;max-width:none}.assembly-description-dialog textarea{min-height:68vh;width:100%;resize:vertical}
+    .start-customer-row{display:grid;grid-template-columns:minmax(240px,1fr) minmax(180px,.75fr);gap:12px;align-items:end;margin:12px 0 14px}.start-customer-status{min-height:42px;display:flex;align-items:center;padding:9px 12px;border:1px solid #dbe3ec;border-radius:8px;background:#f8fafc;color:var(--muted);font-size:12px}.start-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.start-action-grid .btn{width:100%;min-height:42px}.assembly-quote-fields{display:grid;grid-template-columns:minmax(280px,1.6fr) minmax(90px,.45fr) minmax(150px,.7fr);gap:12px;align-items:end;margin-bottom:14px}.assembly-quote-fields input{width:100%}.assembly-quote-help{margin-top:5px;font-size:11px;color:var(--muted)}@media(max-width:760px){.start-customer-row,.assembly-quote-fields{grid-template-columns:1fr}.start-action-grid{grid-template-columns:1fr 1fr}}@media(max-width:460px){.start-action-grid{grid-template-columns:1fr}}
+    .quotation-title-line{display:flex;align-items:end;gap:22px;flex:1}.quotation-title-line h1{margin:0}.quotation-title-line .quote-number-field{min-width:260px}.quote-head{align-items:end}.quote-top-controls{margin-left:auto}.es-matrix-table{min-width:1450px}.es-matrix-table input{min-width:105px}
+
+    .pricelist-currency-panel{padding:0!important;overflow:hidden}.pricelist-currency-panel>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:800;color:var(--navy);display:flex;align-items:center;justify-content:space-between;background:#f8fafc}.pricelist-currency-panel>summary::-webkit-details-marker{display:none}.pricelist-currency-panel>summary:after{content:"▾";font-size:16px;transition:transform .2s}.pricelist-currency-panel[open]>summary:after{transform:rotate(180deg)}.pricelist-currency-panel-body{padding:0 18px 18px}.keyplc-product-toolbar{display:grid;grid-template-columns:minmax(220px,420px);gap:14px}.keyplc-table th,.keyplc-table td{white-space:nowrap}.keyplc-table select{min-width:112px}.keyplc-route-actions{justify-content:flex-start;flex-wrap:nowrap}.keyplc-route-actions .btn{min-width:72px}.keyplc-surcharge-note{font-size:11px;color:var(--muted);margin-top:5px}.assembly-item-option{display:flex;align-items:center;gap:8px;margin-top:7px}.assembly-item-option label{margin:0;font-size:11px}.assembly-item-option select{min-width:190px;padding:6px 8px}.assembly-keyplc-options{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:7px;margin-top:7px}.assembly-keyplc-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-keyplc-options .assembly-item-option select{min-width:0;width:100%}.assembly-motor-options{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:7px;margin-top:7px}.assembly-motor-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-motor-options .assembly-item-option select{min-width:0;width:100%}
+    .product-model-actions [data-product-assembly],.route-actions [data-es-assembly],.route-actions [data-gws-assembly],.route-actions [data-keyplc-assembly]{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}
+    .product-model-actions [data-product-add],.route-actions [data-es-quote],.route-actions [data-gws-quote],.route-actions [data-keyplc-quote]{background:#16a34a!important;border-color:#15803d!important;color:#fff!important}
+
+
+    /* V2.06 ES matrix freeze panes and top horizontal scrollbar */
+    .es-price-top-scroll{overflow-x:auto;overflow-y:hidden;height:18px;margin:8px 0 4px;border:1px solid #dbe3ec;border-radius:7px;background:#f8fafc}
+    .es-price-top-scroll-inner{height:1px}
+    .es-price-table-wrap{position:relative;max-height:650px;overflow:auto}
+    .es-matrix-table thead th{position:sticky;top:0;z-index:4;background:#eef3f8;box-shadow:0 1px 0 #cbd5e1}
+    .es-matrix-table th:first-child,.es-matrix-table td:first-child{position:sticky;left:0;min-width:130px;z-index:3;background:#fff;box-shadow:2px 0 0 #dbe3ec}
+    .es-matrix-table thead th:first-child{z-index:6;background:#e6edf5}
+
+    /* V2.05 quotation and ES Price List */
+    .quote-head{display:flex;align-items:center;justify-content:space-between;gap:18px}.quote-head>h1{margin:0}.quote-head-right{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:12px}.quotation-template-logo-button{width:68px;height:48px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;padding:4px 6px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}.quotation-template-logo-button:hover{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.12)}.quotation-template-logo-button img{display:block;max-width:56px;max-height:38px;object-fit:contain}.quote-number-field{display:grid!important;grid-template-columns:auto minmax(260px,380px);align-items:center;gap:10px;min-width:0!important}.quote-number-field label{margin:0;white-space:nowrap}.quote-number-field input{width:100%}.es-matrix-table{min-width:1180px}.es-matrix-table select[data-es-rarity]{min-width:96px}
+    @media(max-width:700px){.quote-head{align-items:stretch;flex-direction:column}.quote-head-right{margin-left:0;display:block}.quote-number-field{grid-template-columns:1fr}.quote-number-field label{margin-bottom:5px}}
+
+    /* V2.13 defaults, manual pricing, internal remarks and Manifold integration */
+    .non-default-selection{background:#ffd6e7!important;border-color:#e879a7!important;box-shadow:0 0 0 1px rgba(232,121,167,.16)}
+    .default-choice-control{display:flex;align-items:center;gap:9px;height:42px;margin:0;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;transition:background .15s,border-color .15s}.default-choice-control input{width:auto}
+    .es-product-material{min-width:190px}.gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
+    .price-completion-indicator{font-weight:700;color:#475569}
+    .category-manual-calculator{margin-top:16px;padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#f8fafc}.category-manual-calculator h3{margin:0 0 6px}.category-manual-grid{display:grid;grid-template-columns:minmax(150px,1fr) minmax(120px,.7fr) minmax(130px,.8fr);gap:10px;align-items:end}.category-manual-result{margin-top:12px;padding:12px;border:1px solid #bfdbfe;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:space-between;gap:12px}.category-manual-result strong{font-size:22px;color:#17365d}.category-manual-result small{display:block;color:#64748b;margin-top:3px}@media(max-width:720px){.category-manual-grid{grid-template-columns:1fr}.category-manual-result{align-items:flex-start;flex-direction:column}}
+    .quote-item-head{grid-template-columns:28px 18px 30px 48px max-content minmax(220px,1fr) 72px 130px}.item-remark-indicator{display:none;width:12px;height:12px;border-radius:50%;background:#D5BD50;box-shadow:0 0 0 2px rgba(213,189,80,.22);justify-self:center}.quote-item.collapsed.has-internal-remark .item-remark-indicator{display:inline-block}.remark-quote-item.has-remark{background:#D5BD50!important;border-color:#b59b32!important;color:#332b0d!important;font-weight:800}.item-remark-dialog textarea{min-height:180px}.item-remark-help{font-size:12px;color:#64748b;margin-top:6px}
+    @media(max-width:900px){.quote-item-head{grid-template-columns:24px 14px 28px 42px max-content minmax(140px,1fr) 62px 105px}}
+    @media(max-width:560px){.quote-item-head{grid-template-columns:22px 12px 26px 38px max-content minmax(110px,1fr) 54px 90px}}
+
+    /* V2.14 system automation, quotation isolation and alignment */
+    .assembly-quote-fields{align-items:start}.assembly-quote-fields>div{display:grid;grid-template-rows:18px 42px minmax(28px,auto);align-content:start}.assembly-quote-fields>div>label{margin:0;line-height:18px}.assembly-quote-fields>div>input{height:42px;box-sizing:border-box}.assembly-quote-help{min-height:18px}
+    .assembly-auto-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 7px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.assembly-auto-locked{background:#e5e7eb!important;border-color:#aab4c3!important;color:#334155!important;opacity:1!important;cursor:not-allowed}.assembly-item.auto-generated{background:#f8fafc}.assembly-item.auto-generated>div:first-child{padding-left:8px;border-left:3px solid #93c5fd}
+    .manifold-auto-note{font-size:11px;color:#64748b;margin-top:5px}
+
+    /* V2.13 Manifold product and price tables */
+    .item-description,#assemblyDescription,#assemblyDescriptionPopup{tab-size:4}
+    .manifold-product-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.manifold-summary{display:grid;gap:8px}.manifold-summary-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid #edf1f6}.manifold-summary-row b{text-align:right}.manifold-total{font-size:22px;color:var(--navy)}.manifold-pricelist-tabs{display:flex;gap:8px;flex-wrap:wrap}.manifold-pricelist-tabs .active{background:var(--navy);color:#fff}.manifold-table input,.manifold-table select{min-width:92px}.manifold-table .na-cell{color:#94a3b8;text-align:center}.pricing-manual-calculator{border-color:#93c5fd;background:#eff6ff}@media(max-width:900px){.manifold-product-grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.manifold-product-grid{grid-template-columns:1fr}}
+
+    /* V2.15 ES configuration and System workspace clarity */
+    .es-product-seal,.es-product-elastomer{min-width:210px}.es-product-seal:disabled{background:#e5e7eb!important;color:#64748b!important;cursor:not-allowed}
+    .assembly-description-preview{margin:7px 0 9px;padding:14px 16px;min-height:110px;border:1px solid #cbd5e1;border-radius:9px;background:#fbfdff;color:#1e293b;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;white-space:pre-wrap;tab-size:4;overflow:auto;cursor:text}
+    .assembly-description-preview:focus{outline:2px solid #2563eb;outline-offset:2px}.assembly-description-preview mark{padding:1px 3px;border-radius:4px;background:#fff1a8;color:#172033;font-weight:800}#assemblyDescriptionPopup{font-family:Arial,Helvetica,sans-serif;tab-size:4;white-space:pre-wrap}.assembly-description-source{display:none!important}
+    .assembly-section{border:1px solid rgba(15,23,42,.16);border-radius:10px;overflow:hidden;margin:10px 0}.assembly-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin:0}.assembly-section-head h2{margin:0}.assembly-section-body{padding:5px 8px 8px}.assembly-section-pumpset,.assembly-section-pumpset .assembly-section-head,.assembly-section-pumpset .assembly-section-body,.assembly-item-pumpset{background:#DDEBF7!important}.assembly-section-control_panel,.assembly-section-control_panel .assembly-section-head,.assembly-section-control_panel .assembly-section-body,.assembly-item-control_panel{background:#BDD7EE!important}.assembly-section-manifold,.assembly-section-manifold .assembly-section-head,.assembly-section-manifold .assembly-section-body,.assembly-item-manifold{background:#9BC2E6!important}.assembly-section-tank,.assembly-section-tank .assembly-section-head,.assembly-section-tank .assembly-section-body,.assembly-item-tank{background:#6AA4D8!important}.assembly-item{padding:10px;border-radius:8px;margin:5px 0;border-bottom:1px solid rgba(15,23,42,.18)}.assembly-item.auto-generated>div:first-child{border-left-color:#334155}.assembly-section-tank,.assembly-section-tank label,.assembly-section-tank .muted{color:#10243a}.assembly-section .assembly-empty{padding:8px;margin:0;background:rgba(255,255,255,.45);border-radius:7px}
+    .item-description,.print-item-desc{font-family:Arial,Helvetica,sans-serif;tab-size:4;white-space:pre-wrap}
+
+    .quotation-template-field{display:grid;grid-template-columns:minmax(210px,1fr) auto;gap:8px;align-items:end}.quotation-template-field .btn{height:42px;white-space:nowrap}.template-dialog{width:min(1180px,calc(100vw - 28px))!important}.template-manager-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px}.template-list{display:grid;gap:8px;max-height:68vh;overflow:auto}.template-list button{text-align:left;border:1px solid #dbe3ec;border-radius:9px;background:#fff;padding:11px}.template-list button.active{border-color:#2563eb;background:#eff6ff}.template-list small{display:block;color:#64748b;margin-top:4px}.template-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.template-form-grid .span-2{grid-column:1/-1}.template-logo-preview{display:none;max-width:260px;max-height:100px;object-fit:contain;border:1px solid #dbe3ec;border-radius:8px;background:#fff;padding:7px}.template-check{display:flex;align-items:center;gap:8px;margin:0;font-weight:700}.template-check input{width:auto}.template-message{min-height:22px;margin:8px 0}.template-preview-card{border:1px solid #dbe3ec;border-radius:10px;padding:16px;background:#fff}.template-preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:3px solid var(--template-preview-color,#17365d);padding-bottom:12px}.template-preview-head img{max-width:180px;max-height:70px;object-fit:contain}.template-preview-title{color:var(--template-preview-color,#17365d)}@media(max-width:850px){.template-manager-layout{grid-template-columns:1fr}.template-list{max-height:220px}.template-form-grid{grid-template-columns:1fr}.template-form-grid .span-2{grid-column:auto}.quotation-template-field{grid-template-columns:1fr}}
+    #pTemplateAddress{white-space:pre-line}.template-preview-header{font-size:12px;text-align:center;color:#475569;margin-bottom:8px}.template-preview-company{display:flex;gap:14px;align-items:flex-start;border-bottom:3px solid var(--preview-color,#17365d);padding-bottom:12px}.template-preview-company img{max-width:180px;max-height:75px;object-fit:contain}.template-preview-card h3{color:var(--preview-color,#17365d)}.template-preview-line{border-top:2px solid var(--preview-color,#17365d);margin:16px 0 8px}#printQuotationDocument{--template-primary:#17365d;--template-font:Calibri,Arial,Helvetica,sans-serif}.print-template-header{position:absolute;top:3mm;left:8mm;right:8mm;text-align:center;font-size:9pt;color:#475569}.print-template-bank{white-space:pre-line;margin-top:3mm;font-size:9.5pt}.print-page{font-family:var(--template-font)!important}.print-page h1{color:var(--template-primary)}.print-items-table thead::after,.print-summary-rule{border-color:var(--template-primary)!important}.template-amount-only .print-items-table th:nth-child(4),.template-amount-only .print-items-table td:nth-child(4){display:none}.template-amount-only .print-system-item-desc-row .print-system-price-spacer{display:none}.template-amount-only .print-items-table th:nth-child(5),.template-amount-only .print-items-table td:nth-child(5){width:32mm}.template-no-signature .signatory-block{display:none!important}
+
+  .company-factor-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.company-factor-tab{border:1px solid #94a3b8;background:#f8fafc;color:#334155;border-radius:10px;padding:9px 18px;font-weight:800;cursor:pointer}.company-factor-tab.active{background:#17365d;color:#fff;border-color:#17365d}.company-settings-layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(420px,1.2fr);gap:16px;margin-top:16px}.company-factor-grid{display:grid;gap:10px}.company-factor-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(130px,180px);gap:10px;align-items:center;padding:10px 12px;border:1px solid #dbe4ee;border-radius:10px;background:#f8fafc}.company-factor-row input[type=number]{width:100%}.company-factor-formula{white-space:normal;line-height:1.55}.company-sensitive-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#fee2e2;color:#991b1b;padding:5px 10px;font-weight:800;font-size:12px}.company-settings-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,240px);gap:12px;align-items:end;margin:12px 0}.company-setup-count{display:inline-flex;align-items:center;border-radius:999px;background:#fff7ed;color:#9a3412;padding:5px 10px;font-weight:800;font-size:12px}.category-company-factor-list{display:grid;gap:8px;margin-top:12px}.category-company-factor{display:grid;grid-template-columns:minmax(160px,1fr) minmax(130px,180px) 92px;gap:10px;align-items:center;padding:10px 12px;border:1px solid #dbe4ee;border-radius:10px;background:#f8fafc}.category-company-factor input[readonly]{background:#e5e7eb;color:#334155}.category-factor-use{display:flex;align-items:center;gap:6px;font-weight:700;margin:0}.pricing-factor-mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pricing-factor-mode-tab{border:1px solid #94a3b8;background:#f8fafc;color:#334155;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer}.pricing-factor-mode-tab.active{background:#17365d;color:#fff;border-color:#17365d}@media(max-width:900px){.company-settings-layout{grid-template-columns:1fr}.company-factor-row,.category-company-factor{grid-template-columns:1fr}.company-settings-toolbar{grid-template-columns:1fr}}
+
+.motor-selector-grid{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:12px;align-items:end}.motor-selected-card{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(280px,1.5fr) minmax(150px,.6fr) auto;gap:16px;align-items:center}.motor-selected-value{padding:12px 14px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc;min-height:72px}.motor-selected-value small{display:block;color:var(--muted);font-weight:700;margin-bottom:5px}.motor-selected-value strong{display:block;color:var(--navy);font-size:17px}.motor-price-selector-grid{display:grid;grid-template-columns:repeat(2,minmax(180px,280px));gap:12px;align-items:end}.motor-custom-grid{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,.7fr) auto;gap:12px;align-items:end;margin-top:14px}.motor-table-wrap{max-height:650px;overflow:auto}.motor-table-wrap thead{position:sticky;top:0;z-index:2}.motor-table-wrap input,.motor-table-wrap select{min-width:100px}.motor-table-wrap td:last-child{white-space:nowrap}@media(max-width:1050px){.motor-selected-card{grid-template-columns:repeat(2,minmax(180px,1fr))}}@media(max-width:700px){.motor-selector-grid,.motor-selected-card,.motor-price-selector-grid,.motor-custom-grid{grid-template-columns:1fr}}
+
+.coupling-method-row,.assembly-coupling-mode-buttons{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.coupling-method-row .btn.active,.assembly-coupling-mode-buttons .btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}.coupling-selection-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.coupling-selection-badge.auto{background:#dbeafe;color:#1d4ed8}.coupling-selection-badge.manual{background:#fef3c7;color:#92400e}.coupling-status{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}.coupling-status.suitable{background:#dcfce7;color:#166534}.coupling-status.unsuitable{background:#fee2e2;color:#991b1b}.coupling-suitability-table td:last-child{min-width:320px;white-space:normal}.coupling-bush-info-table td,.coupling-bush-info-table th{white-space:nowrap}.assembly-coupling-mode-controls{margin-top:8px;padding:10px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc}.assembly-coupling-summary{font-size:11px;color:var(--muted);margin-top:6px}.assembly-coupling-bush-summary{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.45}.assembly-coupling-source-note{font-size:11px;color:#475569;margin:0 0 7px}.assembly-coupling-warning{grid-column:1/-1;margin-top:7px;padding:7px 9px;border:1px solid #f59e0b;border-radius:7px;background:#fff7ed;color:#9a3412;font-size:11px;font-weight:700}.es-material-select{min-width:220px}
+
+    /* V2.30 capacity rows, suggestion lists and aligned Assembly BOM controls */
+    .quote-capacity-row,.assembly-capacity-row{display:grid;grid-template-columns:minmax(150px,.65fr) minmax(230px,1fr) 24px minmax(230px,1fr);gap:10px;align-items:end;margin-top:12px;padding:10px 12px;border:1px solid #dbe3ec;border-radius:9px;background:#f8fafc}.quote-capacity-toggle,.assembly-capacity-toggle{display:flex;align-items:center;gap:8px;min-height:42px;margin:0;font-weight:800}.quote-capacity-toggle input,.assembly-capacity-toggle input{width:auto}.capacity-input-pair{display:grid;grid-template-columns:minmax(90px,1fr) minmax(86px,.65fr);gap:7px}.capacity-input-pair input,.capacity-input-pair select{width:100%;height:42px}.capacity-at{height:42px;display:flex;align-items:center;justify-content:center;font-weight:900}.capacity-disabled{opacity:.68}.quote-capacity-row.capacity-disabled input:not([type=checkbox]),.quote-capacity-row.capacity-disabled select,.assembly-capacity-row.capacity-disabled input:not([type=checkbox]),.assembly-capacity-row.capacity-disabled select{background:#e2e8f0}
+    .assembly-capacity-row{margin:0 0 14px}.assembly-item{grid-template-columns:minmax(430px,1.45fr) 92px 132px 132px auto;align-items:start}.assembly-component-main>b{display:inline-block;min-height:20px}.assembly-item>div:nth-child(2),.assembly-item>div:nth-child(3),.assembly-item>div:nth-child(4){display:grid;grid-template-rows:18px 42px;gap:4px}.assembly-item>div:nth-child(2)>label,.assembly-item>div:nth-child(3)>label,.assembly-item>div:nth-child(4)>label{margin:0;line-height:18px;white-space:nowrap}.assembly-item>div:nth-child(2)>input,.assembly-item>div:nth-child(3)>input{height:42px;width:100%}.assembly-line-total{height:42px;display:flex;align-items:center;white-space:nowrap}.assembly-delete{margin-top:22px}.assembly-component-options,.assembly-keyplc-options,.assembly-motor-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-top:8px}.assembly-component-options .assembly-item-option,.assembly-keyplc-options .assembly-item-option,.assembly-motor-options .assembly-item-option{display:grid;grid-template-rows:18px 38px;gap:4px;margin:0;min-width:0}.assembly-component-options .assembly-item-option label,.assembly-keyplc-options .assembly-item-option label,.assembly-motor-options .assembly-item-option label{margin:0;line-height:18px;white-space:nowrap;font-size:11px}.assembly-component-options .assembly-item-option select,.assembly-keyplc-options .assembly-item-option select,.assembly-motor-options .assembly-item-option select{width:100%;min-width:0;height:38px;padding:6px 8px}.assembly-coupling-bush-summary{grid-column:1/-1;position:relative;z-index:1;pointer-events:none;clear:both;padding-top:6px}.assembly-coupling-options{position:relative;z-index:2}.assembly-coupling-options select{position:relative;z-index:3;pointer-events:auto}.assembly-coupling-resolved-model,.assembly-coupling-resolved-arrangement{width:100%;min-width:0;height:42px!important;background:rgba(255,255,255,.72);font-weight:700}.assembly-coupling-resolved-note{margin:7px 0 0;padding:7px 9px;border-radius:7px;background:rgba(255,255,255,.55);font-size:11px;color:#31412a}.assembly-description-preview mark{padding:0 2px;border-radius:3px}
+    @media(max-width:1100px){.assembly-item{grid-template-columns:minmax(300px,1fr) 80px 110px 110px auto}.quote-capacity-row,.assembly-capacity-row{grid-template-columns:1fr 1fr}.capacity-at{display:none}}
+    @media(max-width:720px){.quote-capacity-row,.assembly-capacity-row{grid-template-columns:1fr}.assembly-item{grid-template-columns:1fr}.assembly-item>div:nth-child(2),.assembly-item>div:nth-child(3),.assembly-item>div:nth-child(4){grid-template-columns:110px 1fr;grid-template-rows:42px;align-items:center}.assembly-delete{margin-top:0}.capacity-at{display:none}}
+
+    /* V2.31 unified Assembly BOM rows */
+    .coupling-product-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px;align-items:end}.coupling-product-grid>div:nth-child(1),.coupling-product-grid>div:nth-child(2){grid-column:span 2}
+    .assembly-item{display:block;padding:0;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#fff}.assembly-bom-main-row{display:grid;grid-template-columns:minmax(260px,1.5fr) 90px 130px 130px auto;gap:10px;align-items:end;padding:10px 12px}.assembly-bom-main-row>div{display:grid;grid-template-rows:18px 42px;gap:4px}.assembly-bom-main-row label{margin:0;line-height:18px;white-space:nowrap;font-size:11px}.assembly-bom-main-row input,.assembly-model-value{height:42px;width:100%;min-width:0}.assembly-model-value{background:rgba(255,255,255,.78);font-weight:700}.assembly-bom-main-row .assembly-delete{margin:0;height:42px}.assembly-component-detail-row{padding:0 12px 12px}.assembly-component-detail-row .assembly-component-options,.assembly-component-detail-row .assembly-keyplc-options,.assembly-component-detail-row .assembly-motor-options{margin-top:0;grid-template-columns:repeat(auto-fit,minmax(160px,240px))}.assembly-item-pump{background:#E2EFDA}.assembly-item-motor{background:#C6E0B4}.assembly-item-coupling{background:#A9D08E}.assembly-item-baseplate{background:#76B54B}.assembly-item-baseplate label,.assembly-item-baseplate .assembly-line-total{color:#102a12}.assembly-auto-badge{vertical-align:middle}.assembly-coupling-mode-buttons{display:none!important}
+    @media(max-width:900px){.coupling-product-grid{grid-template-columns:1fr}.assembly-bom-main-row{grid-template-columns:minmax(220px,1fr) 80px 110px 110px auto}}@media(max-width:720px){.assembly-bom-main-row{grid-template-columns:1fr}.assembly-bom-main-row>div{grid-template-columns:110px 1fr;grid-template-rows:42px;align-items:center}.assembly-bom-main-row .assembly-delete{width:100%}}
+
+    /* V2.31 Coupling shaft-information row */
+    .quote-shaft-row{grid-template-columns:minmax(180px,.8fr) minmax(170px,1fr) minmax(170px,1fr) minmax(210px,1.1fr)}.quote-shaft-row>div{display:grid;grid-template-rows:18px 42px;gap:4px}.quote-shaft-row input,.quote-shaft-row select{height:42px;width:100%}
+    @media(max-width:850px){.quote-shaft-row{grid-template-columns:1fr 1fr}}@media(max-width:600px){.quote-shaft-row{grid-template-columns:1fr}}
+    /* V2.32 Coupling, BOM colour and quotation typography corrections */
+    .quote-shaft-row>div input,.quote-shaft-row>div select{height:42px;width:100%}.quote-shaft-row .item-display-shaft{width:13px!important;height:13px!important;min-width:13px!important;flex:0 0 13px;padding:0!important;margin:0!important}
+    .assembly-item.assembly-item-pump,.assembly-item.assembly-item-pump.auto-generated{background:#E2EFDA!important}.assembly-item.assembly-item-motor,.assembly-item.assembly-item-motor.auto-generated{background:#C6E0B4!important}.assembly-item.assembly-item-coupling,.assembly-item.assembly-item-coupling.auto-generated{background:#A9D08E!important}.assembly-item.assembly-item-baseplate,.assembly-item.assembly-item-baseplate.auto-generated{background:#76B54B!important}
+    .assembly-section-pump>.assembly-section-head{background:#E2EFDA}.assembly-section-motor>.assembly-section-head{background:#C6E0B4}.assembly-section-coupling>.assembly-section-head{background:#A9D08E}.assembly-section-baseplate>.assembly-section-head{background:#76B54B}.assembly-section-pump>.assembly-section-head,.assembly-section-motor>.assembly-section-head,.assembly-section-coupling>.assembly-section-head,.assembly-section-baseplate>.assembly-section-head{border-radius:9px 9px 0 0;padding:9px 12px}
+    .assembly-component-detail-row .assembly-component-options .assembly-item-option,.assembly-component-detail-row .assembly-keyplc-options .assembly-item-option,.assembly-component-detail-row .assembly-motor-options .assembly-item-option{grid-template-rows:18px 42px}.assembly-component-detail-row select,.assembly-component-detail-row input{height:42px!important;box-sizing:border-box}.assembly-bom-main-row input,.assembly-bom-main-row .assembly-line-total,.assembly-bom-main-row .assembly-delete{height:42px;box-sizing:border-box}.quotation-history-filter-card{margin-bottom:14px}.quotation-history-filters{display:grid;grid-template-columns:minmax(280px,1.35fr) minmax(240px,1fr) minmax(220px,1fr);gap:12px;align-items:end}.quotation-history-filters>div{display:grid;gap:5px}.quotation-history-filters label{margin:0;font-size:12px;font-weight:800}.quotation-history-filters input,.quotation-history-filters select{height:42px}.history-customer-filter{min-width:220px}.history-check-filter{position:relative}.history-check-filter>summary{height:42px;display:flex;align-items:center;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;list-style:none}.history-check-filter>summary::-webkit-details-marker{display:none}.history-check-filter>summary:after{content:"▾";margin-left:auto;color:#64748b}.history-check-filter[open]>summary:after{content:"▴"}.history-check-panel{position:absolute;z-index:30;top:47px;left:0;min-width:230px;max-height:320px;overflow:auto;padding:10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-shadow:0 12px 30px rgba(15,23,42,.16)}.history-check-actions{display:flex;gap:6px;margin-bottom:8px;position:sticky;top:-10px;background:#fff;padding:2px 0 8px}.history-check-actions button{font-size:11px;padding:5px 8px}.history-check-options{display:grid;gap:10px}.history-year-group{display:grid;gap:7px;padding:8px;border:1px solid #e2e8f0;border-radius:8px}.history-year-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.history-year-heading>span{display:flex;gap:5px;flex-wrap:wrap}.history-year-heading button{font-size:10px;padding:4px 6px}.history-month-grid{display:grid;grid-template-columns:repeat(2,minmax(95px,1fr));gap:2px 8px}.history-check-option{display:flex!important;align-items:center;gap:8px;padding:6px 5px;border-radius:6px;font-weight:500!important;cursor:pointer}.history-check-option:hover{background:#f1f5f9}.history-check-option input{width:16px!important;height:16px!important;margin:0}.history-check-option span{white-space:nowrap}@media(max-width:900px){.quotation-history-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}}@media(max-width:560px){.quotation-history-filters{grid-template-columns:1fr}.history-check-panel{position:static;min-width:0;margin-top:6px}}
+    .coupling-top-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.coupling-top-action-row .coupling-method-row{display:flex;gap:8px;margin:0}.coupling-top-model{font-size:18px;font-weight:900;color:var(--navy);min-width:100px;padding:7px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;text-align:center}.coupling-top-action-row .actions{margin:0 0 0 auto}.coupling-selection-badge{display:none!important}
+    @media(max-width:720px){.coupling-top-action-row .actions{margin-left:0;width:100%;justify-content:flex-start}.coupling-top-model{order:2}.coupling-top-action-row .actions{order:3}}
+
+  </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V1.24 secure quotation and pump selection system</small></div>
+    <div class="auth-brand">KeySuite<small>V2.32 Coupling & Quotation Corrections</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -208,20 +295,22 @@
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V1.24</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V2.32</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
-      <div class="nav-group open" data-nav-group="selectorMenu">
+      <div class="nav-group" data-nav-group="selectorMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="selectorMenu"><span>Selector</span><span class="nav-chevron">⌄</span></button>
         <div class="nav-submenu"><button data-page="selector">CHC</button></div>
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="productChc">CHC</button><button data-page="productGws">GWS Tank</button></div>
+        <div class="nav-submenu"><button data-page="productChc">CHC</button><button data-page="productEs">End Suction</button><button data-page="productGws">GWS Tank</button><button data-page="productKeyplc">KeyPLC Panel</button><button data-page="productManifold">Manifold</button><button data-page="productMotor">Motor</button><button data-page="productCoupling">Coupling</button></div>
       </div>
       <button data-page="quotation">Quotation</button>
       <button data-page="history">Quote History</button>
+      <div class="assembly-nav-gap" aria-hidden="true"></div>
+      <button data-page="assembly" class="nav-assembly">Assembly</button>
     </nav>
     <div class="user-panel">
       <b id="sessionUserName">Signed in</b>
@@ -229,7 +318,7 @@
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V1.24 · V1.08 PDF output frozen</div>
+    <div class="suite-version">KeySuite V2.32 · Coupling & Quotation Corrections</div>
   </aside>
 
   <main>
@@ -242,7 +331,7 @@
         <div class="card metric"><span class="muted">Pending</span><b id="mPending">0</b></div>
       </div>
       <div class="grid grid-2" style="margin-top:16px">
-        <div class="card"><h2>Start</h2><p class="muted">Create a customer first, then select a CHC pump and prepare the quotation.</p><div class="actions"><button class="btn" data-go="customers">Add Customer</button><button class="btn green" data-go="selector">New CHC Quote</button></div></div>
+        <div class="card"><h2>Start</h2><p class="muted">Choose the working customer first. The Dashboard and Quotation customer remain synchronized.</p><div class="start-customer-row"><div><label for="startCustomer">Customer</label><select id="startCustomer"><option value="">Select customer</option></select></div><div id="startCustomerStatus" class="start-customer-status">No customer selected</div></div><div class="start-action-grid"><button class="btn green" data-go="selector">Selection</button><button class="btn" data-go="productChc">Product</button><button class="btn action-assembly" type="button" data-assembly-open="system">System</button><button class="btn action-assembly" type="button" data-assembly-open="pumpset">Pumpset</button></div></div>
         <div class="card"><h2>Testing Notes</h2><textarea id="testingNotes" placeholder="Write anything that feels slow, confusing or missing during your one-week trial..."></textarea><div class="actions"><button class="btn secondary" id="saveNotes">Save Notes</button></div></div>
       </div>
       <div class="card" style="margin-top:16px"><h2>Recent Quotations</h2><div class="table-wrap"><table><thead><tr><th>No.</th><th>Customer</th><th>Model</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentQuotes"></tbody></table></div></div>
@@ -292,6 +381,7 @@
               <div><label>MSIC Code</label><div class="detail-value" id="detailMsic"></div></div>
               <div class="span-2"><label>Business Activity Description</label><div class="detail-value" id="detailBusinessActivity"></div></div>
               <div class="span-2"><label>Notes</label><div class="detail-value" id="detailNotes"></div></div>
+              <div class="span-2"><label>Default Quotation Template</label><div class="detail-value" id="detailQuotationTemplate"></div></div>
             </div>
             </div>
             <h2 style="margin-top:20px">Contact Persons</h2>
@@ -308,12 +398,13 @@
             <input type="hidden" id="customerId">
             <div class="form-grid">
               <div class="span-2"><label>Company Name *</label><input id="company"></div>
-              <div><label>Classification</label><select id="customerClassification"><option>End User</option><option>Contractor</option><option>Dealer</option><option>Distributor</option><option>Consultant</option><option>Government</option><option selected>Other</option></select></div>
+              <div><label>Classification</label><select id="customerClassification"><option>End User</option><option>Owner</option><option>Contractor</option><option>Dealer</option><option>Distributor</option><option>Consultant</option><option>Government</option><option selected>Other</option></select></div>
               <div id="customerOwnerWrap"><label>Assigned User</label><select id="customerOwner"></select></div>
               <div id="customerDistanceWrap"><label>Distance (km) · Admin only</label><input id="customerDistance" type="number" min="0" step="0.1" value="0"></div>
               <div><label>Company Phone</label><input id="companyPhone" placeholder="+60 (x) xxxx xxxx"></div>
               <div class="span-3"><label>Address</label><textarea id="address" style="min-height:110px"></textarea></div>
               <div class="span-2"><label>Terms</label><input id="customerTerms" placeholder="Example: 30 days"></div>
+              <div class="span-2"><label>Default Quotation Template</label><select id="customerDefaultQuotationTemplate"><option value="">Use company default template</option></select></div>
               <div><label>TIN Number</label><input id="tinNumber"></div>
               <div><label>Business Registration No.</label><input id="brnNumber"></div>
               <div><label>SST Registration No.</label><input id="sstNumber"></div>
@@ -339,15 +430,13 @@
     </section>
 
     <section id="selector" class="page">
-      <div class="page-title-row">
-        <h1>Selector · CHC</h1>
-      </div>
+      <div class="page-title-row"><div><h1>Selector · CHC</h1><div class="muted">Select a CHC pumpset, then use Assembly or Quote in the result panel.</div></div></div>
       <div class="card selector-toolbar">
-        <div><label>Material</label><select id="pumpMaterial"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
-        <div><label>Mechanical Seal</label><select id="sealFaces"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
-        <div><label>Elastomer</label><select id="sealElastomer"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
-        <div><label>Connection</label><select id="connectionType"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
-        <div><label>Supply</label><label style="display:flex;align-items:center;gap:9px;height:42px;margin:0;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff"><input id="bareShaft" type="checkbox" style="width:auto"> Bare Shaft Pump</label></div>
+        <div><label>Material</label><select id="pumpMaterial" data-default-value="SS304 (Cast Iron Connection)"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
+        <div><label>Mechanical Seal</label><select id="sealFaces" data-default-value="Car/Cer"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
+        <div><label>Elastomer</label><select id="sealElastomer" data-default-value="Viton"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
+        <div><label>Connection</label><select id="connectionType" data-default-value="round"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
+        <div><label>Supply</label><label id="bareShaftControl" class="default-choice-control"><input id="bareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <iframe id="selectorFrame" src="about:blank" data-src="selector/index.html" title="KeySelector CHC Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
@@ -358,11 +447,11 @@
       <div class="page-title-row"><div><h1>Product · CHC</h1><div class="muted">Choose a CHC model directly without entering a duty point.</div></div></div>
       <div class="card product-toolbar">
         <div><label>Model</label><input id="productModelInput" list="productModelOptions" placeholder="Type or choose a model"><datalist id="productModelOptions"></datalist></div>
-        <div><label>Material</label><select id="productMaterial"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
-        <div><label>Mechanical Seal</label><select id="productSeal"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
-        <div><label>Elastomer</label><select id="productElastomer"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
-        <div><label>Connection</label><select id="productConnection"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
-        <div><label>Supply</label><label style="display:flex;align-items:center;gap:9px;height:42px;margin:0;padding:0 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff"><input id="productBareShaft" type="checkbox" style="width:auto"> Bare Shaft Pump</label></div>
+        <div><label>Material</label><select id="productMaterial" data-default-value="SS304 (Cast Iron Connection)"><option value="SS304 (Cast Iron Connection)" selected>SS304 (Cast Iron Connection)</option><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div>
+        <div><label>Mechanical Seal</label><select id="productSeal" data-default-value="Car/Cer"><option value="Car/Cer" selected>Carbon v Silicon Carbide (Car/Cer)</option><option value="SiC/SiC">Silicon Carbide v Silicon Carbide (SiC/SiC)</option><option value="TC/TC">Tungsten v Tungsten (TC/TC)</option></select></div>
+        <div><label>Elastomer</label><select id="productElastomer" data-default-value="Viton"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
+        <div><label>Connection</label><select id="productConnection" data-default-value="round"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
+        <div><label>Supply</label><label id="productBareShaftControl" class="default-choice-control"><input id="productBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="product-layout">
         <div class="card"><h2>CHC Series</h2><div id="productSeriesList" class="product-series-list"></div></div>
@@ -375,7 +464,7 @@
       <div class="page-title-row"><div><h1>Product · GWS Tank</h1><div class="muted">Choose an actual GWS series/model/pressure SKU, then add the priced item to a quotation.</div></div></div>
       <div class="card gws-product-toolbar">
         <div><label>Series</label><select id="gwsProductSeries"><option value="ALL">All Series</option></select></div>
-        <div><label>Search Model</label><input id="gwsProductSearch" placeholder="Example: 100LV"></div>
+        <div><label>Model</label><select id="gwsProductModel"><option value="ALL">All Models</option></select></div>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsProductCount" class="muted"></div></div></div>
@@ -383,12 +472,139 @@
       </div>
     </section>
 
+
+    <section id="productEs" class="page">
+      <div class="page-title-row"><div><h1>Product · End Suction</h1><div class="muted">B.G.Reich ES bare-shaft pump products.</div></div></div>
+      <div class="card"><div class="page-title-row"><div><h2 style="margin:0">ES Models</h2><div id="esProductCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="esProductSearch" placeholder="Example: ES 65-32"></div></div>
+      <div class="table-wrap" style="max-height:650px"><table><thead><tr><th>Model</th><th>Material</th><th>Mech Seal Material</th><th>Elastomer</th><th style="text-align:right">Actions</th></tr></thead><tbody id="esProductRows"></tbody></table></div></div>
+    </section>
+    <section id="productKeyplc" class="page">
+      <div class="page-title-row"><div><h1>Product · KeyPLC Panel</h1><div class="muted">Choose a motor rating and number of pumps, then route the priced control panel to Assembly or Quotation.</div></div></div>
+      <div class="card keyplc-product-toolbar"><div><label>Search Motor Rating</label><input id="keyplcProductSearch" placeholder="Example: 4kW"></div></div>
+      <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KeyPLC Panel Models</h2><div id="keyplcProductCount" class="muted"></div></div></div><div class="table-wrap" style="max-height:650px"><table class="keyplc-table"><thead><tr><th>Motor Rating</th><th>Number of Pumps</th><th>Indoor</th><th>Sheltered</th></tr></thead><tbody id="keyplcProductRows"></tbody></table></div></div>
+    </section>
+
+    <section id="productManifold" class="page">
+      <div class="page-title-row"><div><h1>Product · Manifold</h1><div class="muted">Calculate a complete manifold from the imported Branch, Sizing, Header and Tank Fitting price tables.</div></div></div>
+      <div id="manifoldProductNotice" class="notice active-customer">Select a quotation customer before pricing a manifold.</div>
+      <div class="card manifold-product-grid" style="margin-top:16px">
+        <div><label>Material</label><select id="manifoldMaterial" data-default-value="GI"><option value="GI" selected>GI</option><option value="SS">SS</option></select></div>
+        <div><label>Connection</label><select id="manifoldConnection" data-default-value="FLANGE_16"><option value="THREAD_8">Thread @ 8 Bar</option><option value="FLANGE_10">Flange @ 10 Bar</option><option value="FLANGE_16" selected>Flange @ 16 Bar</option><option value="FLANGE_25">Flange @ 25 Bar</option></select></div>
+        <div><label>Pump Suction</label><select id="manifoldSuctionDn"></select></div>
+        <div><label>Pump Discharge</label><select id="manifoldDischargeDn"></select></div>
+        <div><label>Number of Pumps</label><select id="manifoldPumpQty" data-default-value="2"><option value="1">1 Pump</option><option value="2" selected>2 Pumps</option><option value="3">3 Pumps</option><option value="4">4 Pumps</option><option value="5">5 Pumps</option><option value="6">6 Pumps</option></select></div>
+        <div><label>Tank Fitting</label><select id="manifoldTankSize"><option value="">No Tank Fitting</option></select></div>
+        <div><label>Pricing Type</label><select id="manifoldRarity" data-default-value="common"><option value="many">Many</option><option value="common" selected>Common</option><option value="rare">Rare</option></select></div>
+      </div>
+      <div class="grid grid-2" style="margin-top:16px">
+        <div class="card"><h2>Calculated Selection</h2><div id="manifoldSelectionSummary" class="manifold-summary"></div></div>
+        <div class="card"><h2>Price</h2><div id="manifoldPriceSummary" class="manifold-summary"></div><div class="actions"><button class="btn action-assembly" id="manifoldAddAssembly" type="button">Assembly</button><button class="btn action-quote" id="manifoldAddQuotation" type="button">Quote</button></div></div>
+      </div>
+    </section>
+
+    <section id="assembly" class="page">
+      <div class="page-title-row"><div><h1>Assembly</h1><div class="muted">Build priced equipment packages before sending them to a quotation.</div></div></div>
+      <div class="assembly-home-grid">
+        <button class="assembly-choice" type="button" data-assembly-open="system"><div class="assembly-choice-icon">▦</div><h2>System</h2><p class="muted">Complete solution with pumps, panel, tanks, valves, accessories and services.</p></button>
+        <button class="assembly-choice" type="button" data-assembly-open="pumpset"><div class="assembly-choice-icon">⚙</div><h2>Pumpset</h2><p class="muted">Pump with motor, baseplate, coupling, guard and related components.</p></button>
+      </div>
+    </section>
+
+    <section id="assemblyBuilder" class="page">
+      <div class="page-title-row"><div><h1 id="assemblyBuilderTitle">System</h1><div class="muted">Component prices remain in this assembly until it is sent to Quotation. Changes save automatically.</div></div><div class="actions"><button class="btn secondary" data-go="assembly">← Assembly</button><button class="btn" id="newAssemblyDraft" type="button">+ New</button></div></div>
+      <div id="assemblyNotice" class="notice">Loading assembly drafts…</div>
+      <div class="assembly-workspace">
+        <div class="card"><h2>Drafts</h2><div><label>Customer</label><select id="assemblyCustomer" disabled title="Customer follows the active quotation selection"></select><div class="muted" style="margin:5px 0 14px">Follows Quotation customer</div></div><div id="assemblyDraftList" class="assembly-list"></div></div>
+        <div class="card">
+          <input id="assemblyStatus" type="hidden" value="draft">
+          <div class="actions assembly-top-actions"><button class="btn action-assembly" id="assemblyToSystem" type="button">System</button><button class="btn action-quote" id="assemblyToQuotation" type="button">Quote</button><button class="btn danger" id="deleteAssemblyDraft" type="button">Delete</button></div>
+          <div class="assembly-quote-fields">
+            <div><label for="assemblyModelItem">Model / Item</label><input id="assemblyModelItem" list="assemblyModelItemOptions" placeholder="Select a suggested model or type a custom item"><datalist id="assemblyModelItemOptions"></datalist><div class="assembly-quote-help" id="assemblyModelItemHelp">System suggestions follow the pump quantity in the BOM; custom text is allowed.</div></div>
+            <div><label for="assemblyQuoteQty">Qty</label><input id="assemblyQuoteQty" type="number" min="0.01" step="0.01" value="1"><div class="assembly-quote-help" aria-hidden="true">&nbsp;</div></div>
+            <div><label for="assemblyQuoteUnitPrice">Unit Price</label><input id="assemblyQuoteUnitPrice" type="number" min="0" step="0.01"><div class="assembly-quote-help">Defaults to the BOM total; edit to override.</div></div>
+          </div>
+          <div id="assemblyCapacityRow" class="assembly-capacity-row no-print">
+            <label class="assembly-capacity-toggle"><input id="assemblyDisplayCapacity" type="checkbox"> Display Capacity</label>
+            <div><label for="assemblyCapacityValue">Capacity</label><div class="capacity-input-pair"><input id="assemblyCapacityValue" type="number" min="0" step="any"><select id="assemblyCapacityUnit"><option selected>m³/hr</option><option>L/s</option><option>L/min</option><option>GPM</option></select></div></div>
+            <span class="capacity-at">@</span>
+            <div><label for="assemblyHeadValue">Head</label><div class="capacity-input-pair"><input id="assemblyHeadValue" type="number" min="0" step="any"><select id="assemblyHeadUnit"><option>Mtr</option><option>ft</option><option>bar</option></select></div></div>
+          </div>
+          <div class="form-grid">
+            <div class="span-3"><label id="assemblyDescriptionLabel">System Description</label><div id="assemblyDescriptionPreview" class="assembly-description-preview" role="button" tabindex="0" title="Double-click to edit System Description" aria-label="Highlighted System Description. Double-click to edit."></div><textarea id="assemblyDescription" class="assembly-description-source" hidden aria-hidden="true"></textarea></div>
+          </div>
+          <h2 style="margin-top:22px">Components / BOM</h2><div id="assemblyItems"></div>
+          <div class="assembly-total">Total: <span id="assemblyTotal">RM 0.00</span></div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="productMotor" class="page">
+      <div class="page-title-row"><div><h1>Product · Motor</h1><div class="muted">Select HP, Pole and Efficiency. IE3 is the default. Assembly always routes to Pumpset → Motor.</div></div></div>
+      <div id="motorProductNotice" class="notice active-customer">Select a quotation customer with a Pricing Category before pricing a motor.</div>
+      <div id="motorProductMessage" class="auth-message"></div>
+      <div class="card">
+        <h2 style="margin-top:0">Motor Model</h2>
+        <div class="motor-selector-grid">
+          <div><label for="motorProductHp">HP</label><select id="motorProductHp"></select></div>
+          <div><label for="motorProductPole">Pole</label><select id="motorProductPole"><option value="2" selected>2 Pole</option><option value="4">4 Pole</option><option value="6">6 Pole</option><option value="8">8 Pole</option></select></div>
+          <div><label for="motorProductEfficiency">Efficiency</label><select id="motorProductEfficiency"><option value="IE1">IE1</option><option value="IE2">IE2</option><option value="IE3" selected>IE3</option><option value="IE4">IE4</option><option value="IE5">IE5</option></select></div>
+        </div>
+      </div>
+      <div class="card motor-selected-card" style="margin-top:16px">
+        <div class="motor-selected-value"><small>Model</small><strong id="motorSelectedModel">—</strong></div>
+        <div class="motor-selected-value"><small>Description</small><strong id="motorSelectedDescription">—</strong></div>
+        <div class="actions" style="margin:0;justify-content:flex-end"><button class="btn action-assembly" id="motorSelectedAssembly" type="button">Assembly</button><button class="btn green" id="motorSelectedQuote" type="button">Quote</button></div>
+      </div>
+      
+    </section>
+
+
+    <section id="productCoupling" class="page">
+      <div class="page-title-row"><div><h1>Product · Coupling</h1><div class="muted">Choose Auto Size when KeySuite should size from Pump and Motor information, or Manual Selection when you want to decide the model.</div></div></div>
+      <div id="couplingProductNotice" class="notice active-customer">Select a quotation customer with a Pricing Category before pricing a coupling.</div>
+      <div id="couplingProductMessage" class="auth-message"></div>
+      <div class="card">
+        <div class="page-title-row" style="margin-bottom:14px"><div><h2 style="margin:0">Coupling Selection</h2></div><span id="couplingSelectionBadge" class="coupling-selection-badge auto">Auto Selected</span></div>
+        <div class="coupling-top-action-row">
+          <div class="coupling-method-row"><button class="btn secondary active" type="button" data-coupling-selection-method="auto">Auto Size</button><button class="btn secondary" type="button" data-coupling-selection-method="manual">Manual Selection</button></div>
+          <strong id="couplingSelectedModel" class="coupling-top-model">—</strong>
+          <div class="actions"><button class="btn action-assembly" id="couplingSelectedAssembly" type="button">Assembly</button><button class="btn green" id="couplingSelectedQuote" type="button">Quote</button></div>
+        </div>
+        <div class="coupling-product-grid">
+          <div><label for="couplingProductType">Coupling Type</label><select id="couplingProductType"><option value="pin_bush" selected>Pin &amp; Bush</option><option value="tyre">Tyre Coupling</option></select></div>
+          <div><label for="couplingProductModel">Coupling Model</label><select id="couplingProductModel" disabled></select></div>
+          <div><label for="couplingProductPumpSeries">Pump Series</label><select id="couplingProductPumpSeries"><option value="ES" selected>ES</option></select></div>
+          <div><label for="couplingProductPump">Pump Model</label><select id="couplingProductPump"></select></div>
+          <div><label for="couplingProductMotorPole">Motor Pole</label><select id="couplingProductMotorPole"><option value="2" selected>2 Pole</option><option value="4">4 Pole</option><option value="6">6 Pole</option><option value="8">8 Pole</option></select></div>
+          <div><label for="couplingProductMotorHp">Motor HP</label><select id="couplingProductMotorHp"></select></div>
+        </div>
+        <div id="couplingTyreBushFields" class="hidden" style="margin-top:16px">
+          <div class="motor-selector-grid" style="margin-bottom:12px"><div><label for="couplingProductArrangement">F/H Bush Arrangement</label><select id="couplingProductArrangement"></select></div></div>
+          <div class="table-wrap"><table class="pricelist-table coupling-bush-info-table"><thead><tr><th>Position</th><th>Bush Type</th><th>Bush Model</th><th>Actual Shaft</th><th>Maximum Shaft</th><th>Status</th></tr></thead><tbody id="couplingTyreBushInfoRows"></tbody></table></div>
+        </div>
+      </div>
+      <div class="card motor-selected-card" style="margin-top:16px">
+        <div class="motor-selected-value"><small>Pump Shaft</small><strong id="couplingSelectedPumpShaft">—</strong></div>
+        <div class="motor-selected-value"><small>Motor Frame</small><strong id="couplingSelectedMotorFrame">—</strong></div>
+        <div class="motor-selected-value"><small>Motor Shaft</small><strong id="couplingSelectedMotorShaft">—</strong></div>
+        <div class="motor-selected-value"><small>Required Torque</small><strong id="couplingSelectedTorque">—</strong></div>
+        <div class="motor-selected-value"><small>Required Speed</small><strong id="couplingSelectedSpeed">—</strong></div>
+        <div class="motor-selected-value"><small>Description</small><strong id="couplingSelectedDescription">—</strong></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">Suitability Check</h2><div class="muted">Every model shows why it is suitable or unsuitable for the selected Pump and Motor.</div></div></div>
+        <div class="table-wrap"><table class="pricelist-table coupling-suitability-table"><thead><tr><th>Coupling Model</th><th>Shaft / Bush</th><th>Status</th><th>Reason</th></tr></thead><tbody id="couplingSuitabilityRows"></tbody></table></div>
+      </div>
+    </section>
+
     <section id="quotation" class="page">
       <div class="quote-head">
-        <div><h1>Quotation</h1></div>
-        <div class="quote-top-controls">
-          <button class="btn green no-print export-center-hidden" type="button" id="topPrintQuote">PDF</button>
-          <div class="quote-number-field"><label>Quotation No.</label><input id="quoteNo"></div>
+        <h1>Quotation</h1>
+        <div class="quote-head-right">
+          <button id="quotationTemplateLogoButton" class="quotation-template-logo-button" type="button" title="Quotation template" aria-label="Open selected quotation template"><img id="quotationTemplateHeaderLogo" src="keylargo-logo.png" alt="Selected quotation template logo"></button>
+          <div class="quote-number-field"><label for="quoteNo">Quotation No.</label><div><input id="quoteNo" class="quote-number-input" autocomplete="off" spellcheck="false" aria-label="Quotation number"><div class="quote-number-help">The Owner-assigned prefix is locked. YYMM and running number may be amended.</div></div></div>
+          <button class="btn action-pdf no-print export-center-hidden" type="button" id="topPrintQuote">PDF</button>
           <input id="preparedBy" type="hidden">
           <input id="preparedByDesignation" type="hidden">
         </div>
@@ -413,6 +629,7 @@
           <div id="revisionLockNote" class="span-3 revision-note" style="display:none">Revision copy: Customer and original Date are locked. Only Revision Date may be changed.</div>
           <div class="span-3"><label>Contact Details</label><div id="qContactInfo" class="detail-value">-</div></div>
           <div class="short-field"><label>Document Type</label><select id="qDocumentType"><option>Quotation</option><option>Proforma Invoice</option></select></div>
+          <div class="quotation-template-field"><div><label for="qTemplate">Quotation Template</label><select id="qTemplate"></select></div><button class="btn secondary no-print" id="manageQuotationTemplates" type="button">Templates</button></div>
           <div class="short-field"><label>Validity</label><input id="validity" value="14 days"></div>
           <div class="full-field"><label>Project</label><input id="project" class="popup-input" readonly placeholder="Click to enter up to 2 lines"><input id="project2" type="hidden"></div>
           <div class="full-field"><label>Delivery</label><input id="delivery" class="popup-input" readonly value="Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order."><input id="delivery2" type="hidden"></div>
@@ -426,16 +643,16 @@
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2>Items <span id="itemCount" class="muted"></span></h2><div class="status-summary"><span class="status-pill" title="Complete"><i class="status-dot green"></i><b id="completeCount">0</b></span><span class="status-pill" title="Warning"><i class="status-dot yellow"></i><b id="warningCount">0</b></span><span class="status-pill" title="Error"><i class="status-dot red"></i><b id="errorCount">0</b></span></div></div>
           <div class="items-toolbar-actions no-print"><button class="btn secondary" type="button" id="expandAllItems">Expand All</button><button class="btn secondary" type="button" id="collapseAllItems">Collapse All</button><button class="btn secondary" type="button" id="addQuoteItem">+ Add Item</button></div>
         </div>
-        <div id="quoteItems"></div>
+        <div id="quoteItems"></div><datalist id="quotationModelItemOptions"></datalist>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
-        <div class="card no-print export-center-hidden" id="quotationExportCenter" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn green" id="printQuote">PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Item buttons export the selected item PDF.</p></div>
+        <div class="card no-print export-center-hidden" id="quotationExportCenter" style="margin-top:16px"><h2>Export Center</h2><div class="actions"><button class="btn action-pdf" id="printQuote">PDF</button><button class="btn secondary" id="loadPrintSample">Load Print Sample</button></div><div id="itemExportButtons" class="actions"></div><p class="muted" style="margin-bottom:0">Item buttons export the selected item PDF.</p></div>
       </div>
     </section>
 
 
     <section id="keyDashboard" class="page">
       <div class="page-title-row">
-        <div><h1>Key Dashboard</h1><div class="muted">Administration, roles and protected company pricing.</div></div>
+        <div><h1>Key Dashboard</h1><div class="muted">Administration, roles and protected customer pricing.</div></div>
       </div>
       <div id="keyDashboardNotice" class="notice">Loading your Key permissions…</div>
       <div class="key-dashboard-grid">
@@ -457,11 +674,17 @@
           <p>Maintain USD, RMB and MYR source prices for CHC and GWS Tank.</p>
           <span class="module-order">03</span>
         </button>
+        <button type="button" class="key-module-card" data-go="companySettings">
+          <span class="module-icon">👥</span>
+          <h2>Customer</h2>
+          <p>Maintain Owner-only customer Commission, Set Discount and Final Discount rates.</p>
+          <span class="module-order">04</span>
+        </button>
         <button type="button" class="key-module-card" data-go="companyPricing">
           <span class="module-icon">RM</span>
           <h2>Company &amp; Pricing</h2>
-          <p>Assign customer pricing categories, maintain fuel price and view protected CHC selling prices.</p>
-          <span class="module-order">04</span>
+          <p>Assign customer pricing categories, maintain fuel price and view protected selling prices.</p>
+          <span class="module-order">05</span>
         </button>
       </div>
     </section>
@@ -478,12 +701,12 @@
       <div id="roleAccessNotice" class="notice">Loading role access…</div>
       <div class="card">
         <div class="role-toolbar">
-          <div><h2 style="margin-bottom:4px">Users</h2><div class="role-note">New users can receive an invitation email and set their own password. Role changes apply after refresh or next sign-in.</div></div>
+          <div><h2 style="margin-bottom:4px">Users</h2><div class="role-note">New users can receive an invitation email and set their own password. The Owner assigns each user’s unique quotation prefix here.</div></div>
           <button id="reloadRoles" type="button" class="btn secondary">Reload</button>
         </div>
         <div class="table-wrap" style="margin-top:14px">
           <table class="role-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Login</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Quotation Prefix</th><th>Role</th><th>Status</th><th>Login</th><th></th></tr></thead>
             <tbody id="roleRows"></tbody>
           </table>
         </div>
@@ -520,7 +743,11 @@
               <div class="category-product-rule-layout">
                 <div class="category-product-buttons" aria-label="Product pricing rules">
                   <button class="category-product-button active" type="button" data-category-product="CHC">CHC</button>
+                  <button class="category-product-button" type="button" data-category-product="ES">ES</button>
                   <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
+                  <button class="category-product-button" type="button" data-category-product="KEYPLC">KeyPLC</button>
+                  <button class="category-product-button" type="button" data-category-product="MANIFOLD">Manifold</button>
+                  <button class="category-product-button" type="button" data-category-product="MOTOR">Motor</button><button class="category-product-button" type="button" data-category-product="COUPLING">Coupling</button>
                 </div>
                 <div class="category-rule-editor">
                   <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
@@ -546,29 +773,27 @@
                       <div class="category-inline-input"><span>RM</span><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly></div>
                       <span class="category-inline-check" aria-hidden="true"></span>
                     </div>
-                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_commission" data-lock-key="commission" data-lock-label="Commission">
-                      <label for="categoryCommissionInput">Commission</label>
-                      <div class="category-inline-input"><input id="categoryCommissionInput" type="number" min="0" max="99.99" step="0.01" value="3.00" readonly><span>%</span></div>
-                      <label class="category-inline-check" title="Include Commission"><input id="categoryCommissionEnabled" type="checkbox" checked disabled><span>Use</span></label>
-                    </div>
-                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_setDiscount" data-lock-key="setDiscount" data-lock-label="Set Discount">
-                      <label for="categorySetDiscountInput">Set Discount</label>
-                      <div class="category-inline-input"><input id="categorySetDiscountInput" type="number" min="0" max="99.99" step="0.01" value="6.80" readonly><span>%</span></div>
-                      <label class="category-inline-check" title="Include Set Discount"><input id="categorySetDiscountEnabled" type="checkbox" checked disabled><span>Use</span></label>
-                    </div>
-                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_finalDiscount" data-lock-key="finalDiscount" data-lock-label="Final Discount">
-                      <label for="categoryFinalDiscountInput">Final</label>
-                      <div class="category-inline-input"><input id="categoryFinalDiscountInput" type="number" min="0" max="99.99" step="0.01" value="8.00" readonly><span>%</span></div>
-                      <label class="category-inline-check" title="Include Final Discount"><input id="categoryFinalDiscountEnabled" type="checkbox" checked disabled><span>Use</span></label>
-                    </div>
-                    <div class="category-lock-field locked category-inline-rule category-fuel-toggle" id="categoryLock_fuelCharge" data-lock-key="fuelCharge" data-lock-label="Fuel Charge">
-                      <label for="categoryFuelChargeInput">Fuel Charge</label>
-                      <div class="category-inline-input"><span>RM</span><input id="categoryFuelChargeInput" type="number" min="0" step="0.01" value="0.00" readonly data-always-readonly="true" title="Calculated automatically from customer distance and the saved Fuel Price"></div>
-                      <label class="category-inline-check" title="Include automatic Fuel Charge"><input id="categoryFuelChargeEnabled" type="checkbox" checked disabled><span>Use</span></label>
-                      <small class="category-inline-note">Auto: customer distance × (Fuel Price − RM2.00)</small>
-                    </div>
+                  </div>
+                  <div class="category-company-factor-list" aria-label="Company factors for this category">
+                    <div class="category-company-factor"><label for="categoryCommissionValue"><b>Commission</b></label><div class="category-inline-input"><input id="categoryCommissionValue" type="text" value="0.00" readonly data-always-readonly="true"><span>%</span></div><label class="category-factor-use"><input id="categoryUseCommission" type="checkbox"> Use</label></div>
+                    <div class="category-company-factor"><label for="categorySetDiscountValue"><b>Set Discount</b></label><div class="category-inline-input"><input id="categorySetDiscountValue" type="text" value="0.00" readonly data-always-readonly="true"><span>%</span></div><label class="category-factor-use"><input id="categoryUseSetDiscount" type="checkbox"> Use</label></div>
+                    <div class="category-company-factor"><label for="categoryFinalDiscountValue"><b>Final Discount</b></label><div class="category-inline-input"><input id="categoryFinalDiscountValue" type="text" value="0.00" readonly data-always-readonly="true"><span>%</span></div><label class="category-factor-use"><input id="categoryUseFinalDiscount" type="checkbox"> Use</label></div>
+                    <div class="category-company-factor"><label for="categoryFuelChargeValue"><b>Fuel Charge</b></label><input id="categoryFuelChargeValue" type="text" value="Automatic" readonly data-always-readonly="true"><label class="category-factor-use"><input id="categoryUseFuelCharge" type="checkbox"> Use</label></div>
                   </div>
                   <div class="formula" id="categoryFormulaPreview" style="margin-top:14px"></div>
+                  <div class="category-manual-calculator">
+                    <h3>Manual Quoted Value</h3>
+                    <div class="muted">For uncommon items that use this product family’s saved exchange rates and the same Many / Common / Rare formula.</div>
+                    <div class="category-manual-grid" style="margin-top:10px">
+                      <div><label for="categoryManualCost">Cost Figure</label><input id="categoryManualCost" type="number" min="0" step="0.01" placeholder="0.00"></div>
+                      <div><label for="categoryManualCurrency">Currency</label><select id="categoryManualCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
+                      <div><label for="categoryManualRarity">Pricing Type</label><select id="categoryManualRarity"><option value="many">Many</option><option value="common" selected>Common</option><option value="rare">Rare</option></select></div>
+                    </div>
+                    <div class="category-manual-result" aria-live="polite">
+                      <div><b>Quoted Value</b><small id="categoryManualBreakdown">Enter a cost figure to calculate.</small></div>
+                      <strong id="categoryManualQuotedValue">RM 0.00</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -591,13 +816,83 @@
           <p>Maintain CHC, CHCS and CHCN source prices and the source-currency multipliers.</p>
           <span class="module-order">OPEN PRICE LIST</span>
         </button>
+
+        <button type="button" class="key-module-card" data-go="esPriceList">
+          <span class="module-icon">ES</span><h2>End Suction</h2><p>Maintain B.G.Reich ES source prices by material construction.</p><span class="module-order">OPEN PRICE LIST</span>
+        </button>
         <button type="button" class="key-module-card" data-go="gwsPriceList">
           <span class="module-icon">GWS</span>
           <h2>GWS Tank</h2>
           <p>Maintain only valid GWS series, model and pressure SKUs; unavailable pressure combinations are not shown.</p>
           <span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="keyplcPriceList">
+          <span class="module-icon">PLC</span>
+          <h2>KeyPLC Panel</h2>
+          <p>Maintain control-panel source prices by motor rating and one-to-six pump configuration.</p>
+          <span class="module-order">OPEN PRICE LIST</span>
+        </button>
+        <button type="button" class="key-module-card" data-go="manifoldPriceList">
+          <span class="module-icon">MF</span><h2>Manifold</h2><p>Maintain Branch, Manifold Sizing, Header and Tank Fitting source data.</p><span class="module-order">OPEN PRICE LIST</span>
+        </button>
+        <button type="button" class="key-module-card" data-go="motorPriceList">
+          <span class="module-icon">MTR</span><h2>Motor</h2><p>Maintain IE1, IE2, IE3, IE4 and IE5 source prices by HP and pole.</p><span class="module-order">OPEN PRICE LIST</span>
+        </button>
+        <button type="button" class="key-module-card" data-go="couplingPriceList">
+          <span class="module-icon">CPL</span><h2>Coupling</h2><p>Maintain Pin &amp; Bush, Tyre and taper-lock Bush source prices.</p><span class="module-order">OPEN PRICE LIST</span>
+        </button>
       </div>
+    </section>
+
+    <section id="motorPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>Motor Price List</h1><div class="muted">Select Efficiency and Pole, then maintain each HP price in the selected currency.</div></div></div>
+      <div id="motorPriceMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="motorPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-multiplier-lock locked" id="motorMultiplierLock_USD"><label>USD → MYR</label><input id="motorUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="motorUsdMultiplierHint"><div class="multiplier-hold-feedback" id="motorUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-motor-rate-save>Save</button><button class="btn secondary" type="button" data-motor-rate-cancel>Cancel</button></div></div>
+            <div class="pricelist-multiplier-lock locked" id="motorMultiplierLock_RMB"><label>RMB → MYR</label><input id="motorRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="motorRmbMultiplierHint"><div class="multiplier-hold-feedback" id="motorRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-motor-rate-save>Save</button><button class="btn secondary" type="button" data-motor-rate-cancel>Cancel</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to view and save that currency's independent Motor prices. Press and hold a locked USD or RMB multiplier for 3 seconds to edit it.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px">
+        <h2 style="margin-top:0">Motor Price Selection</h2>
+        <div class="motor-price-selector-grid">
+          <div><label for="motorPriceEfficiency">Efficiency</label><select id="motorPriceEfficiency"><option value="IE1">IE1</option><option value="IE2">IE2</option><option value="IE3" selected>IE3</option><option value="IE4">IE4</option><option value="IE5">IE5</option></select></div>
+          <div><label for="motorPricePole">Pole</label><select id="motorPricePole"><option value="2" selected>2 Pole</option><option value="4">4 Pole</option><option value="6">6 Pole</option><option value="8">8 Pole</option></select></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">Motor HP Prices</h2><div id="motorPriceCount" class="muted"></div></div></div><div class="table-wrap motor-table-wrap"><table class="pricelist-table"><thead><tr><th>HP</th><th>Model</th><th>Rarity</th><th id="motorPriceValueHeading">USD Price</th><th></th></tr></thead><tbody id="motorPriceRows"></tbody></table></div></div>
+    </section>
+
+
+    <section id="couplingPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>Coupling Price List</h1><div class="muted">Maintain Pin &amp; Bush, Tyre and taper-lock Bush source prices from the uploaded Coupling workbook.</div></div></div>
+      <div id="couplingPriceMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="couplingPriceCurrency"><option value="USD">USD</option><option value="RMB" selected>RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-multiplier-lock locked" id="couplingMultiplierLock_USD"><label>USD → MYR</label><input id="couplingUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-coupling-rate-save>Save</button><button class="btn secondary" type="button" data-coupling-rate-cancel>Cancel</button></div></div>
+            <div class="pricelist-multiplier-lock locked" id="couplingMultiplierLock_RMB"><label>RMB → MYR</label><input id="couplingRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-coupling-rate-save>Save</button><button class="btn secondary" type="button" data-coupling-rate-cancel>Cancel</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">The uploaded workbook prices are seeded as RMB. USD and MYR remain independently editable.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px">
+        <div class="manifold-pricelist-tabs" role="tablist">
+          <button class="btn secondary active" type="button" data-coupling-price-type="pin_bush">Pin &amp; Bush</button>
+          <button class="btn secondary" type="button" data-coupling-price-type="tyre">Tyre</button>
+          <button class="btn secondary" type="button" data-coupling-price-type="bush">Bush</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">Coupling Source Prices</h2><div id="couplingPriceCount" class="muted"></div></div></div><div class="table-wrap motor-table-wrap"><table class="pricelist-table"><thead id="couplingPriceHead"><tr><th>Model</th><th>Torque (N·m)</th><th>Max Speed (rpm)</th><th>Max Shaft</th><th>Rarity</th><th id="couplingPriceValueHeading">RMB Price</th><th></th></tr></thead><tbody id="couplingPriceRows"></tbody></table></div></div>
     </section>
 
     <section id="chcPriceList" class="page">
@@ -606,14 +901,17 @@
         <div><h1>CHC Price List</h1><div class="muted">All source prices are interpreted in the selected CHC currency. Internal product IDs remain hidden.</div></div>
       </div>
       <div id="chcPriceListMessage" class="auth-message"></div>
-      <div class="card">
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
         <div class="pricelist-settings">
           <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="chcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
           <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_USD" data-multiplier-prefix="chc" data-multiplier-currency="USD"><label>USD → MYR</label><input id="chcUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="chcUsdMultiplierHint"><div class="multiplier-hold-feedback" id="chcUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
           <div class="pricelist-multiplier-lock locked" id="chcMultiplierLock_RMB" data-multiplier-prefix="chc" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="chcRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="chcRmbMultiplierHint"><div class="multiplier-hold-feedback" id="chcRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
         <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to view and save that currency's independent prices. CHC keeps its own rates. Press and hold directly on a locked USD or RMB input for 3 seconds; the countdown appears below the input.</div>
-      </div>
+        </div>
+      </details>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">CHC Models</h2><div id="chcPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="chcPriceSearch" placeholder="Example: CHC 15-30"></div></div>
         <div class="table-wrap" style="max-height:650px">
@@ -625,28 +923,119 @@
       </div>
     </section>
 
+
+    <section id="esPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>End Suction Price List</h1><div class="muted">Maintain independent USD, RMB and MYR ES source prices. Rarity is set once per model and applies to every material.</div></div></div>
+      <div id="esPriceListMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+        <div class="pricelist-settings">
+          <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="esPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+          <div class="pricelist-multiplier-lock locked" id="esMultiplierLock_USD" data-multiplier-prefix="es" data-multiplier-currency="USD"><label>USD → MYR</label><input id="esUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="esUsdMultiplierHint"><div class="multiplier-hold-feedback" id="esUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          <div class="pricelist-multiplier-lock locked" id="esMultiplierLock_RMB" data-multiplier-prefix="es" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="esRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="esRmbMultiplierHint"><div class="multiplier-hold-feedback" id="esRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+        </div>
+        <div class="pricelist-note" style="margin-top:12px">Select one material per ES model, then enter the selected USD, RMB or MYR price. Each material keeps its own saved price.</div>
+        </div>
+      </details>
+      <div class="card"><div class="page-title-row"><div><h2 style="margin:0">ES Models</h2><div id="esPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="esPriceSearch" placeholder="Example: ES 100-32"></div></div>
+      <div id="esPriceTopScroll" class="es-price-top-scroll" aria-label="ES price list top horizontal scrollbar"><div id="esPriceTopScrollInner" class="es-price-top-scroll-inner"></div></div>
+      <div id="esPriceTableWrap" class="table-wrap es-price-table-wrap"><table class="pricelist-table es-matrix-table"><thead><tr><th>Model</th><th>Rarity</th><th>Material Selection</th><th>Selected Currency Price</th><th></th></tr></thead><tbody id="esPriceRows"></tbody></table></div></div>
+    </section>
     <section id="gwsPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
       <div class="page-title-row"><div><h1>GWS Tank Price List</h1><div class="muted">Maintain separate USD, RMB and MYR prices only for valid GWS series/model/pressure combinations.</div></div></div>
       <div id="gwsPriceListMessage" class="auth-message"></div>
-      <div class="card">
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
         <div class="pricelist-settings">
           <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="gwsPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
           <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_USD" data-multiplier-prefix="gws" data-multiplier-currency="USD"><label>USD → MYR</label><input id="gwsUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="gwsUsdMultiplierHint"><div class="multiplier-hold-feedback" id="gwsUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
           <div class="pricelist-multiplier-lock locked" id="gwsMultiplierLock_RMB" data-multiplier-prefix="gws" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="gwsRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="gwsRmbMultiplierHint"><div class="multiplier-hold-feedback" id="gwsRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
         </div>
         <div class="pricelist-note" style="margin-top:12px">GWS keeps its own USD and RMB rates. Press and hold directly on a locked input for 3 seconds, then edit and press Save. Each currency keeps an independent GWS price list.</div>
-      </div>
+        </div>
+      </details>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">GWS Tank Models</h2><div id="gwsPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="gwsPriceSearch" placeholder="Example: 100LV"></div></div>
         <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Series</th><th>Model</th><th>Size</th><th>Pressure</th><th>Price</th><th>Rarity</th><th></th></tr></thead><tbody id="gwsPriceRows"></tbody></table></div>
       </div>
     </section>
 
+    <section id="keyplcPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>KeyPLC Panel Price List</h1><div class="muted">Maintain independent USD, RMB and MYR panel prices for one-to-six pump systems. Rarity applies to the complete motor-rating row.</div></div></div>
+      <div id="keyplcPriceListMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="keyplcPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-multiplier-lock locked" id="keyplcMultiplierLock_USD" data-multiplier-prefix="keyplc" data-multiplier-currency="USD"><label>USD → MYR</label><input id="keyplcUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly aria-describedby="keyplcUsdMultiplierHint"><div class="multiplier-hold-feedback" id="keyplcUsdMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+            <div class="pricelist-multiplier-lock locked" id="keyplcMultiplierLock_RMB" data-multiplier-prefix="keyplc" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="keyplcRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly aria-describedby="keyplcRmbMultiplierHint"><div class="multiplier-hold-feedback" id="keyplcRmbMultiplierHint">Hold input 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">Prices imported from the supplied KeyPLC workbook are seeded as MYR. USD and RMB remain independently editable.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KeyPLC Panel Models</h2><div id="keyplcPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Motor Rating</label><input id="keyplcPriceSearch" placeholder="Example: 4kW"></div></div>
+        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table keyplc-table"><thead><tr><th>Model</th><th>Rarity</th><th>1 Pump</th><th>2 Pumps</th><th>3 Pumps</th><th>4 Pumps</th><th>5 Pumps</th><th>6 Pumps</th><th></th></tr></thead><tbody id="keyplcPriceRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="manifoldPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>Manifold Price List</h1><div class="muted">Imported from 010 - Manifold (Pricelist) - 260801 - V1.0.xlsx. Maintain all source tables here.</div></div></div>
+      <div id="manifoldPriceListMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div><label>Currency Selection</label><select id="manifoldPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR" selected>MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div><label>USD → MYR</label><div class="pricelist-setting-row"><input id="manifoldUsdMultiplier" type="number" min="0.0001" step="0.0001"><button class="btn" id="saveManifoldUsdMultiplier" type="button">Save</button></div></div>
+            <div><label>RMB → MYR</label><div class="pricelist-setting-row"><input id="manifoldRmbMultiplier" type="number" min="0.0001" step="0.0001"><button class="btn" id="saveManifoldRmbMultiplier" type="button">Save</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">Workbook prices are seeded as MYR. USD and RMB remain independently editable.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px"><div class="page-title-row"><div><h2 style="margin:0">Manifold Tables</h2><div id="manifoldPriceListCount" class="muted"></div></div></div>
+        <div class="manifold-pricelist-tabs" role="tablist"><button class="btn secondary active" type="button" data-manifold-table="branch">Branch</button><button class="btn secondary" type="button" data-manifold-table="sizing">Manifold Sizing</button><button class="btn secondary" type="button" data-manifold-table="header">Header</button><button class="btn secondary" type="button" data-manifold-table="tank_fitting">Tank Fitting</button></div>
+        <div id="manifoldPriceTableHost" class="table-wrap" style="max-height:650px;margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section id="companySettings" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
+      <div class="page-title-row">
+        <div><h1>Customer</h1><div class="muted">Choose a customer and maintain Owner-only commercial pricing percentages.</div></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="companySetupCount" class="company-setup-count">Not Set: 0 / 0</span><span class="company-sensitive-badge">Owner Only</span></div>
+      </div>
+      <div id="companySettingsOwnerNotice" class="notice active-customer">Loading Customer access…</div>
+      <div class="company-settings-toolbar">
+        <div><label for="companySettingsCompanySelect">Customer</label><select id="companySettingsCompanySelect"></select></div>
+        <div><label for="companySetupFilter">Filter</label><select id="companySetupFilter"><option value="all">All Customers</option><option value="not-set">Not Set Only</option></select></div>
+      </div>
+      <div class="company-settings-layout">
+        <div class="card"><h2>Customer Information</h2><div id="companyIdentitySummary"></div></div>
+        <div class="card" id="companyPricingEditor">
+          <div class="page-title-row" style="margin-bottom:6px"><div><h2 style="margin:0">Customer Pricing Settings</h2><div class="muted">Protected from accidental changes. Hold for 3 seconds before editing.</div></div><div class="customer-pricing-lock-tools"><button class="btn secondary customer-pricing-hold" id="unlockCompanyPricing" type="button">Hold 3s to Edit</button></div></div>
+          <div id="companySettingsMessage" class="auth-message"></div>
+          <div class="company-factor-grid">
+            <div class="company-factor-row"><label for="companyCommissionInput"><b>Commission</b></label><div class="category-inline-input"><input id="companyCommissionInput" type="number" min="0" max="99.99" step="0.01"><span>%</span></div></div>
+            <div class="company-factor-row"><label for="companySetDiscountInput"><b>Set Discount</b></label><div class="category-inline-input"><input id="companySetDiscountInput" type="number" min="0" max="99.99" step="0.01"><span>%</span></div></div>
+            <div class="company-factor-row"><label for="companyFinalDiscountInput"><b>Final Discount</b></label><div class="category-inline-input"><input id="companyFinalDiscountInput" type="number" min="0" max="99.99" step="0.01"><span>%</span></div></div>
+          </div>
+          <div class="actions" style="justify-content:flex-end"><button class="btn" id="saveCompanyPricing" type="button">Save Customer Rates</button></div>
+        </div>
+      </div>
+    </section>
+
     <section id="companyPricing" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="keyDashboard">← Key Dashboard</button></div>
       <div class="page-title-row">
-        <div><h1>Company &amp; Pricing</h1><div class="muted">Customer/company address, pricing category and protected product selling prices.</div></div>
+        <div><h1>Company &amp; Pricing</h1><div class="muted">Customer address, pricing category and protected product selling prices.</div></div>
         <div class="pricing-title-tools">
           <div class="fuel-inline-setting">
             <label for="pricingFuelPrice">Fuel Price (RM/L)</label>
@@ -662,15 +1051,15 @@
       </div>
       <div id="pricingAccessNotice" class="notice">Secure pricing is loading.</div>
       <div class="pricing-metrics" style="margin-top:16px">
-        <div class="card metric"><span class="muted">Companies</span><b id="pricingCompanyCount">0</b></div>
+        <div class="card metric"><span class="muted">Customers</span><b id="pricingCompanyCount">0</b></div>
         <div class="card metric"><span class="muted">Categories</span><b id="pricingCategoryCount">0</b></div>
         <div class="card metric"><span class="muted">CHC Models</span><b id="pricingModelCount">0</b></div>
         <div class="card metric"><span class="muted">Priced Variants</span><b id="pricingVariantCount">0</b></div>
       </div>
       <div class="pricing-layout">
         <div class="card">
-          <h2>Customer / Company</h2>
-          <div><label>Customer / Company</label><select id="pricingCompanySelect"></select></div>
+          <h2>Customer</h2>
+          <div><label>Customer</label><select id="pricingCompanySelect"></select></div>
           <div id="pricingCompanySummary" style="margin-top:12px"></div>
         </div>
         <div class="card">
@@ -678,18 +1067,44 @@
           <div><label>Category</label><div style="display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:10px;align-items:end"><select id="pricingCategorySelect"></select><button class="btn" id="savePricingCategory" type="button">Save Category</button></div><div id="pricingCategoryMessage" class="muted" style="margin-top:7px">The Owner assigns the pricing category to each customer.</div></div>
           <div class="pricing-family-tabs" id="pricingFamilyTabs" role="tablist" aria-label="Product pricing rule">
             <button class="pricing-family-tab active" type="button" role="tab" aria-selected="true" data-pricing-family="CHC">CHC</button>
+            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="ES">ES</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="GWS">GWS</button>
+            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="KEYPLC">KeyPLC</button>
+            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="MANIFOLD">Manifold</button>
+            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="MOTOR">Motor</button>
+          </div>
+          <div class="pricing-factor-mode-tabs" role="tablist" aria-label="Pricing factor view">
+            <button class="pricing-factor-mode-tab" type="button" role="tab" aria-selected="false" data-pricing-factor-mode="assembly">Assembly</button>
+            <button class="pricing-factor-mode-tab active" type="button" role="tab" aria-selected="true" data-pricing-factor-mode="quotation">Quote</button>
           </div>
           <div id="pricingCategorySummary" class="pricing-rule" style="margin-top:12px"></div>
           <div class="formula pricing-family-formulas" id="pricingFormula" style="margin-top:14px"></div>
+          <div class="category-manual-calculator pricing-manual-calculator" id="pricingManualCalculator">
+            <div class="page-title-row" style="margin-bottom:6px"><div><h3 style="margin:0">Manual Quoted Value Calculator</h3><div class="muted">Available here for uncommon items using the selected product family and customer category.</div></div><span class="pricing-badge ok">Always available</span></div>
+            <div class="category-manual-grid" style="margin-top:10px">
+              <div><label for="pricingManualCost">Cost Figure</label><input id="pricingManualCost" type="number" min="0" step="0.01" placeholder="0.00"></div>
+              <div><label for="pricingManualCurrency">Currency</label><select id="pricingManualCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select></div>
+              <div><label for="pricingManualRarity">Pricing Type</label><select id="pricingManualRarity"><option value="many">Many</option><option value="common" selected>Common</option><option value="rare">Rare</option></select></div>
+            </div>
+            <div class="category-manual-result" aria-live="polite">
+              <div><b>Quoted Value</b><small id="pricingManualBreakdown">Select a customer and enter a cost figure.</small></div>
+              <strong id="pricingManualQuotedValue">RM 0.00</strong>
+            </div>
+          </div>
         </div>
       </div>
 
     </section>
 
     <section id="history" class="page">
-      <h1>Quotation History</h1>
-      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Customer</th><th>Items</th><th>Total</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
+      <div class="page-title-row"><div><h1>Quotation History</h1><div class="muted">Filter secure quotation records by date, customer and—where authorised—creator.</div></div><button id="clearHistoryFilters" class="btn secondary" type="button">Clear Filters</button></div>
+      <div id="quotationHistoryNotice" class="auth-message"></div>
+      <div class="card quotation-history-filter-card"><div class="quotation-history-filters">
+        <div><label>Year / Month</label><details id="historyYearMonthFilter" class="history-check-filter"><summary id="historyYearMonthSummary">All Dates</summary><div class="history-check-panel"><div class="history-check-actions"><button class="btn secondary" type="button" data-history-period-action="select">Select All</button><button class="btn secondary" type="button" data-history-period-action="clear">Clear All</button></div><div id="historyYearMonthOptions" class="history-check-options"></div></div></details></div>
+        <div class="history-customer-filter"><label>Customer Name</label><input id="historyCustomer" type="search" placeholder="Search customer name"></div>
+        <div id="historyUserWrap"><label>User</label><select id="historyUser"><option value="">All Users</option></select></div>
+      </div></div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Customer</th><th id="historyUserHead">User</th><th>Items</th><th>Total</th><th></th></tr></thead><tbody id="quoteRows"></tbody></table></div></div>
     </section>
   </main>
 </div>
@@ -710,6 +1125,7 @@
     <div class="form-grid">
       <div class="span-2"><label>Email *</label><input id="roleUserEmail" type="email" autocomplete="off" placeholder="name@keylargo.com.my" required></div>
       <div class="span-2"><label>Display Name *</label><input id="roleUserDisplayName" autocomplete="off" required></div>
+      <div><label>Quotation Prefix</label><input id="roleUserQuotationPrefix" class="role-prefix-input" maxlength="8" autocomplete="off" placeholder="Example: R"><div class="role-note" style="margin-top:5px">Owner-assigned. Letters and numbers only; prefixes must be unique.</div></div>
       <div><label>Role</label><select id="roleUserRole"><option value="viewer">Viewer</option><option value="dealer">Dealer</option><option value="user" selected>User</option><option value="admin">Admin</option><option value="owner">Owner</option></select></div>
       <div><label>Status</label><select id="roleUserActive"><option value="true" selected>Active</option><option value="false">Inactive</option></select></div>
     </div>
@@ -758,6 +1174,8 @@
       <div class="span-2"><label>Login Email</label><input id="settingsEmail" type="email" readonly><div class="muted" style="margin-top:5px">Ask an administrator before changing a login email because access approval uses this address.</div></div>
     </div>
     <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0">
+    <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">Quotation Templates</h2><div class="muted">Create company or personal/dealer PDF layouts.</div></div><button class="btn secondary" id="settingsQuotationTemplates" type="button">Manage Templates</button></div>
+    <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0">
     <h2 style="margin-bottom:12px">Quotation Signature</h2>
     <div class="form-grid">
       <div class="span-2"><label>Signatory</label><input id="settingsSignatoryName" placeholder="Name used as the typed signature when no image is attached"><div class="muted" style="margin-top:5px">The signature image is used first. The signatory text is used only when no image is attached.</div></div>
@@ -776,6 +1194,14 @@
   </form>
 </dialog>
 
+<dialog id="itemRemarkDialog" class="ks-dialog">
+  <form method="dialog" class="dialog-body item-remark-dialog">
+    <div class="page-title-row"><div><h2 style="margin:0">Internal Item Remarks</h2><div class="item-remark-help">For internal records only. These remarks are never included in quotation printouts or PDFs.</div></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></div>
+    <textarea id="itemRemarkInput" maxlength="4000" placeholder="Enter internal remarks for this quotation item..."></textarea>
+    <div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveItemRemark" value="default">Save Remarks</button></div>
+  </form>
+</dialog>
+
 <div id="printQuotationDocument" aria-hidden="true">
   <section class="print-page print-cover">
     <div class="print-header">
@@ -786,15 +1212,14 @@
         <div><span>Mobile</span><b>:</b><strong id="pMobile"></strong></div>
         <div><span>Email</span><b>:</b><strong id="pEmail"></strong></div>
       </div>
+      <div id="pTemplateHeader" class="print-template-header"></div>
       <div class="print-company">
-        <img src="keylargo-logo.png" alt="Keylargo">
-        <strong>Keylargo Industrial Sdn. Bhd. (297660-M)</strong>
-        <div>No. 73, Jalan Industri 2/5</div>
-        <div>Rawang Integrated Industrial Park, 48000</div>
-        <div>Rawang, Selangor Darul Ehsan, Malaysia</div>
-        <div>Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
-        <div>Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
-        <div>email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
+        <img id="pTemplateLogo" src="keylargo-logo.png" alt="Keylargo">
+        <strong id="pTemplateCompanyName">Keylargo Industrial Sdn. Bhd. (297660-M)</strong>
+        <div id="pTemplateAddress">No. 73, Jalan Industri 2/5<br>Rawang Integrated Industrial Park, 48000<br>Rawang, Selangor Darul Ehsan, Malaysia</div>
+        <div id="pTemplatePhone">Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
+        <div id="pTemplateFax">Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
+        <div id="pTemplateEmail">email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
         <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
         <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span><b>:</b><strong id="pRevisionDate"></strong></div>
       </div>
@@ -807,7 +1232,7 @@
       <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
     </div>
     <p class="print-dear" id="pDear">Dear Sir / Madam,</p>
-    <p class="print-intro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
+    <p class="print-intro" id="pTemplateIntro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
     <div class="print-terms">
       <div><span>Delivery</span><b>:</b><strong id="pDelivery"></strong></div>
       <div><span>Term</span><b>:</b><strong id="pPayment"></strong></div>
@@ -815,8 +1240,8 @@
       <div><span>Price Basis</span><b>:</b><strong id="pPriceBasis"></strong></div>
     </div>
     <div class="print-closing">
-      <p>Please contact us if you have any remaining question(s) or when this quotation is not in line with your requirements.</p>
-      <p>We would appreciate to receive feedback and to keep us informed about the status of this quotation.</p>
+      <p id="pTemplateClosing1">Please contact us if you have any remaining question(s) or when this quotation is not in line with your requirements.</p>
+      <p id="pTemplateClosing2">We would appreciate to receive feedback and to keep us informed about the status of this quotation.</p>
       <p>Your sincerely,</p>
       <div class="signatory-block">
         <div class="signature-space">
@@ -824,29 +1249,81 @@
           <div id="pClosingSignature" class="signature"></div>
         </div>
         <div class="signature-line"></div>
-        <div class="signatory-company">Keylargo Industrial Sdn. Bhd.</div>
+        <div class="signatory-company" id="pTemplateSignatoryCompany">Keylargo Industrial Sdn. Bhd.</div><div id="pTemplateBank" class="print-template-bank"></div>
       </div>
     </div>
-    <footer><div>E &amp; O.E.</div><div>Page 1 of 2</div></footer>
+    <footer><div id="pTemplateFooter">E &amp; O.E.</div><div>Page 1 of 2</div></footer>
   </section>
   <div id="pItemPages"></div>
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="permissions.js?v=124"></script>
-<script src="app.js?v=124"></script>
-<script src="pricing.js?v=124"></script>
-<script src="categories.js?v=124"></script>
-<script src="pricelist.js?v=124"></script>
-<script src="product.js?v=124"></script>
-<script src="roles.js?v=124"></script>
+<script src="permissions.js?v=216"></script>
+<script src="applications.js?v=234"></script>
+<script src="app.js?v=238"></script>
+<script src="pricing.js?v=234"></script>
+<script src="quotation-references.js?v=234"></script>
+<script src="categories.js?v=234"></script>
+<script src="pricelist.js?v=234"></script>
+<script src="product.js?v=234"></script>
+<script src="manifold.js?v=234"></script>
+<script src="roles.js?v=234"></script>
+<script src="assembly.js?v=238"></script>
+<script src="motor.js?v=234"></script>
+<script src="coupling.js?v=238"></script>
+<script src="quotation-templates.js?v=234"></script>
+
+<dialog id="quotationTemplateDialog" class="ks-dialog template-dialog">
+  <div class="dialog-body">
+    <div class="page-title-row"><div><h2 style="margin:0">Quotation Templates</h2><div class="muted">Company templates are shared. Personal templates are visible only to their owner.</div></div><button class="dialog-close" id="closeQuotationTemplates" type="button" aria-label="Close">×</button></div>
+    <div id="quotationTemplateMessage" class="template-message muted"></div>
+    <div class="template-manager-layout">
+      <div><div class="actions" style="margin:0 0 10px"><button class="btn" id="newQuotationTemplate" type="button">+ New</button><button class="btn secondary" id="copyQuotationTemplate" type="button">Copy</button></div><div id="quotationTemplateList" class="template-list"></div></div>
+      <div>
+        <div class="template-form-grid">
+          <input id="templateId" type="hidden">
+          <div><label>Template Name</label><input id="templateName"></div>
+          <div><label>Ownership</label><select id="templateScope"><option value="company">Company-wide</option><option value="personal">Personal / Dealer</option></select></div>
+          <div><label>Status</label><select id="templateStatus"><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
+          <div><label>Default</label><label class="template-check"><input id="templateDefault" type="checkbox"> Use as my default</label></div>
+          <div class="span-2"><label>Logo</label><input id="templateLogoUpload" type="file" accept="image/png,image/jpeg,image/webp"><div class="actions" style="justify-content:flex-start"><img id="templateLogoPreview" class="template-logo-preview" alt="Template logo"><button class="btn secondary" id="removeTemplateLogo" type="button">Remove Logo</button></div></div>
+          <div><label>Company / Dealer Name</label><input id="templateCompanyName"></div>
+          <div><label>Registration No.</label><input id="templateRegistration"></div>
+          <div class="span-2"><label>Address</label><textarea id="templateAddress" rows="3"></textarea></div>
+          <div><label>Telephone</label><input id="templatePhone"></div>
+          <div><label>Fax</label><input id="templateFax"></div>
+          <div><label>Email</label><input id="templateEmail" type="email"></div>
+          <div><label>Primary Colour</label><input id="templatePrimaryColor" type="color" value="#17365d"></div>
+          <div><label>Font</label><select id="templateFont"><option value="Calibri,Arial,Helvetica,sans-serif">Calibri / Arial</option><option value="Arial,Helvetica,sans-serif">Arial</option><option value="Georgia,serif">Georgia</option><option value="Times New Roman,serif">Times New Roman</option></select></div>
+          <div><label>Price Columns</label><select id="templatePriceColumns"><option value="full">Qty, Unit Price & Total</option><option value="amount-only">Qty & Total only</option></select></div>
+          <div class="span-2"><label>Header Text</label><input id="templateHeader"></div>
+          <div class="span-2"><label>Footer Text</label><input id="templateFooter" value="E & O.E."></div>
+          <div class="span-2"><label>Introduction</label><textarea id="templateIntro" rows="2"></textarea></div>
+          <div><label>Default Delivery Term</label><input id="templateDelivery"></div>
+          <div><label>Default Payment Term</label><input id="templatePayment"></div>
+          <div><label>Default Validity</label><input id="templateValidity"></div>
+          <div><label>Default Price Basis</label><input id="templatePriceBasis"></div>
+          <div class="span-2"><label>Closing Message</label><textarea id="templateClosing" rows="3"></textarea></div>
+          <div class="span-2"><label>Bank Details</label><textarea id="templateBank" rows="3"></textarea></div>
+          <div><label>Signature Section</label><label class="template-check"><input id="templateShowSignature" type="checkbox" checked> Show signature</label></div>
+          <div><label>PDF Filename</label><input id="templatePdfName" value="{quoteNo} - {customer}"><div class="muted" style="margin-top:4px">Tokens: {quoteNo}, {customer}, {date}, {template}</div></div>
+        </div>
+        <div class="actions"><button class="btn secondary" id="previewQuotationTemplate" type="button">Preview</button><button class="btn danger" id="deleteQuotationTemplate" type="button">Delete</button><button class="btn" id="saveQuotationTemplate" type="button">Save Template</button></div>
+        <div id="quotationTemplatePreview" class="template-preview-card" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="assemblyDescriptionDialog" class="ks-dialog"><form method="dialog" class="dialog-body assembly-description-dialog"><div class="page-title-row"><h2>System Description</h2><button class="dialog-close" value="cancel" aria-label="Close">×</button></div><textarea id="assemblyDescriptionPopup"></textarea><div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveAssemblyDescriptionPopup" value="default">Save</button></div></form></dialog>
 
 <dialog id="productCurveDialog" class="ks-dialog product-curve-dialog">
   <div class="dialog-body">
-    <div class="page-title-row" style="margin-bottom:10px"><div><h2 id="productCurveTitle" style="margin:0">CHC Curve</h2></div><button class="btn secondary" type="button" id="closeProductCurve">Close</button></div>
+    <div class="page-title-row" style="margin-bottom:10px"><div><h2 id="productCurveTitle" style="margin:0">CHC Curve</h2></div><div class="actions" style="margin:0"><button class="btn action-pdf" type="button" id="exportProductCurve">PDF</button><button class="btn secondary" type="button" id="closeProductCurve">Close</button></div></div>
     <div id="productCurveHost"></div>
   </div>
 </dialog>
-<script src="auth.js?v=124"></script>
+<script src="company-settings.js?v=234"></script>
+<script src="auth.js?v=238"></script>
 </body>
 </html>
