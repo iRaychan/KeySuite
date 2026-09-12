@@ -1,0 +1,15 @@
+{
+  "version": "4.26.05",
+  "baseline": "4.26.04 FULL CLEAN",
+  "upgrade_supported_from": "4.26.04",
+  "changes": [
+    "KeyBot PDF static artwork moved out of embedded Base64 Edge Function sources",
+    "telegram-webhook deploy source reduced below Supabase request-size limit",
+    "KeyBot PDF fetches report logo, CHC C6 dimensions and ES dimension artwork from deployed KeySuite web assets with GitHub fallback",
+    "All V4.26.04 CHC C4/C6 assignment-aware candidate sizing and smooth Power curve logic retained"
+  ],
+  "new_database_migration_required": false,
+  "edge_function_deploy_required": true,
+  "edge_function": "telegram-webhook",
+  "notes": "Deploy V4.26.05 web assets first, then redeploy telegram-webhook. No Supabase db push is required."
+}
