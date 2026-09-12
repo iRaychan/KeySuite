@@ -1,0 +1,1 @@
+-- Remote migration already applied. Placeholder retained for migration history alignment.
