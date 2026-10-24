@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>KeyHQ V0.5 Preview Harness</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0}</style><iframe src="../keyhq/index.html"></iframe><script>
+const people=[
+ ['owner@keylargo.test','Iray Chan','owner',1,'female','#62f1dc','online'],
+ ['alex@keylargo.test','Alex Tan','user',2,'male','#89ddff','offline'],
+ ['mei@keylargo.test','Mei Ling','user',3,'female','#a998ff','offline'],
+ ['daniel@keylargo.test','Daniel Lee','user',4,'male','#ffc766','offline'],
+ ['sara@keylargo.test','Sara Wong','user',5,'female','#ff8db2','offline'],
+ ['amir@keylargo.test','Amir Rahman','user',6,'male','#c8ff66','offline']
+].map(([email,name,role,deskNo,gender,accent,presence])=>({email,name,role,deskNo,gender,accent,presence,accountState:'enabled'}));
+const quotations=[{id:'q1',reference:'KL-26-001',customer:'Demo Customer',project:'Pump Room',amount:12800,currency:'MYR',date:'2026-10-23',status:'sealed',createdByEmail:'alex@keylargo.test',documentType:'Quotation',originalPdfAvailable:true}];
+addEventListener('message',event=>{if(event.data?.type==='KEYHQ_READY')event.source.postMessage({type:'KEYHQ_CONTEXT',context:{name:'Iray Chan',email:'owner@keylargo.test',role:'owner',companyId:'test',canProjector:true,canConfigure:true,canConfigurePeople:true,canAccessOwnerRoom:true,eventMode:'empty',events:[],floorConfig:[],people,peopleMode:'live',peopleError:'',quotations,quotationMode:'mock',quotationError:'',refreshedAt:new Date().toISOString(),agents:{}}},location.origin)});
+</script>

@@ -1,0 +1,32 @@
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const root=path.resolve(__dirname,'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const app=read('keyhq/app.js'),html=read('keyhq/index.html'),launcher=read('keyhq-launcher.js'),auth=read('auth.js'),migration=read('supabase/migrations/20261023233000_keyhq_v04_presence_dynamic_desks.sql');
+
+assert.match(html,/V0\.[45] (?:LIVING|ARCHITECTURAL) OFFICE/);
+assert.match(html,/id="locationTracker"/);
+assert.match(html,/Original KeySuite quotation format/);
+assert.doesNotMatch(html,/id="quotationPreview"|id="previewPrev"/);
+assert.match(app,/Math\.ceil\(Math\.max\(1,count\)\/4\)\*4/);
+assert.match(app,/GROUPS OF 4/);
+assert.match(app,/18 SEATS · 9 PER SIDE/);
+assert.match(app,/PRIVATE LEISURE/);
+assert.match(app,/function updateAgentMotion/);
+assert.match(app,/walk-lift/);
+assert.match(app,/walk-destination/);
+assert.match(app,/a\.activityEndsAt=now\+r\.activity\.duration/);
+assert.match(app,/filter\(item=>item\.id!==a\.lastActivity\)/);
+for(const duration of ['30*60*1000','10*60*1000'])assert.ok(app.includes(duration));
+assert.doesNotMatch(app,/function quotePages|snapshot-notice/);
+assert.match(launcher,/openHistoryPdf/);
+assert.match(launcher,/keysuite_list_keyhq_people_v42922_v04/);
+assert.match(launcher,/keysuite_set_keyhq_presence_v42922_v04/);
+assert.match(auth,/setPresence\?\.\('offline'\)/);
+assert.match(migration,/lower\(a\.role\)='owner'/);
+assert.match(migration,/greatest\(4,ceil\(v_enabled\/4\.0\)::integer\*4\)/);
+assert.match(migration,/presence_state in \('online','offline'\)/);
+assert.match(migration,/revoke all on function public\.keysuite_set_keyhq_presence_v42922_v04/);
+
+console.log('KeyHQ V0.4 Living Office regression: PASS');

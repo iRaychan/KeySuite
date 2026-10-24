@@ -1,0 +1,13 @@
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const index=read('index.html'),app=read('app.js'),sw=read('sw.js'),bootstrap=read('v41200-bootstrap.js'),release=JSON.parse(read('RELEASE.json'));
+assert.strictEqual(read('VERSION.txt').trim(),'4.28.67');
+assert.strictEqual(JSON.parse(read('manifest.json')).name,'KeySuite V4.28.67');
+assert.strictEqual(release.version,'4.28.67');assert.strictEqual(release.baseline,'4.28.66');assert.strictEqual(release.new_database_migration_required,false);
+assert(index.includes("window.KEYSUITE_VERSION='4.28.67'"));assert(index.includes('v42867-selector-first-open.js?v=42867'));assert(index.includes('v42867-version-lock.js?v=42867'));
+assert(bootstrap.includes("window.KEYSUITE_VERSION='4.28.67'")&&bootstrap.includes("const VERSION='42867'"));
+assert(app.includes("serviceWorker.register('sw.js?v=42867')"));assert(sw.includes("const CACHE='keysuite-v42867'")&&sw.includes("'./v42867-selector-first-open.js'"));
+for(const file of ['v42867-selector-first-open.js','v42867-version-lock.js'])assert(fs.existsSync(path.join(root,file)),`${file} exists`);
+console.log('V4.28.67 release regression: PASS');

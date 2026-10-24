@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KeySuite V4.29.17 Safari auth verification</title>
+  <style>
+    body{font:16px -apple-system,BlinkMacSystemFont,sans-serif;margin:36px;color:#17365d;background:#f4f7fb}
+    main{max-width:760px;margin:auto;background:white;border-radius:16px;padding:28px;box-shadow:0 12px 40px #17365d1a}
+    h1{margin-top:0}.case{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #dbe3ed}.pass{color:#087f3f;font-weight:700}.fail{color:#b42318;font-weight:700}
+    .hidden,#loginView,#loadingView,#appView{display:none}
+  </style>
+</head>
+<body>
+<main>
+  <h1>KeySuite V4.29.17 Safari auth verification</h1>
+  <div id="results">Running…</div>
+</main>
+<div id="loginView"><form id="loginForm"><input id="loginEmail"><input id="loginPassword"><button id="loginButton"></button></form><div id="loginMessage"></div></div>
+<div id="loadingView"><span id="loadingText"></span></div><div id="appView"></div>
+<button id="logoutButton"></button><input id="showPassword" type="checkbox"><button id="forgotPasswordButton"></button>
+<form id="forgotPasswordForm"></form><button id="closeForgotPassword"></button><button id="cancelForgotPassword"></button>
+<form id="invitePasswordForm"></form><button id="settingsButton"></button><form id="settingsForm"></form>
+<button id="closeSettings"></button><button id="cancelSettings"></button><input id="settingsSignatureUpload" type="file"><button id="settingsRemoveSignature"></button><button id="keyButton"></button>
+<script>window.KEYSUITE_TEST_MODE=true;window.KEYSUITE_CONFIG={};</script>
+<script src="../auth.js?v=42917-safari-test"></script>
+<script>
+(async()=>{
+  const results=[];
+  const run=async(name,fn)=>{try{await fn();results.push([name,true])}catch(error){console.error(name,error);results.push([name,false,error.message])}};
+  const assert=(value,message)=>{if(!value)throw new Error(message)};
+  const api=window.KeySuiteAuthTest;
+  await run('Logged-out session',async()=>{const r=await api.readInitialSession({auth:{getSession:async()=>({data:{session:null},error:null})}},100);assert(r.data.session===null,'expected no session')});
+  await run('Valid persisted session',async()=>{const s={access_token:'valid'};const r=await api.readInitialSession({auth:{getSession:async()=>({data:{session:s},error:null})}},100);assert(r.data.session===s,'valid session changed')});
+  await run('Expired session refresh',async()=>{const r=await api.readInitialSession({auth:{getSession:async()=>{await new Promise(x=>setTimeout(x,10));return {data:{session:{access_token:'refreshed'}},error:null}}}},100);assert(r.data.session.access_token==='refreshed','refresh result missing')});
+  await run('Hung initialization cutoff',async()=>{try{await api.readInitialSession({auth:{getSession:()=>new Promise(()=>{})}},30);throw new Error('hang unexpectedly resolved')}catch(error){assert(error.code==='KEYSUITE_AUTH_TIMEOUT','wrong timeout error')}});
+  await run('Repeated page-session read',async()=>{let n=0;const c={auth:{getSession:async()=>({data:{session:{n:++n}},error:null})}};const a=await api.readInitialSession(c,100),b=await api.readInitialSession(c,100);assert(a.data.session.n===1&&b.data.session.n===2,'second read did not run')});
+  const all=results.every(([,ok])=>ok);
+  document.getElementById('results').innerHTML=results.map(([name,ok,error])=>`<div class="case"><span>${name}</span><span class="${ok?'pass':'fail'}">${ok?'PASS':`FAIL: ${error}`}</span></div>`).join('')+`<h2 class="${all?'pass':'fail'}">${all?'ALL SAFARI SCENARIOS PASSED':'SAFARI VERIFICATION FAILED'}</h2>`;
+  document.title=all?'PASS — KeySuite Safari auth':'FAIL — KeySuite Safari auth';
+})().catch(error=>{document.getElementById('results').textContent=error.stack||error.message});
+</script>
+</body>
+</html>

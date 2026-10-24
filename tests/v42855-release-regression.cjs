@@ -1,0 +1,16 @@
+const assert=require('assert'),fs=require('fs'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const read=name=>fs.readFileSync(path.join(root,name),'utf8');
+const suite=read('index.html'),categories=read('categories.js'),auth=read('auth.js'),compare=read('v3944-categories.js');
+assert(suite.includes("window.KEYSUITE_VERSION='4.28.55'"),'visible release version is V4.28.55');
+assert(suite.includes('data-go="crPriceList"'),'main Price List dashboard links to CR');
+assert(suite.includes('data-category-product="CR"'),'Category Management includes CR');
+assert(suite.includes('data-pricing-family="CR"'),'Company & Pricing includes CR');
+assert(categories.includes("CR:normalize('CR')"),'Category reload maps CR rules');
+assert(auth.includes('CR:normalizeRule(rules.CR,otherFallback)'),'secure data maps CR rules');
+assert(categories.includes("rpc='keysuite_save_cr_category_rule_v42855'"),'Category editor saves CR rules through the V4.28.55 RPC');
+assert(compare.includes("selectedProduct==='CR'"),'Category comparison saves CR rules through the V4.28.55 RPC');
+const migration=read('supabase/migrations/20261001203000_v42855_cr_category_pricing.sql');
+assert(migration.includes('keysuite_save_cr_category_rule_v42855'),'CR category save RPC migration is included');
+assert(migration.includes("'CHC_G1','CHC_G2','CR','BFI'"),'category currency RPC accepts CR');
+console.log(JSON.stringify({version:'4.28.55',priceListCR:true,categoryCR:true,status:'PASS'}));

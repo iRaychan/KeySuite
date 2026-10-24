@@ -1,0 +1,1 @@
+{"name":"keyhq-v09-verification","private":true,"scripts":{"test:database":"node database.cjs","test:browser":"node browser.cjs && node features.cjs && node chat-browser.cjs"},"devDependencies":{"@electric-sql/pglite":"0.5.11","playwright":"1.51.1"}}

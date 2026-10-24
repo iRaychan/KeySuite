@@ -1,0 +1,4 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),b=fs.readFileSync(path.join(root,'keyhq/avatar/assets/keyhq-original.glb'));
+assert.equal(b.readUInt32LE(0),0x46546c67);assert.equal(b.readUInt32LE(4),2);assert.equal(b.readUInt32LE(8),b.length);
+const json=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());assert.equal(json.asset.version,'2.0');assert.deepEqual(json.animations.map(a=>a.name),['idle','walk','sit','work','talk','wave']);assert(json.skins.every(s=>s.joints.length===15));assert(json.meshes.every(m=>m.primitives.every(p=>p.attributes.JOINTS_0!==undefined&&p.attributes.WEIGHTS_0!==undefined)));assert(!json.images);assert(b.length<512000);console.log('PASS GLB 2.0, 15-joint skinning, six animation clips, no textures, under 500 KiB');

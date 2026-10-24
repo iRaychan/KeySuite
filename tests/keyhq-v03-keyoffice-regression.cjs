@@ -1,0 +1,31 @@
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const root=path.resolve(__dirname,'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const hq=read('keyhq/app.js'),html=read('keyhq/index.html'),css=read('keyhq/styles.css'),launcher=read('keyhq-launcher.js'),migration=read('supabase/migrations/20261023204500_keyhq_level6_people.sql'),main=read('app.js');
+
+assert.match(html,/V0\.5 ARCHITECTURAL OFFICE/);
+assert.match(html,/id="quotationDialog"/);
+assert.match(html,/id="peopleDialog"/);
+assert.match(launcher,/keyhq\/index\.html\?embedded=1&v=keyhq05/);
+assert.match(launcher,/keysuite_list_keyhq_people_v42922/);
+assert.match(launcher,/KeySuiteQuotationStore/);
+assert.match(launcher,/originalPdfAvailable:String/);
+assert.match(hq,/officeDeskPositions/);
+assert.match(hq,/function drawKeyOffice/);
+assert.match(hq,/function drawChibi/);
+assert.match(hq,/function pickMonitor/);
+assert.match(hq,/KEYHQ_OPEN_PDF/);
+assert.match(hq,/No demo records are shown/);
+assert.match(css,/\.original-pdf-panel/);
+assert.match(main,/getQuotes:/);
+assert.match(main,/openHistoryPdf:openHistoryQuotationPdf/);
+assert.match(migration,/enable row level security/);
+assert.match(migration,/lower\(a\.role\)='owner'/);
+assert.match(migration,/desk_no between 1 and 28/);
+assert.match(migration,/revoke all on table public\.ks_keyhq_people_v42922 from public,anon,authenticated/);
+assert.doesNotMatch(hq,/const agents=\[/);
+assert.doesNotMatch(hq,/progress:\d+|eta:'/);
+
+console.log('KeyHQ V0.3 KeyOffice regression: PASS');

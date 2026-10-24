@@ -1,0 +1,20 @@
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const root=path.resolve(__dirname,'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+
+const index=read('index.html'),app=read('app.js'),sw=read('sw.js'),bootstrap=read('v41200-bootstrap.js');
+assert.strictEqual(read('VERSION.txt').trim(),'4.28.67');
+assert.strictEqual(JSON.parse(read('manifest.json')).name,'KeySuite V4.28.67');
+assert.strictEqual(JSON.parse(read('RELEASE.json')).version,'4.28.67');
+assert(index.includes("window.KEYSUITE_VERSION='4.28.67'"));
+assert(index.includes('<script src="v42867-version-lock.js?v=42867"></script>'));
+assert(index.includes('<script src="v42867-selector-first-open.js?v=42867"></script>'));
+assert(bootstrap.includes("window.KEYSUITE_VERSION='4.28.67'")&&bootstrap.includes("const VERSION='42867'"));
+assert(app.includes("serviceWorker.register('sw.js?v=42867')"));
+assert(sw.includes("const CACHE='keysuite-v42867'")&&sw.includes("'./v42867-version-lock.js'"));
+assert(read('v42867-version-lock.js').includes("const V='4.28.67'"));
+assert(read('v42867-selector-first-open.js').includes("version:'4.28.67'"));
+for(const file of ['app.js','assembly.js','pricing.js','index.html','selector/product.html','selector-cr/product.html'])assert(!read(file).includes('4.28.64'),`${file} has no stale visible version`);
+console.log('V4.28.67 release regression: PASS');

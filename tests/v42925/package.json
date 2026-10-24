@@ -1,0 +1,8 @@
+{
+  "name": "keysuite-v42925-local-verification",
+  "private": true,
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "playwright": "1.51.1"
+  }
+}
