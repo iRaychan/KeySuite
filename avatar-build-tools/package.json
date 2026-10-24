@@ -1,0 +1,12 @@
+{
+  "name": "keyhq-avatar-build-tools",
+  "version": "4.29.24",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build-avatar.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}

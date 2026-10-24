@@ -1,0 +1,16 @@
+import {extraOptions} from '../avatar/extensions.js';
+// Display ordering is independent of storage identity: Eve keeps Maya's slot 0.
+export const storagePrefix='keyhq:phase1:avatar:v1';
+export const options={gender:['female','male','nonbinary'],face:['soft','defined','round'],body:['average','slim','broad'],hair:['short','bob','long','curly','tied','bald'],outfit:['business','smart-casual','keylargo','dress','sport'],shoes:['black','brown','white'],accessory:['none','glasses','sunglasses'],...extraOptions};
+export const defaultProfiles=[{name:'Eve',gender:'female',face:'soft',body:'slim',hair:'long',hairColor:'#57382b',skin:'#d9a27e',outfit:'dress',shoes:'brown',accessory:'none'},{name:'Adam',gender:'male',face:'defined',body:'average',hair:'short',hairColor:'#29231f',skin:'#a86c48',outfit:'business',shoes:'black',accessory:'none'}];
+export function normalize(p={},index=0){const result={...defaultProfiles[index],facialHair:'none',hat:'none',earrings:'none',watch:'none',nose:'medium',ears:'medium',lips:'medium',brows:'soft',eyeSize:'medium',eyeSpacing:'medium',eyeColor:'#513a2b',outfitColor:'#305577'};for(const [k,values] of Object.entries(options))if(values.includes(p?.[k]))result[k]=p[k];if(p?.outfit==='casual')result.outfit='smart-casual';for(const k of ['skin','hairColor','eyeColor','outfitColor'])if(/^#[0-9a-f]{6}$/i.test(p?.[k]||''))result[k]=p[k];if(typeof p?.name==='string'&&p.name.trim())result.name=p.name.trim().slice(0,40);return result;}
+export function loadDemo(storage,index){let p;try{p=JSON.parse(storage.getItem(storagePrefix+':'+index)||'null')}catch{}const profile=normalize(p,index);if(index===0&&/^Maya(?:\s*·\s*Prototype)?$/i.test(profile.name))profile.name='Eve';if(index===1&&/^Adam\s*·\s*Prototype$/i.test(profile.name))profile.name='Adam';return profile;}
+export function canControl(actor,session,embedded){if(actor.demo)return !embedded||Boolean(session?.userId);return Boolean(session?.userId&&actor.userId===session.userId&&actor.kind!=='ai'&&actor.accountState==='enabled');}
+export function authorizedEnquiries(session){return session?.canProjector&&session?.eventMode==='live'?(session.events||[]).filter(e=>!e.isDemo&&e.id&&typeof e.message==='string'):[];}
+export function groundPath(start,end,floor,obstacles=[]){
+ // Four-connected grid prevents diagonal corner cutting. Building wall crossings are disallowed.
+ const indoor=floor!=='all'&&floor!=='roof';const step=indoor?.8:2;
+ const valid=(x,z)=>{if(indoor)return x>-61&&x<-9&&z>-16&&z<16&&!obstacles.some(o=>Math.abs(x-o.x)<o.w/2+.4&&Math.abs(z-o.z)<o.d/2+.4)&&!(x>-39&&x<-31&&z<-10);return x>-105&&x<100&&z>-120&&z<90&&!(x>-67&&x<-3&&z>-21&&z<21)&&!(x>43&&x<87&&z>42&&z<66)&&Math.hypot(x+31,z-53)>15;};
+ if(!valid(end.x,end.z))return null;const cell=p=>[Math.round(p.x/step),Math.round(p.z/step)],a=cell(start),b=cell(end),key=(x,z)=>x+','+z,queue=[a],prev=new Map([[key(...a),null]]);let found=false;
+ for(let i=0;i<queue.length&&i<16000;i++){const c=queue[i];if(c[0]===b[0]&&c[1]===b[1]){found=true;break}for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=[c[0]+dx,c[1]+dz],k=key(...n);if(!prev.has(k)&&valid(n[0]*step,n[1]*step)){prev.set(k,c);queue.push(n)}}}if(!found)return null;const path=[];for(let c=b;c;c=prev.get(key(...c)))path.push({x:c[0]*step,z:c[1]*step});path.reverse();path.shift();path.push(end);return path;
+}
