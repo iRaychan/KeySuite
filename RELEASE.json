@@ -1,0 +1,15 @@
+{
+  "version": "4.29.25",
+  "baseline": "4.29.24",
+  "upgrade_supported_from": "4.29.24",
+  "changes": [
+    "shared 3D avatars for existing enabled workforce",
+    "self-only Auth UUID appearance profiles and Realtime refresh",
+    "single responsive workforce/location sidebar",
+    "preserved original building, logo, PDF and business modules"
+  ],
+  "new_database_migration_required": true,
+  "edge_function_deploy_required": false,
+  "production_deployed": false,
+  "notes": "Apply only the V4.29.25 migration after separate approval and staging acceptance. See README_UPGRADE_V42925.md."
+}
