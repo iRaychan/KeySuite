@@ -1,0 +1,16 @@
+README.md
+README_UPGRADE_V42915.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42915.txt
+VERIFICATION_V42915.md
+VERSION.txt
+app.js
+assembly.js
+index.html
+manifest.json
+selector-g1/index.html
+supabase/migrations/20261021194500_v42915_atomic_quotation_claim.sql
+sw.js
+tests/v42915-release-regression.cjs
+v41200-bootstrap.js
+v42915-version-lock.js

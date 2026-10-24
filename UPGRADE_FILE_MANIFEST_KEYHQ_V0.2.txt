@@ -1,0 +1,11 @@
+README.md
+README_UPGRADE_KEYHQ_V0.2.md
+UPGRADE_FILE_MANIFEST_KEYHQ_V0.2.txt
+VERIFICATION_KEYHQ_V0.2.md
+keyhq-launcher.js
+keyhq/app.js
+keyhq/index.html
+keyhq/styles.css
+tests/keyhq-integration-regression.cjs
+tests/keyhq-v01-master-building-regression.cjs
+tests/keyhq-v02-living-headquarters-regression.cjs

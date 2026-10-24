@@ -1,0 +1,16 @@
+CHANGELOG_V42919.md
+README.md
+README_UPGRADE_V42919.md
+RELEASE.json
+ROOT_CAUSE_V42919.md
+UPGRADE_FILE_MANIFEST_V42919.txt
+VERIFICATION_V42919.md
+VERSION.txt
+app.js
+index.html
+manifest.json
+supabase/migrations/20261022170000_v42919_quotation_history_and_counter.sql
+sw.js
+v41200-bootstrap.js
+v42918-version-lock.js
+v42919-version-lock.js

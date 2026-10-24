@@ -1,0 +1,27 @@
+KeySuite V4.29.13 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.12:
+
+README.md
+README_UPGRADE_V42913.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42913.txt
+VERIFICATION_V42913.md
+VERSION.txt
+index.html
+manifest.json
+sw.js
+app.js
+keyhq-launcher.js
+keyhq/index.html
+keyhq/styles.css
+keyhq/app.js
+pricing.js
+tests/keyhq-integration-regression.cjs
+tests/v42913-motor-price-regression.cjs
+tests/v42913-release-regression.cjs
+v41200-bootstrap.js
+v42913-version-lock.js
+
+Website-only release. No Supabase migration or Edge Function redeployment is required.

@@ -1,0 +1,89 @@
+{
+  "module": "KeyHQ",
+  "module_version": "0.8-campus-review",
+  "keysuite_version": "4.29.25",
+  "required_baseline": "KeySuite_V4.29.25_FULL_CLEAN_GitHub.zip",
+  "baseline_zip_sha256": "c9c388e520a4cced7082ee07ff38f0b2f452d52790c68d1230ea47095c112a1c",
+  "new_database_migration": false,
+  "deployed": false,
+  "files": [
+    {
+      "path": "CAMPUS_REVIEW.md",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "0653e07828df40e14ad036d783a22a5d87c630f4a7babad435ecb99caba7d8ea"
+    },
+    {
+      "path": "KEYHQ_RELEASE.json",
+      "action": "replace",
+      "before_sha256": "2f22194dcfb8ca5550d4591a90613aa406ee8b152fedc402a74f58c0cdc84bff",
+      "after_sha256": "656c5bf99a00daf478ad8fb6f82d444c6208826674d3127d72e9f3c516d2b893"
+    },
+    {
+      "path": "README_UPGRADE_KEYHQ_V0.8.md",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "c63d24d26a4f00fd866556f3197718547f35630795a95195de965456c4a672cb"
+    },
+    {
+      "path": "VERSION.txt",
+      "action": "replace",
+      "before_sha256": "3a8f512dad8d5f8b3ba887620206a31748c275534f3e1eccec4209160e3c2f64",
+      "after_sha256": "9acbc38fb4742cd4f1126ba02efbb8c98931c8b1618e35484b317793d4632b29"
+    },
+    {
+      "path": "keyhq/app.js",
+      "action": "replace",
+      "before_sha256": "92fe352769845492b5d1424e9ea7d37fbfff24c538f1c8b2090b4bcf25058b57",
+      "after_sha256": "d7f9a61ad1951dca5b99dcc5a2eb6bdfd26e522af4ae30c7cc7e143ae111e03c"
+    },
+    {
+      "path": "keyhq/avatar/controller.js",
+      "action": "replace",
+      "before_sha256": "50abcef7a1ea46f3252fda35973c78671a2de8e8222b0d8c75139b76447fa42e",
+      "after_sha256": "49bfeaf02ee35eb4f66b7e8fee11a9f16dbba2a6084e0cba74bc98da83196079"
+    },
+    {
+      "path": "keyhq/campus/campus.css",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "c8200d8a132a7e24a119a7015d116ac8dc0370702896f6819f9b6776d7a5c4fa"
+    },
+    {
+      "path": "keyhq/campus/main.js",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "690b3e6fa90d674bee24ceea2d7caf50d483c701811399c91cdcb7bda1be781a"
+    },
+    {
+      "path": "keyhq/campus/reference.png",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "18b693aea950c9aa8410bebbc81854a8da204a2f3e86601d8b6308429acf18af"
+    },
+    {
+      "path": "keyhq/campus/scene.js",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "8b0d90ed8575b2ce3c0ae76f28a0529a1d31136d9b76d2c0e98d35f74ba982d3"
+    },
+    {
+      "path": "keyhq/campus/state.js",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "c25714f66f1ab0ab01f7d8a5051aadee236fb965f1d6b645a4324a4d977a449e"
+    },
+    {
+      "path": "keyhq/index.html",
+      "action": "replace",
+      "before_sha256": "0c8038eed43793cfaef805c621b3dfed0cce430cdfc784b5342b5ec6a325479a",
+      "after_sha256": "3f9ae15c7534437957ca39b957c26864f02371bf6df62324f923bfa1ed88cbce"
+    },
+    {
+      "path": "keyhq/legacy.html",
+      "action": "add",
+      "before_sha256": null,
+      "after_sha256": "a10246839fb83598e1d7a7ebdb36b80abb0bfa6cad87a013df0613792b87361c"
+    }
+  ]
+}

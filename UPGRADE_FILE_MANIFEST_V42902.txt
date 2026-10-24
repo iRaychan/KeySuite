@@ -1,0 +1,21 @@
+KeySuite V4.29.02 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.01:
+
+README.md
+README_UPGRADE_V42902.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42902.txt
+VERIFICATION_V42902.md
+VERSION.txt
+index.html
+manifest.json
+sw.js
+tests/v42902-release-regression.cjs
+v394411-product-curve.js
+v40001-product-series-overhaul.js
+v41200-bootstrap.js
+v42902-version-lock.js
+
+Only Product/Selection visibility and embedded height synchronization change at runtime. ES and BFI alternative-model panels are restored, dynamic content remains scrollable on Windows, and CHC/CR recommendation visibility remains unchanged.

@@ -1,0 +1,73 @@
+KeySuite V4.28.60 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.28.59 by copying this package over the existing installation and
+replacing files when prompted. Preserve the directory structure shown here.
+
+Core application and release metadata
+-------------------------------------
+README.md
+README_UPGRADE_V42860.md
+RELEASE.json
+VERIFICATION_V42860.md
+VERSION.txt
+app.js
+assembly.js
+auth.js
+baseplate.js
+chc-g1-product-data-v41411.js
+cr-price-data-v42854.js
+cr-pricelist-v42854.js
+cr-product.js
+index.html
+manifest.json
+pricelist.js
+pricing.js
+sw.js
+universe.js
+v394411-product-curve.js
+v40205-motor-baseplate-data.js
+v40001-customer-brand-settings.js
+v40001-multibrand.js
+v40001-product-series-overhaul.js
+v40201-quick-selection.js
+v40407-role-authority.js
+v41200-bootstrap.js
+v42860-version-lock.js
+
+Selector application files
+--------------------------
+selector/index.html
+selector/product.html
+selector-bfi/index.html
+selector-bfi/product.html
+selector-cr/index.html
+selector-cr/product.html
+selector-es/index.html
+selector-g1/index.html
+selector-g1/product.html
+
+Shared data and existing prerequisite migrations
+------------------------------------------------
+source/004 - CHC G1 261003 - V1.3 - CHC 32 Amend.xlsx
+source/004 - CR 261003 - V1.0.xlsx
+supabase/functions/shared-chc-g1/chc-data.js
+supabase/functions/shared-cr/cr-data.js
+supabase/functions/shared-cr/cr-selector-core.js
+supabase/migrations/20261005090000_v42858_cr_mechanical_seal_addons.sql
+supabase/migrations/20261005090001_v42858_verify_cr_mechanical_seal_addons.sql
+
+Verification tests
+------------------
+tests/v42858-cr-pricing-regression.cjs
+tests/v42858-cr-seal-editor-regression.cjs
+tests/v42858-cr-selector-regression.cjs
+tests/v42858-release-regression.cjs
+tests/v42859-assembly-pricing-regression.cjs
+tests/v42859-cr-seal-editor-regression.cjs
+tests/v42859-release-regression.cjs
+tests/v42860-release-regression.cjs
+
+Database note
+-------------
+No database migration is required for V4.28.60.

@@ -1,0 +1,14 @@
+README_UPGRADE_KEYHQ_V0.3.md
+UPGRADE_FILE_MANIFEST_KEYHQ_V0.3.txt
+VERIFICATION_KEYHQ_V0.3.md
+KEYHQ_RELEASE.json
+app.js
+index.html
+keyhq-launcher.js
+keyhq/app.js
+keyhq/index.html
+keyhq/styles.css
+sw.js
+supabase/migrations/20261023204500_keyhq_level6_people.sql
+supabase/migrations/20261023204501_keyhq_level6_people_verify.sql
+tests/keyhq-v03-keyoffice-regression.cjs

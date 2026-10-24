@@ -1,0 +1,28 @@
+KeySuite V4.29.03 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.02:
+
+README.md
+README_UPGRADE_V42903.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42903.txt
+VERIFICATION_V42903.md
+VERSION.txt
+index.html
+manifest.json
+selector/index.html
+selector/product.html
+selector-bfi/index.html
+selector-bfi/product.html
+selector-cr/index.html
+selector-cr/product.html
+selector-g1/index.html
+selector-g1/product.html
+sw.js
+tests/v42903-release-regression.cjs
+v41200-bootstrap.js
+v42903-version-lock.js
+
+Only motor HP display precision and release metadata change at runtime. Existing kW display formatting and all calculations, data, pricing, actions, PDF behavior and layout styling are preserved.
+

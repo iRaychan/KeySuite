@@ -1,0 +1,22 @@
+KeySuite V4.29.11 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.10:
+
+README.md
+README_UPGRADE_V42911.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42911.txt
+VERIFICATION_V42911.md
+VERSION.txt
+index.html
+manifest.json
+supabase/functions/telegram-webhook/index.ts
+sw.js
+tests/v42911-release-regression.cjs
+v40001-customer-brand-settings.js
+v40201-quick-selection.js
+v41200-bootstrap.js
+v42911-version-lock.js
+
+Redeploy the included telegram-webhook Edge Function. No database migration is required.

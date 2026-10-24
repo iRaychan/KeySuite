@@ -1,0 +1,22 @@
+KeySuite V4.28.75 Full Clean Package
+====================================
+
+Complete clean source based on the deployed V4.28.74 runtime.
+
+V4.28.75 runtime change:
+v40201-quick-selection.js
+
+V4.28.75 release metadata:
+VERSION.txt
+index.html
+manifest.json
+sw.js
+v41200-bootstrap.js
+v42875-version-lock.js
+
+Verification:
+tests/v42875-curve-timing-regression.cjs
+tests/v42875-release-regression.cjs
+
+All retained selector, curve-data, pricing, layout and frozen-PDF files are unchanged.
+

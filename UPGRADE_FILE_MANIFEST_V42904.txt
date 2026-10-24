@@ -1,0 +1,22 @@
+KeySuite V4.29.04 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.03:
+
+README.md
+README_UPGRADE_V42904.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42904.txt
+VERIFICATION_V42904.md
+VERSION.txt
+index.html
+manifest.json
+selector/index.html
+selector/product.html
+sw.js
+tests/v42904-release-regression.cjs
+v41200-bootstrap.js
+v42904-version-lock.js
+
+Only CHC C4/C6 PDF preparation timing and release metadata change. All PDF output, calculations, data, UI, pricing, actions and non-CHC families remain locked.
+

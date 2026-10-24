@@ -1,0 +1,15 @@
+CHANGELOG_V42918.md
+README.md
+README_UPGRADE_V42918.md
+RELEASE.json
+ROOT_CAUSE_V42918.md
+UPGRADE_FILE_MANIFEST_V42918.txt
+VERIFICATION_V42918.md
+VERSION.txt
+auth.js
+index.html
+manifest.json
+sw.js
+v41200-bootstrap.js
+v42917-version-lock.js
+v42918-version-lock.js

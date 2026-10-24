@@ -1,0 +1,16 @@
+README.md
+README_UPGRADE_V42914.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42914.txt
+VERIFICATION_V42914.md
+VERSION.txt
+index.html
+manifest.json
+pricing.js
+sw.js
+tests/keyhq-integration-regression.cjs
+tests/v42914-motor-final-price-regression.cjs
+tests/v42914-release-regression.cjs
+v40001-multibrand.js
+v41200-bootstrap.js
+v42914-version-lock.js

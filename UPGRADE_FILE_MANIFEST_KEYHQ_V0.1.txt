@@ -1,0 +1,9 @@
+README.md
+README_UPGRADE_KEYHQ_V0.1.md
+UPGRADE_FILE_MANIFEST_KEYHQ_V0.1.txt
+VERIFICATION_KEYHQ_V0.1.md
+keyhq-launcher.js
+keyhq/app.js
+keyhq/index.html
+tests/keyhq-integration-regression.cjs
+tests/keyhq-v01-master-building-regression.cjs

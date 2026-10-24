@@ -1,0 +1,47 @@
+KeySuite V4.28.61 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.28.60 by copying this package over the existing installation and
+replacing files when prompted. Preserve the directory structure shown here.
+
+Core application and release metadata
+-------------------------------------
+README.md
+README_UPGRADE_V42861.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42861.txt
+VERIFICATION_V42861.md
+VERSION.txt
+app.js
+cr-product.js
+index.html
+manifest.json
+sw.js
+universe.js
+v40001-customer-brand-settings.js
+v40001-multibrand.js
+v40001-product-series-overhaul.js
+v40201-quick-selection.js
+v41200-bootstrap.js
+v41223-selection-recovery.js
+v42861-version-lock.js
+
+Selector application files
+--------------------------
+selector/index.html
+selector/product.html
+selector-bfi/index.html
+selector-bfi/product.html
+selector-cr/index.html
+selector-cr/product.html
+selector-es/index.html
+selector-g1/index.html
+selector-g1/product.html
+
+Verification test
+-----------------
+tests/v42861-release-regression.cjs
+
+Database note
+-------------
+No database migration is required for V4.28.61.

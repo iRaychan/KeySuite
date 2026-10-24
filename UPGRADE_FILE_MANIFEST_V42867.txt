@@ -1,0 +1,56 @@
+KeySuite V4.28.67 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.28.66 by preserving this package's directory structure.
+
+Core application
+----------------
+README.md
+README_UPGRADE_V42867.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42867.txt
+VERIFICATION_V42867.md
+VERSION.txt
+index.html
+manifest.json
+app.js
+assembly.js
+cr-product.js
+pdf-optimization.js
+pricing.js
+sw.js
+universe.js
+v40001-customer-brand-settings.js
+v40001-multibrand.js
+v40001-product-series-overhaul.js
+v40201-quick-selection.js
+v41200-bootstrap.js
+v42867-selector-first-open.js
+v42867-version-lock.js
+
+Selectors
+---------
+selector/index.html
+selector/product.html
+selector-bfi/index.html
+selector-bfi/product.html
+selector-cr/index.html
+selector-cr/product.html
+selector-es/index.html
+selector-g1/index.html
+selector-g1/product.html
+
+Dimension drawing assets (existing V4.28.66 assets, required in upgrade)
+-----------------------------------------------------------------------
+assets/pdf-optimized/chc-g1-dimensions/1.jpg through 13.jpg
+
+Verification
+------------
+tests/v42865-functional-regression.cjs
+tests/v42865-release-regression.cjs
+tests/v42866-functional-regression.cjs
+tests/v42866-release-regression.cjs
+tests/v42867-functional-regression.cjs
+tests/v42867-release-regression.cjs
+
+No database migration is required.

@@ -1,0 +1,22 @@
+KeySuite V4.29.05 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.04:
+
+README.md
+README_UPGRADE_V42905.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42905.txt
+VERIFICATION_V42905.md
+VERSION.txt
+index.html
+manifest.json
+selector-g1/product.html
+selector/product.html
+sw.js
+tests/v42905-release-regression.cjs
+v41200-bootstrap.js
+v42872-selector-first-open.js
+v42905-version-lock.js
+
+Only the macOS CHC C4/C6 Product PDF launch/preparation path, Selection fit retry timing and release metadata change. PDF content, calculations, data, UI, pricing, actions and all other product families remain locked.

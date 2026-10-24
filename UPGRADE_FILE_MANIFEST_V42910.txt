@@ -1,0 +1,32 @@
+KeySuite V4.29.10 Upgrade File Manifest
+=======================================
+
+Upgrade from V4.29.05, V4.29.06, V4.29.07 or V4.29.08:
+
+README.md
+README_UPGRADE_V42910.md
+RELEASE.json
+UPGRADE_FILE_MANIFEST_V42910.txt
+VERIFICATION_V42910.md
+VERSION.txt
+app.js
+auth.js
+bfi-v42302.js
+cr-pricelist-v42854.js
+index.html
+manifest.json
+manifold.js
+pricing.js
+pricelist.js
+quotation-references.js
+supabase/functions/telegram-webhook/index.ts
+supabase/migrations/20261018150000_v42906_fuel_and_model_rarity.sql
+supabase/migrations/20261018190000_v42910_company_wide_quotation_sequence.sql
+sw.js
+tests/v42910-release-regression.cjs
+v39445-model-return.js
+v40001-multibrand.js
+v41200-bootstrap.js
+v42910-version-lock.js
+
+The V4.29.10 company-wide quotation sequence migration is required. The earlier fuel/rarity migration and telegram-webhook redeployment are needed only when upgrading from before V4.29.08.
