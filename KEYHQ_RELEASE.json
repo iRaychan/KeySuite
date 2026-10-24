@@ -1,0 +1,14 @@
+{
+  "keysuite_version": "4.29.25",
+  "keyhq_version": "0.9-engineering-preview",
+  "baseline_full_zip": "KeySuite_V4.29.25_KeyHQ_V0.8_FULL.zip",
+  "new_supabase_changes_required": false,
+  "production_deployed": false,
+  "production_database_modified": true,
+  "github_pushed": false,
+  "status": "Supabase backend deployed and verified; user handles GitHub frontend deployment",
+  "deployment": "DEPLOY_KEYHQ_V0.9.md",
+  "database_migration_applied": "20261024134905",
+  "supabase_project_ref": "skidqdixnnnuhvarekxp",
+  "frontend_deployed": false
+}
