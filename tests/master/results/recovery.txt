@@ -1,0 +1,74 @@
+{
+  "elevatorResults": [
+    {
+      "floor": "1",
+      "manual": true,
+      "moved": true
+    },
+    {
+      "floor": "0",
+      "manual": true,
+      "moved": true
+    },
+    {
+      "floor": "2",
+      "manual": true,
+      "moved": true
+    },
+    {
+      "floor": "0",
+      "manual": true,
+      "moved": true
+    }
+  ],
+  "rides": [
+    {
+      "id": "bicycle",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "all"
+    },
+    {
+      "id": "scooter",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "all"
+    },
+    {
+      "id": "hoverboard",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "0"
+    },
+    {
+      "id": "golfcart",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "all"
+    },
+    {
+      "id": "hoverboard_office",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "1"
+    },
+    {
+      "id": "hoverboard_lift",
+      "mounted": true,
+      "exited": true,
+      "recovered": true,
+      "floor": "2"
+    }
+  ],
+  "boardLift": {
+    "floor": "1",
+    "vehicleFloor": "1",
+    "y": 4.98,
+    "completed": true
+  }
+}

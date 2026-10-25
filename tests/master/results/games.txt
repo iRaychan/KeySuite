@@ -1,0 +1,22 @@
+{
+  "shared": {
+    "score": 2,
+    "guestScore": 2,
+    "guestMoved": true,
+    "positionError": 0.1833333333333087,
+    "inputSent": true,
+    "stateSent": true,
+    "exitManual": true
+  },
+  "swimming": {
+    "y": 0.65,
+    "pitch": -1.5707963267948966,
+    "x": 83.65,
+    "deck": [
+      42,
+      0.2,
+      51
+    ],
+    "manual": true
+  }
+}

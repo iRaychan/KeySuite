@@ -3,11 +3,14 @@
 const uid=n=>'00000000-0000-0000-0000-'+String(n).padStart(12,'0');
 const names=['You Test','Zoe','Anna','Ben','Carla','Dan','Eli','Fran','Grace','Hana','Ivan','Jess'];
 const context={userId:uid(1),companyId:'test-only',name:names[0],email:'u1@example.test',role:'user',people:names.map((name,i)=>({name,email:`u${i+1}@example.test`,deskNo:i<2?i+1:null,kind:'human',accountState:'enabled',presence:'online'})),avatarProfiles:{companyId:'test-only',userId:uid(1),rows:names.map((_,i)=>({user_id:uid(i+1),email:`u${i+1}@example.test`}))},quotations:Array.from({length:1500},(_,i)=>({id:'quote-'+i,reference:'Q-'+String(i).padStart(4,'0'),createdByEmail:'u2@example.test',customer:i===50?'Acme Marine':'Customer '+i,project:i===50?'Harbour Pump':'Project '+i,date:'2026-10-24',currency:'MYR',amount:100+i,status:'sealed'}))};
-const state={state:'ready',companyId:context.companyId,userId:context.userId,messages:[],presence:Array.from({length:12},(_,i)=>i+1).map(n=>({user_id:uid(n)})),sessions:[],unread:0,groups:[],groupMessages:[],groupCounts:[],groupsReady:true,rides:[]};window.sent=[];
+const state={state:'ready',companyId:context.companyId,userId:context.userId,messages:[],presence:Array.from({length:12},(_,i)=>i+1).map(n=>({user_id:uid(n)})),sessions:[],unread:0,groups:[],groupMessages:[],groupCounts:[],groupsReady:true,rides:[],gamesReady:true,games:[],gameInputs:[]};window.sent=[];
 function send(data){hq.contentWindow.postMessage(data,location.origin)}
 function publish(){send({type:'KEYHQ_SOCIAL_STATE',data:state})}window.fixture={context,state,publish};
 window.addEventListener('message',e=>{if(e.source!==hq.contentWindow)return;const d=e.data;window.sent.push(d);if(d.type==='KEYHQ_READY')send({type:'KEYHQ_CONTEXT',context:{...context,social:state}});if(d.type==='KEYHQ_SOCIAL'){
 let result=[];
+if(d.action==='game-configure')state.games.push({session_id:d.id,mode:d.mode,seq:0,state:{},updated_at:new Date().toISOString()});
+if(d.action==='game-input'){state.gameInputs=state.gameInputs.filter(x=>x.session_id!==d.id||x.user_id!==uid(1));state.gameInputs.push({session_id:d.id,user_id:uid(1),seq:d.seq,input:d.input,updated_at:new Date().toISOString()})}
+if(d.action==='game-state'){const g=state.games.find(g=>g.session_id===d.id);if(g)Object.assign(g,{seq:d.seq,state:d.state,updated_at:new Date().toISOString()})}
 if(d.action==='send')state.messages.push({id:d.nonce,sender_id:uid(1),recipient_id:d.recipient,body:d.body,created_at:new Date().toISOString(),read_at:null});
 if(d.action==='history')result=state.messages;
 if(d.action==='create'){const row={id:crypto.randomUUID(),activity:d.activity,host_id:uid(1),status:'waiting',participants:[{user_id:uid(1),status:'accepted'},...(d.invitees||[]).map(user_id=>({user_id,status:state.presence.some(p=>p.user_id===user_id)?'invited':'accepted'}))]};state.sessions.push(row);result=row.id;}

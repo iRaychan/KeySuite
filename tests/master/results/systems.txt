@@ -1,0 +1,48 @@
+{
+  "seating": [
+    {
+      "type": "chair",
+      "registered": 101,
+      "seated": true,
+      "hipError": 0,
+      "stand": true,
+      "manual": true
+    },
+    {
+      "type": "sofa",
+      "registered": 42,
+      "seated": true,
+      "hipError": 0,
+      "stand": true,
+      "manual": true
+    },
+    {
+      "type": "bench",
+      "registered": 24,
+      "seated": true,
+      "hipError": 0,
+      "stand": true,
+      "manual": true
+    },
+    {
+      "type": "lounger",
+      "registered": 20,
+      "seated": true,
+      "hipError": 0,
+      "stand": true,
+      "manual": true
+    }
+  ],
+  "points": 2,
+  "opacities": [
+    0.2200000137090683,
+    1
+  ],
+  "restored": [
+    1,
+    1
+  ],
+  "collision": true,
+  "cartFits": true,
+  "cartRejects": true
+}
