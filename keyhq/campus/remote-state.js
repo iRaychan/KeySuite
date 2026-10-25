@@ -1,0 +1,7 @@
+import * as T from 'three';
+export class RemoteState {
+ constructor({session,actors,post,carry}){Object.assign(this,{session,actors,post,carry});this.rows=new Map();this.last=0;this.sequence=0;}
+ sync(rows){for(const row of rows||[]){if(row.company_id!==this.session().companyId||row.user_id===this.session().userId)continue;const previous=this.rows.get(row.user_id);if(previous&&previous.session_id===row.session_id&&row.seq<=previous.seq)continue;this.rows.set(row.user_id,row);}}
+ update(dt,now){const session=this.session();for(const a of this.actors()){if(a.userId===session.userId){if(this.ready!==false&&now-this.last>250){this.last=now;this.post({type:'KEYHQ_SOCIAL',action:'avatar-state',seq:++this.sequence,pose:{position:a.rig.model.position.toArray(),yaw:a.rig.model.rotation.y,floor:a.floor,state:a.state,carry:a.carry?.mode||null}})}continue;}
+ const row=this.rows.get(a.userId);if(!row||Date.now()-Date.parse(row.updated_at)>10000||a.match||a.vehicle||a.lift)continue;const pose=row.pose;if(!Array.isArray(pose.position)||pose.position.length!==3||!pose.position.every(Number.isFinite))continue;const model=a.rig.model;model.position.lerp(new T.Vector3(...pose.position),1-Math.exp(-dt*12));const turn=Math.atan2(Math.sin(pose.yaw-model.rotation.y),Math.cos(pose.yaw-model.rotation.y));model.rotation.y+=turn*(1-Math.exp(-dt*12));a.floor=pose.floor;a.state=pose.state;a.remoteUntil=now+500;if(pose.carry)this.carry.start(a,pose.carry);else this.carry.stop(a);}}
+}

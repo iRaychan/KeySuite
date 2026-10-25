@@ -1,3 +1,26 @@
+# V4.29.26 consolidated amendment — 26 October 2026
+
+Continued from the saved master build; no restart from V4.29.25. The saved source is not a Git checkout. Changes were compared against the delivered master FULL CLEAN archive, which remains preserved.
+
+## Six amendments
+
+1. **Independent input:** only the selected, authorized local actor receives keyboard/joystick commands. Vehicle and game inputs use the same ownership boundary. Remote movement applies only to the authenticated user/session row; own and cross-company rows are ignored. Other avatars retain their own controllers.
+2. **Cutaway walls replace transparency:** wall/window and floor/ceiling geometry is divided into independently hidden instances. View obstruction and local ceiling sections are removed from rendering; collisions and shared materials remain unchanged. A short restore delay prevents visibility flicker. The previous opacity shader and wall-distance contraction are removed.
+3. **Visible carry actions:** hand-attached cigarette/filter/glowing ember, world-space dispersing smoke particles, shaped bottle with glass/liquid/label, alternating smoking/drinking arm motion, cleanup on Stop/indoor entry/sports/vehicles. Authenticated remote-state support shares carry choice through the deployed amendment migration.
+4. **Camera stability:** removed the second building-envelope distance correction and the ray-hit zoom controller. Ordinary obstruction never changes the requested orbit radius. Follow survives camera zoom/rotation controls; Free keeps independent target control. A body-clearance guard and finite-coordinate recovery protect invalid views without changing movement mode or avatar position.
+5. **Manual lifecycle:** persistent movement selection is distinguished from legitimate interaction ownership. Only the selected local actor receives stale-controller recovery. Vehicle/seat/game exits restore the chosen controller. Dialog/dropdown closure restores scene focus while typing and open dialogs retain keyboard ownership. Smart-action buttons include actor identity in their refresh key to avoid stale closures.
+6. **Rendering stability:** one camera obstruction system, stable section matrices/materials, frame-time damping retained, and graphics-context restoration preserves scene state. No scene rebuild, avatar reset or Auto→Manual workaround is used for normal recovery.
+
+## Database and delivery
+
+The existing master migration 20261025113911 remains deployed. The additional avatar-state migration was explicitly approved, deployed as **20261025164217**, and verified on 26 October 2026 (Malaysia time). Its RLS, grants and Realtime publication passed inspection; security-advisor counts did not change. The earlier approval rejection is resolved. No GitHub or frontend deployment occurred.
+
+See QA_V42926.md, REQUIREMENTS_STATUS_V42926.md, MODIFIED_FILES_V42926.md and README_UPGRADE_V42926.md.
+
+---
+
+## Preserved master implementation history
+
 # KeySuite V4.29.26 — master revision changelog
 
 ## Campus and controls

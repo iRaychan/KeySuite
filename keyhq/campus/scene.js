@@ -15,10 +15,14 @@ export function createCampus(renderer){
  const hemi=new T.HemisphereLight(0xe8f6ff,0x78836a,2.3);scene.add(hemi);
  const sun=new T.DirectionalLight(0xffe1b0,3.5);sun.position.set(-90,150,85);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-145,right:145,top:145,bottom:-145,near:1,far:450});sun.shadow.normalBias=.1;sun.shadow.bias=-.00015;sun.target.position.set(0,0,-15);scene.add(sun,sun.target);
  const materials=new Map(),batches=new Map(),unit={box:new T.BoxGeometry(1,1,1),sphere:new T.SphereGeometry(.5,12,8),cylinder:new T.CylinderGeometry(.5,.5,1,24),cone:new T.ConeGeometry(.5,1,10)};
- const workstations=[],seats=[];const lazyZones=[];const coarseSphere=new T.IcosahedronGeometry(.5,0);const matrix=new T.Matrix4(),q=new T.Quaternion(),v=new T.Vector3(),s=new T.Vector3();let group=scene;const neonLights=[],logoHalos=[];const details=[],floorGroups=[],facades=[],ceilings=[],labels=[],obstacles=Object.assign([[],[],[]],{all:[],roof:[]}),water=[];
+ const workstations=[],seats=[],cutawaySections=[];const lazyZones=[];const coarseSphere=new T.IcosahedronGeometry(.5,0);const matrix=new T.Matrix4(),q=new T.Quaternion(),v=new T.Vector3(),s=new T.Vector3();let group=scene;const neonLights=[],logoHalos=[];const details=[],floorGroups=[],facades=[],ceilings=[],labels=[],obstacles=Object.assign([[],[],[]],{all:[],roof:[]}),water=[];
  const mat=(color,opts={})=>{const key=color+JSON.stringify(opts);if(!materials.has(key))materials.set(key,new T.MeshStandardMaterial({color,roughness:.74,...opts}));return materials.get(key)};
  const white=mat('#f4f0e4'),stone=mat('#c7c7ad'),dark=mat('#263e3b'),wood=mat('#a97b4f'),grass=mat('#729259'),leaf=mat('#2f6542'),warm=mat('#f1c175',{emissive:'#e8b86b',emissiveIntensity:.45}),glass=mat('#a6c7be',{transparent:true,opacity:.14,roughness:.13,metalness:.15,depthWrite:false}),blue=mat('#174b69'),trim=mat('#526661',{metalness:.5,roughness:.32});
  function primitive(geo,x,y,z,w,h,d,m,ry=0,rz=0,rx=0){
+ let p=group,inBuilding=false;while(p){if(/^floor-|rooftop|building-exterior/.test(p.name))inBuilding=true;p=p.parent;}
+ if(geo==='box'&&inBuilding&&((h>=1.2&&Math.min(w,d)<=1.2&&Math.max(w,d)>6)||(h<.5&&w>6&&d>6))){const nx=Math.ceil(w/6),nz=Math.ceil(d/6);for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++)primitive('box',x-w/2+(ix+.5)*w/nx,y,z-d/2+(iz+.5)*d/nz,w/nx,h,d/nz,m,ry);return;}
+
+
  // Register solid geometry at pedestrian height in the same coordinate system used to draw it.
  let ancestor=group,floor='all',station=false;while(ancestor){if(ancestor.name==='workstation')station=true;if(/^floor-[0-2]$/.test(ancestor.name))floor=ancestor.name.slice(-1);if(ancestor.name==='rooftop')floor='roof';ancestor=ancestor.parent;}
  group.updateWorldMatrix(true,false);const center=new T.Vector3(x,y,z).applyMatrix4(group.matrixWorld),base=floor==='all'?.2:floor==='roof'?14.8:Number(floor)*4.8+.4;
@@ -26,7 +30,7 @@ export function createCampus(renderer){
   const angle=ry+new T.Euler().setFromQuaternion(group.getWorldQuaternion(new T.Quaternion())).y;
   obstacles[floor].push({x:center.x,z:center.z,w:Math.abs(w*Math.cos(angle))+Math.abs(d*Math.sin(angle)),d:Math.abs(w*Math.sin(angle))+Math.abs(d*Math.cos(angle))});
  }
- let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());}
+ let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[],tags:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());const building=(floor!=='all'||group.name==='building-exterior');b.tags.push(building&&geo==='box'&&((h>=1.2&&Math.min(w,d)<=1.2)||(h<.5&&w>3&&d>3))?{floor,kind:h<.5?'slab':'wall'}:null);}
  const box=(x,y,z,w,h,d,m=white,ry=0)=>{
  if(w>=59&&w<=64&&d>=37&&d<=41&&h<.5&&x===-35&&z===0){
   const left=x-w/2,right=x+w/2,back=z-d/2,front=z+d/2;
@@ -144,7 +148,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  }
  group=new T.Group();group.name='owner-interior';floorGroups[2].add(group);const ownerGroup=group;desk(-53,10,9,2);couch(-57,10,1,4);couch(-47,10,1,4);box(-52,10.6,3,3,.3,1.5,wood);box(-52,12,-.9,5,2.5,.14,dark);text('OWNER ROOM',-52,12.3,15,7);ownerGroup.visible=false;
  // Front logo and canopy belongs to the exterior, not to a fourth floor.
- group=new T.Group();scene.add(group);const exterior=group;box(-47,7.25,20.8,13,14.5,1,white);
+ group=new T.Group();scene.add(group);const exterior=group;group.name='building-exterior';box(-47,7.25,20.8,13,14.5,1,white);
  for(const y of [4.7,9.5]){box(-5,y,1,8,.25,36,white);box(-1.2,y+.7,1,.08,1.2,36,glass);for(let z=-14;z<17;z+=7)planter(-2,y+.15,z,1.3,2.5);}
  for(let f=0;f<3;f++){const glow=new T.PointLight(0xffd399,85,28,2);glow.position.set(-38,f*4.8+2.8,12);scene.add(glow);}
  box(-39,4.4,23,18,.18,9,glass);for(const x of [-47,-31])cyl(x,2.2,26,.12,4.4,trim);
@@ -204,7 +208,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  box(-35,4.25,19,4.6,.45,.5,entranceFrame);for(const x of [-37.1,-32.9])box(x,2.1,19,.17,4.1,.22,entranceFrame);text('MAIN ENTRANCE',-35,4.25,19.28,4,'#fff4d4');
  box(-35,4.05,21,6,.22,4.5,entranceFrame);box(-35,3.90,21,4,.05,1.7,entranceLight);box(-35,.10,27.5,4.5,.20,11,entranceStone);const entryRamp=new T.Mesh(new T.BoxGeometry(4.5,.1,Math.hypot(3,.2)),entranceStone);entryRamp.position.set(-35,.25,20.5);entryRamp.rotation.x=Math.atan2(.2,3);scene.add(entryRamp);
  const entryLamp=new T.PointLight('#ffedca',40,12);entryLamp.position.set(-35,3.7,20);scene.add(entryLamp);
- function flush(){for(const [parent,groups] of batches){for(const b of groups.values()){const mesh=new T.InstancedMesh(b.geo,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!b.mat.transparent;mesh.receiveShadow=true;if(b.geo===unit.sphere&&b.transforms.length>10){const low=new T.InstancedMesh(coarseSphere,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>low.setMatrixAt(i,m));low.instanceMatrix.needsUpdate=true;low.castShadow=mesh.castShadow;low.receiveShadow=true;const lod=new T.LOD();lod.addLevel(mesh,0);lod.addLevel(low,180);parent.add(lod)}else parent.add(mesh)}}batches.clear()}
+ function flush(){for(const [parent,groups] of batches){for(const b of groups.values()){const mesh=new T.InstancedMesh(b.geo,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!b.mat.transparent;mesh.receiveShadow=true;if(b.geo===unit.sphere&&b.transforms.length>10){const low=new T.InstancedMesh(coarseSphere,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>low.setMatrixAt(i,m));low.instanceMatrix.needsUpdate=true;low.castShadow=mesh.castShadow;low.receiveShadow=true;const lod=new T.LOD();lod.addLevel(mesh,0);lod.addLevel(low,180);parent.add(lod)}else parent.add(mesh);mesh.updateWorldMatrix(true,false);b.tags.forEach((tag,id)=>{if(tag){const transform=b.transforms[id].clone(),bounds=new T.Box3(new T.Vector3(-.5,-.5,-.5),new T.Vector3(.5,.5,.5)).applyMatrix4(transform).applyMatrix4(mesh.matrixWorld);cutawaySections.push({...tag,mesh,id,transform,bounds,hidden:false,clearSince:0});}})}}batches.clear()}
  flush();
  function setFloor(value,owner=false){floorGroups.forEach((g,i)=>{g.visible=value==='all'||(value==='roof')||i<=Number(value);facades[i].visible=value==='all'||value==='roof'||i<Number(value);ceilings[i].visible=facades[i].visible});roof.visible=value==='all'||value==='roof';exterior.visible=value==='all'||value==='roof';ownerGroup.visible=owner;}
  const servicePath=new T.Mesh(new T.BoxGeometry(4,.08,12),stone);servicePath.position.set(-43,.16,-28);scene.add(servicePath);const rearRamp=new T.Mesh(new T.BoxGeometry(4,.1,Math.hypot(3,.2)),stone);rearRamp.position.set(-43,.25,-20.5);rearRamp.rotation.x=-Math.atan2(.2,3);scene.add(rearRamp);
@@ -218,5 +222,5 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  const mix=k=>T.MathUtils.lerp(a[k],b[k],t);scene.background.set(a.bg).lerp(new T.Color(b.bg),t);scene.fog.color.copy(scene.background);hemi.intensity=mix('hemi');sun.intensity=mix('sun');sun.color.set(a.color).lerp(new T.Color(b.color),t);sun.position.set(-90,mix('height'),85);warm.emissiveIntensity=mix('warm');neon.emissiveIntensity=mix('neon');for(const light of neonLights)light.intensity=light.userData.nightPower*mix('lamps');for(const halo of logoHalos)halo.uniforms.strength.value=1.6*mix('lamps');glass.color.set('#a6c7be');}
 
  function buildDistant(){while(lazyZones.length){group=scene;lazyZones.shift()();}flush();}
- return {scene,workstations,seats,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
+ return {scene,workstations,seats,cutawaySections,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
 }

@@ -1,0 +1,4 @@
+// Input belongs to one local actor. Observing a colleague never grants control.
+export function ownsInput(actor,selected,session,embedded){return !!actor&&actor.id===selected&&(!embedded||!!session.userId&&actor.userId===session.userId);}
+export function interactionLock(a){return a.lift?'elevator':a.vehicle?'vehicle':a.seating?'seating':a.match?'activity':a.ridePending?'approaching vehicle':a.elevatorCall?'approaching elevator':a.path?.length?'navigation':a.followTarget?'following companion':null;}
+export function recoverManual(a){if(!a)return;if(a.gameActive&&!a.match)a.gameActive=false;if(a.controlMode==='manual'&&!interactionLock(a)){a.manual=true;a.auto=false;a.returnToWork=false;a.followTarget=null;delete a.afterPoolControl;}if(a.manual&&!a.auto&&!a.controlMode)a.controlMode='manual';}

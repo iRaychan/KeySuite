@@ -1,0 +1,57 @@
+# Files changed from the delivered master build
+
+- Modified: CHANGELOG_V42926.md
+- Modified: KEYHQ_RELEASE.json
+- Added: QA_MASTER_V42926.md
+- Modified: QA_V42926.md
+- Modified: README_UPGRADE_V42926.md
+- Added: REQUIREMENTS_STATUS_V42926.md
+- Added: SUPABASE_AMENDMENT_STATUS.json
+- Modified: index.html
+- Modified: keyhq/campus/camera-safety.js
+- Added: keyhq/campus/carry.js
+- Added: keyhq/campus/control-state.js
+- Modified: keyhq/campus/games.js
+- Modified: keyhq/campus/leisure.js
+- Modified: keyhq/campus/main.js
+- Added: keyhq/campus/remote-state.js
+- Modified: keyhq/campus/scene.js
+- Modified: keyhq/campus/seating.js
+- Modified: keyhq/campus/vehicles.js
+- Modified: keyhq/index.html
+- Modified: keyhq-social.js
+- Added: supabase/migrations/20261025162321_keyhq_v42926_avatar_state.sql
+- Modified: sw.js
+- Added: tests/amendment/browser.cjs
+- Added: tests/amendment/cutaway.cjs
+- Added: tests/amendment/database.cjs
+- Added: tests/amendment/remote.cjs
+- Added: tests/amendment/results/browser.txt
+- Added: tests/amendment/results/cutaway.txt
+- Added: tests/amendment/results/database.txt
+- Added: tests/amendment/results/game-controls.txt
+- Added: tests/amendment/results/games.txt
+- Added: tests/amendment/results/keyhq-amendment-carry-chromium.png
+- Added: tests/amendment/results/keyhq-amendment-carry-webkit.png
+- Added: tests/amendment/results/keyhq-amendment-chromium.png
+- Added: tests/amendment/results/keyhq-amendment-webkit.png
+- Added: tests/amendment/results/navigation.txt
+- Added: tests/amendment/results/physics.txt
+- Added: tests/amendment/results/recovery.txt
+- Added: tests/amendment/results/regression-browser.txt
+- Added: tests/amendment/results/remote.txt
+- Added: tests/amendment/results/stability.txt
+- Added: tests/amendment/results/systems.txt
+- Added: tests/amendment/results/touch.txt
+- Added: tests/amendment/stability.cjs
+- Modified: tests/master/browser.cjs
+- Modified: tests/master/game-controls.cjs
+- Modified: tests/master/games.cjs
+- Modified: tests/master/recovery.cjs
+- Modified: tests/master/systems.cjs
+- Modified: tests/v42926/navigation.cjs
+- Modified: tests/v42926/physics.cjs
+- Modified: tests/v42926/touch.cjs
+- Modified: tools/apply_v42926_upgrade.py
+
+Generated integrity and upgrade manifests are also refreshed. No legacy eight-floor code is restored.

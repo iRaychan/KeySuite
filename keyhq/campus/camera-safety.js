@@ -1,19 +1,28 @@
 import * as T from 'three';
-// Instance-level fading: one tree/wall can fade without changing its batched neighbours.
+// One obstruction system: section cutaways. Never changes camera distance or materials.
 export class CameraSafety {
- constructor(scene){this.scene=scene;this.ray=new T.Raycaster();this.entries=new Map();this.obstructing=[];this.next=0;}
- instance(mesh,id){let entry=this.entries.get(mesh);if(!entry){const material=mesh.material.clone(),previous=mesh.material.onBeforeCompile;material.onBeforeCompile=previous;if(mesh.isInstancedMesh){mesh.geometry=mesh.geometry.clone();const values=new Float32Array(mesh.count).fill(1);mesh.geometry.setAttribute('viewOpacity',new T.InstancedBufferAttribute(values,1));material.onBeforeCompile=shader=>{previous.call(material,shader);shader.vertexShader='attribute float viewOpacity; varying float vViewOpacity;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvViewOpacity=viewOpacity;');shader.fragmentShader='varying float vViewOpacity;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','diffuseColor.a *= vViewOpacity;\n#include <opaque_fragment>');};material.customProgramCacheKey=()=> 'keyhq-obstruction-instance';entry={mesh,values,active:new Map(),base:material.opacity};}else entry={mesh,active:new Map(),base:material.opacity};entry.originalTransparent=material.transparent;entry.originalDepthWrite=material.depthWrite;material.transparent=true;material.depthWrite=false;mesh.material=material;this.entries.set(mesh,entry)}return entry;}
+ constructor(world){this.world=world;this.sections=world.cutawaySections||[];this.ray=new T.Ray();this.hidden=[];this.zero=new T.Matrix4().makeScale(0,0,0);this.lastGood=null;this.recoveries=0;}
  update(camera,actor,dt,now,enabled=true){
- let active=this.cached||new Map();if(now>=this.next||!enabled){this.next=now+120;active=new Map();if(enabled&&actor){const origin=actor.rig.model.position.clone().add(new T.Vector3(0,1.45,0)),delta=camera.position.clone().sub(origin),distance=delta.length();this.ray.set(origin,delta.normalize());this.ray.far=distance;
- const hits=this.ray.intersectObjects(this.scene.children,true);let collision=distance;
- for(const hit of hits){let obj=hit.object,hidden=false,person=false;for(let p=obj;p;p=p.parent){if(!p.visible)hidden=true;if(p===actor.rig.model||p.userData.character)person=true}if(hidden||person||!obj.isMesh||obj.userData.noOrbit)continue;obj.geometry.computeBoundingBox();const box=obj.geometry.boundingBox.clone();if(obj.isInstancedMesh){const m=new T.Matrix4();obj.getMatrixAt(hit.instanceId,m);box.applyMatrix4(m)}const size=box.getSize(new T.Vector3());if(Math.max(size.x,size.y,size.z)<2||size.y<.5)continue;
- const entry=this.instance(obj,hit.instanceId),id=hit.instanceId??0;active.set(obj,(active.get(obj)||new Set()).add(id));
- // Solid vertical walls constrain the camera; trees and thin foliage only fade.
- if(size.y>2&&Math.min(size.x,size.z)<1&&Math.max(size.x,size.z)>3&&hit.distance>.7)collision=Math.min(collision,Math.max(.65,hit.distance-.3));
+ const p=actor?.rig.model.position,inside=p&&p.x>-66&&p.x<-4&&p.z>-20&&p.z<20&&actor.floor!=='roof';
+ const aim=p?.clone().add(new T.Vector3(0,1.35,0));const touched=new Set();this.hidden=[];
+ for(const section of this.sections){const box=section.bounds;let hide=false;
+ if(enabled&&aim){const delta=camera.position.clone().sub(aim),distance=delta.length();this.ray.set(aim,delta.normalize());const expanded=box.clone().expandByScalar(section.kind==='wall'?.45:.15),hit=this.ray.intersectBox(expanded,new T.Vector3());const obstructs=!!hit&&hit.distanceTo(aim)<distance+.1;
+ const localCeiling=inside&&section.kind==='slab'&&box.min.y>p.y+2&&box.min.y<camera.position.y+1&&box.distanceToPoint(new T.Vector3(p.x,box.min.y,p.z))<8;
+ hide=obstructs||localCeiling;
+ // Never remove the occupied floor surface or a floor below the avatar.
+ if(section.kind==='slab'&&box.max.y<=p.y+1)hide=false;
  }
- this.collision=collision;if(collision<distance){camera.position.copy(origin).addScaledVector(delta,collision);camera.lookAt(origin);camera.updateMatrixWorld()}
+ if(hide){section.clearSince=0;}else if(section.hidden&&enabled){section.clearSince ||= now;hide=now-section.clearSince<350;}
+ if(hide!==section.hidden){section.hidden=hide;section.mesh.setMatrixAt(section.id,hide?this.zero:section.transform);touched.add(section.mesh);}
+ if(hide)this.hidden.push({object:section.mesh.uuid,instance:section.id,kind:section.kind,floor:section.floor});
  }
- this.cached=active;}if(enabled&&actor&&this.collision){const origin=actor.rig.model.position.clone().add(new T.Vector3(0,1.45,0)),delta=camera.position.clone().sub(origin);if(delta.length()>this.collision){camera.position.copy(origin).addScaledVector(delta.normalize(),this.collision);camera.lookAt(origin);camera.updateMatrixWorld()}}this.obstructing=[];for(const [mesh,e]of this.entries){const ids=new Set([...e.active.keys(),...(active.get(mesh)||[])]);for(const id of ids){const goal=active.get(mesh)?.has(id)?.22:1,current=e.values?e.values[id]:(e.active.get(id)??1),value=T.MathUtils.damp(current,goal,9,dt);if(goal===1&&value>.999){e.active.delete(id);if(e.values)e.values[id]=1;}else{e.active.set(id,value);if(e.values)e.values[id]=value;}if(goal<1)this.obstructing.push({object:mesh.uuid,instance:id,opacity:value});if(!e.values)mesh.material.opacity=e.base*value;}const faded=e.active.size>0;const transparent=faded||e.originalTransparent;if(mesh.material.transparent!==transparent){mesh.material.transparent=transparent;mesh.material.needsUpdate=true}mesh.material.depthWrite=faded?false:e.originalDepthWrite;if(e.values)mesh.geometry.attributes.viewOpacity.needsUpdate=true;}
+ for(const mesh of touched){mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}
  }
- snapshot(){return this.obstructing;}
+ recover(camera,actor,viewMode){
+ // Recovery is reserved for invalid coordinates; ordinary walls use cutaways.
+ const finite=camera.position.toArray().every(Number.isFinite)&&camera.quaternion.toArray().every(Number.isFinite);
+ if(!finite&&this.lastGood){camera.position.copy(this.lastGood.position);camera.quaternion.copy(this.lastGood.quaternion);this.recoveries++;}
+ if(camera.position.toArray().every(Number.isFinite))this.lastGood={position:camera.position.clone(),quaternion:camera.quaternion.clone()};
+ }
+ snapshot(){return this.hidden;}
 }

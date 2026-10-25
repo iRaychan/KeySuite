@@ -36,8 +36,8 @@ export class Vehicles{
  for(const v of this.items){const driver=v.occupants.find(a=>a.userId===v.host&&!a.dismount),p=v.group.position;
  if(driver?.lift){v.group.position.copy(driver.rig.model.position).add(new T.Vector3(0,-v.seats[driver.seat][1],0));v.floor=driver.floor;v.speed=0;if(v.host===this.session().userId&&now-this.lastSend>200){this.lastSend=now;this.post({type:'KEYHQ_SOCIAL',action:'ride-position',id:v.session,x:p.x,z:p.z,yaw:v.group.rotation.y,speed:0,floor:v.floor,y:p.y})}continue;}
  if(driver&&v.host===this.session().userId&&!v.occupants.some(a=>a.mounting||a.dismount)){
-  const input=this.analog&&Math.abs(this.analog.y)>.08?-this.analog.y:Number(this.keys.has('ArrowUp'))-Number(this.keys.has('ArrowDown'));v.speed=T.MathUtils.damp(v.speed,input*v.spec.speed,7,dt);if(Math.abs(v.speed)<.02)v.speed=0;
-  const rotation=v.group.rotation.y+(this.analog&&Math.abs(this.analog.x)>.08?-this.analog.x:Number(this.keys.has('ArrowLeft'))-Number(this.keys.has('ArrowRight')))*dt*1.4;const next={x:p.x+Math.sin(rotation)*v.speed*dt,z:p.z+Math.cos(rotation)*v.speed*dt},radius=v.id==='golfcart'?1.8:v.id==='scooter'?1:.6;
+  const active=!this.inputEnabled||this.inputEnabled(driver),driveKeys=active?this.keys:new Set(),analog=active?this.analog:null;const input=analog&&Math.abs(analog.y)>.08?-analog.y:Number(driveKeys.has('ArrowUp'))-Number(driveKeys.has('ArrowDown'));v.speed=T.MathUtils.damp(v.speed,input*v.spec.speed,7,dt);if(Math.abs(v.speed)<.02)v.speed=0;
+  const rotation=v.group.rotation.y+(analog&&Math.abs(analog.x)>.08?-analog.x:Number(driveKeys.has('ArrowLeft'))-Number(driveKeys.has('ArrowRight')))*dt*1.4;const next={x:p.x+Math.sin(rotation)*v.speed*dt,z:p.z+Math.cos(rotation)*v.speed*dt},radius=v.id==='golfcart'?1.8:v.id==='scooter'?1:.6;
   const others=this.items.filter(o=>o!==v&&o.floor===v.floor).map(o=>({x:o.group.position.x,z:o.group.position.z,w:o.width,d:o.length}));
   const clear=clearPoint(next.x,next.z,v.floor,[],.1)&&sweepVehicle(p,next,v.group.rotation.y,rotation,v.width,v.length,[...(this.world.obstacles[v.floor]||[]),...others,...this.actors().filter(a=>!v.occupants.includes(a)&&a.floor===v.floor).map(a=>({x:a.rig.model.position.x,z:a.rig.model.position.z,w:.5,d:.5}))])&&(v.id.startsWith('hoverboard')||groundFloorAt(next.x,next.z)==='all');
   if(clear){p.x=next.x;p.z=next.z;v.group.rotation.y=rotation;if(v.id.startsWith('hoverboard')&&(v.floor==='all'||v.floor==='0')){v.floor=groundFloorAt(p.x,p.z);p.y=floorHeight(v.floor)}}else v.speed=0;
@@ -45,7 +45,7 @@ export class Vehicles{
  }else if(v.remote){p.lerp(new T.Vector3(v.remote.x,v.remote.y??floorHeight(v.remote.floor||'all'),v.remote.z),1-Math.exp(-dt*8));v.group.rotation.y=v.remote.yaw;v.speed=v.remote.speed;v.floor=v.remote.floor||'all';}
  v.group.updateWorldMatrix(true,false);for(const a of [...v.occupants]){let end;if(a.dismount)end=new T.Vector3(a.dismount.x,floorHeight(v.floor),a.dismount.z);else end=new T.Vector3(...v.seats[a.seat]).applyMatrix4(v.group.matrixWorld);
  const m=a.rig.model,d=m.position.distanceTo(end),step=dt*2;if(a.mounting||a.dismount)m.position.lerp(end,d?Math.min(1,step/d):1);else m.position.copy(end);m.rotation.set(0,v.group.rotation.y,0);a.path=[];a.floor=v.floor;a.state=a.mounting||a.dismount?'walk':v.id.startsWith('hoverboard')?'idle':v.id==='bicycle'?'cycle':'ride';
- if(d<.03){a.mounting=false;if(a.dismount){a.vehicle=null;a.dismount=null;a.state='idle';a.returnToWork=false;a.manual=a.rideControl?.manual!==false;a.auto=!!a.rideControl?.auto;if(a.auto)a.manual=false;a.rideControl=null;v.occupants=v.occupants.filter(b=>b!==a)}}
+ if(d<.03){a.mounting=false;if(a.dismount){a.vehicle=null;a.dismount=null;a.state='idle';a.returnToWork=false;a.manual=a.rideControl?.manual!==false;a.auto=!!a.rideControl?.auto;if(a.auto)a.manual=false;a.controlMode=a.auto?'auto':'manual';a.rideControl=null;v.occupants=v.occupants.filter(b=>b!==a)}}
  }
  for(const w of v.wheels)w.rotation.x+=v.speed*dt*2;
  }

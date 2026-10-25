@@ -1,12 +1,13 @@
 {
   "keysuite_version": "4.29.26",
-  "keyhq_version": "V4.29.26 master revision",
-  "status": "Implemented with documented limitations; local checks passed; live/device acceptance pending",
-  "database_migration": "20261025074942_keyhq_v42926_playable_campus.sql",
+  "keyhq_version": "V4.29.26 consolidated amendment",
+  "status": "Amendment migration deployed and verified; live/device acceptance pending",
+  "database_migration": "20261025162321_keyhq_v42926_avatar_state.sql",
   "new_migration_deployed": true,
-  "remote_migration_version": "20261025113911",
+  "remote_migration_version": "20261025164217",
   "github_pushed": false,
   "frontend_deployed": false,
   "review": "QA_V42926.md",
-  "upgrade": "README_UPGRADE_V42926.md"
+  "upgrade": "README_UPGRADE_V42926.md",
+  "previous_master_remote_version": "20261025113911"
 }
