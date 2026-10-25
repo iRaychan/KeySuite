@@ -1,0 +1,2 @@
+Keyboard charge, release, ball launch and Exit Activity passed
+Touch charge, release, ball launch and Exit Activity passed

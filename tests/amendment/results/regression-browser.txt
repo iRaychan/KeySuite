@@ -1,0 +1,2 @@
+chromium control combinations, arrows-only, upright transitions, toolbar, panels, invitations, phone modes and 4 viewport checks passed
+webkit control combinations, arrows-only, upright transitions, toolbar, panels, invitations, phone modes and 4 viewport checks passed

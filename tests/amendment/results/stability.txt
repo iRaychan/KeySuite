@@ -1,0 +1,11 @@
+{
+  "frames": 3901,
+  "largestCameraStep": 0.055417886203421064,
+  "radiusConstant": true,
+  "manualAlways": true,
+  "modePreserved": true,
+  "finite": true,
+  "noContextLoss": true,
+  "recoveries": 0,
+  "contextRecoveryPreservesState": true
+}

@@ -1,0 +1,10 @@
+{
+  "sections": 1211,
+  "allCameraPositionsUnchanged": true,
+  "maxHidden": 65,
+  "minHidden": 51,
+  "retainedCollision": true,
+  "restored": true,
+  "unchangedMaterials": true,
+  "changes": 43
+}

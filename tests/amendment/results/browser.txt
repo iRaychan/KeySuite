@@ -1,0 +1,2 @@
+chromium: independent input in 4 directions, independent Auto, stale-lock recovery, menus/views, stable radius/cutaway, all carry modes passed
+webkit: independent input in 4 directions, independent Auto, stale-lock recovery, menus/views, stable radius/cutaway, all carry modes passed
