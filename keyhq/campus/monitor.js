@@ -1,14 +1,18 @@
-// Shared by the legacy office and 3D campus; uses the existing KeySuite store/PDF workflow.
+// Only rows already authorized by the KeySuite quotation store reach this monitor.
+const states=new Map();
 export function openMonitor(station,session,post){
- let dialog=document.getElementById('quotationDialog');if(!dialog){dialog=document.createElement('dialog');dialog.id='quotationDialog';document.body.append(dialog)}
- dialog.replaceChildren();const make=(tag,text,parent=dialog)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el};
- const close=make('button','Close ×');close.onclick=()=>dialog.close();const person=station.employee;
- make('h2',person?`${person.name} · Desk ${station.deskNo}`:'Unassigned workstation').id='quotationEmployee';
- make('p','Existing KeySuite quotation history · records permitted by your current account').id='quotationAccess';
- const rows=person?(session.quotations||[]).filter(q=>String(q.createdByEmail||'').toLowerCase()===String(person.email).toLowerCase()).sort((a,b)=>String(b.date).localeCompare(String(a.date))):[];
- make('small',`${rows.length} records`).id='quotationCount';const list=make('div','');list.id='quotationList';
- if(!rows.length)make('p',session.quotationError||'No authorized records were returned.',list);
- const detail=make('section','');make('h3','Original KeySuite quotation format',detail);make('p','Select an authorized sealed quotation to view the original PDF, with its existing layout, logo, pricing and permission checks.',detail);const note=make('p','No quotation selected.',detail);note.id='selectedPdfNote';const open=make('button','View original PDF',detail);open.id='openPdfWorkflow';open.disabled=true;
- for(const q of rows){const button=make('button',`${q.reference} · ${q.customer} · ${q.currency} ${Number(q.amount).toFixed(2)} · ${q.date} · ${q.status}`,list);button.className='quotation-record';button.disabled=String(q.status).toLowerCase()!=='sealed';button.onclick=()=>{list.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));note.textContent=q.reference+' · '+q.customer;open.disabled=false;open.onclick=()=>post({type:'KEYHQ_OPEN_PDF',id:q.id})}}
- if(!dialog.open)dialog.showModal();
+ const key=String(session.companyId)+':'+session.userId+':'+station.floor+':'+station.deskNo;
+ const state=states.get(key)||{search:'',selected:null,scroll:0};states.set(key,state);
+ let dialog=document.getElementById('quotationDialog');if(!dialog){dialog=document.createElement('dialog');dialog.id='quotationDialog';document.body.append(dialog)}dialog.replaceChildren();
+ const make=(tag,text,parent=dialog)=>{const e=document.createElement(tag);e.textContent=text;parent.append(e);return e};
+ const header=make('header','');make('h2',station.employee?.name||'Desk '+String(station.deskNo).padStart(2,'0'),header).id='quotationEmployee';const close=make('button','Close ×',header);close.onclick=()=>dialog.close();
+ const body=make('div','');body.className='monitor-columns';const left=make('section','',body),right=make('section','',body);left.className='monitor-history';right.className='monitor-detail';
+ const search=make('input','',left);search.type='search';search.id='quotationSearch';search.placeholder='Search reference, customer or project';search.setAttribute('aria-label',search.placeholder);search.value=state.search;
+ const count=make('small','',left);count.id='quotationCount';const list=make('div','',left);list.id='quotationList';const detail=make('div','',right);detail.id='selectedPdfNote';const pdf=make('button','View Original PDF',right);pdf.id='openPdfWorkflow';pdf.onclick=()=>{if(state.selected)post({type:'KEYHQ_OPEN_PDF',id:state.selected})};
+ const rows=station.employee?(session.quotations||[]).filter(q=>String(q.createdByEmail||'').toLowerCase()===station.employee.email.toLowerCase()).sort((a,b)=>String(b.date).localeCompare(String(a.date))):[];
+ const describe=()=>{const q=rows.find(q=>q.id===state.selected);detail.replaceChildren();make('h3',q?.reference||'Select a quotation',detail);if(q)for(const [label,value] of Object.entries({Customer:q.customer,Project:q.project,Amount:`${q.currency} ${Number(q.amount).toLocaleString(undefined,{minimumFractionDigits:2})}`,Date:q.date,Status:q.status})) {make('small',label,detail);make('p',value||'—',detail)}else make('p','Authorized quotation history from KeySuite.',detail);pdf.disabled=!q||q.status.toLowerCase()!=='sealed';};
+ let filtered=[],scheduled=false,lastScroll=-1;const rowHeight=88;
+ const renderWindow=()=>{scheduled=false;const offset=list.scrollTop;list.replaceChildren();const first=Math.max(0,Math.floor(offset/rowHeight)-3),last=Math.min(filtered.length,first+Math.ceil((list.clientHeight||500)/rowHeight)+6);const top=make('div','',list);top.style.height=first*rowHeight+'px';for(let i=first;i<last;i++){const q=filtered[i],b=make('button','',list);b.className='quotation-record'+(state.selected===q.id?' active':'');b.style.height=rowHeight+'px';make('b',q.reference,b);make('span',q.customer+' · '+(q.project||'—'),b);make('small',`${q.currency} ${Number(q.amount).toFixed(2)} · ${q.date} · ${q.status}`,b);b.onclick=()=>{state.selected=q.id;describe();renderWindow()}}const bottom=make('div','',list);bottom.style.height=(filtered.length-last)*rowHeight+'px';if(!filtered.length)make('p',session.quotationError||'No matching authorized quotations.',list);list.scrollTop=offset;state.scroll=offset;lastScroll=list.scrollTop;};
+ const filter=()=>{state.search=search.value;const term=state.search.trim().toLowerCase();filtered=rows.filter(q=>[q.reference,q.customer,q.project].some(v=>String(v||'').toLowerCase().includes(term)));count.textContent=filtered.length+' quotations';renderWindow()};
+ list.onscroll=()=>{if(lastScroll===list.scrollTop)return;state.scroll=list.scrollTop;if(!scheduled){scheduled=true;requestAnimationFrame(renderWindow)}};search.oninput=()=>{state.scroll=0;list.scrollTop=0;filter()};const restoredScroll=state.scroll;filter();describe();if(!dialog.open)dialog.showModal();list.scrollTop=restoredScroll;renderWindow();
 }

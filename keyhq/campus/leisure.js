@@ -6,11 +6,11 @@ export const activities={
  badminton:{name:'Badminton · singles',min:2,capacity:2,x:-86,z:0,floor:'all',y:.42},
  pickleball:{name:'Pickleball · singles',min:2,capacity:2,x:-87,z:-30,floor:'all',y:.42},
  tennis:{name:'Tennis · singles',min:2,capacity:2,x:-87,z:-66,floor:'all',y:.42},
- swim:{name:'Swimming',min:1,capacity:4,x:42,z:54,floor:'all',y:.4},
+ swim:{name:'Swimming',min:1,capacity:4,x:42,z:51,floor:'all',y:.4},
  gym:{name:'Gym / fitness',min:1,capacity:3,x:-18,z:12,floor:'2',y:10},
  coffee:{name:'Coffee break',min:1,capacity:4,x:39,z:57,floor:'all',y:.3},
  smoking:{name:'Smoking / chatting',min:1,capacity:3,x:-12,z:-87,floor:'all',y:.2},
- rooftop:{name:'Rooftop relaxation',min:1,capacity:4,x:-58,z:8,floor:'roof',y:14.8},
+ rooftop:{name:'Rooftop relaxation',min:1,capacity:4,x:-58,z:10,floor:'roof',y:14.8},
  garden:{name:'Garden walking',min:1,capacity:6,x:-35,z:-67,floor:'all',y:.2}
 };
 export const online=a=>!a.demo&&a.presence==='online';
@@ -19,36 +19,36 @@ const height=f=>f==='all'?.2:f==='roof'?14.8:Number(f)*4.8+.4;
 // Explicit doors and lift stops. Ground routing never cuts through the building or pool.
 export function routeActor(a,end,world){
  const m=a.rig.model,start={x:m.position.x,z:m.position.z},from=a.floor,to=end.floor,prefix=[];if(from==='all'&&start.x>43&&start.x<87&&start.z>42&&start.z<66){prefix.push({x:44,z:start.z,y:.4,floor:'all',swim:true},{x:42,z:start.z,y:.4,floor:'all'});start.x=42;}
- const leg=(s,e,f)=>{const path=f==='roof'?[e]:groundPath(s,e,f,world.obstacles[Number(f)]||[]);return path?.map(p=>({...p,y:height(f),floor:f}))};
+ const leg=(s,e,f)=>{const path=groundPath(s,e,f,[...(world.obstacles[f]||[]),...(f==='all'?world.dynamicColliders||[]:[])]);return path?.map(p=>({...p,y:height(f),floor:f}))};
  let result=[];
  if(from===to){result=leg(start,end,to);}
  else{
   const lift={x:-35,z:-9},door={x:-35,z:24};
-  if(from==='all'){const path=leg(start,door,'all');if(!path)return false;result.push(...path,{...door,y:.4,floor:'0'},{x:-35,z:16,y:.4,floor:'0'},...leg({x:-35,z:16},lift,'0')||[])}
+  if(from==='all'){const path=leg(start,door,'all');if(!path)return false;result.push(...path,{...door,y:.4,floor:'0'},{x:-35,z:16,y:.4,floor:'0'},...(leg({x:-35,z:16},lift,'0')||[]))}
   else{const path=leg(start,lift,from);if(!path)return false;result.push(...path)}
-  if(to==='all'){result.push({...lift,y:.4,floor:'0',lift:true},...leg(lift,{x:-35,z:16},'0')||[],{...door,y:.2,floor:'all'});const path=leg(door,end,'all');if(!path)return false;result.push(...path)}
-  else{result.push({...lift,y:height(to),floor:to,lift:true});const path=leg(lift,end,to);if(!path)return false;result.push(...path)}
+  if(to==='all'){result.push({...lift,y:.4,floor:'0',liftTo:'0'},...leg(lift,{x:-35,z:16},'0')||[],{...door,y:.2,floor:'all'});const path=leg(door,end,'all');if(!path)return false;result.push(...path)}
+  else{result.push({...lift,y:height(to),floor:to,liftTo:to});const path=leg(lift,end,to);if(!path)return false;result.push(...path)}
  }
- if(!result)return false;a.path=[...prefix,...result];a.state='walk';a.auto=false;return true;
+ if(!result)return false;if(a.lift)return false;a.returning=null;a.followTarget=null;a.manual=false;if(result.length&&Number.isFinite(end.y))result[result.length-1].y=end.y;a.path=[...prefix,...result];a.state='walk';a.auto=false;return true;
 }
 export class Leisure{
  constructor({world,actors,session,toast,post}){Object.assign(this,{world,actors,session,toast,post});this.matches=new Map();this.remote=new Map();this.last=0;this.statusChanged=()=>{};}
- release(a){a.followTarget=null;if(a.match){const match=this.matches.get(a.match);if(match){match.members=match.members.filter(m=>m.id!==a.id);match.status='waiting';match.started=0;if(!match.members.length){this.matches.delete(match.id);this.disposeMatch(match)}}a.match=null}a.path=[];a.activity=null;a.rig.model.rotation.x=0;a.rig.model.position.y=height(a.floor);this.clearProps(a);}
+ release(a){a.returnToWork=online(a)&&Boolean(a.match||a.activity);a.followTarget=null;if(a.match){const match=this.matches.get(a.match);if(match){match.members=match.members.filter(m=>m.id!==a.id);match.status='waiting';match.started=0;if(!match.members.length){this.matches.delete(match.id);this.disposeMatch(match)}}a.match=null}const swimming=a.activity==='swim';a.path=swimming?[{x:44,z:a.rig.model.position.z,y:.65,floor:'all',swim:true},{x:42,z:a.rig.model.position.z,y:.2,floor:'all'}]:[];a.activity=null;if(!swimming)a.rig.model.rotation.x=0;this.clearProps(a);}
  clearProps(a){for(const p of a.props||[]){p.traverse(o=>{o.geometry?.dispose();o.material?.dispose()});p.removeFromParent()}a.props=[];}
  choose(a,key,invitees=[]){const spec=activities[key];if(!spec)return false;if(online(a)&&a.userId!==this.session().userId)return false;
  const busy=[...this.matches.values()].some(m=>m.activity===key&&m.members.length);if(busy){this.toast('This facility is reserved. Choose another activity.');return false}
  const members=[a,...invitees.filter(b=>b!==a&&Boolean(b.demo)===Boolean(a.demo))].slice(0,spec.capacity);
  if(!a.demo&&a.userId===this.session().userId){this.post({type:'KEYHQ_SOCIAL',action:'create',activity:key,invitees:members.filter(b=>b.userId&&b!==a).map(b=>b.userId)});return true}
  const id='local:'+crypto.randomUUID(),match={id,activity:key,members:[],status:'waiting',started:0,created:performance.now(),autonomous:a.auto};this.matches.set(id,match);
- for(const actor of members){if(online(actor))continue;this.join(match,actor)}this.statusChanged();return true;
+ for(const actor of members){if(online(actor))continue;this.join(match,actor)}if(!match.members.length){this.matches.delete(id);return false}this.statusChanged();return true;
  }
  join(match,a){const spec=activities[match.activity];if(match.members.length>=spec.capacity||(!match.remote&&online(a)))return false;this.release(a);const index=match.members.length;
- const offset=spec.min===2?{x:spec.x,z:spec.z+(index===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+index*1.4,z:spec.z};
+ const offset=spec.min===2?{x:spec.x,z:spec.z+(index===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+(match.activity==='swim'?0:index*1.4),z:spec.z+(match.activity==='swim'?index*.6:0)};
  if(!routeActor(a,{...spec,...offset},this.world)){this.toast('No clear route to '+spec.name);return false}
  a.activity=match.activity;a.match=match.id;a.auto=false;a.next=Infinity;match.members.push(a);a.arrived=false;a.reported=false;return true;
  }
  sync(rows){
- const live=new Set();for(const row of rows){if(!['waiting','playing'].includes(row.status))continue;live.add(row.id);let match=this.matches.get(row.id);if(!match){match={id:row.id,activity:row.activity,members:[],status:'waiting',started:0,created:performance.now(),remote:true,host:row.host_id};this.matches.set(row.id,match)}
+ const live=new Set();for(const row of rows){if(!activities[row.activity]||!['waiting','playing'].includes(row.status))continue;live.add(row.id);let match=this.matches.get(row.id);if(!match){match={id:row.id,activity:row.activity,members:[],status:'waiting',started:0,created:performance.now(),remote:true,host:row.host_id};this.matches.set(row.id,match)}
   for(const p of [...row.participants||[]].sort((a,b)=>a.user_id.localeCompare(b.user_id))){const a=this.actors().find(a=>a.userId===p.user_id);if(!a)continue;if(['accepted','arrived'].includes(p.status)&&!match.members.includes(a))this.join(match,a);if(['invited','declined','left'].includes(p.status)&&a.match===match.id)this.release(a)}
   match.server=row;
  }
@@ -56,14 +56,14 @@ export class Leisure{
  }
  update(dt,now){
  for(const match of [...this.matches.values()]){const spec=activities[match.activity];
-  for(const a of match.members){if(!a.path.length&&!a.arrived){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
+  for(const a of match.members){if(!a.path.length&&!a.lift&&!a.arrived){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
   const ready=match.members.filter(a=>a.arrived);
   const authorized=!match.remote||match.server?.status==='playing';
-  if(ready.length>=spec.min&&authorized){if(!match.started){match.started=now;match.status='playing';this.equipment(match);this.statusChanged()}if(match.ball)match.ball.visible=true;this.play(match,dt,match.remote&&match.server?.started_at?Math.max(0,(Date.now()-Date.parse(match.server.started_at))/1000):(now-match.started)/1000)}else{match.status='waiting';match.started=0;if(match.ball)match.ball.visible=false;for(const a of ready)a.state='idle'}
-  if(!match.remote&&now-match.created>15000&&ready.length<spec.min){const candidate=this.actors().find(a=>!online(a)&&!a.match&&a.auto&&Boolean(a.demo)===Boolean(match.members[0]?.demo));if(candidate)this.join(match,candidate);else if(now-match.created>35000)for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+2000}}
+  if(ready.length>=spec.min&&authorized){if(!match.started){match.started=now;match.status='playing';this.equipment(match);this.statusChanged()}if(match.ball)match.ball.visible=true;this.play(match,dt,match.activity!=='swim'&&match.remote&&match.server?.started_at?Math.max(0,(Date.now()-Date.parse(match.server.started_at))/1000):(now-match.started)/1000)}else{match.status='waiting';match.started=0;if(match.ball)match.ball.visible=false;for(const a of ready)a.state='idle'}
+  if(!match.remote&&now-match.created>15000&&match.members.length<spec.min&&!match.members.some(a=>a.path.length||a.lift)){const candidate=this.actors().find(a=>!online(a)&&!a.match&&a.auto&&Boolean(a.demo)===Boolean(match.members[0]?.demo));if(candidate)this.join(match,candidate);else if(now-match.created>35000)for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+2000}}
   if(!match.remote&&match.started&&now-match.started>45000+(match.created%30000)){for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+3000+Math.random()*5000}}
  }
- if(now-this.last>1200){this.last=now;for(const a of this.actors())if(a.auto&&!a.match&&!a.path.length&&!online(a)&&now>a.next){const choices=Object.keys(activities).filter(k=>k!==a.previousActivity&&!['smoking'].includes(k)&&![...this.matches.values()].some(m=>m.activity===k));const weights=choices.flatMap(k=>Array(['garden','coffee','basketball','swim'].includes(k)?3:1).fill(k));const key=weights[Math.floor(Math.random()*weights.length)];if(key){a.previousActivity=key;const spec=activities[key],peers=this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match&&Boolean(b.demo)===Boolean(a.demo)).slice(0,spec.min-1);if(peers.length>=spec.min-1)this.choose(a,key,peers);else a.next=now+5000}}}
+ if(now-this.last>1200){this.last=now;for(const a of this.actors())if(a.auto&&!a.match&&!a.path.length&&!a.lift&&!a.vehicle&&!a.ridePending&&!a.manual&&!online(a)&&now>a.next){const choices=Object.keys(activities).filter(k=>k!==a.previousActivity&&!['smoking'].includes(k)&&![...this.matches.values()].some(m=>m.activity===k));const weights=choices.flatMap(k=>Array(['garden','coffee','basketball','swim'].includes(k)?3:1).fill(k));const key=weights[Math.floor(Math.random()*weights.length)];if(key){a.previousActivity=key;const spec=activities[key],peers=this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match&&Boolean(b.demo)===Boolean(a.demo)).slice(0,spec.min-1);if(peers.length>=spec.min-1)this.choose(a,key,peers);else a.next=now+5000}}}
  }
  mesh(geo,color,parent,pos=[0,0,0]){const m=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:.6}));m.position.set(...pos);parent.add(m);return m}
  equipment(match){const key=match.activity;
@@ -104,9 +104,13 @@ export class Leisure{
   // Every sixth rally is missed; the visible projectile drops before a new serve.
   if(Math.floor(t/3)%6===5&&u>.8){match.ball.position.y=T.MathUtils.lerp(match.ball.position.y,.47,(u-.8)/.2);(reverse?a:b).state='idle'}
  }
- if(key==='swim')for(const [i,a] of ready.entries()){const u=Math.min(t/4,1);a.rig.model.rotation.x=-Math.PI/2*u;a.rig.model.position.set(42+u*20+Math.sin(t*.22)*Math.min(t,12),.4,48+i*3);a.rig.model.rotation.y=Math.cos(t*.22)>0?Math.PI/2:-Math.PI/2;}
+ if(key==='swim')for(const [i,a] of ready.entries()){
+  const entry=a.anchor,elapsed=Math.min(t/6,1),lane=48+i*3;
+  if(t<6){a.rig.model.position.lerpVectors(entry,new T.Vector3(47,.65,lane),elapsed);a.rig.model.rotation.x=-Math.PI/2*elapsed;a.rig.model.rotation.y=Math.PI/2}
+  else{const phase=(t-6)*.12;const x=47+34*(1-Math.cos(phase))/2;a.rig.model.position.set(x,.65,lane);a.rig.model.rotation.x=-Math.PI/2;a.rig.model.rotation.y=Math.sin(phase)>=0?Math.PI/2:-Math.PI/2;}
+ }
  if(key==='garden')for(const [i,a] of ready.entries()){a.rig.model.position.set(-35+Math.sin(t*.18+i)*.6,.2,-67+Math.sin(t*.12+i)*13);a.rig.model.rotation.y=Math.cos(t*.12+i)>0?0:Math.PI;}
  }
- disposeMatch(match){match.ball?.geometry.dispose();match.ball?.material.dispose();match.ball?.removeFromParent();match.ball=null;}
+ disposeMatch(match){match.ball?.traverse(o=>{o.geometry?.dispose();o.material?.dispose()});match.ball?.removeFromParent();match.ball=null;}
  dispose(){for(const a of this.actors())this.clearProps(a);for(const m of this.matches.values())this.disposeMatch(m);this.matches.clear()}
 }

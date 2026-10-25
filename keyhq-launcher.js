@@ -152,12 +152,12 @@
   function openQuotationPdf(id){
     const rows=window.KeySuiteQuotationStore?.getQuotes?.()||[],allowed=rows.some(row=>String(row.id)===String(id));
     if(!allowed)return;
-    close();window.KeySuiteQuotationStore?.openHistoryPdfModal?.(id);
+    window.KeySuiteQuotationStore?.openHistoryPdfModal?.(id);
   }
 
   function startRefresh(){clearInterval(refreshTimer);refreshTimer=window.setInterval(()=>{if(document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))sendContext()},REFRESH_MS)}
   function stopRefresh(){clearInterval(refreshTimer);refreshTimer=0;contextRequest++;avatarProfiles.disconnect()}
-  function open(){const node=overlay(),frame=node.querySelector('#keyhqFrame');if(!frame.getAttribute('src'))frame.src='keyhq/index.html?embedded=1&v=keyhq09';node.classList.add('keyhq-open');frame.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:true},location.origin);document.body.classList.add('keyhq-active');document.getElementById('keyhqNavButton')?.classList.add('active');setPresence('online').finally(()=>sendContext());startRefresh()}
+  function open(){const node=overlay(),frame=node.querySelector('#keyhqFrame');if(!frame.getAttribute('src'))frame.src='keyhq/index.html?embedded=1&v=keyhq010';node.classList.add('keyhq-open');frame.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:true},location.origin);document.body.classList.add('keyhq-active');document.getElementById('keyhqNavButton')?.classList.add('active');setPresence('online').finally(()=>sendContext());startRefresh()}
   function close(){document.getElementById('keyhqFrame')?.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:false},location.origin);document.getElementById('keyhqOverlay')?.classList.remove('keyhq-open');document.body.classList.remove('keyhq-active');document.getElementById('keyhqNavButton')?.classList.remove('active');stopRefresh()}
   function boot(){installStyles();document.getElementById('keyhqNavButton')?.addEventListener('click',open);window.addEventListener('message',event=>{const frame=document.getElementById('keyhqFrame');if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;if(event.data?.type==='KEYHQ_CLOSE')close();if(event.data?.type==='KEYHQ_READY')social.frameReady=true;if(event.data?.type==='KEYHQ_READY'||event.data?.type==='KEYHQ_REFRESH')sendContext();if(event.data?.type==='KEYHQ_SAVE_CONFIG')saveFloorConfig(event.data.floors);if(event.data?.type==='KEYHQ_SAVE_PEOPLE')savePeople(event.data.people);if(event.data?.type==='KEYHQ_SAVE_AVATAR')saveAvatar(event.data.avatar);if(event.data?.type==='KEYHQ_SOCIAL')social.handle(event.data);if(event.data?.type==='KEYHQ_OPEN_PDF')openQuotationPdf(event.data.id)});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))close()})}
 

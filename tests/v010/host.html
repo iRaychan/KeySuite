@@ -1,0 +1,25 @@
+<!doctype html><html><body style="margin:0"><iframe id="hq" src="../../keyhq/index.html?embedded=1" style="border:0;width:100vw;height:100vh"></iframe><script>
+// Deterministic local-only fixture. No network credentials or live database access.
+const uid=n=>'00000000-0000-0000-0000-'+String(n).padStart(12,'0');
+const names=['You Test','Zoe','Anna','Ben','Carla','Dan','Eli','Fran','Grace','Hana','Ivan','Jess'];
+const context={userId:uid(1),companyId:'test-only',name:names[0],email:'u1@example.test',role:'user',people:names.map((name,i)=>({name,email:`u${i+1}@example.test`,deskNo:i<2?i+1:null,kind:'human',accountState:'enabled',presence:i<5?'online':'offline'})),avatarProfiles:{companyId:'test-only',userId:uid(1),rows:names.map((_,i)=>({user_id:uid(i+1),email:`u${i+1}@example.test`}))},quotations:Array.from({length:1500},(_,i)=>({id:'quote-'+i,reference:'Q-'+String(i).padStart(4,'0'),createdByEmail:'u2@example.test',customer:i===50?'Acme Marine':'Customer '+i,project:i===50?'Harbour Pump':'Project '+i,date:'2026-10-24',currency:'MYR',amount:100+i,status:'sealed'}))};
+const state={state:'ready',companyId:context.companyId,userId:context.userId,messages:[],presence:[1,2,3,4,5].map(n=>({user_id:uid(n)})),sessions:[],unread:0,groups:[],groupMessages:[],groupCounts:[],groupsReady:true,rides:[]};window.sent=[];
+function send(data){hq.contentWindow.postMessage(data,location.origin)}
+function publish(){send({type:'KEYHQ_SOCIAL_STATE',data:state})}window.fixture={context,state,publish};
+window.addEventListener('message',e=>{if(e.source!==hq.contentWindow)return;const d=e.data;window.sent.push(d);if(d.type==='KEYHQ_READY')send({type:'KEYHQ_CONTEXT',context:{...context,social:state}});if(d.type==='KEYHQ_SOCIAL'){
+let result=[];
+if(d.action==='send')state.messages.push({id:d.nonce,sender_id:uid(1),recipient_id:d.recipient,body:d.body,created_at:new Date().toISOString(),read_at:null});
+if(d.action==='history')result=state.messages;
+if(d.action==='create'){const row={id:crypto.randomUUID(),activity:d.activity,host_id:uid(1),status:'waiting',participants:[{user_id:uid(1),status:'accepted'},...(d.invitees||[]).map(user_id=>({user_id,status:state.presence.some(p=>p.user_id===user_id)?'invited':'accepted'}))]};state.sessions.push(row);result=row.id;}
+if(d.action==='arrive'){const row=state.sessions.find(s=>s.id===d.id);if(row){row.participants.find(p=>p.user_id===(d.userId||uid(1))).status='arrived';if(row.participants.filter(p=>p.status==='arrived').length>=(['tennis','badminton','pickleball'].includes(row.activity)?2:1)){row.status='playing';row.started_at=new Date().toISOString()}}}
+if(d.action==='end')state.sessions=state.sessions.filter(s=>s.id!==d.id);
+if(d.action==='leave'){const r=state.sessions.find(s=>s.id===d.id);if(r)r.participants=r.participants.filter(p=>p.user_id!==uid(1))}
+if(d.action==='group-create'){result=crypto.randomUUID();state.groups.push({id:result,name:d.name,owner_id:uid(1),members:[uid(1),...d.users].map(user_id=>({user_id,last_read_at:null}))})}
+if(d.action==='group-send')state.groupMessages.push({id:d.nonce,conversation_id:d.id,sender_id:uid(1),body:d.body,created_at:new Date().toISOString()});
+if(d.action==='group-history')result=state.groupMessages.filter(m=>m.conversation_id===d.id);
+if(d.action==='group-rename')state.groups.find(g=>g.id===d.id).name=d.name;
+if(d.action==='group-add')state.groups.find(g=>g.id===d.id).members.push({user_id:d.userId});
+if(d.action==='group-remove'){const g=state.groups.find(g=>g.id===d.id);g.members=g.members.filter(m=>m.user_id!==d.userId)}
+send({type:'KEYHQ_SOCIAL_RESULT',requestId:d.requestId,action:d.action,ok:true,recipient:d.recipient,id:d.id,result});if(d.action!=='ride-position')publish();
+}});
+</script></body></html>

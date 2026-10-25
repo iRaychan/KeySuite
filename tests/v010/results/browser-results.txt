@@ -1,0 +1,14 @@
+chromium loaded
+chromium list/persistence
+chromium eyes
+chromium orbit
+chromium monitor
+chromium chat
+chromium UI, identity, list, camera, arrows-only, monitor, group-chat and responsive checks passed
+webkit loaded
+webkit list/persistence
+webkit eyes
+webkit orbit
+webkit monitor
+webkit chat
+webkit UI, identity, list, camera, arrows-only, monitor, group-chat and responsive checks passed

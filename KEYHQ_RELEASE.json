@@ -1,14 +1,15 @@
 {
   "keysuite_version": "4.29.25",
-  "keyhq_version": "0.9-engineering-preview",
-  "baseline_full_zip": "KeySuite_V4.29.25_KeyHQ_V0.8_FULL.zip",
-  "new_supabase_changes_required": false,
+  "keyhq_version": "0.10",
+  "baseline_full_zip": "KeySuite_V4.29.25_KeyHQ_V0.9_FULL.zip",
+  "baseline_sha256": "473f831a3420f0177376020bbf567e43279658310aca9d74d714d6676909133e",
+  "status": "Local tested release candidate; hosted account acceptance pending",
+  "new_supabase_changes_required": true,
+  "database_migration": "20261024184425_keyhq_v010_groups_rides.sql",
   "production_deployed": false,
-  "production_database_modified": true,
+  "production_database_modified": false,
   "github_pushed": false,
-  "status": "Supabase backend deployed and verified; user handles GitHub frontend deployment",
-  "deployment": "DEPLOY_KEYHQ_V0.9.md",
-  "database_migration_applied": "20261024134905",
-  "supabase_project_ref": "skidqdixnnnuhvarekxp",
-  "frontend_deployed": false
+  "frontend_deployed": false,
+  "review": "KEYHQ_V0.10_REVIEW.md",
+  "upgrade": "README_UPGRADE_KEYHQ_V0.10.md"
 }

@@ -1,0 +1,1 @@
+{"name":"keyhq-v010-tests","private":true,"scripts":{"database":"node database.cjs","browser":"node browser.cjs","activities":"node activities.cjs"},"devDependencies":{"@electric-sql/pglite":"0.3.14","playwright":"1.56.1"}}
