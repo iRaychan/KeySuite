@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {clearSegment,clearPoint,roadPoint} from './navigation.js';
 import {routeActor,online} from './leisure.js';
-export const vehicleSpecs={bicycle:{name:'Bicycle',capacity:1,speed:5,position:[-2,68]},scooter:{name:'Scooter',capacity:2,speed:6,position:[1,63]},hoverboard:{name:'Hoverboard',capacity:1,speed:3.5,position:[-2,58]},golfcart:{name:'Golf cart',capacity:4,speed:5,position:[1,71]}};
+export const vehicleSpecs={bicycle:{name:'Bicycle',capacity:1,speed:6.6,position:[-2,68]},scooter:{name:'Scooter',capacity:2,speed:8.8,position:[1,63]},hoverboard:{name:'Hoverboard',capacity:1,speed:4.4,position:[-2,58]},golfcart:{name:'Golf cart',capacity:4,speed:11,position:[1,71]}};
 export class Vehicles{
  constructor({world,actors,session,keys,toast,post,leisure}){Object.assign(this,{world,actors,session,keys,toast,post,leisure});this.items=[];this.lastSend=0;this.rows=[];
  for(const [id,spec] of Object.entries(vehicleSpecs)){const group=new T.Group();group.name=id;group.position.set(spec.position[0],.2,spec.position[1]);world.scene.add(group);const v={id,spec,group,occupants:[],speed:0,wheels:[],session:null};this.items.push(v);
@@ -33,14 +33,14 @@ export class Vehicles{
  this.world.dynamicColliders=this.items.map(v=>({x:v.group.position.x,z:v.group.position.z,w:v.id==='golfcart'?3.6:1.6,d:v.id==='golfcart'?3.6:1.6}));
  for(const v of this.items){const driver=v.occupants.find(a=>a.userId===v.host&&!a.dismount),p=v.group.position;
  if(driver&&v.host===this.session().userId&&!v.occupants.some(a=>a.mounting||a.dismount)){
-  const input=Number(this.keys.has('ArrowUp'))-Number(this.keys.has('ArrowDown'));v.speed=T.MathUtils.damp(v.speed,input*v.spec.speed,7,dt);if(Math.abs(v.speed)<.02)v.speed=0;
-  const rotation=v.group.rotation.y+(Number(this.keys.has('ArrowLeft'))-Number(this.keys.has('ArrowRight')))*dt*1.4;const next={x:p.x+Math.sin(rotation)*v.speed*dt,z:p.z+Math.cos(rotation)*v.speed*dt},radius=v.id==='golfcart'?1.8:v.id==='scooter'?1:.6;
+  const input=this.analog&&Math.abs(this.analog.y)>.08?-this.analog.y:Number(this.keys.has('ArrowUp'))-Number(this.keys.has('ArrowDown'));v.speed=T.MathUtils.damp(v.speed,input*v.spec.speed,7,dt);if(Math.abs(v.speed)<.02)v.speed=0;
+  const rotation=v.group.rotation.y+(this.analog&&Math.abs(this.analog.x)>.08?-this.analog.x:Number(this.keys.has('ArrowLeft'))-Number(this.keys.has('ArrowRight')))*dt*1.4;const next={x:p.x+Math.sin(rotation)*v.speed*dt,z:p.z+Math.cos(rotation)*v.speed*dt},radius=v.id==='golfcart'?1.8:v.id==='scooter'?1:.6;
   const clear=clearSegment(p,next,'all',this.world.obstacles.all,radius)&&(! (v.id==='golfcart')||roadPoint(next.x,next.z,1))&&!this.actors().some(a=>!v.occupants.includes(a)&&a.floor==='all'&&Math.hypot(next.x-a.rig.model.position.x,next.z-a.rig.model.position.z)<radius+.4)&&!this.items.some(o=>o!==v&&Math.hypot(next.x-o.group.position.x,next.z-o.group.position.z)<radius+1);
   if(clear){p.x=next.x;p.z=next.z;v.group.rotation.y=rotation}else v.speed=0;
   if(now-this.lastSend>200){this.lastSend=now;this.post({type:'KEYHQ_SOCIAL',action:'ride-position',id:v.session,x:p.x,z:p.z,yaw:v.group.rotation.y,speed:v.speed})}
  }else if(v.remote){p.lerp(new T.Vector3(v.remote.x,.2,v.remote.z),1-Math.exp(-dt*8));v.group.rotation.y=v.remote.yaw;v.speed=v.remote.speed;}
- for(const a of [...v.occupants]){let end;if(a.dismount)end=new T.Vector3(a.dismount.x,.2,a.dismount.z);else end=new T.Vector3(...v.seats[a.seat]).applyMatrix4(v.group.matrixWorld);
- const m=a.rig.model,d=m.position.distanceTo(end),step=dt*2;m.position.lerp(end,d?Math.min(1,step/d):1);m.rotation.y=v.group.rotation.y;m.rotation.x=0;a.floor='all';a.state=a.mounting||a.dismount?'walk':v.id==='hoverboard'?'idle':v.id==='bicycle'?'cycle':'ride';
+ v.group.updateWorldMatrix(true,false);for(const a of [...v.occupants]){let end;if(a.dismount)end=new T.Vector3(a.dismount.x,.2,a.dismount.z);else end=new T.Vector3(...v.seats[a.seat]).applyMatrix4(v.group.matrixWorld);
+ const m=a.rig.model,d=m.position.distanceTo(end),step=dt*2;if(a.mounting||a.dismount)m.position.lerp(end,d?Math.min(1,step/d):1);else m.position.copy(end);m.rotation.set(0,v.group.rotation.y,0);a.path=[];a.floor='all';a.state=a.mounting||a.dismount?'walk':v.id==='hoverboard'?'idle':v.id==='bicycle'?'cycle':'ride';
  if(d<.03){a.mounting=false;if(a.dismount){a.vehicle=null;a.dismount=null;a.state='idle';a.returnToWork=online(a);v.occupants=v.occupants.filter(b=>b!==a)}}
  }
  for(const w of v.wheels)w.rotation.x+=v.speed*dt*2;

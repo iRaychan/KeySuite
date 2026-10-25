@@ -1,0 +1,1 @@
+{"passed":true,"manual":true,"max":4,"maxStep":0.08500000000000085,"phases":["opening","unloading","boarding","selecting","closing","moving"],"floors":["roof","2","2","2","2"],"pending":false,"buttons":4}

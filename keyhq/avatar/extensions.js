@@ -7,18 +7,19 @@ export function decorate(model,p){
  root=new T.Group();root.name='customHead';model.getObjectByName('Head').add(root);
  const materials=new Map(),material=color=>{if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color,roughness:.72}));return materials.get(color)};
  const add=(name,pos,size,color,geo=sphere,parent=root)=>{const m=new T.Mesh(geo,material(color));m.name=name;m.position.set(...pos);m.scale.set(...size);parent.add(m);return m};
- const skin=p.skin,hair=p.hairColor;
+ const skin=p.skin,hair=p.hairColor;model.userData.gender=p.gender;
+ for(const sign of [-1,1]){add('cheek',[sign*.14,.018,.174],[.045,.028,.018],new T.Color(skin).lerp(new T.Color('#d9958a'),.24));if(p.gender==='female')add('lash',[sign*.085,.164,.24],[.049,.005,.012],hair);}
  // Base face is skinned. Features use head-local coordinates and follow every clip.
  add('customNose',[0,.065,.22],[p.nose==='broad'?.047:.033,.045,p.nose==='small'?.03:.045],skin);
  for(const sign of [-1,1]){
   add('customEar',[sign*.23,.065,0],[.038,p.ears==='large'?.07:p.ears==='small'?.043:.056,.04],skin);
   if(p.earrings!=='none'&&p.earrings)add('earring',[sign*.245,.012,.012],[.015,.02,.012],'#d8b76b');
   const spacing=p.eyeSpacing==='wide'?.095:p.eyeSpacing==='close'?.073:.085,size=p.eyeSize==='large'?1.12:p.eyeSize==='small'?.88:1;
-  add('eyeWhite',[sign*spacing,.12,.193],[.046*size,.057*size,.03],'#fffaf3');
-  add('iris',[sign*spacing,.12,.22],[.023*size,.032*size,.009],p.eyeColor||'#513a2b');
-  add('pupil',[sign*spacing,.12,.228],[.012*size,.021*size,.005],'#192329');
-  add('eyeLight',[sign*spacing-.007,.133,.233],[.007,.008,.004],'#ffffff');
-  add('eyebrow',[sign*.086,.194,.177],[.05,.011,.018],hair).rotation.z=sign*(p.brows==='arched'?.15:0);
+  add('eyeWhite',[sign*spacing,.12,.218],[.046*size,.057*size,.03],'#fffaf3');
+  add('iris',[sign*spacing,.12,.246],[.023*size,.032*size,.009],p.eyeColor||'#513a2b');
+  add('pupil',[sign*spacing,.12,.254],[.012*size,.021*size,.005],'#192329');
+  add('eyeLight',[sign*spacing-.007,.133,.26],[.007,.008,.004],'#ffffff');
+  add('eyebrow',[sign*.086,.194,.211],[.05,.011,.018],hair).rotation.z=sign*(p.brows==='arched'?.15:0);
  }
  for(let i=-3;i<=3;i++)add('smile',[i*.012,-.026+Math.pow(i/3,2)*.014,.192],[.012,p.lips==='full'?.009:.006,.01],'#9a5b50');
  if(p.facialHair&&p.facialHair!=='none'){if(['moustache','beard'].includes(p.facialHair))add('moustache',[0,-.01,.205],[.074,.016,.025],hair);if(p.facialHair!=='moustache')add('beard',[0,-.11,.14],[p.facialHair==='goatee'?.045:.12,p.facialHair==='stubble'?.028:.065,.065],hair)}
@@ -31,6 +32,7 @@ export function decorate(model,p){
  let skirt=model.getObjectByName('customDress');if(skirt){skirt.geometry.dispose();skirt.material.dispose();skirt.removeFromParent()}if(p.outfit==='dress'){skirt=new T.Mesh(new T.CylinderGeometry(.19,.28,.45,24),new T.MeshStandardMaterial({color:p.outfitColor||'#b56c6e',roughness:.65}));skirt.name='customDress';skirt.position.set(0,-.17,0);model.getObjectByName('Hips').add(skirt);}
  let watch=model.getObjectByName('customWatch');if(watch){watch.material.dispose();watch.removeFromParent()}
  if(p.watch&&p.watch!=='none')add('customWatch',[0,.04,0],[.055,.025,.05],p.watch==='gold'?'#d8b76b':'#acb7bb',box,model.getObjectByName('LHand'));
+ model.userData.faceParts=[];root.traverse(o=>{if(['eyeWhite','iris','pupil','eyeLight','smile','eyebrow'].includes(o.name)){o.userData.restScale=o.scale.clone();model.userData.faceParts.push(o)}});
  model.traverse(o=>{if(!o.isMesh)return;if(o.material.name==='shirt'&&p.outfitColor)o.material.color.set(p.outfitColor);if(o.material.name==='eyes'&&p.eyeColor)o.material.color.set(p.eyeColor);if(o.name==='glasses'&&p.accessory==='sunglasses')o.material.color.set('#14212b')});
 }
 export function installClips(rig){

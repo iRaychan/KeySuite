@@ -1,0 +1,570 @@
+{
+  "travel": [
+    {
+      "name": "basketball",
+      "planned": true,
+      "arrived": true,
+      "steps": 1924
+    },
+    {
+      "name": "football",
+      "planned": true,
+      "arrived": true,
+      "steps": 2875
+    },
+    {
+      "name": "badminton",
+      "planned": true,
+      "arrived": true,
+      "steps": 1093
+    },
+    {
+      "name": "pickleball",
+      "planned": true,
+      "arrived": true,
+      "steps": 1035
+    },
+    {
+      "name": "tennis",
+      "planned": true,
+      "arrived": true,
+      "steps": 1269
+    },
+    {
+      "name": "swim",
+      "planned": true,
+      "arrived": true,
+      "steps": 1520
+    },
+    {
+      "name": "gym",
+      "planned": true,
+      "arrived": true,
+      "steps": 747
+    },
+    {
+      "name": "coffee",
+      "planned": true,
+      "arrived": true,
+      "steps": 1541
+    },
+    {
+      "name": "smoking",
+      "planned": true,
+      "arrived": true,
+      "steps": 1293
+    },
+    {
+      "name": "rooftop",
+      "planned": true,
+      "arrived": true,
+      "steps": 817
+    },
+    {
+      "name": "garden",
+      "planned": true,
+      "arrived": true,
+      "steps": 1107
+    }
+  ],
+  "routes": [
+    {
+      "start": {
+        "x": 0,
+        "z": 32,
+        "floor": "all"
+      },
+      "routes": [
+        {
+          "name": "basketball",
+          "reachable": true,
+          "points": 5,
+          "blocked": []
+        },
+        {
+          "name": "football",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        },
+        {
+          "name": "badminton",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "pickleball",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "tennis",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "swim",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "gym",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "coffee",
+          "reachable": true,
+          "points": 5,
+          "blocked": []
+        },
+        {
+          "name": "smoking",
+          "reachable": true,
+          "points": 3,
+          "blocked": []
+        },
+        {
+          "name": "rooftop",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "garden",
+          "reachable": true,
+          "points": 3,
+          "blocked": []
+        },
+        {
+          "name": "front",
+          "reachable": true,
+          "points": 4,
+          "blocked": []
+        },
+        {
+          "name": "lobby",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "rear",
+          "reachable": true,
+          "points": 10,
+          "blocked": []
+        },
+        {
+          "name": "lift",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        }
+      ]
+    },
+    {
+      "start": {
+        "x": -35,
+        "z": 16,
+        "floor": "0"
+      },
+      "routes": [
+        {
+          "name": "basketball",
+          "reachable": true,
+          "points": 10,
+          "blocked": []
+        },
+        {
+          "name": "football",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "badminton",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "pickleball",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "tennis",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "swim",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "gym",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "coffee",
+          "reachable": true,
+          "points": 10,
+          "blocked": []
+        },
+        {
+          "name": "smoking",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "rooftop",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "garden",
+          "reachable": true,
+          "points": 5,
+          "blocked": []
+        },
+        {
+          "name": "front",
+          "reachable": true,
+          "points": 1,
+          "blocked": []
+        },
+        {
+          "name": "lobby",
+          "reachable": true,
+          "points": 1,
+          "blocked": []
+        },
+        {
+          "name": "rear",
+          "reachable": true,
+          "points": 5,
+          "blocked": []
+        },
+        {
+          "name": "lift",
+          "reachable": true,
+          "points": 3,
+          "blocked": []
+        }
+      ]
+    },
+    {
+      "start": {
+        "x": -59,
+        "z": -2.95,
+        "floor": "1"
+      },
+      "routes": [
+        {
+          "name": "basketball",
+          "reachable": true,
+          "points": 14,
+          "blocked": []
+        },
+        {
+          "name": "football",
+          "reachable": true,
+          "points": 14,
+          "blocked": []
+        },
+        {
+          "name": "badminton",
+          "reachable": true,
+          "points": 12,
+          "blocked": []
+        },
+        {
+          "name": "pickleball",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "tennis",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "swim",
+          "reachable": true,
+          "points": 13,
+          "blocked": []
+        },
+        {
+          "name": "gym",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "coffee",
+          "reachable": true,
+          "points": 14,
+          "blocked": []
+        },
+        {
+          "name": "smoking",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "rooftop",
+          "reachable": true,
+          "points": 6,
+          "blocked": []
+        },
+        {
+          "name": "garden",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        },
+        {
+          "name": "front",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        },
+        {
+          "name": "lobby",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        },
+        {
+          "name": "rear",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        },
+        {
+          "name": "lift",
+          "reachable": true,
+          "points": 5,
+          "blocked": []
+        }
+      ]
+    },
+    {
+      "start": {
+        "x": -59,
+        "z": 2.05,
+        "floor": "1"
+      },
+      "routes": [
+        {
+          "name": "basketball",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "football",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "badminton",
+          "reachable": true,
+          "points": 14,
+          "blocked": []
+        },
+        {
+          "name": "pickleball",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "tennis",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "swim",
+          "reachable": true,
+          "points": 15,
+          "blocked": []
+        },
+        {
+          "name": "gym",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "coffee",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "smoking",
+          "reachable": true,
+          "points": 10,
+          "blocked": []
+        },
+        {
+          "name": "rooftop",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "garden",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "front",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "lobby",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "rear",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "lift",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        }
+      ]
+    },
+    {
+      "start": {
+        "x": -59,
+        "z": 7.05,
+        "floor": "1"
+      },
+      "routes": [
+        {
+          "name": "basketball",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "football",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "badminton",
+          "reachable": true,
+          "points": 14,
+          "blocked": []
+        },
+        {
+          "name": "pickleball",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "tennis",
+          "reachable": true,
+          "points": 11,
+          "blocked": []
+        },
+        {
+          "name": "swim",
+          "reachable": true,
+          "points": 15,
+          "blocked": []
+        },
+        {
+          "name": "gym",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "coffee",
+          "reachable": true,
+          "points": 16,
+          "blocked": []
+        },
+        {
+          "name": "smoking",
+          "reachable": true,
+          "points": 10,
+          "blocked": []
+        },
+        {
+          "name": "rooftop",
+          "reachable": true,
+          "points": 8,
+          "blocked": []
+        },
+        {
+          "name": "garden",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "front",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "lobby",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "rear",
+          "reachable": true,
+          "points": 9,
+          "blocked": []
+        },
+        {
+          "name": "lift",
+          "reachable": true,
+          "points": 7,
+          "blocked": []
+        }
+      ]
+    }
+  ],
+  "frontPassable": true,
+  "rearPassable": true,
+  "obstacles": 1255
+}

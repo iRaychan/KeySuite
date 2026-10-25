@@ -105,15 +105,15 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
   group=new T.Group();group.name='floor-'+f;scene.add(group);floorGroups.push(group);const y=f*fh;
   box(bx,y+.18,bz,bw+2,.36,bd+2,white);box(bx,y+.38,bz,bw-.3,.06,bd-.3,mat('#d9d4bd'));const interiorGroup=group,ceiling=new T.Group();interiorGroup.add(ceiling);ceilings.push(ceiling);group=ceiling;box(bx,y+fh-.17,bz,bw+3,.34,bd+3,white);group=interiorGroup;
   const fg=new T.Group();fg.name='facade-'+f;group.add(fg);facades.push(fg);const interior=group;group=fg;
-  if(f===0){box(-51,y+2.55,19,28,4.35,.1,glass);box(-19,y+2.55,19,28,4.35,.1,glass);}else box(bx,y+2.55,19,60,4.35,.1,glass);box(-65,y+2.55,0,.1,4.35,38,glass);box(-5,y+2.55,0,.1,4.35,38,glass);box(bx,y+2.55,-19,60,4.35,.1,glass);
-  for(let x=-65;x<=-5;x+=5){box(x,y+2.55,19,.11,4.5,.18,trim);box(x,y+2.55,-19,.11,4.5,.18,trim)}
+  if(f===0){box(-51,y+2.55,19,28,4.35,.1,glass);box(-19,y+2.55,19,28,4.35,.1,glass);}else box(bx,y+2.55,19,60,4.35,.1,glass);box(-65,y+2.55,0,.1,4.35,38,glass);box(-5,y+2.55,0,.1,4.35,38,glass);if(f===0){box(-55,y+2.55,-19,20,4.35,.1,glass);box(-23,y+2.55,-19,36,4.35,.1,glass);}else box(bx,y+2.55,-19,60,4.35,.1,glass);
+  for(let x=-65;x<=-5;x+=5){if(f!==0||x!==-35)box(x,y+2.55,19,.11,4.5,.18,trim);if(f!==0||x!==-45)box(x,y+2.55,-19,.11,4.5,.18,trim)}
   for(let z=-19;z<=19;z+=4.75){box(-65,y+2.55,z,.18,4.5,.11,trim);box(-5,y+2.55,z,.18,4.5,.11,trim)}
   box(-47,y+2.5,19.2,13,4.8,.65,white);group=interior;
   for(let x=-62;x<-5;x+=14){box(x,y+2.5,17,.48,4.5,.48,white);box(x,y+2.5,-17,.48,4.5,.48,white)}
   group=ceiling;for(let x=-59;x<-8;x+=10)for(let z=-13;z<18;z+=10){box(x,y+4.4,z,3,.05,.8,warm)}group=interiorGroup;
   for(let z=-14;z<17;z+=8){planter(-62,y+.4,z,1.2,1.2);planter(-8,y+.4,z,1.2,1.2)}
   // Stair and elevator core at rear, consistent in each floor.
-  box(-37.2,y+2.4,-12,.25,4.8,4.6,white);box(-32.8,y+2.4,-12,.25,4.8,4.6,white);box(-35,y+2.4,-14.2,4.6,4.8,.25,white);obstacles[f].push({x:-37.2,z:-12,w:.25,d:4.6},{x:-32.8,z:-12,w:.25,d:4.6},{x:-35,z:-14.2,w:4.6,d:.25});text('LIFT',-35,y+3.7,-10.85,2);for(let j=0;j<12;j++)box(-43,y+j*.36,-16+j*.48,2.4,.2,.5,stone);
+  box(-37.2,y+2.4,-12,.25,4.8,4.6,white);box(-32.8,y+2.4,-12,.25,4.8,4.6,white);box(-35,y+2.4,-14.2,4.6,4.8,.25,white);obstacles[f].push({x:-37.2,z:-12,w:.25,d:4.6},{x:-32.8,z:-12,w:.25,d:4.6},{x:-35,z:-14.2,w:4.6,d:.25});text('LIFT',-35,y+3.7,-10.85,2);if(f!==0)for(let j=0;j<12;j++)box(-43,y+j*.36,-16+j*.48,2.4,.2,.5,stone);
   if(f===0){
    box(-39,y+1,10,11,1.5,2.3,white);box(-39,y+.6,11.2,10,.09,.1,warm);box(-39,y+2.5,5,14,4,.25,wood);logo(-39,y+2.8,5.2,6.5);text('RECEPTION',-39,y+.95,11.23,5);
    for(let x=-58;x<-47;x+=5){couch(x,y+.4,12);box(x,y+.7,14,2,.3,1,wood)}
@@ -202,7 +202,16 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  function flush(){for(const [parent,groups] of batches){for(const b of groups.values()){const mesh=new T.InstancedMesh(b.geo,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!b.mat.transparent;mesh.receiveShadow=true;if(b.geo===unit.sphere&&b.transforms.length>10){const low=new T.InstancedMesh(coarseSphere,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>low.setMatrixAt(i,m));low.instanceMatrix.needsUpdate=true;low.castShadow=mesh.castShadow;low.receiveShadow=true;const lod=new T.LOD();lod.addLevel(mesh,0);lod.addLevel(low,180);parent.add(lod)}else parent.add(mesh)}}batches.clear()}
  flush();
  function setFloor(value,owner=false){floorGroups.forEach((g,i)=>{g.visible=value==='all'||(value==='roof')||i<=Number(value);facades[i].visible=value==='all'||value==='roof'||i<Number(value);ceilings[i].visible=facades[i].visible});roof.visible=value==='all'||value==='roof';exterior.visible=value==='all'||value==='roof';ownerGroup.visible=owner;}
- function lighting(mode){const night=mode==='night',sunset=mode==='sunset';scene.background.set(night?'#152d40':sunset?'#d6baa2':'#b7d9e3');scene.fog.color.copy(scene.background);hemi.intensity=night?.65:sunset?1.8:2.3;sun.intensity=night?.4:sunset?2.4:3.5;sun.color.set(night?'#9fb7ec':sunset?'#ffd5a0':'#ffe1b0');sun.position.set(-90,sunset?55:150,85);warm.emissiveIntensity=night?3:1;neon.emissiveIntensity=night?4.5:sunset?2:.5;for(const light of neonLights)light.intensity=night?light.userData.nightPower:sunset?light.userData.nightPower*.3:0;for(const halo of logoHalos)halo.uniforms.strength.value=night?1.6:sunset?.5:0;glass.color.set(night?'#d5b87e':'#a6c7be');}
+ const servicePath=new T.Mesh(new T.BoxGeometry(4,.08,12),stone);servicePath.position.set(-43,.11,-25);scene.add(servicePath);
+ const doors=[];
+ for(const [x,z,width] of [[-35,19,4],[-43,-19,4]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+side*width/4,2.1,z);const pane=new T.Mesh(new T.BoxGeometry(width/2,3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.06,3.8,.12),trim);rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,leaves,open:0})}
+ function updateDoors(actors,dt){for(const d of doors){const near=actors.some(a=>(a.floor==='all'||a.floor==='0')&&Math.hypot(a.rig.model.position.x-d.x,a.rig.model.position.z-d.z)<5);d.open=T.MathUtils.damp(d.open,near?1:0,8,dt);for(const {leaf,side}of d.leaves)leaf.position.x=d.x+side*(d.width/4+d.open*d.width/2)}}
+ // Both sides of the ground entrance share the exact same wall/furniture collisions.
+ const groundObstacles=[...obstacles.all,...obstacles[0]];obstacles.all=groundObstacles;obstacles[0]=groundObstacles;
+ const palettes={night:{bg:'#152d40',hemi:.65,sun:.4,color:'#9fb7ec',height:45,warm:3,neon:4.5,lamps:1},day:{bg:'#b7d9e3',hemi:2.3,sun:3.5,color:'#ffe1b0',height:150,warm:1,neon:.5,lamps:0},sunset:{bg:'#d6baa2',hemi:1.8,sun:2.4,color:'#ffd5a0',height:55,warm:1.5,neon:2,lamps:.3}};
+ function lighting(mode,now=Date.now()){let a,b,t=0;if(mode==='live'){const h=(now/3600000+8)%24,stops=[[0,'night'],[6,'night'],[7,'sunset'],[9,'day'],[17,'day'],[18.5,'sunset'],[20,'night'],[24,'night']];let i=0;while(i<stops.length-2&&h>=stops[i+1][0])i++;a=palettes[stops[i][1]];b=palettes[stops[i+1][1]];t=(h-stops[i][0])/(stops[i+1][0]-stops[i][0]);t=t*t*(3-2*t);}else a=b=palettes[mode]||palettes.day;
+ const mix=k=>T.MathUtils.lerp(a[k],b[k],t);scene.background.set(a.bg).lerp(new T.Color(b.bg),t);scene.fog.color.copy(scene.background);hemi.intensity=mix('hemi');sun.intensity=mix('sun');sun.color.set(a.color).lerp(new T.Color(b.color),t);sun.position.set(-90,mix('height'),85);warm.emissiveIntensity=mix('warm');neon.emissiveIntensity=mix('neon');for(const light of neonLights)light.intensity=light.userData.nightPower*mix('lamps');for(const halo of logoHalos)halo.uniforms.strength.value=1.6*mix('lamps');glass.color.set('#a6c7be');}
+
  function buildDistant(){while(lazyZones.length){group=scene;lazyZones.shift()();}flush();}
- return {scene,workstations,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
+ return {scene,workstations,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
 }

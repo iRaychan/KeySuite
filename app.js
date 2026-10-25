@@ -2065,6 +2065,7 @@ $('closeRecentQuotesBottom')?.addEventListener('click',()=>$('recentQuotesDialog
 
 window.KeySuiteCustomerStore={load:loadSecureCustomers,getMode:()=>customerSyncMode,getError:()=>customerSyncError};
 window.KeySuiteQuotationStore={
+ getCustomerName:quoteDisplayCustomerName,
  load:loadSecureQuotes,
  getMode:()=>quotationSyncMode,
  getError:()=>quotationSyncError,

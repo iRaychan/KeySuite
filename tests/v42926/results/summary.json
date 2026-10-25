@@ -1,0 +1,67 @@
+[
+  {
+    "suite": "tests/v42926/navigation.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/physics.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/database.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/quotation.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/avatar-asset.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/touch.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v010/activities.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v010/elevator.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42914-motor-final-price-regression.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42922-tyre-coupling-regression.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42858-cr-pricing-regression.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42918-auth-bootstrap.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/visual.cjs",
+    "passed": true
+  },
+  {
+    "suite": "tests/v42926/browser.cjs",
+    "passed": true,
+    "browsers": [
+      "Chrome",
+      "WebKit"
+    ],
+    "auto_motion_verified": true
+  },
+  {
+    "suite": "tests/v42926/version-lock.cjs",
+    "passed": true
+  }
+]

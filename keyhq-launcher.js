@@ -94,7 +94,7 @@
 
   function quoteCreator(row={}){return String(row.createdByEmail||row.created_by_email||row.createdBy||'').trim().toLowerCase()}
   function quotationSummary(row={}){
-    return {id:String(row.id||''),reference:String(row.no||row.quotation_no||''),customer:String(row.printedCompany||row.customerName||row.customer_name||''),project:String(row.project||row.project2||''),amount:Number(row.total||0),currency:String(row.currency||row.pricingCurrency||'MYR').toUpperCase(),date:String(row.date||row.quotation_date||row.createdAt||'').slice(0,10),status:String(row.status||'saved'),createdByEmail:quoteCreator(row),documentType:String(row.documentType||'Quotation'),originalPdfAvailable:String(row.status||'').toLowerCase()==='sealed'};
+    return {id:String(row.id||''),reference:String(row.no||row.quotation_no||''),customer:String(window.KeySuiteQuotationStore?.getCustomerName?.(row)||row.printedCompany||row.customerName||row.customer_name||row.company||row.pricingCustomerSnapshot?.company||''),project:String(row.project||row.project2||''),amount:Number(row.total||0),currency:String(row.currency||row.pricingCurrency||'MYR').toUpperCase(),date:String(row.date||row.quotation_date||row.createdAt||'').slice(0,10),status:String(row.status||'saved'),createdByEmail:quoteCreator(row),documentType:String(row.documentType||'Quotation'),originalPdfAvailable:String(row.status||'').toLowerCase()==='sealed'};
   }
 
   async function loadQuotations(){

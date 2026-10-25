@@ -1,0 +1,39 @@
+{
+  "entered": true,
+  "exited": true,
+  "rearExit": true,
+  "opened": true,
+  "closed": true,
+  "half": 0.10999999999999943,
+  "full": 0.21999999999999886,
+  "released": 0,
+  "seatErrors": {
+    "bicycle": {
+      "error": 0,
+      "capacity": 1,
+      "speedRatio": 2.9999999999999996
+    },
+    "scooter": {
+      "error": 0,
+      "capacity": 2,
+      "speedRatio": 4
+    },
+    "hoverboard": {
+      "error": 0,
+      "capacity": 1,
+      "speedRatio": 2
+    },
+    "golfcart": {
+      "error": 0,
+      "capacity": 4,
+      "speedRatio": 5
+    }
+  },
+  "lighting": {
+    "0": 0.4,
+    "7": 2.4,
+    "12": 3.5,
+    "22": 0.4,
+    "18.5": 2.685185185185185
+  }
+}

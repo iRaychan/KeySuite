@@ -1,11 +1,11 @@
 import * as T from 'three';
-import {groundPath} from './state.js';
+import {groundPath,groundFloorAt} from './navigation.js';
 export const activities={
  basketball:{name:'Basketball · shooting practice',min:1,capacity:4,x:61,z:8,floor:'all',y:.42},
  football:{name:'Football · shooting practice',min:1,capacity:4,x:57,z:-98,floor:'all',y:.35},
- badminton:{name:'Badminton · singles',min:2,capacity:2,x:-86,z:0,floor:'all',y:.42},
- pickleball:{name:'Pickleball · singles',min:2,capacity:2,x:-87,z:-30,floor:'all',y:.42},
- tennis:{name:'Tennis · singles',min:2,capacity:2,x:-87,z:-66,floor:'all',y:.42},
+ badminton:{name:'Badminton · singles',min:2,capacity:2,x:-86,z:-4,courtZ:0,floor:'all',y:.42},
+ pickleball:{name:'Pickleball · singles',min:2,capacity:2,x:-87,z:-34,courtZ:-30,floor:'all',y:.42},
+ tennis:{name:'Tennis · singles',min:2,capacity:2,x:-87,z:-73,courtZ:-66,floor:'all',y:.42},
  swim:{name:'Swimming',min:1,capacity:4,x:42,z:51,floor:'all',y:.4},
  gym:{name:'Gym / fitness',min:1,capacity:3,x:-18,z:12,floor:'2',y:10},
  coffee:{name:'Coffee break',min:1,capacity:4,x:39,z:57,floor:'all',y:.3},
@@ -17,19 +17,19 @@ export const online=a=>!a.demo&&a.presence==='online';
 export const minimumReady=(activity,participants)=>participants.filter(p=>p.status==='arrived').length>=activities[activity].min;
 const height=f=>f==='all'?.2:f==='roof'?14.8:Number(f)*4.8+.4;
 // Explicit doors and lift stops. Ground routing never cuts through the building or pool.
+export function planRoute(a,end,world){
+ const start={x:a.rig.model.position.x,z:a.rig.model.position.z},from=a.floor,to=end.floor;
+ const prefix=[];if(from==='all'&&start.x>43&&start.x<87&&start.z>42&&start.z<66){prefix.push({x:44,z:start.z,y:.65,floor:'all',swim:true},{x:42,z:start.z,y:.2,floor:'all'});start.x=42;}
+ const ground=f=>f==='all'||f==='0',lift={x:-35,z:-8.6};
+ const leg=(s,e,f)=>groundPath(s,e,f,world.obstacles[f]||[])?.map(p=>({...p,y:height(f),floor:ground(f)?groundFloorAt(p.x,p.z):f}));
+ let result;
+ if(from===to||ground(from)&&ground(to))result=leg(start,end,to);
+ else {const first=leg(start,lift,from),last=leg(lift,end,to);if(!first||!last)return null;result=[...first,{...lift,y:height(ground(to)?'0':to),floor:ground(to)?'0':to,liftTo:ground(to)?'0':to},...last]}
+ if(!result)return null;if(result.length&&Number.isFinite(end.y))result[result.length-1].y=end.y;return [...prefix,...result];
+}
 export function routeActor(a,end,world){
- const m=a.rig.model,start={x:m.position.x,z:m.position.z},from=a.floor,to=end.floor,prefix=[];if(from==='all'&&start.x>43&&start.x<87&&start.z>42&&start.z<66){prefix.push({x:44,z:start.z,y:.4,floor:'all',swim:true},{x:42,z:start.z,y:.4,floor:'all'});start.x=42;}
- const leg=(s,e,f)=>{const path=groundPath(s,e,f,[...(world.obstacles[f]||[]),...(f==='all'?world.dynamicColliders||[]:[])]);return path?.map(p=>({...p,y:height(f),floor:f}))};
- let result=[];
- if(from===to){result=leg(start,end,to);}
- else{
-  const lift={x:-35,z:-9},door={x:-35,z:24};
-  if(from==='all'){const path=leg(start,door,'all');if(!path)return false;result.push(...path,{...door,y:.4,floor:'0'},{x:-35,z:16,y:.4,floor:'0'},...(leg({x:-35,z:16},lift,'0')||[]))}
-  else{const path=leg(start,lift,from);if(!path)return false;result.push(...path)}
-  if(to==='all'){result.push({...lift,y:.4,floor:'0',liftTo:'0'},...leg(lift,{x:-35,z:16},'0')||[],{...door,y:.2,floor:'all'});const path=leg(door,end,'all');if(!path)return false;result.push(...path)}
-  else{result.push({...lift,y:height(to),floor:to,liftTo:to});const path=leg(lift,end,to);if(!path)return false;result.push(...path)}
- }
- if(!result)return false;if(a.lift)return false;a.returning=null;a.followTarget=null;a.manual=false;if(result.length&&Number.isFinite(end.y))result[result.length-1].y=end.y;a.path=[...prefix,...result];a.state='walk';a.auto=false;return true;
+ if(a.lift||a.vehicle)return false;const result=planRoute(a,end,world);if(!result)return false;
+ a.returning=null;a.followTarget=null;a.manual=false;a.path=result;a.routeRetries=0;a.routeFailed=false;a.state='walk';return true;
 }
 export class Leisure{
  constructor({world,actors,session,toast,post}){Object.assign(this,{world,actors,session,toast,post});this.matches=new Map();this.remote=new Map();this.last=0;this.statusChanged=()=>{};}
@@ -43,27 +43,27 @@ export class Leisure{
  for(const actor of members){if(online(actor))continue;this.join(match,actor)}if(!match.members.length){this.matches.delete(id);return false}this.statusChanged();return true;
  }
  join(match,a){const spec=activities[match.activity];if(match.members.length>=spec.capacity||(!match.remote&&online(a)))return false;this.release(a);const index=match.members.length;
- const offset=spec.min===2?{x:spec.x,z:spec.z+(index===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+(match.activity==='swim'?0:index*1.4),z:spec.z+(match.activity==='swim'?index*.6:0)};
- if(!routeActor(a,{...spec,...offset},this.world)){this.toast('No clear route to '+spec.name);return false}
- a.activity=match.activity;a.match=match.id;a.auto=false;a.next=Infinity;match.members.push(a);a.arrived=false;a.reported=false;return true;
+ const offset=spec.min===2?{x:spec.x,z:(spec.courtZ??spec.z)+(index===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+(match.activity==='swim'?0:index*1.4),z:spec.z+(match.activity==='swim'?index*.6:0)};
+ if(!routeActor(a,{...spec,...offset},this.world)){a.routeFailures??={};if(!a.routeFailures[match.activity])this.toast('No clear route to '+spec.name);a.routeFailures[match.activity]=performance.now();a.next=performance.now()+15000;return false}
+ a.activity=match.activity;a.match=match.id;a.next=Infinity;match.members.push(a);a.arrived=false;a.reported=false;return true;
  }
  sync(rows){
  const live=new Set();for(const row of rows){if(!activities[row.activity]||!['waiting','playing'].includes(row.status))continue;live.add(row.id);let match=this.matches.get(row.id);if(!match){match={id:row.id,activity:row.activity,members:[],status:'waiting',started:0,created:performance.now(),remote:true,host:row.host_id};this.matches.set(row.id,match)}
-  for(const p of [...row.participants||[]].sort((a,b)=>a.user_id.localeCompare(b.user_id))){const a=this.actors().find(a=>a.userId===p.user_id);if(!a)continue;if(['accepted','arrived'].includes(p.status)&&!match.members.includes(a))this.join(match,a);if(['invited','declined','left'].includes(p.status)&&a.match===match.id)this.release(a)}
+  for(const p of [...row.participants||[]].sort((a,b)=>a.user_id.localeCompare(b.user_id))){const a=this.actors().find(a=>a.userId===p.user_id);if(!a)continue;if(['accepted','arrived'].includes(p.status)&&!match.members.includes(a)&&(!a.routeFailures?.[row.activity]||performance.now()-a.routeFailures[row.activity]>60000))this.join(match,a);if(['invited','declined','left'].includes(p.status)&&a.match===match.id)this.release(a)}
   match.server=row;
  }
  for(const m of [...this.matches.values()])if(m.remote&&!live.has(m.id)){for(const a of [...m.members])this.release(a);this.matches.delete(m.id);this.disposeMatch(m)}this.statusChanged();
  }
  update(dt,now){
  for(const match of [...this.matches.values()]){const spec=activities[match.activity];
-  for(const a of match.members){if(!a.path.length&&!a.lift&&!a.arrived){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
+  for(const a of [...match.members]){if(a.routeFailed){a.routeFailures??={};a.routeFailures[match.activity]=now;if(match.remote&&a.userId===this.session().userId)this.post({type:'KEYHQ_SOCIAL',action:match.host===a.userId?'end':'leave',id:match.id});this.release(a);a.auto=true;a.next=now+15000;this.toast('Route blocked by traffic. Choose another destination or try again shortly.');continue;}if(!a.path.length&&!a.lift&&!a.arrived&&!a.routeFailed){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
   const ready=match.members.filter(a=>a.arrived);
   const authorized=!match.remote||match.server?.status==='playing';
   if(ready.length>=spec.min&&authorized){if(!match.started){match.started=now;match.status='playing';this.equipment(match);this.statusChanged()}if(match.ball)match.ball.visible=true;this.play(match,dt,match.activity!=='swim'&&match.remote&&match.server?.started_at?Math.max(0,(Date.now()-Date.parse(match.server.started_at))/1000):(now-match.started)/1000)}else{match.status='waiting';match.started=0;if(match.ball)match.ball.visible=false;for(const a of ready)a.state='idle'}
   if(!match.remote&&now-match.created>15000&&match.members.length<spec.min&&!match.members.some(a=>a.path.length||a.lift)){const candidate=this.actors().find(a=>!online(a)&&!a.match&&a.auto&&Boolean(a.demo)===Boolean(match.members[0]?.demo));if(candidate)this.join(match,candidate);else if(now-match.created>35000)for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+2000}}
   if(!match.remote&&match.started&&now-match.started>45000+(match.created%30000)){for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+3000+Math.random()*5000}}
  }
- if(now-this.last>1200){this.last=now;for(const a of this.actors())if(a.auto&&!a.match&&!a.path.length&&!a.lift&&!a.vehicle&&!a.ridePending&&!a.manual&&!online(a)&&now>a.next){const choices=Object.keys(activities).filter(k=>k!==a.previousActivity&&!['smoking'].includes(k)&&![...this.matches.values()].some(m=>m.activity===k));const weights=choices.flatMap(k=>Array(['garden','coffee','basketball','swim'].includes(k)?3:1).fill(k));const key=weights[Math.floor(Math.random()*weights.length)];if(key){a.previousActivity=key;const spec=activities[key],peers=this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match&&Boolean(b.demo)===Boolean(a.demo)).slice(0,spec.min-1);if(peers.length>=spec.min-1)this.choose(a,key,peers);else a.next=now+5000}}}
+ if(now-this.last>1200){this.last=now;for(const a of this.actors())if(a.auto&&!a.match&&!a.path.length&&!a.lift&&!a.vehicle&&!a.ridePending&&!a.manual&&(!online(a)||a.userId===this.session().userId)&&now>a.next){a.next=now+8000;const choices=Object.keys(activities).filter(k=>(activities[k].min===1||this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match).length>=activities[k].min-1)&&k!==a.previousActivity&&(!a.routeFailures?.[k]||now-a.routeFailures[k]>60000)&&planRoute(a,activities[k],this.world)&&!['smoking'].includes(k)&&![...this.matches.values()].some(m=>m.activity===k));const weights=choices.flatMap(k=>Array(['garden','coffee','basketball','swim'].includes(k)?3:1).fill(k));const key=weights[Math.floor(Math.random()*weights.length)];if(key){a.previousActivity=key;const spec=activities[key],peers=this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match&&Boolean(b.demo)===Boolean(a.demo)).slice(0,spec.min-1);if(peers.length>=spec.min-1)this.choose(a,key,peers);else a.next=now+5000}}}
  }
  mesh(geo,color,parent,pos=[0,0,0]){const m=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:.6}));m.position.set(...pos);parent.add(m);return m}
  equipment(match){const key=match.activity;

@@ -1,0 +1,137 @@
+{
+  "results": {
+    "badminton": {
+      "status": "playing",
+      "members": 2,
+      "ballMoved": true,
+      "props": true,
+      "maxStep": 0.11000000000000519,
+      "phases": [
+        "idle",
+        "moving",
+        "opening",
+        "unloading",
+        "boarding",
+        "closing"
+      ],
+      "positions": [
+        [
+          -85.8357533503203,
+          0.42,
+          -4
+        ],
+        [
+          -86.1642466496797,
+          0.42,
+          4
+        ]
+      ]
+    },
+    "pickleball": {
+      "status": "playing",
+      "members": 2,
+      "ballMoved": true,
+      "props": true,
+      "maxStep": 0.11000000000000582,
+      "phases": [
+        "idle",
+        "moving",
+        "opening",
+        "unloading",
+        "boarding",
+        "closing"
+      ],
+      "positions": [
+        [
+          -86.8357533503203,
+          0.42,
+          -34
+        ],
+        [
+          -87.1642466496797,
+          0.42,
+          -26
+        ]
+      ]
+    },
+    "tennis": {
+      "status": "playing",
+      "members": 2,
+      "ballMoved": true,
+      "props": true,
+      "maxStep": 0.1100000000000033,
+      "phases": [
+        "idle",
+        "moving",
+        "opening",
+        "unloading",
+        "boarding",
+        "closing"
+      ],
+      "positions": [
+        [
+          -86.8357533503203,
+          0.42,
+          -73
+        ],
+        [
+          -87.1642466496797,
+          0.42,
+          -59
+        ]
+      ]
+    },
+    "swim": {
+      "status": "playing",
+      "members": 1,
+      "ballMoved": false,
+      "props": false,
+      "maxStep": 0.11000000000000455,
+      "phases": [
+        "idle",
+        "moving",
+        "opening",
+        "unloading",
+        "boarding",
+        "closing"
+      ],
+      "positions": [
+        [
+          48.921086312752166,
+          0.65,
+          48
+        ]
+      ],
+      "exited": true
+    },
+    "bicycle": {
+      "count": 1,
+      "moved": 8.247088532240284,
+      "exit": true,
+      "exited": true,
+      "speed": 0
+    },
+    "scooter": {
+      "count": 2,
+      "moved": 5.993932506975781,
+      "exit": true,
+      "exited": true,
+      "speed": 0
+    },
+    "hoverboard": {
+      "count": 1,
+      "moved": 5.497245620388938,
+      "exit": true,
+      "exited": true,
+      "speed": 0
+    },
+    "golfcart": {
+      "count": 4,
+      "moved": 7.931715267289178,
+      "exit": true,
+      "exited": true,
+      "speed": 0
+    }
+  },
+  "notes": []
+}
