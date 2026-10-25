@@ -9,7 +9,7 @@ export class Elevator{
  this.canvas=document.createElement('canvas');this.canvas.width=256;this.canvas.height=64;this.texture=new T.CanvasTexture(this.canvas);const sign=new T.Mesh(new T.PlaneGeometry(2,.5),new T.MeshBasicMaterial({map:this.texture}));sign.position.set(0,2.65,-1.62);this.cabin.add(sign);this.label();
  }
  label(){const c=this.canvas.getContext('2d');c.fillStyle='#102b31';c.fillRect(0,0,256,64);c.fillStyle='#b8ffd5';c.font='28px sans-serif';c.textAlign='center';c.fillText(`${this.floor==='roof'?'R':Number(this.floor)+1}  ·  ${this.phase}`,128,43);this.texture.needsUpdate=true;}
- request(actor,to){if(to!==null&&!this.stops.includes(to)||actor.lift)return;actor.lift={from:actor.floor,to,stage:'waiting'};this.queue.push(actor);}
+ request(actor,to){if(to!==null&&!this.stops.includes(to)||actor.lift)return;actor.lift={from:actor.floor==='all'?'0':actor.floor,to,stage:'waiting',manual:actor.resumeManual??actor.manual,auto:actor.auto};delete actor.resumeManual;this.queue.push(actor);}
  call(f){if(this.stops.includes(f)&&!this.calls.includes(f))this.calls.push(f)}
  moveActor(a,x,y,z,dt){const p=a.rig.model.position,d=Math.hypot(x-p.x,y-p.y,z-p.z),k=d?Math.min(1,dt*1.5/d):1;if(Math.hypot(x-p.x,z-p.z)>.01)a.rig.model.rotation.y=Math.atan2(x-p.x,z-p.z);p.lerp(new T.Vector3(x,y,z),k);a.state=d>.02?'walk':'idle';return d<.03;}
  update(dt){
@@ -24,7 +24,7 @@ export class Elevator{
   }else if(this.phase==='opening'){
    this.door=Math.min(1,this.door+dt*1.3);if(this.door===1)set('unloading');
   }else if(this.phase==='unloading'){
-   const leaving=this.passengers.filter(a=>a.lift.to===this.floor);for(const a of leaving){a.lift.stage='exiting';if(this.moveActor(a,-35+(a.lift.slot%2? .7:-.7),this.y,-8.6,dt)){a.lift=null;this.passengers=this.passengers.filter(b=>b!==a)}}if(!leaving.length)set('boarding');
+   const leaving=this.passengers.filter(a=>a.lift.to===this.floor);for(const a of leaving){a.lift.stage='exiting';if(this.moveActor(a,-35+(a.lift.slot%2? .7:-.7),this.y,-8.6,dt)){const saved=a.lift;if(saved.manual&&!a.path.length){a.manual=true;a.auto=false;a.state='idle';}a.lift=null;this.passengers=this.passengers.filter(b=>b!==a)}}if(!leaving.length)set('boarding');
   }else if(this.phase==='boarding'){
    const waiting=this.queue.filter(a=>a.lift.from===this.floor).slice(0,this.capacity-this.passengers.length);
    for(const a of waiting){this.queue=this.queue.filter(b=>b!==a);a.lift.slot=[0,1,2,3].find(i=>!this.passengers.some(b=>b.lift.slot===i));a.lift.stage='boarding';this.passengers.push(a)}

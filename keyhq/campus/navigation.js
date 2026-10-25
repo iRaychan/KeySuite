@@ -27,3 +27,5 @@ export function groundPath(start,end,floor,obstacles=[]){
  const reduced=[];let current=start;for(let i=0;i<path.length;){let j=i;while(j+1<path.length&&clearSegment(current,path[j+1],floor,obstacles))j++;reduced.push(path[j]);current=path[j];i=j+1}return reduced;
 }
 export function roadPoint(x,z,r=1){return (x>-104+r&&x<8-r&&z>36+r&&z<80-r)||(x>14+r&&x<22-r&&z>7+r&&z<99-r)||(x>10+r&&x<18-r&&z>-111+r&&z<39-r)||(x>-67+r&&x<-1-r&&z>24.5+r&&z<35.5-r)||(x>14+r&&x<101-r&&z>29.5+r&&z<36.5-r);}
+
+export function walkingHeight(x,z,floor){if(floor==='all'||floor==='0'){if(Math.abs(x+35)<2.25&&z>=19&&z<=22)return .4-(z-19)/15;if(Math.abs(x+43)<2&&z<=-19&&z>=-22)return .4+(z+19)/15;}return floorHeight(floor);}

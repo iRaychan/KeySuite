@@ -1,11 +1,11 @@
 import * as T from 'three';
 import {groundPath,groundFloorAt} from './navigation.js';
 export const activities={
- basketball:{name:'Basketball · shooting practice',min:1,capacity:4,x:61,z:8,floor:'all',y:.42},
+ basketball:{name:'Basketball · shooting practice',min:1,capacity:10,x:61,z:8,floor:'all',y:.42},
  football:{name:'Football · shooting practice',min:1,capacity:4,x:57,z:-98,floor:'all',y:.35},
- badminton:{name:'Badminton · singles',min:2,capacity:2,x:-86,z:-4,courtZ:0,floor:'all',y:.42},
- pickleball:{name:'Pickleball · singles',min:2,capacity:2,x:-87,z:-34,courtZ:-30,floor:'all',y:.42},
- tennis:{name:'Tennis · singles',min:2,capacity:2,x:-87,z:-73,courtZ:-66,floor:'all',y:.42},
+ badminton:{name:'Badminton · singles',min:1,capacity:4,x:-86,z:-4,courtZ:0,floor:'all',y:.42},
+ pickleball:{name:'Pickleball · singles',min:1,capacity:4,x:-87,z:-34,courtZ:-30,floor:'all',y:.42},
+ tennis:{name:'Tennis · singles',min:1,capacity:4,x:-87,z:-73,courtZ:-66,floor:'all',y:.42},
  swim:{name:'Swimming',min:1,capacity:4,x:42,z:51,floor:'all',y:.4},
  gym:{name:'Gym / fitness',min:1,capacity:3,x:-18,z:12,floor:'2',y:10},
  coffee:{name:'Coffee break',min:1,capacity:4,x:39,z:57,floor:'all',y:.3},
@@ -33,7 +33,7 @@ export function routeActor(a,end,world){
 }
 export class Leisure{
  constructor({world,actors,session,toast,post}){Object.assign(this,{world,actors,session,toast,post});this.matches=new Map();this.remote=new Map();this.last=0;this.statusChanged=()=>{};}
- release(a){a.returnToWork=online(a)&&Boolean(a.match||a.activity);a.followTarget=null;if(a.match){const match=this.matches.get(a.match);if(match){match.members=match.members.filter(m=>m.id!==a.id);match.status='waiting';match.started=0;if(!match.members.length){this.matches.delete(match.id);this.disposeMatch(match)}}a.match=null}const swimming=a.activity==='swim';a.path=swimming?[{x:44,z:a.rig.model.position.z,y:.65,floor:'all',swim:true},{x:42,z:a.rig.model.position.z,y:.2,floor:'all'}]:[];a.activity=null;if(!swimming)a.rig.model.rotation.x=0;this.clearProps(a);}
+ release(a){const played=a.gameActive;if(a.seating&&!this.seating?.stand(a))return false;a.gameActive=false;a.returnToWork=online(a)&&Boolean(a.match||a.activity);a.followTarget=null;if(a.match){const match=this.matches.get(a.match);if(match){match.members=match.members.filter(m=>m.id!==a.id);match.status='waiting';match.started=0;if(!match.members.length){this.matches.delete(match.id);this.disposeMatch(match)}}a.match=null}const swimming=a.activity==='swim';a.path=swimming?[{x:44,z:a.rig.model.position.z,y:.65,floor:'all',swim:true},{x:42,z:a.rig.model.position.z,y:.2,floor:'all'}]:[];a.activity=null;if(!swimming)a.rig.model.rotation.x=0;this.clearProps(a);if(played){a.returnToWork=false;a.path=[];a.manual=true;a.auto=false;a.state='idle';a.rig.model.rotation.x=0;if(swimming)a.rig.model.position.set(42,.2,51)}}
  clearProps(a){for(const p of a.props||[]){p.traverse(o=>{o.geometry?.dispose();o.material?.dispose()});p.removeFromParent()}a.props=[];}
  choose(a,key,invitees=[]){const spec=activities[key];if(!spec)return false;if(online(a)&&a.userId!==this.session().userId)return false;
  const busy=[...this.matches.values()].some(m=>m.activity===key&&m.members.length);if(busy){this.toast('This facility is reserved. Choose another activity.');return false}
@@ -42,8 +42,8 @@ export class Leisure{
  const id='local:'+crypto.randomUUID(),match={id,activity:key,members:[],status:'waiting',started:0,created:performance.now(),autonomous:a.auto};this.matches.set(id,match);
  for(const actor of members){if(online(actor))continue;this.join(match,actor)}if(!match.members.length){this.matches.delete(id);return false}this.statusChanged();return true;
  }
- join(match,a){const spec=activities[match.activity];if(match.members.length>=spec.capacity||(!match.remote&&online(a)))return false;this.release(a);const index=match.members.length;
- const offset=spec.min===2?{x:spec.x,z:(spec.courtZ??spec.z)+(index===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+(match.activity==='swim'?0:index*1.4),z:spec.z+(match.activity==='swim'?index*.6:0)};
+ join(match,a){const spec=activities[match.activity];if(match.members.length>=spec.capacity||(!match.remote&&online(a)))return false;if(this.release(a)===false)return false;const index=match.members.length;
+ const offset=spec.courtZ!==undefined?{x:spec.x+(index>=2?1:-1),z:spec.courtZ+(index%2===0?-1:1)*(match.activity==='tennis'?7:4)}:{x:spec.x+(match.activity==='swim'?0:index*1.4),z:spec.z+(match.activity==='swim'?index*.6:0)};
  if(!routeActor(a,{...spec,...offset},this.world)){a.routeFailures??={};if(!a.routeFailures[match.activity])this.toast('No clear route to '+spec.name);a.routeFailures[match.activity]=performance.now();a.next=performance.now()+15000;return false}
  a.activity=match.activity;a.match=match.id;a.next=Infinity;match.members.push(a);a.arrived=false;a.reported=false;return true;
  }
@@ -56,12 +56,12 @@ export class Leisure{
  }
  update(dt,now){
  for(const match of [...this.matches.values()]){const spec=activities[match.activity];
-  for(const a of [...match.members]){if(a.routeFailed){a.routeFailures??={};a.routeFailures[match.activity]=now;if(match.remote&&a.userId===this.session().userId)this.post({type:'KEYHQ_SOCIAL',action:match.host===a.userId?'end':'leave',id:match.id});this.release(a);a.auto=true;a.next=now+15000;this.toast('Route blocked by traffic. Choose another destination or try again shortly.');continue;}if(!a.path.length&&!a.lift&&!a.arrived&&!a.routeFailed){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
+  for(const a of [...match.members]){if(a.routeFailed){a.routeFailures??={};a.routeFailures[match.activity]=now;if(match.remote&&a.userId===this.session().userId)this.post({type:'KEYHQ_SOCIAL',action:match.host===a.userId?'end':'leave',id:match.id});this.release(a);a.manual=false;a.auto=true;a.next=now+15000;this.toast('Route blocked by traffic. Choose another destination or try again shortly.');continue;}if(!a.path.length&&!a.lift&&!a.arrived&&!a.routeFailed){a.arrived=true;a.state='idle';if(match.remote&&!a.reported&&(a.userId===this.session().userId||!online(a)&&match.host===this.session().userId)){a.reported=true;this.post({type:'KEYHQ_SOCIAL',action:'arrive',id:match.id,userId:a.userId})}}}
   const ready=match.members.filter(a=>a.arrived);
   const authorized=!match.remote||match.server?.status==='playing';
-  if(ready.length>=spec.min&&authorized){if(!match.started){match.started=now;match.status='playing';this.equipment(match);this.statusChanged()}if(match.ball)match.ball.visible=true;this.play(match,dt,match.activity!=='swim'&&match.remote&&match.server?.started_at?Math.max(0,(Date.now()-Date.parse(match.server.started_at))/1000):(now-match.started)/1000)}else{match.status='waiting';match.started=0;if(match.ball)match.ball.visible=false;for(const a of ready)a.state='idle'}
-  if(!match.remote&&now-match.created>15000&&match.members.length<spec.min&&!match.members.some(a=>a.path.length||a.lift)){const candidate=this.actors().find(a=>!online(a)&&!a.match&&a.auto&&Boolean(a.demo)===Boolean(match.members[0]?.demo));if(candidate)this.join(match,candidate);else if(now-match.created>35000)for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+2000}}
-  if(!match.remote&&match.started&&now-match.started>45000+(match.created%30000)){for(const a of [...match.members]){this.release(a);a.auto=true;a.next=now+3000+Math.random()*5000}}
+  if(ready.length>=spec.min&&authorized){if(!match.started){match.started=now;match.status='playing';this.equipment(match);this.statusChanged()}if(match.ball)match.ball.visible=true;this.play(match,dt,match.activity!=='swim'&&match.remote&&match.server?.started_at?Math.max(0,(Date.now()-Date.parse(match.server.started_at))/1000):(now-match.started)/1000)}else{this.games?.updateMatch(match,dt,now);match.status='waiting';match.started=0;if(match.ball)match.ball.visible=false;for(const a of ready)a.state='idle'}
+  if(!match.remote&&now-match.created>15000&&match.members.length<spec.min&&!match.members.some(a=>a.path.length||a.lift)){const candidate=this.actors().find(a=>!online(a)&&!a.match&&a.auto&&Boolean(a.demo)===Boolean(match.members[0]?.demo));if(candidate)this.join(match,candidate);else if(now-match.created>35000)for(const a of [...match.members]){this.release(a);a.manual=false;a.auto=true;a.next=now+2000}}
+  if(!match.remote&&match.started&&now-match.started>45000+(match.created%30000)){for(const a of [...match.members]){this.release(a);a.manual=false;a.auto=true;a.next=now+3000+Math.random()*5000}}
  }
  if(now-this.last>1200){this.last=now;for(const a of this.actors())if(a.auto&&!a.match&&!a.path.length&&!a.lift&&!a.vehicle&&!a.ridePending&&!a.manual&&(!online(a)||a.userId===this.session().userId)&&now>a.next){a.next=now+8000;const choices=Object.keys(activities).filter(k=>(activities[k].min===1||this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match).length>=activities[k].min-1)&&k!==a.previousActivity&&(!a.routeFailures?.[k]||now-a.routeFailures[k]>60000)&&planRoute(a,activities[k],this.world)&&!['smoking'].includes(k)&&![...this.matches.values()].some(m=>m.activity===k));const weights=choices.flatMap(k=>Array(['garden','coffee','basketball','swim'].includes(k)?3:1).fill(k));const key=weights[Math.floor(Math.random()*weights.length)];if(key){a.previousActivity=key;const spec=activities[key],peers=this.actors().filter(b=>b!==a&&!online(b)&&b.auto&&!b.match&&Boolean(b.demo)===Boolean(a.demo)).slice(0,spec.min-1);if(peers.length>=spec.min-1)this.choose(a,key,peers);else a.next=now+5000}}}
  }
@@ -72,7 +72,7 @@ export class Leisure{
  if(['coffee','smoking','gym'].includes(key)){const prop=new T.Group();hand.add(prop);a.props=[prop];if(key==='coffee')this.mesh(new T.CylinderGeometry(.05,.04,.10,12),'#f5eee4',prop);if(key==='smoking')this.mesh(new T.CylinderGeometry(.006,.006,.08,6),'#eee5c9',prop);if(key==='gym'){this.mesh(new T.CylinderGeometry(.018,.018,.25,8),'#bec6c4',prop).rotation.z=Math.PI/2;for(const side of [-1,1])this.mesh(new T.BoxGeometry(.08,.16,.16),'#253335',prop,[side*.12,0,0])}}
  }
  }
- play(match,dt,t){const spec=activities[match.activity],key=match.activity,ready=match.members.filter(a=>a.arrived),m=ready[0];if(!m)return;
+ play(match,dt,t){if(['coffee','rooftop'].includes(match.activity)){for(const a of match.members.filter(a=>a.arrived&&!a.seating)){if(!this.seating?.sit(a,match.activity==='rooftop'?'sofa':'chair'))a.state='idle';}return;}if(this.games?.updateMatch(match,dt,performance.now())){if(match.ball)match.ball.visible=false;return;}const spec=activities[match.activity],key=match.activity,ready=match.members.filter(a=>a.arrived),m=ready[0];if(!m)return;
  for(const [i,a] of ready.entries()){a.state=['rooftop'].includes(key)?'relax':key==='garden'?'walk':key;a.rig.model.visible=a.rig.model.visible;}
  const pos=m.rig.model.position;
  if(key==='basketball'){
