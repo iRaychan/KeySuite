@@ -1,13 +1,13 @@
 {
-  "version": "5.00.02",
-  "baseline": "5.00.01",
-  "upgrade_supported_from": "5.00.01",
+  "version": "5.00.03",
+  "baseline": "5.00.02",
+  "upgrade_supported_from": "5.00.02",
   "changes": [
-    "Preserve completed System Capacity and Head in Quotation and PDF",
-    "Keep quotation PDF V1.08 layout unchanged"
+    "Preserve completed System Capacity and Head through save, seal, secure-history reload and PDF",
+    "Restore compact capacity-line spacing while keeping quotation PDF V1.08 otherwise unchanged"
   ],
   "new_database_migration_required": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "No database or Edge Function deployment is required. See README_UPGRADE_V50002.md."
+  "notes": "No database or Edge Function deployment is required. See README_UPGRADE_V50003.md."
 }

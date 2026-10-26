@@ -242,6 +242,8 @@ function parseCapacityDescription(value){
 }
 function stripCapacityDescription(value){return String(value||'').replace(/\r\n?/g,'\n').split('\n').filter(row=>!/^Capacity:/i.test(row.trim())).join('\n').replace(/^\n+|\n+$/g,'')}
 function capacityStateFromData(data={},description=''){
+ const nested=data?.pumpsetData?.capacity||data?.pumpset_data?.capacity||{};
+ data={...nested,...data};
  const parsed=parseCapacityDescription(description)||{};
  return {displayCapacity:Boolean(data.displayCapacity??data.display_capacity??parsed.displayCapacity??false),capacityValue:String(data.capacityValue??data.capacity_value??parsed.capacityValue??''),capacityUnit:normalizeCapacityUnit(data.capacityUnit??data.capacity_unit??parsed.capacityUnit),headValue:String(data.headValue??data.head_value??parsed.headValue??''),headUnit:normalizeHeadUnit(data.headUnit??data.head_unit??parsed.headUnit)};
 }
@@ -274,7 +276,8 @@ function quotePricingSource(data={}){const raw=data?.pricingSource||data?.pricin
 function quoteProductFamily(data={}){const source=quotePricingSource(data),raw=data.productFamily||data.product_family||source.product_family||source.family||'';return String(raw||'').toUpperCase()}
 function isCouplingQuoteData(data={}){return !!(data.isCoupling||data.couplingData||quoteProductFamily(data)==='COUPLING'||/(?:Pin & Bush|Tyre|Flexible)?\s*Coupling Model:/i.test(String(data.model||'')))}
 function isMotorQuoteData(data={}){return !!(data.isMotor||data.motorData||quoteProductFamily(data)==='MOTOR'||/^(?:B\.G\.Reich\s+)?Motor Model:/i.test(String(data.model||'').trim()))}
-function isNoCapacityQuoteData(data={}){const family=quoteProductFamily(data),text=`${data.model||''} ${data.description||''}`;return ['MOTOR','KEYPLC','GWS','MANIFOLD','BASEPLATE','KEYLAB'].includes(family)||/\b(?:Control Panel|KeyPLC|Manifold|Tank)\b/i.test(text)}
+function hasCompleteQuoteCapacity(data={}){const state=capacityStateFromData(data,data.description||'');return !!(state.displayCapacity&&String(state.capacityValue).trim()&&String(state.headValue).trim())}
+function isNoCapacityQuoteData(data={}){if(hasCompleteQuoteCapacity(data))return false;const family=quoteProductFamily(data),text=`${data.model||''} ${data.description||''}`;return ['MOTOR','KEYPLC','GWS','MANIFOLD','BASEPLATE','KEYLAB'].includes(family)||/\b(?:Control Panel|KeyPLC|Manifold|Tank)\b/i.test(text)}
 function couplingQuoteType(data={}){const raw=String(data?.couplingData?.resolvedType||data?.couplingData?.type||data?.couplingData?.selectionMode||'').toLowerCase(),model=String(data?.model||'');return raw==='tyre'||/^\s*Tyre\s+Coupling Model:/i.test(model)?'Tyre':'Pin & Bush'}
 function normalizeCouplingQuoteModel(value,data={}){const raw=stripQuotationBrand(value),code=(raw.match(/Coupling Model:\s*(.+)$/i)?.[1]||raw).trim();return code?`${couplingQuoteType(data)} Coupling Model: ${code}`:raw}
 function stripStandaloneCouplingType(value){return String(value||'').replace(/\r\n?/g,'\n').split('\n').filter(row=>!/^(?:Pin\s*&\s*Bush|Tyre|Flexible)\s+Coupling$/i.test(row.trim())).join('\n').replace(/^\n+|\n+$/g,'')}

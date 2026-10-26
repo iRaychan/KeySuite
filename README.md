@@ -1,6 +1,6 @@
-# KeySuite V5.00.02
+# KeySuite V5.00.03
 
-Built from the supplied V5.00.01 FULL CLEAN source archive. See [release notes](CHANGELOG_V50002.md) and [deployment / upgrade instructions](README_UPGRADE_V50002.md). The System → Quotation handoff now retains a completed Capacity and Head duty point. The quotation PDF V1.08 layout remains unchanged. No database changes are required. Earlier documentation below is retained as historical reference.
+Built from the local V5.00.02 source. See [release notes](CHANGELOG_V50003.md), [deployment / upgrade instructions](README_UPGRADE_V50003.md), and [QA evidence](QA_V50003.md). Completed System Capacity and Head now survive save, seal, secure-history reload and PDF export. The quotation PDF V1.08 layout remains frozen apart from restoring its existing compact capacity-line spacing. No database changes are required. Earlier documentation below is retained as historical reference.
 
 # KeySuite V5.00.00
 
