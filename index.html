@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.05</title>
-  <script>window.KEYSUITE_VERSION='5.00.05';window.KEYSUITE_BUILD='V5.00.05';</script>
+  <title>KeySuite V5.00.06</title>
+  <script>window.KEYSUITE_VERSION='5.00.06';window.KEYSUITE_BUILD='V5.00.06';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.05</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.06</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,7 +658,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.05</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.06</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.05</div>
+    <div class="suite-version">KeySuite V5.00.06</div>
   </aside>
 
   <main>
@@ -1454,6 +1454,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="bfiPriceList">
           <span class="module-icon">BFI</span><h2>BFI / BFIN</h2><p>Maintain separate SS304 and SS316 1 Phase / 3 Phase source prices and rarity by currency.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="bgfPriceList">
+          <span class="module-icon">BGF</span><h2>BGF</h2><p>Maintain BGF 350M, BGF 350E, BGF 400 and BGF 500 source prices from the supplied BGF reference.</p><span class="module-order">OPEN PRICE LIST</span>
+        </button>
         <button type="button" class="key-module-card" data-go="esPriceList">
           <span class="module-icon">ES</span><h2>End Suction</h2><p>Maintain B.G.Reich ES source prices by material construction.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
@@ -1650,6 +1653,18 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       </details>
       <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="bfiPriceListHeading" style="margin:0">BFI Models · Stainless Steel 304</h2><div id="bfiPriceListCount" class="muted"></div></div><div class="bfi-price-list-tools"><div class="bfi-material-setting"><label for="bfiPriceMaterial">Material</label><select id="bfiPriceMaterial"><option value="SS304">SS304</option><option value="SS316">SS316</option></select></div><div class="price-list-search"><label>Search Model</label><input id="bfiPriceSearch" placeholder="Example: BFI 12-5"></div></div></div>
       <div class="table-wrap" style="max-height:680px"><table class="pricelist-table"><thead><tr><th>Model</th><th>1 Phase · Price / Rarity</th><th>3 Phase · Price / Rarity</th><th></th></tr></thead><tbody id="bfiPriceRows"></tbody></table></div></div>
+    </section>
+
+
+    <section id="bgfPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>BGF Price List</h1><div class="muted">Four approved BGF close-coupled pump models from 004 - BGF - 261026 - V1.0.xlsx.</div></div></div>
+      <div id="bgfPriceListMessage" class="auth-message"></div>
+      <div class="card">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">BGF Models</h2><div id="bgfPriceListCount" class="muted"></div></div><div class="price-list-search"><label for="bgfPriceCurrency">Currency</label><select id="bgfPriceCurrency"><option value="MYR">MYR</option><option value="USD">USD</option><option value="RMB">RMB</option></select></div></div>
+        <div class="pricelist-note" style="margin-bottom:12px">The supplied workbook contains no positive price values. Blank source prices remain 0 and unavailable for quotation until an Owner enters and saves them.</div>
+        <div class="table-wrap" style="max-height:680px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Drive</th><th>Suction × Discharge</th><th>Stages</th><th>Source Price</th><th>Rarity</th><th></th></tr></thead><tbody id="bgfPriceRows"></tbody></table></div>
+      </div>
     </section>
 
 
@@ -2074,7 +2089,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50001"></script>
+<script src="app.js?v=50006"></script>
 <script src="pricing.js?v=42917"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=42824"></script>
@@ -2085,6 +2100,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=42872"></script>
 <script src="bfi-v42302.js?v=42821"></script>
+<script src="bgf-v50006.js?v=50006"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=42821"></script>
 <script src="motor.js?v=409"></script>
@@ -2148,11 +2164,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="company-settings.js?v=41707"></script>
 <script src="keyai.js?v=41300"></script>
 <script src="keylab.js?v=41406"></script>
-<script src="auth.js?v=42922"></script>
+<script src="auth.js?v=50006"></script>
 <script src="keyhq/avatar-sync.js?v=42925"></script>
 <script src="keyhq-social.js?v=50001"></script>
 <script src="keyhq-launcher.js?v=50001"></script>
-<script type="module" src="keyhq-messenger.js?v=50001"></script>
+<script type="module" src="keyhq-messenger.js?v=50006"></script>
 <script src="v388-dashboard-keycore.js?v=42821"></script>
 <script src="universe.js?v=42872"></script>
 <script src="v41223-selection-recovery.js?v=41300"></script>
@@ -2191,7 +2207,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50005-version-lock.js?v=50005"></script>
+<script src="v50006-version-lock.js?v=50006"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

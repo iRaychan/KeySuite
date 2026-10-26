@@ -1,15 +1,15 @@
 {
-  "version": "5.00.05",
-  "baseline": "5.00.04",
-  "upgrade_supported_from": "5.00.04",
+  "version": "5.00.06",
+  "baseline": "5.00.05",
+  "upgrade_supported_from": "5.00.05",
   "changes": [
-    "KS-09 aligns System and Pumpset capacity/head units with Dashboard and preserves converted values through quotation/PDF",
-    "KS-10 safely widens System/Pumpset PDF description continuation rows across otherwise empty price columns",
-    "KS-11 changes generated manifold wording to Isolation valves and Strainer"
+    "Adds the BGF 350M, BGF 350E, BGF 400 and BGF 500 Price List models from the supplied BGF workbook without inventing blank prices",
+    "Makes the authenticated KeyHQ Messenger available beside Important Note on every KeySuite page while reusing the isolated private/group Realtime service",
+    "Auto-expands quotation descriptions from a five-row minimum to the complete wrapped content height while preserving c/w tab alignment"
   ],
-  "new_database_migration_required": false,
-  "production_migration_applied": false,
+  "new_database_migration_required": true,
+  "production_migration_applied": true,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "Targeted frontend-only release. No Supabase migration, Edge Function deployment, GitHub push or hosting deployment was performed. See README_UPGRADE_V50005.md."
+  "notes": "Targeted release with one additive BGF Price List migration and one RLS performance migration. Both were deployed and verified on the production KeySuite Supabase project on 2026-10-27. No Edge Function deployment, GitHub push or frontend hosting deployment was performed. See README_UPGRADE_V50006.md."
 }

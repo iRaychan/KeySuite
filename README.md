@@ -1,6 +1,6 @@
-# KeySuite V5.00.05
+# KeySuite V5.00.06
 
-Built from the user-supplied V5.00.04 FULL CLEAN package. See [release notes](CHANGELOG_V50005.md), [deployment / upgrade instructions](README_UPGRADE_V50005.md), and [change/test report](CHANGE_TEST_REPORT_V50005.md). V5.00.05 implements KS-09..11 while preserving KS-01..08, KeyHQ, Supabase, pricing/BOM behavior and the PDF V1.08 presentation outside the targeted description-width correction. No production deployment or Supabase change is included. Earlier documentation below is retained as historical reference.
+Built from the user-supplied V5.00.05 FULL CLEAN package. See [release notes](CHANGELOG_V50006.md), [deployment / upgrade instructions](README_UPGRADE_V50006.md), and [change/test report](CHANGE_TEST_REPORT_V50006.md). V5.00.06 adds the approved BGF Price List models, exposes the existing authenticated Messenger beside Important Note on every page, and auto-expands quotation descriptions while preserving all other V5.00.05 behavior. Earlier documentation below is retained as historical reference.
 
 # KeySuite V5.00.00
 

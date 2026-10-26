@@ -5,6 +5,7 @@ const button=document.getElementById('dashboardMessengerButton');
 const count=document.getElementById('dashboardMessengerCount');
 
 if(launcher?.social&&button&&count){
+  const pageButtons=[];
   const mount=document.createElement('div');
   mount.className='top-actions keysuite-chat-mount';
   mount.hidden=true;
@@ -13,7 +14,7 @@ if(launcher?.social&&button&&count){
   const style=document.createElement('style');
   style.id='keysuiteMessengerStyle';
   style.textContent=`
-    .dashboard-tool-count{position:absolute;right:-5px;top:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#b42318;color:#fff;font-size:10px;font-weight:800;box-shadow:0 0 0 2px #fff}.dashboard-tool-count[hidden]{display:none}
+    .dashboard-tool-count{position:absolute;right:-5px;top:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#b42318;color:#fff;font-size:10px;font-weight:800;box-shadow:0 0 0 2px #fff}.dashboard-tool-count[hidden]{display:none}.page-messenger-access{flex:0 0 auto}
     #phoneChat.phone{box-sizing:border-box;width:390px;height:min(760px,90dvh);max-width:94vw;padding:18px 12px 12px;border:7px solid #8e9caa;border-radius:42px;background:#f2f5f1;box-shadow:0 0 0 2px #263340,0 24px 90px #0007;color:#183c36;overflow:visible}
     #phoneChat.phone:not([open]){display:none}#phoneChat.phone[open]{position:fixed;inset:auto 24px 24px auto;margin:0;z-index:7000}#phoneChat.phone::backdrop{background:#17342e44;backdrop-filter:blur(5px)}
     #phoneChat .island{width:100px;height:22px;border-radius:18px;background:#172d2d;margin:0 auto 18px}#phoneChat header{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}#phoneChat header strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#phoneChat header button{padding:6px 9px}
@@ -38,11 +39,21 @@ if(launcher?.social&&button&&count){
 
   function updateButton(data={}){
     const unread=Number(data.unread||0)+(data.groupCounts||[]).reduce((total,row)=>total+Number(row.unread||0),0);
-    count.textContent=unread>99?'99+':String(unread);
-    count.hidden=!unread;
-    button.classList.toggle('has-unread',unread>0);
-    button.setAttribute('aria-label',unread?`Open KeyHQ Messenger Chat, ${unread} unread`:'Open KeyHQ Messenger Chat');
-    button.title=unread?`KeyHQ Messenger Chat · ${unread} unread`:'KeyHQ Messenger Chat';
+    for(const current of [button,...pageButtons]){
+      const badge=current.querySelector('.dashboard-tool-count');if(badge){badge.textContent=unread>99?'99+':String(unread);badge.hidden=!unread}
+      current.classList.toggle('has-unread',unread>0);current.setAttribute('aria-label',unread?`Open KeyHQ Messenger Chat, ${unread} unread`:'Open KeyHQ Messenger Chat');current.title=unread?`KeyHQ Messenger Chat · ${unread} unread`:'KeyHQ Messenger Chat';
+    }
+  }
+
+  function pageMessengerButton(){
+    const current=button.cloneNode(true);current.removeAttribute('id');current.classList.add('page-messenger-access','no-print');const badge=current.querySelector('.dashboard-tool-count');if(badge){badge.removeAttribute('id');badge.hidden=true;badge.textContent='0'}current.addEventListener('click',openMessenger);pageButtons.push(current);return current;
+  }
+
+  function installPageMessengerButtons(){
+    document.querySelectorAll('section.page').forEach(page=>{
+      if(page.id==='dashboard'||page.querySelector('.page-messenger-access'))return;
+      const note=page.querySelector(':scope > .page-title-row .page-note-access,:scope > .quote-head .page-note-access');if(note)note.insertAdjacentElement('afterend',pageMessengerButton());
+    });
   }
 
   async function refreshContext(force=false){
@@ -56,12 +67,14 @@ if(launcher?.social&&button&&count){
     if(event.type==='KEYHQ_SOCIAL_STATE'){chat.update(event.data);updateButton(event.data)}
     else if(event.type==='KEYHQ_SOCIAL_RESULT')chat.result(event);
   });
-  button.addEventListener('click',async()=>{
+  async function openMessenger(){
     await refreshContext();
     if(!chat.phone.open)chat.phone.show();
     chat.render();
-  });
+  }
+  button.addEventListener('click',openMessenger);
+  installPageMessengerButtons();
   updateButton(launcher.social.data);
   refreshContext();
-  window.KeySuiteMessenger={open:()=>button.click(),refresh:()=>refreshContext(true),chat};
+  window.KeySuiteMessenger={open:openMessenger,refresh:()=>refreshContext(true),chat};
 }
