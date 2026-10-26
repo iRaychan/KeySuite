@@ -1,6 +1,6 @@
-# KeySuite V5.00.01
+# KeySuite V5.00.02
 
-Built exclusively from the supplied V5.00.00 source archive. See [release notes](CHANGELOG_V50001.md), [test report](QA_V50001.md), and [deployment / upgrade instructions](README_UPGRADE_V50001.md). No production changes or new database migrations. Earlier documentation below is retained as historical reference.
+Built from the supplied V5.00.01 FULL CLEAN source archive. See [release notes](CHANGELOG_V50002.md) and [deployment / upgrade instructions](README_UPGRADE_V50002.md). The System → Quotation handoff now retains a completed Capacity and Head duty point. The quotation PDF V1.08 layout remains unchanged. No database changes are required. Earlier documentation below is retained as historical reference.
 
 # KeySuite V5.00.00
 

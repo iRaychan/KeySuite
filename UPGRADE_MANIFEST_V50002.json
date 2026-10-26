@@ -1,0 +1,87 @@
+{
+  "deletions": [],
+  "files": {
+    "CHANGELOG_V50002.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "0ea906b35f7c449886c6d60c092357cad49b1266139beb53dca376a42d62c5d2"
+    },
+    "INTEGRITY_V50002.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "d779548038c17c51df42dbd856829bb34ca4da0bd85979ab54d20825316d5767"
+    },
+    "KEYHQ_RELEASE.json": {
+      "baseline_sha256": [
+        "7f7004b75b331a6167ba98b66c0b2b2e7b5d0d54ca417aa0316e41b84b58900a"
+      ],
+      "required_in_baseline": true,
+      "sha256": "c0b06c3465679af0cf0a2518b687dc60ec25cdc911e5976d4530e880d07e25db"
+    },
+    "README.md": {
+      "baseline_sha256": [
+        "7fb99fc13ebe90d20b6ee39cd110b1680b1797b325aa84ffd302ec3962c6ed33"
+      ],
+      "required_in_baseline": true,
+      "sha256": "fa933c40ee32d8fc9cf2c05a0d435a598d5af44a7c980871fdf317278735b70f"
+    },
+    "README_UPGRADE_V50002.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "680f73b155beb69cc7b1e872236056942f14744b25e087fcd9ae47a7d7cd70ed"
+    },
+    "RELEASE.json": {
+      "baseline_sha256": [
+        "a64c8d59654449d254e307f42c8bd1d2ac2c6433f540a061eb899652718183a4"
+      ],
+      "required_in_baseline": true,
+      "sha256": "f488a7ed8efe33872b16e603b232b584fd38335f41f1ced5671e325431f8523e"
+    },
+    "VERSION.txt": {
+      "baseline_sha256": [
+        "b95e73c755b7fc202086b90d87690e6fd502b26af04b1cd738b7cb1fdef58ed7"
+      ],
+      "required_in_baseline": true,
+      "sha256": "4c5c36fe840f514048478462a891c13f6b8c1303602baa13b870fc89ffdcb8e1"
+    },
+    "assembly.js": {
+      "baseline_sha256": [
+        "bbface0fe523bc0b436900d46125ac26f0f3c2a0c77a5df89a6008f7ccb8e461"
+      ],
+      "required_in_baseline": true,
+      "sha256": "1d775d0c397b146b8417369d4cba5cd4e853967dbabe225b34919b79c017a82d"
+    },
+    "index.html": {
+      "baseline_sha256": [
+        "919549317f3210160f0b36ccf64dd418788a8b2af9d405a24d0d2f0b310d77da"
+      ],
+      "required_in_baseline": true,
+      "sha256": "d6546133b45cc91b5505ec52ba56414abe1c909d2104d28f24c430ffe661e9e3"
+    },
+    "sw.js": {
+      "baseline_sha256": [
+        "bf2d134c68e5d52e78a4c11b2b016b0bcc634a04bc9d33d62f36ce03442bed58"
+      ],
+      "required_in_baseline": true,
+      "sha256": "11ab20ed6c21d34df948c08773ba3bb5ed103660dc5088fc1c8de52dfd7ac0ca"
+    },
+    "tools/apply_v50002_upgrade.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "882f6a38d6588326b12dd8771854f909cabe0cc812aa206bf6c853aff215fa87"
+    },
+    "tools/build_v50002_release.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "70107e0638c81d13756bc7fc10624f692f0a6c1f176fcb10f57ca6a820bf0734"
+    },
+    "v50002-version-lock.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "f296627d558e2b9c7c40769cda382fb17980ce0adf31838a97fef3edc5795e7f"
+    }
+  },
+  "from": "5.00.01",
+  "new_database_migration_required": false,
+  "to": "5.00.02"
+}

@@ -1,13 +1,13 @@
 {
-  "keysuite_version": "5.00.01",
+  "keysuite_version": "5.00.02",
   "keyhq_version": "V5.00.01 campus corrections and diving",
   "status": "Source and local verification complete; live multi-account/device acceptance pending",
   "database_migration": "20261025162321_keyhq_v42926_avatar_state.sql",
   "new_migration_deployed": false,
   "github_pushed": false,
   "frontend_deployed": false,
-  "review": "QA_V50001.md",
-  "upgrade": "README_UPGRADE_V50001.md",
+  "review": "README_UPGRADE_V50002.md",
+  "upgrade": "README_UPGRADE_V50002.md",
   "new_database_migration_required": false,
   "production_deployed": false,
   "changes": [
@@ -15,6 +15,7 @@
     "Panel shelter and manifold add-ons retained in assembly consolidation",
     "Stable controls, autonomous activities and avatar pass-through",
     "Rider-only bicycle updates; beer and swimming motion",
-    "Solo leisure, explicit invitations, and shared three-level diving staircase"
+    "Solo leisure, explicit invitations, and shared three-level diving staircase",
+    "System-to-Quotation Capacity and Head preservation; PDF V1.08 layout retained"
   ]
 }

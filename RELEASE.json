@@ -1,16 +1,13 @@
 {
-  "version": "5.00.01",
-  "baseline": "5.00.00",
-  "upgrade_supported_from": "5.00.00",
+  "version": "5.00.02",
+  "baseline": "5.00.01",
+  "upgrade_supported_from": "5.00.01",
   "changes": [
-    "CHC C4 IE2 and C6 IE3 included motor baselines",
-    "Panel shelter and manifold add-ons retained in assembly consolidation",
-    "Stable controls, autonomous activities and avatar pass-through",
-    "Rider-only bicycle updates; beer and swimming motion",
-    "Solo leisure, explicit invitations, and shared three-level diving staircase"
+    "Preserve completed System Capacity and Head in Quotation and PDF",
+    "Keep quotation PDF V1.08 layout unchanged"
   ],
   "new_database_migration_required": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "No new V5 database migration is required. The existing deployed KeyHQ V0.9/V0.10 and V4.29.26 migrations remain authoritative. See README_UPGRADE_V50001.md."
+  "notes": "No database or Edge Function deployment is required. See README_UPGRADE_V50002.md."
 }
