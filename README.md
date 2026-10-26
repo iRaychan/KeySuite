@@ -1,6 +1,6 @@
-# KeySuite V4.29.26
+# KeySuite V5.00.00
 
-Current release: see [changes](CHANGELOG_V42926.md), [upgrade instructions](README_UPGRADE_V42926.md) and [QA evidence](QA_V42926.md). Earlier version documents below and elsewhere are historical.
+Current release: see [changes](CHANGELOG_V50000.md), [upgrade instructions](README_UPGRADE_V50000.md) and [QA evidence](QA_V50000.md). V5.00.00 preserves the complete V4.29.26 master and its six approved amendments, then adds the shared KeyHQ Messenger phone to KeySuite. Earlier version documents below and elsewhere are historical.
 
 # KeySuite V4.29.25 Full
 

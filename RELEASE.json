@@ -1,15 +1,15 @@
 {
-  "version": "4.29.25",
-  "baseline": "4.29.24",
-  "upgrade_supported_from": "4.29.24",
+  "version": "5.00.00",
+  "baseline": "4.29.26",
+  "upgrade_supported_from": "4.29.26",
   "changes": [
-    "shared 3D avatars for existing enabled workforce",
-    "self-only Auth UUID appearance profiles and Realtime refresh",
-    "single responsive workforce/location sidebar",
-    "preserved original building, logo, PDF and business modules"
+    "preserved V4.29.26 master plus all six approved avatar and campus amendments",
+    "shared KeyHQ Messenger Chat button beside Important Note in KeySuite",
+    "same compact phone and expanded iPhone Duo view across KeySuite and KeyHQ",
+    "shared Supabase conversations, group messages, presence and unread state"
   ],
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "Apply only the V4.29.25 migration after separate approval and staging acceptance. See README_UPGRADE_V42925.md."
+  "notes": "No new V5 database migration is required. The existing deployed KeyHQ V0.9/V0.10 and V4.29.26 migrations remain authoritative. See README_UPGRADE_V50000.md."
 }

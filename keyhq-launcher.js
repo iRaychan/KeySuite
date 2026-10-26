@@ -6,7 +6,7 @@
   const REFRESH_MS=20000;
   const social=new window.KeyHQSocial();
   const avatarProfiles=new window.KeyHQAvatarProfiles(snapshot=>{if(!snapshot.userId&&!snapshot.companyId)contextRequest++;const frame=document.getElementById('keyhqFrame');if(frame?.contentWindow&&document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))frame.contentWindow.postMessage(!snapshot.userId&&!snapshot.companyId?{type:'KEYHQ_SESSION_CLEARED'}:{type:'KEYHQ_AVATAR_PROFILES',profiles:snapshot},location.origin)});
-  let refreshTimer=0,contextRequest=0;
+  let refreshTimer=0,contextRequest=0,latestContext={};
   const demoEvents=[
     {id:'demo-1',sender:'Demo · Acme Engineering',message:'Need 2 duty + 1 standby booster pumps, 180 m³/hr at 48 m head.',status:'demo',createdAt:'',isDemo:true},
     {id:'demo-2',sender:'Demo · KL Contractor',message:'Please recommend a transfer pump for a 12-storey building.',status:'demo',createdAt:'',isDemo:true},
@@ -121,7 +121,8 @@
     context.agents=agentSignals(context);return context;
   }
 
-  async function sendContext(){const request=++contextRequest,frame=document.getElementById('keyhqFrame');if(!frame?.contentWindow)return;const context=await keyhqContext();if(request!==contextRequest)return;frame.contentWindow.postMessage({type:'KEYHQ_CONTEXT',context},location.origin);if(social.frameReady&&social.pendingConversation){social.emit('KEYHQ_OPEN_CONVERSATION',{recipient:social.pendingConversation});social.pendingConversation=null;}}
+  async function getContext(){latestContext=await keyhqContext();return latestContext}
+  async function sendContext(){const request=++contextRequest,frame=document.getElementById('keyhqFrame');if(!frame?.contentWindow)return;const context=await getContext();if(request!==contextRequest)return;frame.contentWindow.postMessage({type:'KEYHQ_CONTEXT',context},location.origin);if(social.frameReady&&social.pendingConversation){social.emit('KEYHQ_OPEN_CONVERSATION',{recipient:social.pendingConversation});social.pendingConversation=null;}}
   async function saveFloorConfig(floors){
     const frame=document.getElementById('keyhqFrame'),companyId=String(window.KEYSUITE_ACCESS?.company_id||'');
     if(!canConfigure())return frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:false,error:'Only an Owner or Admin can configure KeyHQ floors.'},location.origin);
@@ -163,6 +164,6 @@
 
   setInterval(()=>{const client=window.KeySuiteAuth?.getClient?.(),company=String(window.KEYSUITE_ACCESS?.company_id||'');if(client&&company)social.connect(client,company);else if(social.user)social.disconnect()},20000);
   window.addEventListener('pagehide',()=>{social.heartbeat(true);social.disconnect()});
-  window.KeySuiteKeyHQ={open,close,refresh:sendContext,setPresence};
+  window.KeySuiteKeyHQ={open,close,refresh:sendContext,setPresence,getContext,getCachedContext:()=>latestContext,social};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

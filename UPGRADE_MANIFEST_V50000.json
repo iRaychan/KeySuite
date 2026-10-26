@@ -1,0 +1,142 @@
+{
+  "files": {
+    "CHANGELOG_V50000.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "674099600fe37dd1f93aaf25091d06431352cfcf2a766524d8dfb69870dd6807"
+    },
+    "INTEGRITY_V50000.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "5b6567d8ca2f87339c25e7a34fac638318f4a3042d9f5e34907e2e5febc221b9"
+    },
+    "KEYHQ_RELEASE.json": {
+      "baseline_sha256": [
+        "3850e1343e434963efc0310a395ab3049d4b5e084af41b52e092115f39e5af37"
+      ],
+      "required_in_baseline": true,
+      "sha256": "62478dfa5b1fdf74c82421ddcec0e4550fa794bc3fee8dc292d92f4f1cbf0a6c"
+    },
+    "MODIFIED_FILES_V50000.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "3714e6f0893b32b138655b16a4c0b47448daaef7cc88f64c232c1f9c257ccd49"
+    },
+    "QA_V50000.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "6dfd10fada1d9c73d0d4ff64c05861658db950935580f50c330e560788c0902c"
+    },
+    "README.md": {
+      "baseline_sha256": [
+        "ca8fab1a4208ddd4b98dcf62be8fbc376f1b67dfbe34838409c33844af26ee9e"
+      ],
+      "required_in_baseline": true,
+      "sha256": "4dc276a90a75f82c3cdb977c616a260e153ded4b86b4f105cbd9acc9d25758a3"
+    },
+    "README_UPGRADE_V50000.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b6032eb10caa1513c4958b382b569c6567e70272a2e097f721e4f9d5fc77e7f4"
+    },
+    "RELEASE.json": {
+      "baseline_sha256": [
+        "f1ce5d38662115f8d8a20cd55a0e764b57265ac896e58ad9a4d1512ecec97e75"
+      ],
+      "required_in_baseline": true,
+      "sha256": "f816599675c8fb4677834bc00b5210e3238fc49d5d68373ecc3635a5f4a2a2d3"
+    },
+    "REQUIREMENTS_STATUS_V50000.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "a2f3ab2d02ddff40df3c20f7d8437f38f4ded1d9b9094295b47531a29687006b"
+    },
+    "VERSION.txt": {
+      "baseline_sha256": [
+        "9acbc38fb4742cd4f1126ba02efbb8c98931c8b1618e35484b317793d4632b29"
+      ],
+      "required_in_baseline": true,
+      "sha256": "bcea1300ef5dd9c40b3f08312be457d95d90518db8abd471b125fd6cbfb8b38a"
+    },
+    "index.html": {
+      "baseline_sha256": [
+        "de6c6234bf3f37bc35b842415e94c5639754eec46d27d2660cc2c7a1bbfab7eb"
+      ],
+      "required_in_baseline": true,
+      "sha256": "60f824661b3e557c47d4a13afbc519275a4dda0344b3d6e3472b70c1cff73780"
+    },
+    "keyhq-launcher.js": {
+      "baseline_sha256": [
+        "40650ab941225b4eefb426ce2cf5c22c563bccbed8f6416fbcc9a9a6d2694728"
+      ],
+      "required_in_baseline": true,
+      "sha256": "df8baf0ac2e34e4ee557afbbcaebb795ef6bcfa937b51b5ff947ce8e1a9e9e15"
+    },
+    "keyhq-messenger.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "3c5f296e4412e14706cb85b60c1a2e625202332da4457c39a1204d19e77f2aa6"
+    },
+    "keyhq-social.js": {
+      "baseline_sha256": [
+        "db6543633725f6dc8baf94a3a80814b52db60b03ed9677f432bd48b4b5f351c9"
+      ],
+      "required_in_baseline": true,
+      "sha256": "365baca57d8ada2af7bbf647df4c78e2e76b982a9dc70587f9a9add824953667"
+    },
+    "keyhq/index.html": {
+      "baseline_sha256": [
+        "036da8d7c98799316b82d80afebabf6e249852ea503b016f54d805ddf4dd3fb1"
+      ],
+      "required_in_baseline": true,
+      "sha256": "658733ae240f18b440ea4a277659519a17b699c0d9b749f84a8a4fe586730a1f"
+    },
+    "manifest.json": {
+      "baseline_sha256": [
+        "dfdf5bfc1c288fd00cb23d52a375e5a1e3256c3e61cc76164c06a0c0190f3cd5"
+      ],
+      "required_in_baseline": true,
+      "sha256": "83cac2a5e6836eeae5f096a66683486aa57f2787fa695ce69347df7c4c8f1eed"
+    },
+    "sw.js": {
+      "baseline_sha256": [
+        "5cff18cbfca8c794ecbf14f4a876f20e92f56cf58cb3d948aeb79fe8fdc3797e"
+      ],
+      "required_in_baseline": true,
+      "sha256": "ed914160e0207766dc2cf3f8b5698999c1d2946080b3b3007f643e13ed39a362"
+    },
+    "tests/v50000/messenger-host.html": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "14083b896afcc0ed757fc817be45ebdcc507c3eee056d002b6c921f043f5254c"
+    },
+    "tests/v50000/messenger.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "8a8b439235c59843eb313a2185c4d4aa970cd3f3dea9b9fbcf04279db3abab4e"
+    },
+    "tests/v50000/version-lock.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "0af569d8671f454163bc4ba90cc6990dacf0031a95222d059037bcc1c8faf023"
+    },
+    "tools/apply_v50000_upgrade.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "79e600f93dbfa642423f3a2851d31fd8f37cb8304a624d4bcd63806dcd9e96d2"
+    },
+    "tools/build_v50000_release.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "f78fecc79f676352ceb8af86241f839319a0cf4ec62aecfb5ab7e1a38ef6f636"
+    },
+    "v50000-version-lock.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "e45231d6d7428c744e69c9186eaf43a02338d0c13605a4852b4da3dcdebe86e0"
+    }
+  },
+  "from": "KeySuite V4.29.26 consolidated amendment",
+  "new_database_migration_required": false,
+  "to": "KeySuite V5.00.00"
+}
