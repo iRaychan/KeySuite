@@ -1,6 +1,6 @@
-# KeySuite V5.00.03
+# KeySuite V5.00.04
 
-Built from the local V5.00.02 source. See [release notes](CHANGELOG_V50003.md), [deployment / upgrade instructions](README_UPGRADE_V50003.md), and [QA evidence](QA_V50003.md). Completed System Capacity and Head now survive save, seal, secure-history reload and PDF export. The quotation PDF V1.08 layout remains frozen apart from restoring its existing compact capacity-line spacing. No database changes are required. Earlier documentation below is retained as historical reference.
+Built from the user-supplied V5.00.03 FULL CLEAN package. See [release notes](CHANGELOG_V50004.md), [deployment / upgrade instructions](README_UPGRADE_V50004.md), and [QA evidence](QA_V50004.md). V5.00.04 implements KS-06..08 while preserving KS-01..05, KeyHQ and the existing PDF V1.08 presentation. The included KS-06 Supabase migration is prepared but must not be applied to production without separate approval. Earlier documentation below is retained as historical reference.
 
 # KeySuite V5.00.00
 

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.03</title>
-  <script>window.KEYSUITE_VERSION='5.00.03';window.KEYSUITE_BUILD='V5.00.03';</script>
+  <title>KeySuite V5.00.04</title>
+  <script>window.KEYSUITE_VERSION='5.00.04';window.KEYSUITE_BUILD='V5.00.04';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -126,9 +126,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   .print-items-top{position:absolute;top:38mm;left:139mm;width:66mm;line-height:1.4}
   .print-items-top>div{display:grid;grid-template-columns:max-content 1fr;column-gap:1.5mm;min-height:5mm}
   .print-items-table{position:absolute;top:52mm;left:8mm;width:194mm;border-collapse:collapse;font-size:10.5pt;table-layout:fixed}
-  .print-items-table thead{position:relative}
-  .print-items-table thead::after{content:"";position:absolute;left:-1.67mm;right:-1.67mm;bottom:0;border-bottom:1.2px solid #111}
-  .print-items-table thead th{padding:0 1.5mm 1.8mm;text-align:left;background:#fff;font-weight:700;border-bottom-color:var(--template-primary,#17365d)}
+  .print-items-table thead{position:static}
+  .print-items-table thead::after{content:none;display:none}
+  .print-items-table thead th{padding:0 1.5mm 1.8mm;text-align:left;background:#fff;font-weight:700;border-bottom:1.2px solid var(--template-primary,#17365d)}
   .print-items-table thead th:nth-child(2){font-size:0}
   .print-items-table tbody td{vertical-align:top;padding:5mm 1.5mm 0;border:0}
   .print-items-table th:nth-child(1),.print-items-table td:nth-child(1){width:13mm}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.03</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.04</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,7 +658,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.03</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.04</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.03</div>
+    <div class="suite-version">KeySuite V5.00.04</div>
   </aside>
 
   <main>
@@ -2189,9 +2189,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   else setGeneration(generation);
 })();
 </script>
-<script src="v42872-selector-first-open.js?v=42872"></script>
+<script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50003-version-lock.js?v=50003"></script>
+<script src="v50004-version-lock.js?v=50004"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

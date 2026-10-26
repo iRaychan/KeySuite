@@ -1,13 +1,15 @@
 {
-  "version": "5.00.03",
-  "baseline": "5.00.02",
-  "upgrade_supported_from": "5.00.02",
+  "version": "5.00.04",
+  "baseline": "5.00.03",
+  "upgrade_supported_from": "5.00.03",
   "changes": [
-    "Preserve completed System Capacity and Head through save, seal, secure-history reload and PDF",
-    "Restore compact capacity-line spacing while keeping quotation PDF V1.08 otherwise unchanged"
+    "KS-06 safely reuses Owner-deleted quotation running numbers after current/archive checks",
+    "KS-07 restores the V4.28.72 natural-width Standard selector layout in Safari",
+    "KS-08 removes Safari's false item-page closing rule while retaining the final totals rule"
   ],
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
+  "production_migration_applied": true,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "No database or Edge Function deployment is required. See README_UPGRADE_V50003.md."
+  "notes": "Both KS-06 migrations were applied to the KeySuite production Supabase project on 2026-10-26 with Owner-confirmed reuse limited to 0235..0239. Frontend hosting was not deployed. See README_UPGRADE_V50004.md."
 }

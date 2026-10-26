@@ -29,9 +29,12 @@
     if(supabase){
       // Supabase is authoritative. Browser-only history must never advance the
       // company sequence or make two accounts preview different numbers.
-      const {data,error}=await supabase.rpc('keysuite_preview_quotation_reference_v42910',{p_requested_at:now.toISOString(),p_minimum_last_number:0});
-      if(!error){const result=row(data);if(result.quotation_reference)return result.quotation_reference}
-      else console.warn('Company-wide quotation reference preview failed; using the loaded quotation floor.',error);
+      let result=await supabase.rpc('keysuite_preview_quotation_reference_v50004',{p_requested_at:now.toISOString()});
+      if(result.error&&String(result.error?.message||'').toLowerCase().includes('keysuite_preview_quotation_reference_v50004')){
+        result=await supabase.rpc('keysuite_preview_quotation_reference_v42910',{p_requested_at:now.toISOString(),p_minimum_last_number:0});
+      }
+      if(!result.error){const preview=row(result.data);if(preview.quotation_reference)return preview.quotation_reference}
+      else console.warn('Company-wide quotation reference preview failed; using the loaded quotation floor.',result.error);
     }
     const floor=scanRunningFloor(prefix,now);
     return `${prefix}-${yy}${mm}-${String(floor+1).padStart(4,'0')}`;

@@ -386,7 +386,10 @@ function cacheSecureQuotes(rows){
 function isMissingRpc(error,name){const text=String(error?.message||error||'').toLowerCase();return text.includes(String(name||'').toLowerCase())&&(text.includes('not found')||text.includes('does not exist')||text.includes('schema cache'))}
 async function rpcSaveQuotation(client,payload){
  const companyId=currentCompanyId();
- let result=await client.rpc('keysuite_save_quotation_v42920',{p_company_id:companyId,p_quotation:payload});
+ let result=await client.rpc('keysuite_save_quotation_v50004',{p_company_id:companyId,p_quotation:payload});
+ if(result.error&&isMissingRpc(result.error,'keysuite_save_quotation_v50004')){
+  result=await client.rpc('keysuite_save_quotation_v42920',{p_company_id:companyId,p_quotation:payload});
+ }
  if(result.error&&isMissingRpc(result.error,'keysuite_save_quotation_v42920')){
   result=await client.rpc('keysuite_save_quotation_v42916',{p_company_id:companyId,p_quotation:payload});
  }

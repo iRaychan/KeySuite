@@ -22,13 +22,26 @@
     try{target?.contentWindow?.postMessage({type:'KEYSUITE_PARENT_VIEWPORT_READY',width:Math.round(target.getBoundingClientRect().width||0),devicePixelRatio:Number(window.devicePixelRatio)||1},'*')}catch(_){}
   }
   function restoreNativeChildLayout(target){
-    if(!isMacSafari||!target)return;
+    if(!target)return;
+    target.style.removeProperty('zoom');
+    target.style.removeProperty('transform');
+    target.style.removeProperty('transform-origin');
     try{
       const doc=target.contentDocument;
       if(!doc?.body)return;
-      doc.documentElement.dataset.ksParentSafariZoom='1';
+      doc.documentElement.dataset.ksParentSafariZoom='native';
+      doc.documentElement.style.removeProperty('zoom');
+      doc.documentElement.style.removeProperty('width');
+      doc.documentElement.style.removeProperty('min-width');
+      doc.documentElement.style.removeProperty('max-width');
+      doc.documentElement.style.removeProperty('transform');
+      doc.documentElement.style.removeProperty('transform-origin');
       doc.body.style.removeProperty('zoom');
       doc.body.style.removeProperty('width');
+      doc.body.style.removeProperty('min-width');
+      doc.body.style.removeProperty('max-width');
+      doc.body.style.removeProperty('transform');
+      doc.body.style.removeProperty('transform-origin');
     }catch(_){}
   }
   function loadedPath(target){

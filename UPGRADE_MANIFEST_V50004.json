@@ -1,0 +1,132 @@
+{
+  "deletions": [],
+  "files": {
+    "CHANGELOG_V50004.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "1f3d4c598d38ff469b42bcf57f6f222948c466e48f8a4a1197a3a41bcbcb2bd3"
+    },
+    "CHANGE_TEST_REPORT_V50004.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "0947bef997342012f583eea843f23e3e0c6482f7edc9fae24d9f75b1233d9c8a"
+    },
+    "KEYHQ_RELEASE.json": {
+      "baseline_sha256": [
+        "fbb3e4bb0218b01a654d65bce5f75098b879f2b8aa6ec46896811ebde3f7c390"
+      ],
+      "required_in_baseline": true,
+      "sha256": "7178707e25bfa80d8467d17fdc00c39b0925b11c020444a277e1fad4ece53226"
+    },
+    "QA_V50004.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "35dd5fd421380175bfe07e2bf8333d9661204ad5e27f95a098ff8bf2f593f69f"
+    },
+    "README.md": {
+      "baseline_sha256": [
+        "b694dfc9d386c6ac45477017ac13c26ae595372560712e4244a82aa9c97c3c0d"
+      ],
+      "required_in_baseline": true,
+      "sha256": "7c6797f89c738563369eb3efce2abacad45ff9ef73ff77dcc2ddcaaa7dd96c57"
+    },
+    "README_UPGRADE_V50004.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "031cb690c2020c26f0a6313f0a0f2f50fa08fef5320ed23cefac4efa4a05f1a7"
+    },
+    "RELEASE.json": {
+      "baseline_sha256": [
+        "7ca83df0cbc759ffd3670b5cabaa5df91529232dbbac76335b9a351aba4fab7e"
+      ],
+      "required_in_baseline": true,
+      "sha256": "fc3c501fc3eb86d8a0a41e7bef38a44eede26599a0e08f453dcf60860ad503d0"
+    },
+    "VERSION.txt": {
+      "baseline_sha256": [
+        "505d30037f3d502017ac199c6a6bbb4960d2e59318e190d3831b6f3a631e88da"
+      ],
+      "required_in_baseline": true,
+      "sha256": "65d54c83133b24e09a54b6bac2cd978a348e05621bb08826553cbb7d46f63a6d"
+    },
+    "app.js": {
+      "baseline_sha256": [
+        "50ae3e2e6e41c08476406e36fea4287ad703a95981a409c7f34aaca96611e7d5"
+      ],
+      "required_in_baseline": true,
+      "sha256": "22ede5ef31befdd9c7d0432506ff49862633add6bc483be2ce0578021b801a77"
+    },
+    "index.html": {
+      "baseline_sha256": [
+        "13dd1b58f4a4770d7c0afd1110b47524db54ea787598e59d1f3706414b8d85a5"
+      ],
+      "required_in_baseline": true,
+      "sha256": "66c349b1dbd355c9fe11c34b11e1b09a202d0d8dd8f8a73f292f09686d3c3f24"
+    },
+    "quotation-references.js": {
+      "baseline_sha256": [
+        "7d0b63508f450951dfd88c880b8dc8a0757ea303bb1bc185c37b928b2510aa23"
+      ],
+      "required_in_baseline": true,
+      "sha256": "87c38a28d791c2fbbec5839cd8013b0ed0e54c43f7cc41fcd8a617f8c91f5377"
+    },
+    "supabase/migrations/20261026170000_v50004_ks06_reuse_deleted_quotation_numbers.sql": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b0f3c58b0bb52b4394dde044f2b67cb398d08c08cc3a401e1232574405298ee6"
+    },
+    "supabase/migrations/20261026172000_v50004_ks06_owner_delete_reuse_queue.sql": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "33bee4d5a05c8e23555b0ff96bc155bf07f37d20f872b469d2dbe33714692205"
+    },
+    "sw.js": {
+      "baseline_sha256": [
+        "7b99f43b6105ed2db58e7aa3f124dcf426c07890792edb493b787e009eac6ef6"
+      ],
+      "required_in_baseline": true,
+      "sha256": "f5290b6acf9d0f05ca44f23455fb1bc09efd472b4f3a00cb7df236a9c0eb2ce3"
+    },
+    "tests/v50004/ks07-safari-selector.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "c8bb29561e4041fe3f4f52748f421ac5da516090d86c699b0793d5b94deb10b0"
+    },
+    "tests/v50004/ks08-continuation-pdf.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b0f8395f6419749639353e7dd61e37d0eec968aa608c2c86f56c423952baad98"
+    },
+    "tests/v50004/release-regression.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "f4add406e8ad8200a8b46343882137a941d7805e438645c94f609a3b5fa2b69d"
+    },
+    "tools/apply_v50004_upgrade.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b277afb9af36a1a0233b3b9b759519c9482f6eed91e55bd79183700b11b83c92"
+    },
+    "tools/build_v50004_release.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "c6b965e1c5c640b89d2afb4b4f407778f96171011a477c006792d226bc4ecee9"
+    },
+    "v42872-selector-first-open.js": {
+      "baseline_sha256": [
+        "ca0d4f6f077d1880aa8c9eb0f7a99e062a2acd86b48f4b7634cfaa147613c2e5"
+      ],
+      "required_in_baseline": true,
+      "sha256": "f4f7800461616a203a9db5975da020a89667dbe33e65604f5092ba3236d30fa4"
+    },
+    "v50004-version-lock.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "32d93a80f502811f28946781f0e7a952591fb25765639006fce240d869a4fc7c"
+    }
+  },
+  "from": "5.00.03",
+  "new_database_migration_required": true,
+  "production_migration_applied": false,
+  "to": "5.00.04"
+}
