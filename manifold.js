@@ -75,13 +75,13 @@
   function setGlobalOptions(value={},meta={}){const next=normalizeOptions(value),changed=Object.keys(OPTION_DEFAULTS).some(key=>next[key]!==globalOptions[key]);globalOptions=next;syncOptionControls();if(changed&&!meta.silent){try{window.dispatchEvent(new CustomEvent('keysuite-manifold-options-changed',{detail:{options:getGlobalOptions(),source:meta.source||'manifold'}}))}catch(_){}}return getGlobalOptions()}
   function systemDescriptionLines(options,strainerConnection=''){
     const o=normalizeOptions(options),lines=[],bothFlexible=o.suctionFlexible&&o.dischargeFlexible;
-    const strainerText=`${String(strainerConnection).toLowerCase()==='flange'?'Flanged':'Threaded'} strainer`;
+    const strainerText='Strainer';
     if(bothFlexible){
-      lines.push('Gate valves and flexible joints on the suction and discharge ports of each pump');
+      lines.push('Isolation valves and flexible joints on the suction and discharge ports of each pump');
       lines.push('Check valve on the discharge port of each pump');
       if(o.suctionStrainer)lines.push(`${strainerText} on the suction port of each pump`);
     }else{
-      lines.push('Gate valves on the suction and discharge ports of each pump');
+      lines.push('Isolation valves on the suction and discharge ports of each pump');
       if(o.suctionFlexible&&o.suctionStrainer)lines.push(`Flexible joint and ${strainerText.toLowerCase()} on the suction port of each pump`);
       else if(o.suctionFlexible)lines.push('Flexible joint on the suction port of each pump');
       else if(o.suctionStrainer)lines.push(`${strainerText} on the suction port of each pump`);

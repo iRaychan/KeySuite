@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.04</title>
-  <script>window.KEYSUITE_VERSION='5.00.04';window.KEYSUITE_BUILD='V5.00.04';</script>
+  <title>KeySuite V5.00.05</title>
+  <script>window.KEYSUITE_VERSION='5.00.05';window.KEYSUITE_BUILD='V5.00.05';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -137,7 +137,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   .print-items-table th:nth-child(4),.print-items-table td:nth-child(4){width:27mm;text-align:right}
   .print-items-table th:nth-child(5),.print-items-table td:nth-child(5){width:27mm;text-align:right}
   .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{font-size:10pt;white-space:pre-wrap;line-height:1.35;tab-size:4;overflow-wrap:normal;word-break:normal}
-  .print-system-item-head td{padding-bottom:0}.print-system-item-head .print-item-model{margin-bottom:0}.print-system-item-desc-row td{padding-top:1.5mm}.print-system-item-desc-row .print-system-desc-cell{width:auto!important;text-align:left!important;white-space:normal!important}.print-system-item-desc-row .print-system-price-spacer,.print-system-item-desc-row .print-system-total-spacer{width:27mm!important}.print-system-item-desc-row .print-item-desc{width:100%}
+  .print-system-item-head td{padding-bottom:0}.print-system-item-head .print-item-model{margin-bottom:0}.print-system-item-desc-row td{padding-top:1.5mm}.print-system-item-desc-row .print-system-desc-cell{width:auto!important;text-align:left!important;white-space:normal!important}.print-system-item-desc-row .print-item-desc{width:100%}
   .print-capacity-item .print-item-model{margin-bottom:.35mm}.print-system-item-desc-row.print-capacity-item td{padding-top:.35mm}
   .print-summary-spacer td{height:5mm;padding:0!important}
   .print-summary-line td{height:0;padding:0!important;border:0!important}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.04</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.05</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,7 +658,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.04</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.05</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.04</div>
+    <div class="suite-version">KeySuite V5.00.05</div>
   </aside>
 
   <main>
@@ -1076,9 +1076,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
           </div>
           <div id="assemblyCapacityRow" class="assembly-capacity-row no-print">
             <label class="assembly-capacity-toggle"><input id="assemblyDisplayCapacity" type="checkbox"> Display Capacity</label>
-            <div><label for="assemblyCapacityValue">Capacity</label><div class="capacity-input-pair"><input id="assemblyCapacityValue" type="number" min="0" step="any"><select id="assemblyCapacityUnit"><option selected>m³/hr</option><option>L/s</option><option>L/min</option><option>GPM</option></select></div></div>
+            <div><label for="assemblyCapacityValue">Capacity</label><div class="capacity-input-pair"><input id="assemblyCapacityValue" type="number" min="0" step="any"><select id="assemblyCapacityUnit"><option selected>m³/hr</option><option>US gpm</option><option>Imp gpm</option><option>L/s</option><option>L/min</option></select></div></div>
             <span class="capacity-at">@</span>
-            <div><label for="assemblyHeadValue">Head</label><div class="capacity-input-pair"><input id="assemblyHeadValue" type="number" min="0" step="any"><select id="assemblyHeadUnit"><option>Mtr</option><option>ft</option><option>bar</option></select></div></div>
+            <div><label for="assemblyHeadValue">Head</label><div class="capacity-input-pair"><input id="assemblyHeadValue" type="number" min="0" step="any"><select id="assemblyHeadUnit"><option>Mtr</option><option>bar</option><option>kPa</option><option>psi</option><option>Ft</option></select></div></div>
           </div>
           <div class="form-grid">
             <div class="span-3"><label id="assemblyDescriptionLabel">System Description</label><div id="assemblyDescriptionPreview" class="assembly-description-preview" role="button" tabindex="0" title="Double-click to edit System Description" aria-label="Highlighted System Description. Double-click to edit."></div><textarea id="assemblyDescription" class="assembly-description-source" hidden aria-hidden="true"></textarea></div>
@@ -2191,7 +2191,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50004-version-lock.js?v=50004"></script>
+<script src="v50005-version-lock.js?v=50005"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

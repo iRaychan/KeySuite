@@ -1,6 +1,6 @@
-# KeySuite V5.00.04
+# KeySuite V5.00.05
 
-Built from the user-supplied V5.00.03 FULL CLEAN package. See [release notes](CHANGELOG_V50004.md), [deployment / upgrade instructions](README_UPGRADE_V50004.md), and [QA evidence](QA_V50004.md). V5.00.04 implements KS-06..08 while preserving KS-01..05, KeyHQ and the existing PDF V1.08 presentation. The included KS-06 Supabase migration is prepared but must not be applied to production without separate approval. Earlier documentation below is retained as historical reference.
+Built from the user-supplied V5.00.04 FULL CLEAN package. See [release notes](CHANGELOG_V50005.md), [deployment / upgrade instructions](README_UPGRADE_V50005.md), and [change/test report](CHANGE_TEST_REPORT_V50005.md). V5.00.05 implements KS-09..11 while preserving KS-01..08, KeyHQ, Supabase, pricing/BOM behavior and the PDF V1.08 presentation outside the targeted description-width correction. No production deployment or Supabase change is included. Earlier documentation below is retained as historical reference.
 
 # KeySuite V5.00.00
 

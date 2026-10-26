@@ -1,15 +1,15 @@
 {
-  "version": "5.00.04",
-  "baseline": "5.00.03",
-  "upgrade_supported_from": "5.00.03",
+  "version": "5.00.05",
+  "baseline": "5.00.04",
+  "upgrade_supported_from": "5.00.04",
   "changes": [
-    "KS-06 safely reuses Owner-deleted quotation running numbers after current/archive checks",
-    "KS-07 restores the V4.28.72 natural-width Standard selector layout in Safari",
-    "KS-08 removes Safari's false item-page closing rule while retaining the final totals rule"
+    "KS-09 aligns System and Pumpset capacity/head units with Dashboard and preserves converted values through quotation/PDF",
+    "KS-10 safely widens System/Pumpset PDF description continuation rows across otherwise empty price columns",
+    "KS-11 changes generated manifold wording to Isolation valves and Strainer"
   ],
-  "new_database_migration_required": true,
-  "production_migration_applied": true,
+  "new_database_migration_required": false,
+  "production_migration_applied": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "Both KS-06 migrations were applied to the KeySuite production Supabase project on 2026-10-26 with Owner-confirmed reuse limited to 0235..0239. Frontend hosting was not deployed. See README_UPGRADE_V50004.md."
+  "notes": "Targeted frontend-only release. No Supabase migration, Edge Function deployment, GitHub push or hosting deployment was performed. See README_UPGRADE_V50005.md."
 }

@@ -1,0 +1,117 @@
+{
+  "deletions": [],
+  "files": {
+    "CHANGELOG_V50005.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "c317e8fc8dccbdca0bdb0448bcafa83825e08e34a616e0944bbf8754aaa589aa"
+    },
+    "CHANGE_TEST_REPORT_V50005.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "263c89f53f2168b889eec304d57469bd58c69086179cbc46aded49de65a3afca"
+    },
+    "INTEGRITY_V50005.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "a8796dff6fd10adf9f6b86200c9ec00cc3e7c84987d0a775de04b0985c7df0ed"
+    },
+    "KEYHQ_RELEASE.json": {
+      "baseline_sha256": [
+        "7178707e25bfa80d8467d17fdc00c39b0925b11c020444a277e1fad4ece53226"
+      ],
+      "required_in_baseline": true,
+      "sha256": "a4af0dfca5ad7042c4a6702b978b792a7eddb5fee3b7ff3ea1f47d21f20342af"
+    },
+    "README.md": {
+      "baseline_sha256": [
+        "7c6797f89c738563369eb3efce2abacad45ff9ef73ff77dcc2ddcaaa7dd96c57"
+      ],
+      "required_in_baseline": true,
+      "sha256": "af1cfde90d6b60789c954a1929f2d2dba6c329d62b869eb091f977ceeee297ba"
+    },
+    "README_UPGRADE_V50005.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "5d3d5e2535994d0210f1f795c967984d3160397644b303a4e749ebbf294654d3"
+    },
+    "RELEASE.json": {
+      "baseline_sha256": [
+        "fc3c501fc3eb86d8a0a41e7bef38a44eede26599a0e08f453dcf60860ad503d0"
+      ],
+      "required_in_baseline": true,
+      "sha256": "4d37204c8ab7e3c747d85dbb9f6bdbdb6f1dbb740ac895136fa43574e76d6e2d"
+    },
+    "VERSION.txt": {
+      "baseline_sha256": [
+        "65d54c83133b24e09a54b6bac2cd978a348e05621bb08826553cbb7d46f63a6d"
+      ],
+      "required_in_baseline": true,
+      "sha256": "2a30d5bf1091831ae1b4577cc06ece4a29d13ceea2162b285e5f813e9fe724b5"
+    },
+    "app.js": {
+      "baseline_sha256": [
+        "22ede5ef31befdd9c7d0432506ff49862633add6bc483be2ce0578021b801a77"
+      ],
+      "required_in_baseline": true,
+      "sha256": "42d581b540adc6dae6777397760761dc0c5d87714f505dfb080dabee91344a23"
+    },
+    "assembly.js": {
+      "baseline_sha256": [
+        "1d775d0c397b146b8417369d4cba5cd4e853967dbabe225b34919b79c017a82d"
+      ],
+      "required_in_baseline": true,
+      "sha256": "964b2c2d419c6b3155483892c9f1ec93d625c2048e4546f2ef14f7f71b089f8e"
+    },
+    "index.html": {
+      "baseline_sha256": [
+        "66c349b1dbd355c9fe11c34b11e1b09a202d0d8dd8f8a73f292f09686d3c3f24"
+      ],
+      "required_in_baseline": true,
+      "sha256": "1b33fc7da7e6930d3cbfaccb5e08ea98c4937664fec2f5e429bb9b9313acc839"
+    },
+    "manifold.js": {
+      "baseline_sha256": [
+        "4cba1cbcc968f599e6612d10570d4135a98227363d94427650c8b276b7afefb1"
+      ],
+      "required_in_baseline": true,
+      "sha256": "fdd0d507355f5c4e1481fd00b7217baa18b839171d2a8c94d7e41de9cb444689"
+    },
+    "sw.js": {
+      "baseline_sha256": [
+        "f5290b6acf9d0f05ca44f23455fb1bc09efd472b4f3a00cb7df236a9c0eb2ce3"
+      ],
+      "required_in_baseline": true,
+      "sha256": "a6767a5dcb0f7abe02d2bdd6e1e86cf11f5bf73c16ae12ab2d398ab7f94ceb21"
+    },
+    "tests/v50005/browser.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "74dddf402afa9e0a5088af58a2d1214587113c0e1616cda0ce82c274e03ded35"
+    },
+    "tests/v50005/release-regression.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "fb2b5cfc1ab0ce186450a380a04577fb70a71fa34e599b51816d69d2bbe40a4f"
+    },
+    "tools/apply_v50005_upgrade.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "9709176a759e92bc436890db4662accde877d41c66ed820af4e4f5aa9c9fce60"
+    },
+    "tools/build_v50005_release.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "fbc16504c0f85e39bc155e459c4f50975a0da6eb50924ba5daf695300ce54143"
+    },
+    "v50005-version-lock.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "bd778ee57b4a14b055fb3f04b7ab8bf1c1e9153c5aad01f719d8a3eb7e6e67ed"
+    }
+  },
+  "from": "5.00.04",
+  "new_database_migration_required": false,
+  "production_migration_applied": false,
+  "to": "5.00.05"
+}
