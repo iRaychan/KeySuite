@@ -325,7 +325,7 @@ const MOTOR_DB=(()=>{
  return {IE:ie1,IE1:ie1,IE2:rows('2Pole IE2'),IE3:rows('2Pole IE3'),IE4:rows('2Pole IE4'),IE5:rows('2Pole IE5')};
 })();
 function motorValue(v,suffix=""){if(v===null||v===undefined||v===""||v==="-")return "-";return `${Number(v).toFixed(Number(v)%1===0?0:2).replace(/\.00$/,"").replace(/(\.\d)0$/,"$1")}${suffix}`;}
-function keysuiteAutoPumpMotorEff(hp,normal='IE2'){const small=Number(hp)>0&&Number(hp)<=0.75+1e-9;if(small){if(motorEff.dataset.autoSmallIe1!=='1')motorEff.dataset.beforeSmallIe1=motorEff.value||normal;motorEff.dataset.autoSmallIe1='1';motorEff.value='IE1';return 'IE1'}if(motorEff.dataset.autoSmallIe1==='1'){motorEff.value=motorEff.dataset.beforeSmallIe1||normal;delete motorEff.dataset.autoSmallIe1;delete motorEff.dataset.beforeSmallIe1}return motorEff.value||normal}
+function keysuiteAutoPumpMotorEff(hp,normal='IE2'){return motorEff.value||normal}
 function findMotorData(hp,effClass,phase,voltage,hz){
  const row=(MOTOR_DB[effClass]||[]).find(r=>Math.abs(Number(r.hp)-Number(hp))<0.011);
  if(!row)return {available:false};

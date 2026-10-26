@@ -8,9 +8,9 @@ export function advanceActor(a,actors,elevator,dt){
  if(Math.hypot(dx,dz)>.01)m.rotation.y=Math.atan2(dx,dz);
  let nx=m.position.x+dx*k,nz=m.position.z+dz*k;
  const vehicleBlocked=a.floor==='all'&&(elevator.world.dynamicColliders||[]).filter(o=>!o.floor||o.floor===a.floor).some(o=>Math.abs(nx-o.x)<o.w/2+.25&&Math.abs(nz-o.z)<o.d/2+.25);
- const blocked=vehicleBlocked||actors.some(b=>b!==a&&!b.lift&&!b.vehicle&&b.floor===a.floor&&Math.hypot(nx-b.rig.model.position.x,nz-b.rig.model.position.z)<.52);
+ const blocked=vehicleBlocked;
  if(!blocked){m.position.set(nx,m.position.y+dy*k,nz);if(!p.swim&&(a.floor==='all'||a.floor==='0')){a.floor=groundFloorAt(nx,nz);m.position.y=walkingHeight(nx,nz,a.floor);}if(dist<=step){a.floor=p.floor??a.floor;a.path.shift()}a.blockedFor=0}else a.blockedFor=(a.blockedFor||0)+dt;
- if(a.blockedFor>1.5){a.blockedFor=0;a.routeRetries=(a.routeRetries||0)+1;if(a.routeRetries>4){a.path=[];a.routeFailed=true;a.state='idle';a.next=performance.now()+15000;return;}const obstacles=[...(elevator.world.obstacles[a.floor]||[]),...(a.floor==='all'?elevator.world.dynamicColliders||[]:[]),...actors.filter(b=>b!==a&&b.floor===a.floor&&!b.lift).map(b=>({x:b.rig.model.position.x,z:b.rig.model.position.z,w:.6,d:.6}))];const route=groundPath(m.position,p,a.floor,obstacles);if(route)a.path=[...route.map(n=>({...n,y:m.position.y,floor:a.floor})),...a.path.slice(1)];}
- a.state=blocked?'idle':p.swim?'swim':'walk';m.rotation.x=p.swim?-Math.PI/2:0;
+ if(a.blockedFor>1.5){a.blockedFor=0;a.routeRetries=(a.routeRetries||0)+1;if(a.routeRetries>4){a.path=[];a.routeFailed=true;a.state='idle';a.next=performance.now()+15000;return;}const obstacles=[...(elevator.world.obstacles[a.floor]||[]),...(a.floor==='all'?elevator.world.dynamicColliders||[]:[])];const route=groundPath(m.position,p,a.floor,obstacles);if(route)a.path=[...route.map(n=>({...n,y:m.position.y,floor:a.floor})),...a.path.slice(1)];}
+ a.state=blocked?'idle':p.swim?'swim':'walk';m.rotation.order='YXZ';m.rotation.x+=( (p.swim?Math.PI/2:0)-m.rotation.x)*Math.min(1,dt*8);
  if(!a.path.length){a.state='idle';if(a.returning){m.rotation.y=a.returning.facing;a.state=a.returning.action||'work';a.returning=null}}
 }

@@ -163,7 +163,7 @@
     const customer=options.customer||pricingCustomer(),category=options.category||categoryFor(customer);if(!customer||!category)return null;
     const source=sourceBook(normalized);if(!source?.priceable)return null;
     const baseCalc=window.KeySuitePricing?.calculatePrice?.(source.book,'TOTAL',category,'MANIFOLD',{...options,customer,rarity:normalized.rarity,pricingMode:options.pricingMode||'quotation'});if(!baseCalc)return null;
-    const accessoryAddonMyr=Number(source.accessoryAddonMyr||0),baseManifoldFinalPrice=Number(baseCalc.finalPrice||0),calc={...baseCalc,baseManifoldFinalPrice,accessoryAddonMyr,unroundedPrice:Number(baseCalc.unroundedPrice??baseManifoldFinalPrice)+accessoryAddonMyr,finalPrice:baseManifoldFinalPrice+accessoryAddonMyr};
+    const accessoryAddonMyr=Number(source.accessoryAddonMyr||0),baseManifoldFinalPrice=Number(baseCalc.finalPrice||0),calc={...baseCalc,baseManifoldFinalPrice,accessoryAddonMyr,beforeFuel:Number(baseCalc.beforeFuel??baseCalc.finalPrice)+accessoryAddonMyr,unroundedPrice:Number(baseCalc.unroundedPrice??baseManifoldFinalPrice)+accessoryAddonMyr,finalPrice:baseManifoldFinalPrice+accessoryAddonMyr};
     return {product:{id:'MANIFOLD-CALCULATOR',model:`${normalized.material} Manifold ${source.manifoldDn}`},material:'TOTAL',variant:'TOTAL',calc,category,customer,family:'MANIFOLD',configuration:normalized,source,sourceExtra:{configuration:normalized,base_manifold_price:baseManifoldFinalPrice,accessory_addon_myr:accessoryAddonMyr,accessory_breakdown:source.accessoryBreakdown}};
   }
 

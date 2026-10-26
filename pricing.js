@@ -384,7 +384,7 @@
     const motorPricingError=sameOrLowerSourcePrice
       ?`Cannot quote: ${selected} motor ${replacementMotor.model} does not have a higher source price than included ${included} motor ${includedMotor.model}. Update the Motor Price List before quoting this efficiency upgrade.`
       :'';
-    return {...calc,...(motorPricingError?{motorPricingError}:{}),preMotorReplacementPrice,motorReplacement:{bareShaft,includedEfficiency:included,selectedEfficiency:bareShaft?'':selected,requestedHp:hp,requestedKw:kw,pole,includedMotorId:includedMotor.id,includedMotorModel:includedMotor.model,includedMotorHp:Number(includedMotor.hp||0),includedMotorRawPriceMyr,includedMotorQuotedPrice,includedMotorDeduction,includedMotorPricingSource:motorCalculationSnapshot(includedCalc),replacementMotorId:bareShaft?'':replacementMotor.id,replacementMotorModel:bareShaft?'':replacementMotor.model,replacementMotorHp:bareShaft?0:Number(replacementMotor.hp||0),replacementMotorRawPriceMyr,replacementMotorQuotedPrice,replacementMotorPricingSource:bareShaft?null:motorCalculationSnapshot(replacementCalc),priceAdjustmentBeforeRounding,priceAdjustmentFinal:finalPrice-preMotorReplacementPrice,minimumUpgradeStepApplied,unroundedPrice:unrounded},unroundedPrice:unrounded,finalPrice};
+    return {...calc,beforeFuel:Number(calc.beforeFuel??calc.finalPrice)+finalPrice-preMotorReplacementPrice,...(motorPricingError?{motorPricingError}:{}),preMotorReplacementPrice,motorReplacement:{bareShaft,includedEfficiency:included,selectedEfficiency:bareShaft?'':selected,requestedHp:hp,requestedKw:kw,pole,includedMotorId:includedMotor.id,includedMotorModel:includedMotor.model,includedMotorHp:Number(includedMotor.hp||0),includedMotorRawPriceMyr,includedMotorQuotedPrice,includedMotorDeduction,includedMotorPricingSource:motorCalculationSnapshot(includedCalc),replacementMotorId:bareShaft?'':replacementMotor.id,replacementMotorModel:bareShaft?'':replacementMotor.model,replacementMotorHp:bareShaft?0:Number(replacementMotor.hp||0),replacementMotorRawPriceMyr,replacementMotorQuotedPrice,replacementMotorPricingSource:bareShaft?null:motorCalculationSnapshot(replacementCalc),priceAdjustmentBeforeRounding,priceAdjustmentFinal:finalPrice-preMotorReplacementPrice,minimumUpgradeStepApplied,unroundedPrice:unrounded},unroundedPrice:unrounded,finalPrice};
   }
   function pumpDefaultMotorEfficiency(hp,normal){const value=Number(hp||0);return value>0&&value<=0.75+1e-9?'IE1':String(normal||'IE3').toUpperCase()}
 
@@ -396,7 +396,7 @@
     const product=catalogue.find(p=>String(p.model).toLowerCase()===base.toLowerCase());if(!product)return null;
     const pricingFamily=generation==='G1'?'CHC_G1':'CHC_G2';
     const motorHp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),motorKw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2;
-    const defaultMotorEfficiency=pumpDefaultMotorEfficiency(motorHp,'IE2'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency)||defaultMotorEfficiency);
+    const defaultMotorEfficiency=(generation==='G1'?'IE2':'IE3'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency)||defaultMotorEfficiency);
     // C1/C2 price records are complete pump packages including the standard
     // IE2 motor.  Do not add a motor again.  Only a non-standard IE class
     // replaces the included motor through the independent MOTOR price table.
@@ -814,7 +814,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const qty=Math.max(1,Math.min(6,Number(pumpQty)||1)),variant=`P${qty}`,enclosure=normalizePanelType(options.enclosure);
     const baseCalc=calculatePrice(keyplcPriceBook(product),variant,cat,'KEYPLC',{...options,customer,rarity:product.rarity||'common'});if(!baseCalc)return null;
     const enclosureSurcharge=enclosure==='sheltered'?1000:0;
-    const calc={...baseCalc,indoorPrice:baseCalc.finalPrice,enclosureSurcharge,unroundedPrice:Number(baseCalc.unroundedPrice||0)+enclosureSurcharge,finalPrice:Number(baseCalc.finalPrice||0)+enclosureSurcharge};
+    const calc={...baseCalc,indoorPrice:baseCalc.finalPrice,enclosureSurcharge,beforeFuel:Number(baseCalc.beforeFuel??baseCalc.finalPrice)+enclosureSurcharge,unroundedPrice:Number(baseCalc.unroundedPrice||0)+enclosureSurcharge,finalPrice:Number(baseCalc.finalPrice||0)+enclosureSurcharge};
     return {product,material:variant,variant,rarity:calc.rarity,pumpQty:qty,enclosure,calc,category:cat,customer,family:'KEYPLC'};
   }
 

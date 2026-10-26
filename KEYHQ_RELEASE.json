@@ -1,13 +1,20 @@
 {
-  "keysuite_version": "5.00.00",
-  "keyhq_version": "V5.00.00 shared Messenger release",
+  "keysuite_version": "5.00.01",
+  "keyhq_version": "V5.00.01 campus corrections and diving",
   "status": "Source and local verification complete; live multi-account/device acceptance pending",
   "database_migration": "20261025162321_keyhq_v42926_avatar_state.sql",
-  "new_migration_deployed": true,
-  "remote_migration_version": "20261025164217",
+  "new_migration_deployed": false,
   "github_pushed": false,
   "frontend_deployed": false,
-  "review": "QA_V50000.md",
-  "upgrade": "README_UPGRADE_V50000.md",
-  "previous_master_remote_version": "20261025113911"
+  "review": "QA_V50001.md",
+  "upgrade": "README_UPGRADE_V50001.md",
+  "new_database_migration_required": false,
+  "production_deployed": false,
+  "changes": [
+    "CHC C4 IE2 and C6 IE3 included motor baselines",
+    "Panel shelter and manifold add-ons retained in assembly consolidation",
+    "Stable controls, autonomous activities and avatar pass-through",
+    "Rider-only bicycle updates; beer and swimming motion",
+    "Solo leisure, explicit invitations, and shared three-level diving staircase"
+  ]
 }

@@ -1,0 +1,305 @@
+{
+  "deletions": [],
+  "files": {
+    "CHANGELOG_V50001.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "2440e3e9c3fdffb767f6edc773592aaefc9ecdd87d943c2feaabb8cd111c9527"
+    },
+    "INTEGRITY_V50001.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "cd0a633396caf8681376331a8d73684ce4698bbdfabe1c69d93ec52be4b00cd0"
+    },
+    "KEYHQ_RELEASE.json": {
+      "baseline_sha256": [
+        "62478dfa5b1fdf74c82421ddcec0e4550fa794bc3fee8dc292d92f4f1cbf0a6c"
+      ],
+      "required_in_baseline": true,
+      "sha256": "7f7004b75b331a6167ba98b66c0b2b2e7b5d0d54ca417aa0316e41b84b58900a"
+    },
+    "QA_V50001.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "22072ef027ba6394e28aaafc14677490f3a489b0c9e80a0c45df1297241a2cf6"
+    },
+    "README.md": {
+      "baseline_sha256": [
+        "4dc276a90a75f82c3cdb977c616a260e153ded4b86b4f105cbd9acc9d25758a3"
+      ],
+      "required_in_baseline": true,
+      "sha256": "7fb99fc13ebe90d20b6ee39cd110b1680b1797b325aa84ffd302ec3962c6ed33"
+    },
+    "README_UPGRADE_V50001.md": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b16f9abfdfdb9e916dfac33204344ed43173298e7056df46b22c95e0aa0f8c05"
+    },
+    "RELEASE.json": {
+      "baseline_sha256": [
+        "f816599675c8fb4677834bc00b5210e3238fc49d5d68373ecc3635a5f4a2a2d3"
+      ],
+      "required_in_baseline": true,
+      "sha256": "a64c8d59654449d254e307f42c8bd1d2ac2c6433f540a061eb899652718183a4"
+    },
+    "VERSION.txt": {
+      "baseline_sha256": [
+        "bcea1300ef5dd9c40b3f08312be457d95d90518db8abd471b125fd6cbfb8b38a"
+      ],
+      "required_in_baseline": true,
+      "sha256": "b95e73c755b7fc202086b90d87690e6fd502b26af04b1cd738b7cb1fdef58ed7"
+    },
+    "index.html": {
+      "baseline_sha256": [
+        "60f824661b3e557c47d4a13afbc519275a4dda0344b3d6e3472b70c1cff73780"
+      ],
+      "required_in_baseline": true,
+      "sha256": "919549317f3210160f0b36ccf64dd418788a8b2af9d405a24d0d2f0b310d77da"
+    },
+    "keyhq/avatar/extensions.js": {
+      "baseline_sha256": [
+        "5443505f504f76239180ef8f83f3cf26cb72ffc15986e5bf85a19a8174cf1e1d"
+      ],
+      "required_in_baseline": true,
+      "sha256": "8cc74e5a966be95180593d8516492bd86e37978700980c8e63372d826e9ca9f1"
+    },
+    "keyhq/campus/campus.css": {
+      "baseline_sha256": [
+        "9ad41f601f782ac64a4e8645285ae8789997a0cdc41abcbf3b9b4560966cc4db"
+      ],
+      "required_in_baseline": true,
+      "sha256": "a6f6b7fec4dee66ebf22d48239319a72456ac8bf512de3385db4914839353b2f"
+    },
+    "keyhq/campus/carry.js": {
+      "baseline_sha256": [
+        "575c74be334a4ca8e71da19a0e5f1bfadb3770735e29c2031ef0ae9093e0de12"
+      ],
+      "required_in_baseline": true,
+      "sha256": "9d5f49d7612619d6a344c9169aa52813763e86aeabe46666f92f830a9e1dd927"
+    },
+    "keyhq/campus/control-state.js": {
+      "baseline_sha256": [
+        "84bf633aa109edf2b4acd854b20664b1ceaa4d22ea5caf57d821c484fce09e43"
+      ],
+      "required_in_baseline": true,
+      "sha256": "0fd4afe4e56e203a88196b674f1742cd0dcb18e801db3d179d52074faf8e8d1a"
+    },
+    "keyhq/campus/controls.js": {
+      "baseline_sha256": [
+        "ba4a6d471de74f1eb8f1c2e25d227475dc0667d2f5d4e03358da0490f10ff35c"
+      ],
+      "required_in_baseline": true,
+      "sha256": "2e45f72a6072d5f331dc18e5cd46b3a6976844b8641d9c0d2b02104c4136abf7"
+    },
+    "keyhq/campus/diving.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "5baef30e2694f9a4b4b0f7afc5ca99a8257e5bd1426e1ae5e670c3abd87efb9f"
+    },
+    "keyhq/campus/games.js": {
+      "baseline_sha256": [
+        "3991ede0b6d15075d9878957d9328173432c35fe1f9c58298f8d639d0787dbb5"
+      ],
+      "required_in_baseline": true,
+      "sha256": "5f06fc0d64c29be8f7e5177fa934f8b4ce9121196aa66fa4619184646d593bd3"
+    },
+    "keyhq/campus/leisure.js": {
+      "baseline_sha256": [
+        "c16bed296c85b333068810e0ed4d8fe19d4b1422357a5b07e139f1f0387d7fc8"
+      ],
+      "required_in_baseline": true,
+      "sha256": "421cfa7e4d8136c01f14eb1a6418255c4cd3bfcab8008c8b8617b0c0a45293d7"
+    },
+    "keyhq/campus/main.js": {
+      "baseline_sha256": [
+        "4579656853966edf1f9508fa9a9b4b1762d4247e2653b7148648c0d0746a908e"
+      ],
+      "required_in_baseline": true,
+      "sha256": "56221e5a2f1ffe7801f7ce41af74d2f2ad0cfa3f3857e8e573776dc24f53c919"
+    },
+    "keyhq/campus/movement.js": {
+      "baseline_sha256": [
+        "49fbb8a7fc02717aa4f120d9f9381e6beacd9aa3cbc84d7336ba958f826329b6"
+      ],
+      "required_in_baseline": true,
+      "sha256": "7633f1c13c5e27008d82d23d715a17933fa441d3f6df51aeb41da8f298ed6528"
+    },
+    "keyhq/campus/seating.js": {
+      "baseline_sha256": [
+        "15cc860d8a59b3127a3e12af3d5fe9d3e97831be60457c1a3a3d37ea580db210"
+      ],
+      "required_in_baseline": true,
+      "sha256": "ffe1c81519333ef7e6d64afe8b86990a84649fbf80d2a40921ca3a5b6c061e33"
+    },
+    "keyhq/campus/vehicles.js": {
+      "baseline_sha256": [
+        "62f9b1d4e40d77db9ac388ee9631b0e95b73c0e18c9843c849076117ccd6c009"
+      ],
+      "required_in_baseline": true,
+      "sha256": "e12077ef92210350dd1164f32f3260b6493d8dbfdd4eccbc93a533f4718a67c8"
+    },
+    "keyhq/index.html": {
+      "baseline_sha256": [
+        "658733ae240f18b440ea4a277659519a17b699c0d9b749f84a8a4fe586730a1f"
+      ],
+      "required_in_baseline": true,
+      "sha256": "b03119562dfa7e96e17018010d136be16978d59f5ee3bb9188c2b987674ab91d"
+    },
+    "manifest.json": {
+      "baseline_sha256": [
+        "83cac2a5e6836eeae5f096a66683486aa57f2787fa695ce69347df7c4c8f1eed"
+      ],
+      "required_in_baseline": true,
+      "sha256": "2652dc2cbfb3e048b80b97d16e848fa5908c28e60089ab8371c25358fcad9f5e"
+    },
+    "manifold.js": {
+      "baseline_sha256": [
+        "8af12085444821b4ed45e056620b2202e3b5ecd82cabb2018a54a4923a8f3d00"
+      ],
+      "required_in_baseline": true,
+      "sha256": "4cba1cbcc968f599e6612d10570d4135a98227363d94427650c8b276b7afefb1"
+    },
+    "pricing.js": {
+      "baseline_sha256": [
+        "7d716e3fe7d7dbf33db783f7bd2db73040e10a7f02bd8cbd3190edeaa91ed031"
+      ],
+      "required_in_baseline": true,
+      "sha256": "f4bc45b3ff0b53e71e6531fe42aeb5d4a7d5c124543174c7729ba6d568a58959"
+    },
+    "product.js": {
+      "baseline_sha256": [
+        "16b7d30924100cbb4d6ad84bbee91edc94aca4d685495f41ccbca2e84ff9d303"
+      ],
+      "required_in_baseline": true,
+      "sha256": "240145801a1d65459527147ba4fcb489afbb65690464d1e47108b00be978c34b"
+    },
+    "selector-g1/index.html": {
+      "baseline_sha256": [
+        "70f508213986e932f0b886b40e7a12c4696dee10353775bb16192adeb7348de4"
+      ],
+      "required_in_baseline": true,
+      "sha256": "0322ae4ce13e47e45e65990d09769c0570b57dd38d74753ece8ee1728dde2838"
+    },
+    "selector-g1/product.html": {
+      "baseline_sha256": [
+        "30c73131db802ecf5a920a47cddf797e3c7740d8f7f21df7f803185c30f2a6df"
+      ],
+      "required_in_baseline": true,
+      "sha256": "150d484e5f70d1ec938592ef4a6d2744c6964a25a07698d27c9eef07f5022f91"
+    },
+    "selector/index.html": {
+      "baseline_sha256": [
+        "8a1c1095600ef0b4826bf698e86bbe59d3304a2db5e02fa8d7f731330a5d3b5c"
+      ],
+      "required_in_baseline": true,
+      "sha256": "63e3461f2e1a2290e517c987ace622cc50a59f81874e04577820b539ec259433"
+    },
+    "selector/product.html": {
+      "baseline_sha256": [
+        "2da181c85defa394e1bec0d3b390bf7a9958f13596d7851859c3461ae0bf49ff"
+      ],
+      "required_in_baseline": true,
+      "sha256": "5a3b4f2058f08903bb40adc2cce1eb1e7e7c0660a84250c57c6f716ee74619bf"
+    },
+    "sw.js": {
+      "baseline_sha256": [
+        "ed914160e0207766dc2cf3f8b5698999c1d2946080b3b3007f643e13ed39a362"
+      ],
+      "required_in_baseline": true,
+      "sha256": "bf2d134c68e5d52e78a4c11b2b016b0bcc634a04bc9d33d62f36ce03442bed58"
+    },
+    "tests/v50001/browser.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "a7a9ff88b4e2e023301fa18a9d2f006d464f74c88fe60585b85600cb2d57094c"
+    },
+    "tests/v50001/pricing.cjs": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "76f4ccb7b7aa94fe175012b2a180501a22c8a4bc56e9fcfac6a339725a9efe8d"
+    },
+    "tests/v50001/results/assembly-legacy.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "e7e7a76f9952c8661b3526d844abc99c006362fc54b064b81f21d4094551724e"
+    },
+    "tests/v50001/results/auth.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "8ef7b2869961e679f0186e7a0f07b9c07a7c5453d37b68f261a8bb75a05619e5"
+    },
+    "tests/v50001/results/browser.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "8aa8d80dcf6f0e7c445286b2c3b8a078b5156504f636fcd6b1c87eaf80430b77"
+    },
+    "tests/v50001/results/campus.png": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b070d32c693dbab0ba4b5ba09bc45774523086324a2e17105b650526358ae132"
+    },
+    "tests/v50001/results/coupling.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "a620a79d587464cd2a491cea1d28572d428f4b9b662a994c889828c6e8015b04"
+    },
+    "tests/v50001/results/diving-platform.png": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "cc41c51444766fb8ad223fba2e0737d5b49d569f4c1b66ff3b3080e4f6b678c5"
+    },
+    "tests/v50001/results/html-syntax.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "ed4552e1ff5545f9e6cfdfc8b05bb8233e71c6e38f615dadb1bb354afefc160e"
+    },
+    "tests/v50001/results/motor-legacy.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "2ee6185bba6050dd7dae06a414f81d3bfc61cb285e7c7393e31e535ab601f365"
+    },
+    "tests/v50001/results/navigation.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "29bb457f2b6df4839a66198730cc4688b1d7e1588444748fc22a0aa81dc1a38f"
+    },
+    "tests/v50001/results/preservation.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "d9c811eb8ff3fd9d77f5e79fee709e4c82ab085883e66398859e95cac1df2b32"
+    },
+    "tests/v50001/results/pricing.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "aa9b039d756488b2121e869055504ff5a1feba2c39c4ed972d47ac7b3a966026"
+    },
+    "tests/v50001/results/quotation.txt": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "c9f9556f577089495b0b1d415abee7df6ae7e2395c62fe3980262c7aedf12f9b"
+    },
+    "tests/v50001/results/syntax.json": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "8e35bee47fd249543a52a0858743aadd88a61fd8e4c5274c3a6fe063ac544fb5"
+    },
+    "tools/apply_v50001_upgrade.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "b3fcb27ff4619ff16d5c0c3db9480ab63f4b5e956c251fd5be2d97e76b20378b"
+    },
+    "tools/build_v50001_release.py": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "07096355be50203689058974de556357a14dba20575c06f533b0a4accfe92e59"
+    },
+    "v50001-version-lock.js": {
+      "baseline_sha256": [],
+      "required_in_baseline": false,
+      "sha256": "af281b3d898124372bbb3a15477b0ff1656d6a09f1d6ecf2edfde7111601cd15"
+    }
+  },
+  "from": "5.00.00",
+  "new_database_migration_required": false,
+  "to": "5.00.01"
+}

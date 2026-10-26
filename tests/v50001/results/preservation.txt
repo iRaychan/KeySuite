@@ -1,0 +1,2 @@
+PASS 118 Supabase / avatar / logo files byte-identical to input ZIP.
+PASS original right-hand smoking geometry, pose expressions and clip retained.

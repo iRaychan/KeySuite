@@ -76,7 +76,7 @@
       speed_rpm:2900,
       pole:2,
       frequency_hz:50,
-      motor_efficiency_class:Number(row.hp||0)>0&&Number(row.hp)<=0.75+1e-9?'IE1':'IE2',
+      motor_efficiency_class:'IE2',
       motor_phase:'3Ph',
       motor_voltage:415,
       product_mode:true,

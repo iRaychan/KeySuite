@@ -1,0 +1,127 @@
+PASS stable Manual/Auto selected state and six existing controls
+PASS solo swimming starts without invitations; Invite and multiplayer mode show existing interface
+{
+  "bikeObstacles": [
+    {
+      "x": -31,
+      "z": 26,
+      "w": 0.12,
+      "d": 0.12
+    },
+    {
+      "x": -27,
+      "z": 26,
+      "w": 5,
+      "d": 2
+    },
+    {
+      "x": -27,
+      "z": 26,
+      "w": 4.65,
+      "d": 1.86
+    }
+  ],
+  "passThrough": true,
+  "wall": true,
+  "parked": true,
+  "ridden": true,
+  "attached": true,
+  "autonomous": true,
+  "walked": true,
+  "swam": true,
+  "independent": true,
+  "dive": [
+    {
+      "level": 1,
+      "started": true,
+      "complete": true,
+      "max": 1.386559995987166,
+      "splash": true,
+      "inWater": true
+    },
+    {
+      "level": 3,
+      "started": true,
+      "complete": true,
+      "max": 3.208925209736171,
+      "splash": true,
+      "inWater": true
+    },
+    {
+      "level": 5,
+      "started": true,
+      "complete": true,
+      "max": 5.2,
+      "splash": true,
+      "inWater": true
+    }
+  ],
+  "beer": {
+    "hold": 0.8,
+    "tilt": 1.95,
+    "rest": 0.8
+  }
+}
+{
+  "bikeObstacles": [
+    {
+      "x": -31,
+      "z": 26,
+      "w": 0.12,
+      "d": 0.12
+    },
+    {
+      "x": -27,
+      "z": 26,
+      "w": 5,
+      "d": 2
+    },
+    {
+      "x": -27,
+      "z": 26,
+      "w": 4.65,
+      "d": 1.86
+    }
+  ],
+  "passThrough": true,
+  "wall": true,
+  "parked": true,
+  "ridden": true,
+  "attached": true,
+  "autonomous": true,
+  "walked": true,
+  "swam": true,
+  "independent": true,
+  "dive": [
+    {
+      "level": 1,
+      "started": true,
+      "complete": true,
+      "max": 1.386559995987166,
+      "splash": true,
+      "inWater": true
+    },
+    {
+      "level": 3,
+      "started": true,
+      "complete": true,
+      "max": 3.208925209736171,
+      "splash": true,
+      "inWater": true
+    },
+    {
+      "level": 5,
+      "started": true,
+      "complete": true,
+      "max": 5.2,
+      "splash": true,
+      "inWater": true
+    }
+  ],
+  "beer": {
+    "hold": 0.8,
+    "tilt": 1.95,
+    "rest": 0.8
+  }
+}
+PASS browser module integration, collisions, bicycle, autonomy, beer cycle, three diving levels; no page errors

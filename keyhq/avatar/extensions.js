@@ -42,5 +42,8 @@ export function installClips(rig){
   const tracks=[];for(const bone of bones){const angles=pose[bone]||[0,0,0],values=[];for(let i=0;i<5;i++){const q=new T.Quaternion().setFromEuler(new T.Euler(angles[0]+(pose[bone]?Math.sin(i*Math.PI/2+(bone.startsWith('R')?Math.PI:0))*(name==='cycle'?.55:.22):0),angles[1],angles[2]));values.push(...q.toArray())}tracks.push(new T.QuaternionKeyframeTrack(bone+'.quaternion',[0,.5,1,1.5,2],values))}
   const hipHeight=['ride','cycle'].includes(name)?.50:.88;tracks.push(new T.VectorKeyframeTrack('Hips.position',[0,2],[0,hipHeight,0,0,hipHeight,0]));rig.actions[name]=rig.mixer.clipAction(new T.AnimationClip(name,2,tracks));
  }
+ const swimTracks=[];
+ for(const bone of bones){const values=[];for(let i=0;i<=16;i++){const phase=i/16*Math.PI*2+(bone.startsWith('R')?Math.PI:0),arm=bone.endsWith('Arm'),leg=bone.endsWith('Thigh'),elbow=bone.endsWith('Forearm');const e=new T.Euler(arm?phase:leg?.3*Math.sin(phase*2):elbow?-.25-Math.max(0,Math.sin(phase))*.8:0,0,arm?(bone.startsWith('L')?.18:-.18):0);values.push(...new T.Quaternion().setFromEuler(e).toArray());}swimTracks.push(new T.QuaternionKeyframeTrack(bone+'.quaternion',Array.from({length:17},(_,i)=>i/8),values));}
+ swimTracks.push(new T.VectorKeyframeTrack('Hips.position',[0,2],[0,.88,0,0,.88,0]));rig.actions.swim=rig.mixer.clipAction(new T.AnimationClip('swim',2,swimTracks));
  for(const [name,source] of Object.entries({type:'work',mouse:'work',relax:'sit',sofa:'sit',tv:'sit',meeting:'talk',badminton:'tennis',pickleball:'tennis'}))rig.actions[name]=rig.actions[source];
 }
