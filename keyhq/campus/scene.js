@@ -93,7 +93,13 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  function tableSet(x,y,z){(obstacles[y>14?'roof':y<1?'all':String(Math.round((y-.4)/4.8))]||[]).push({x,z,w:1.6,d:1.6});cyl(x,y+.8,z,1.5,.12,wood);cyl(x,y+.4,z,.15,.8,trim);chair(x-1.1,y,z,Math.PI/2);chair(x+1.1,y,z,-Math.PI/2);chair(x,y,z+1.1);}
  function umbrella(x,y,z){cyl(x,y+1.5,z,.08,3,trim);primitive('cone',x,y+3,z,5,.85,5,white)}
  function lounge(x,y,z){registerSeat('lounger',x,y+.45,z,0);box(x,y+.36,z,.9,.18,2.3,white);box(x,y+.62,z-.75,.9,.7,.17,mat('#d7cbaa'));}
- function fence(x,z,w,d,h=3){if(w<100)obstacles.all.push({x,z:z-d/2,w,d:.08},{x,z:z+d/2,w,d:.08},{x:x-w/2,z,w:.08,d},{x:x+w/2,z:z-d/4-1,w:.08,d:d/2-2},{x:x+w/2,z:z+d/4+1,w:.08,d:d/2-2});const fm=mat('#526658');for(let a=-w/2;a<=w/2;a+=5){cyl(x+a,h/2,z-d/2,.09,h,fm);cyl(x+a,h/2,z+d/2,.09,h,fm)}for(let a=-d/2;a<=d/2;a+=5){cyl(x-w/2,h/2,z+a,.09,h,fm);cyl(x+w/2,h/2,z+a,.09,h,fm)}const net=mat('#6c8671',{transparent:true,opacity:.15});box(x,h/2,z-d/2,w,h,.03,net);box(x,h/2,z+d/2,w,h,.03,net);box(x-w/2,h/2,z,.03,h,d,net);box(x+w/2,h/2,z-d/4-1,.03,h,d/2-2,net);box(x+w/2,h/2,z+d/4+1,.03,h,d/2-2,net);line([[x-w/2,h,z-d/2],[x+w/2,h,z-d/2],[x+w/2,h,z+d/2],[x-w/2,h,z+d/2],[x-w/2,h,z-d/2]],'#526658')}
+ function entry(x,z,width,title,side=false,y=0){
+ const frame=mat('#173a49'),mark=mat('#d4eaf0');
+ if(side){for(const dz of [-width/2,width/2])box(x,y+1.6,z+dz,.22,3.2,.22,frame);box(x,y+3.25,z,.25,.3,width+.3,frame);box(x,y+.05,z,2.2,.05,width-.4,mark);}
+ else{for(const dx of [-width/2,width/2])box(x+dx,y+1.6,z,.22,3.2,.22,frame);box(x,y+3.25,z,width+.3,.3,.25,frame);box(x,y+.05,z,width-.4,.05,2.2,mark);}
+ const sign=text(title,x+(side?.17:0),y+3.3,z+(side?0:.17),Math.min(width,4),'#edfaff');if(side)sign.rotation.y=Math.PI/2;
+ }
+ function fence(x,z,w,d,h=3){if(w<100)entry(x+w/2,z,4,'ACCESS',true);if(w<100)obstacles.all.push({x,z:z-d/2,w,d:.08},{x,z:z+d/2,w,d:.08},{x:x-w/2,z,w:.08,d},{x:x+w/2,z:z-d/4-1,w:.08,d:d/2-2},{x:x+w/2,z:z+d/4+1,w:.08,d:d/2-2});const fm=mat('#526658');for(let a=-w/2;a<=w/2;a+=5){cyl(x+a,h/2,z-d/2,.09,h,fm);cyl(x+a,h/2,z+d/2,.09,h,fm)}for(let a=-d/2;a<=d/2;a+=5){cyl(x-w/2,h/2,z+a,.09,h,fm);if(w>=100||Math.abs(a)>=2)cyl(x+w/2,h/2,z+a,.09,h,fm)}const net=mat('#6c8671',{transparent:true,opacity:.15});box(x,h/2,z-d/2,w,h,.03,net);box(x,h/2,z+d/2,w,h,.03,net);box(x-w/2,h/2,z,.03,h,d,net);box(x+w/2,h/2,z-d/4-1,.03,h,d/2-2,net);box(x+w/2,h/2,z+d/4+1,.03,h,d/2-2,net);line([[x-w/2,h,z-d/2],[x+w/2,h,z-d/2],[x+w/2,h,z+d/2],[x-w/2,h,z+d/2],[x-w/2,h,z-d/2]],'#526658')}
  function lamp(x,z,h=6){cyl(x,h/2,z,.09,h,dark);box(x,h,z,.7,.14,.7,warm);}
  // Coast, park ground, surrounding skyline.
  box(0,-2.2,-10,245,4,260,mat('#c2bea0'));box(0,-.09,-10,237,.2,252,grass);box(0,-2.6,-370,2200,1,500,mat('#79b8c5',{roughness:.25,metalness:.2}));box(0,-1.2,-148,600,1,27,mat('#c6c6a5'));
@@ -114,7 +120,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
   for(let x=-65;x<=-5;x+=5){if(f!==0||x!==-35)box(x,y+2.55,19,.11,4.5,.18,trim);if(f!==0||x!==-45)box(x,y+2.55,-19,.11,4.5,.18,trim)}
   for(let z=-19;z<=19;z+=4.75){box(-65,y+2.55,z,.18,4.5,.11,trim);box(-5,y+2.55,z,.18,4.5,.11,trim)}
   box(-47,y+2.5,19.2,13,4.8,.65,white);group=interior;
-  for(let x=-62;x<-5;x+=14){box(x,y+2.5,17,.48,4.5,.48,white);box(x,y+2.5,-17,.48,4.5,.48,white)}
+  for(let x=-62;x<-5;x+=14){if(f!==0||x!==-34)box(x,y+2.5,17,.48,4.5,.48,white);box(x,y+2.5,-17,.48,4.5,.48,white)}
   group=ceiling;for(let x=-59;x<-8;x+=10)for(let z=-13;z<18;z+=10){box(x,y+4.4,z,3,.05,.8,warm)}group=interiorGroup;
   for(let z=-14;z<17;z+=8){planter(-62,y+.4,z,1.2,1.2);planter(-8,y+.4,z,1.2,1.2)}
   // Stair and elevator core at rear, consistent in each floor.
@@ -204,6 +210,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  for(const x of [-58,-46,-14])bench(x,.2,34);for(const z of [-35,0,34])bench(17,.2,z,Math.PI/2);
  // Electric golf cart, animated on a safe exterior route.
  const cart=new T.Group();cart.name='parked-cart-retired';scene.add(cart);group=cart;box(0,.6,0,1.7,.3,3,white);box(0,1.1,.35,1.5,.6,1,dark);box(0,2.1,0,1.9,.1,2.6,white);for(const x of [-.8,.8]){box(x,1.4,-1,.06,1.4,.06,trim);for(const z of [-.9,.9])sphere(x,.4,z,.32,.6,.6,dark)}box(0,1.5,-.9,1.4,.7,.04,glass);cart.position.set(1,.1,71);cart.visible=false;group=scene;
+ entry(-43,-19,4,'GARDEN ENTRANCE');entry(36,46,3,'CAFÉ');entry(43,40,3,'POOL');
  const entranceStone=mat('#c9cece'),entranceFrame=mat('#182e34'),entranceLight=mat('#fff1ce',{emissive:'#ffe3a3',emissiveIntensity:1.8});
  box(-35,4.25,19,4.6,.45,.5,entranceFrame);for(const x of [-37.1,-32.9])box(x,2.1,19,.17,4.1,.22,entranceFrame);text('MAIN ENTRANCE',-35,4.25,19.28,4,'#fff4d4');
  box(-35,4.05,21,6,.22,4.5,entranceFrame);box(-35,3.90,21,4,.05,1.7,entranceLight);box(-35,.10,27.5,4.5,.20,11,entranceStone);const entryRamp=new T.Mesh(new T.BoxGeometry(4.5,.1,Math.hypot(3,.2)),entranceStone);entryRamp.position.set(-35,.25,20.5);entryRamp.rotation.x=Math.atan2(.2,3);scene.add(entryRamp);
@@ -213,7 +220,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  function setFloor(value,owner=false){floorGroups.forEach((g,i)=>{g.visible=value==='all'||(value==='roof')||i<=Number(value);facades[i].visible=value==='all'||value==='roof'||i<Number(value);ceilings[i].visible=facades[i].visible});roof.visible=value==='all'||value==='roof';exterior.visible=value==='all'||value==='roof';ownerGroup.visible=owner;}
  const servicePath=new T.Mesh(new T.BoxGeometry(4,.08,12),stone);servicePath.position.set(-43,.16,-28);scene.add(servicePath);const rearRamp=new T.Mesh(new T.BoxGeometry(4,.1,Math.hypot(3,.2)),stone);rearRamp.position.set(-43,.25,-20.5);rearRamp.rotation.x=-Math.atan2(.2,3);scene.add(rearRamp);
  const doors=[];
- for(const [x,z,width] of [[-35,19,4],[-43,-19,4]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+side*width/4,2.1,z);const pane=new T.Mesh(new T.BoxGeometry(width/2,3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.06,3.8,.12),trim);rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,leaves,open:0})}
+ for(const [x,z,width] of [[-35,19,4],[-43,-19,4]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+side*width/4,2.1,z);const pane=new T.Mesh(new T.BoxGeometry(width/2,3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.10,3.8,.12),mat('#173a49'));rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,leaves,open:0})}
  function updateDoors(actors,dt){for(const d of doors){const near=actors.some(a=>(a.floor==='all'||a.floor==='0')&&Math.hypot(a.rig.model.position.x-d.x,a.rig.model.position.z-d.z)<5);d.open=T.MathUtils.damp(d.open,near?1:0,8,dt);for(const {leaf,side}of d.leaves)leaf.position.x=d.x+side*(d.width/4+d.open*d.width/2)}}
  // Both sides of the ground entrance share the exact same wall/furniture collisions.
  const groundObstacles=[...obstacles.all,...obstacles[0]];obstacles.all=groundObstacles;obstacles[0]=groundObstacles;

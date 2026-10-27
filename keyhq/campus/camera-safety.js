@@ -8,11 +8,12 @@ export class CameraSafety {
  for(const section of this.sections){const box=section.bounds;let hide=false;
  if(enabled&&aim){const delta=camera.position.clone().sub(aim),distance=delta.length();this.ray.set(aim,delta.normalize());const expanded=box.clone().expandByScalar(section.kind==='wall'?.45:.15),hit=this.ray.intersectBox(expanded,new T.Vector3());const obstructs=!!hit&&hit.distanceTo(aim)<distance+.1;
  const localCeiling=inside&&section.kind==='slab'&&box.min.y>p.y+2&&box.min.y<camera.position.y+1&&box.distanceToPoint(new T.Vector3(p.x,box.min.y,p.z))<8;
- hide=obstructs||localCeiling;
+ hide=inside&&(obstructs||localCeiling);
  // Never remove the occupied floor surface or a floor below the avatar.
  if(section.kind==='slab'&&box.max.y<=p.y+1)hide=false;
  }
- if(hide){section.clearSince=0;}else if(section.hidden&&enabled){section.clearSince ||= now;hide=now-section.clearSince<350;}
+ if(hide){section.hideSince ??= now;hide=section.hidden||now-section.hideSince>=150;section.clearSince=0;}else section.hideSince=null;
+ if(hide){section.clearSince=0;}else if(section.hidden&&enabled){section.clearSince ||= now;hide=now-section.clearSince<650;}
  if(hide!==section.hidden){section.hidden=hide;section.mesh.setMatrixAt(section.id,hide?this.zero:section.transform);touched.add(section.mesh);}
  if(hide)this.hidden.push({object:section.mesh.uuid,instance:section.id,kind:section.kind,floor:section.floor});
  }

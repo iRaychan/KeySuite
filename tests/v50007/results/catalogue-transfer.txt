@@ -1,0 +1,166 @@
+{
+  "pass": true,
+  "catalogue": {
+    "opened": true,
+    "models": [
+      "BGF 350M",
+      "BGF 350E",
+      "BGF 400",
+      "BGF 500"
+    ],
+    "dialog": true,
+    "denied": true
+  },
+  "transfers": [
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "m3h",
+      "headUnit": "m"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "m3h",
+      "headUnit": "ft"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "m3h",
+      "headUnit": "bar"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "m3h",
+      "headUnit": "kpa"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "m3h",
+      "headUnit": "psi"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "gpm",
+      "headUnit": "m"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "gpm",
+      "headUnit": "ft"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "gpm",
+      "headUnit": "bar"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "gpm",
+      "headUnit": "kpa"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "gpm",
+      "headUnit": "psi"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "igpm",
+      "headUnit": "m"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "igpm",
+      "headUnit": "ft"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "igpm",
+      "headUnit": "bar"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "igpm",
+      "headUnit": "kpa"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "igpm",
+      "headUnit": "psi"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lps",
+      "headUnit": "m"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lps",
+      "headUnit": "ft"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lps",
+      "headUnit": "bar"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lps",
+      "headUnit": "kpa"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lps",
+      "headUnit": "psi"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lpm",
+      "headUnit": "m"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lpm",
+      "headUnit": "ft"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lpm",
+      "headUnit": "bar"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lpm",
+      "headUnit": "kpa"
+    },
+    {
+      "flow": "75.123456",
+      "head": "100.123456",
+      "flowUnit": "lpm",
+      "headUnit": "psi"
+    }
+  ]
+}

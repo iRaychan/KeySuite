@@ -29,3 +29,8 @@
 @media(max-width:700px){#gameHUD{bottom:85px;left:auto;right:8px;transform:none;width:calc(100vw - 150px);max-height:240px;overflow:auto}.camera,body.detail .camera{justify-content:flex-start;width:calc(100vw - 16px);overflow-x:auto}.camera #smartActions{flex-shrink:0}.actions-panel{max-height:calc(100dvh - 370px)}#actionsBody{max-height:calc(100dvh - 430px)}}
 
 #inviteLeisure,#divePlatform{display:block;width:100%;margin-top:6px;text-align:left;padding:8px 10px}
+
+/* V5.00.07 Explore preference */
+.floors.minimized > :not(#toggleExplore){display:none!important}.floors.minimized{width:auto;min-width:170px;max-height:none}#toggleExplore{display:flex;justify-content:space-between;gap:16px;width:100%}
+
+.dive-controls{position:fixed;bottom:105px;left:50%;transform:translateX(-50%);padding:12px;width:290px;z-index:15}.dive-controls[hidden]{display:none}.dive-controls label{display:inline-block;margin:4px}.dive-controls p{font-size:12px;margin:6px 0}

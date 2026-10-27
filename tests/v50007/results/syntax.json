@@ -1,0 +1,92 @@
+[
+  {
+    "file": "v40407-role-authority.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "index.html:script0",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "index.html:script41",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "index.html:script45",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "index.html:script46",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "v50007-version-lock.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "roles.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "v40001-multibrand.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "bgf-v50006.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "assembly.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "sw.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "keyhq/campus/diving.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "keyhq/campus/scene.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "keyhq/campus/controls.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "keyhq/campus/main.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "keyhq/campus/camera-safety.js",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "selector-es/index.html:script1",
+    "exit": 0,
+    "error": ""
+  },
+  {
+    "file": "selector-es/index.html:script8",
+    "exit": 0,
+    "error": ""
+  }
+]

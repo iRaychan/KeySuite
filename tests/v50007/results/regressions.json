@@ -1,0 +1,42 @@
+[
+  {
+    "test": "tests/v50007/assembly.cjs",
+    "exit": 0,
+    "output": "PASS 25 flow/head combinations, six decimal digits, baseplate-independent quantity and totals, duplicate managed cleanup, motor change/removal, manual coupling preservation, System no-op.\n"
+  },
+  {
+    "test": "tests/v42859-assembly-pricing-regression.cjs",
+    "exit": 0,
+    "output": "V4.28.59 assembly/system pricing and restored-action regression checks passed.\n"
+  },
+  {
+    "test": "tests/v42922-tyre-coupling-regression.cjs",
+    "exit": 0,
+    "output": "V4.29.22 tyre coupling regression: PASS\n"
+  },
+  {
+    "test": "tests/v42914-motor-final-price-regression.cjs",
+    "exit": 0,
+    "output": "V4.29.14 final-to-final motor replacement regression: PASS\n"
+  },
+  {
+    "test": "tests/v50001/pricing.cjs",
+    "exit": 0,
+    "output": "PASS C4 IE2 / C6 IE3 defaults and alternative efficiency price differences\nPASS shelter toggles: RM1000 per panel, independent of pump count, BOM/display/quote\nPASS all 8 accessory combinations \u00d7 1/2/3 pumps and display/quotation totals\n"
+  },
+  {
+    "test": "tests/v42926/quotation.cjs",
+    "exit": 0,
+    "output": "Quotation lookup: linked authorized customer, updated customer, snapshot fallback and printed-name priority passed\n"
+  },
+  {
+    "test": "tests/v42918-auth-bootstrap.cjs",
+    "exit": 0,
+    "output": "V4.29.18 auth bootstrap scenarios: PASS (logged-out, valid, expired refresh, hung request, reload)\n"
+  },
+  {
+    "test": "tests/v42858-cr-selector-regression.cjs",
+    "exit": 0,
+    "output": "V4.28.58 CR selector regression: PASS\n"
+  }
+]

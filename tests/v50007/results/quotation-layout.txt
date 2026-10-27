@@ -1,0 +1,23 @@
+{
+  "pass": true,
+  "result": {
+    "missing": [],
+    "thirteen": {
+      "rows": 5,
+      "height": 314,
+      "scrollHeight": 312,
+      "overflow": "hidden",
+      "value": "Close Coupled Pump\nc/w\t3HP 2Pole Motor\nDescription row 3\nDescription row 4\nDescription row 5\nDescription row 6\nDescription row 7\nDescription row 8\nDescription row 9\nDescription row 10\nDescription row 11\nDescription row 12\nDescription row 13"
+    },
+    "short": {
+      "rows": 5,
+      "height": 134,
+      "lineHeight": 22.4,
+      "padding": 20,
+      "value": "c/w\t3HP 2Pole Motor"
+    },
+    "originalValue": "Close Coupled Pump\nc/w\t3HP 2Pole Motor\nDescription row 3\nDescription row 4\nDescription row 5\nDescription row 6\nDescription row 7\nDescription row 8\nDescription row 9\nDescription row 10\nDescription row 11\nDescription row 12\nDescription row 13",
+    "noteCount": 40,
+    "messengerCount": 40
+  }
+}

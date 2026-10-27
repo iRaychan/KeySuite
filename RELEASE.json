@@ -1,15 +1,18 @@
 {
-  "version": "5.00.06",
-  "baseline": "5.00.05",
-  "upgrade_supported_from": "5.00.05",
-  "changes": [
-    "Adds the BGF 350M, BGF 350E, BGF 400 and BGF 500 Price List models from the supplied BGF workbook without inventing blank prices",
-    "Makes the authenticated KeyHQ Messenger available beside Important Note on every KeySuite page while reusing the isolated private/group Realtime service",
-    "Auto-expands quotation descriptions from a five-row minimum to the complete wrapped content height while preserving c/w tab alignment"
-  ],
-  "new_database_migration_required": true,
-  "production_migration_applied": true,
+  "version": "5.00.07",
+  "baseline": "5.00.06",
+  "upgrade_supported_from": "5.00.06",
+  "new_database_migration_required": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
-  "notes": "Targeted release with one additive BGF Price List migration and one RLS performance migration. Both were deployed and verified on the production KeySuite Supabase project on 2026-10-27. No Edge Function deployment, GitHub push or frontend hosting deployment was performed. See README_UPGRADE_V50006.md."
+  "changes": [
+    "BGF Product catalogue using existing supplied model data",
+    "Pumpset selected duty units and precision",
+    "Motor-owned automatic coupling quantities and deduplication",
+    "Persistent Explore panel minimize/expand",
+    "FREE roof restoration and stable FOLLOW cutaways",
+    "Contrasting entrance frames and clear sports gates",
+    "Stainless 10/20/30 m tower, manual stairs and configurable dives",
+    "Remove ground-floor entrance pillar and its collider"
+  ]
 }

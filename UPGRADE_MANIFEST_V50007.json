@@ -1,0 +1,182 @@
+{
+  "from": "5.00.06",
+  "to": "5.00.07",
+  "full_release_sha256": "aecee4e217fd6086f7f30610e717a57185f30522fa6ac7519c148b40297bd184",
+  "new_database_migration_required": false,
+  "edge_function_deploy_required": false,
+  "deletions": [],
+  "files": {
+    "CHANGELOG_V50007.md": {
+      "sha256": "25d754749b748ab2711514994cc301b8fb02ab683b03928b79892a035eb0af08",
+      "baseline_sha256": null
+    },
+    "INTEGRITY_V50007.json": {
+      "sha256": "3072ee39a9ab643500c7409ae11dcc31e85ee0d063b7488611c70242d7ba2734",
+      "baseline_sha256": null
+    },
+    "MODIFIED_FILES_V50007.md": {
+      "sha256": "43cf45f5202c1d75d5121a13973e3e51e44f8a3f8da3b9bcf28ba1495f197566",
+      "baseline_sha256": null
+    },
+    "RELEASE.json": {
+      "sha256": "4c4f2b8ac79633609c21e28ddb45af27bc8ffb05168b8301130d440d94882b2f",
+      "baseline_sha256": "973cdd042a7e3899cc3591828fab6163d40ef143980e42d92e288090a6411774"
+    },
+    "SHA256SUMS_V50007.txt": {
+      "sha256": "8603d6c9b7aebe3dcb06fbcf92c1d36b63b2fd407d0602b7da02feed78ce0ff3",
+      "baseline_sha256": null
+    },
+    "VERIFICATION_V50007.md": {
+      "sha256": "906370412d3d2ab8d8d2df51fef89c04043cd742d1b66e5eb1501bf12f64253f",
+      "baseline_sha256": null
+    },
+    "VERSION.txt": {
+      "sha256": "5fb522a0c0ec1c3a13dcaf8e1072055400528f559a2a140046b268f3f85ec413",
+      "baseline_sha256": "fb242f3388e188e003904e7025964e100ca37c9f48fb7822da429fd61ff1718d"
+    },
+    "assembly.js": {
+      "sha256": "a2781566f814fde8b18e1a0a7a510b399c79600a646add1149317628c0ddb7e4",
+      "baseline_sha256": "964b2c2d419c6b3155483892c9f1ec93d625c2048e4546f2ef14f7f71b089f8e"
+    },
+    "bgf-v50006.js": {
+      "sha256": "ec00d1015bd57db80ba74dc9c824b86cdd918ef93a5a830aaf1bbc64aee9cef3",
+      "baseline_sha256": "53791c341410886402d9670b6a0c1a3f2d48ee4d7a6add7bce38347a1182a2ac"
+    },
+    "index.html": {
+      "sha256": "69175ffdea13caee27f5a71d9bb072366e2c803fa8b3bc42165c07d27193cc22",
+      "baseline_sha256": "a283a68fd0087016ba699f22e1b06ca2bf965595dbb9e419d42fe0a112651f67"
+    },
+    "keyhq/campus/camera-safety.js": {
+      "sha256": "5735e476f06f2fb33d8765d8ac725ea691d1cc9f3935b336498a2e5766e8dead",
+      "baseline_sha256": "3a1f8717f003d5c2d3763d410a05946659d086517a2076ef36dc431c759fabc2"
+    },
+    "keyhq/campus/campus.css": {
+      "sha256": "d6c4bae44eec8b05eaad90ab49ddf5923440308d61ce5bfd0328f7896281ef5e",
+      "baseline_sha256": "a6f6b7fec4dee66ebf22d48239319a72456ac8bf512de3385db4914839353b2f"
+    },
+    "keyhq/campus/controls.js": {
+      "sha256": "6f9b99f22d2d329f99ec77941e5dacf45d50b6279b9a5410a0ace05b3eaa8785",
+      "baseline_sha256": "2e45f72a6072d5f331dc18e5cd46b3a6976844b8641d9c0d2b02104c4136abf7"
+    },
+    "keyhq/campus/diving.js": {
+      "sha256": "0be63547db14b011d21e33df7c83cf0bc87ebde246b71bd3e31ebf2e5cd9a07a",
+      "baseline_sha256": "5baef30e2694f9a4b4b0f7afc5ca99a8257e5bd1426e1ae5e670c3abd87efb9f"
+    },
+    "keyhq/campus/main.js": {
+      "sha256": "6711ba0ee1f46951df5fc3705d8e525c6af5e677f38651ad3dfbe3d05da5b8fd",
+      "baseline_sha256": "56221e5a2f1ffe7801f7ce41af74d2f2ad0cfa3f3857e8e573776dc24f53c919"
+    },
+    "keyhq/campus/scene.js": {
+      "sha256": "d93529bf3c6126434618569cc1b7af7de3ddd2cea667538bdee96d76a96a2878",
+      "baseline_sha256": "3241bfe37c6ffd8d669aecdd6b50e821ce19c8a205fc7827eadf0b73b657262b"
+    },
+    "keyhq/index.html": {
+      "sha256": "e9fd4979983a88ff49cd362ad8867c22c2181f15d579fb2377c60c17072a2234",
+      "baseline_sha256": "b03119562dfa7e96e17018010d136be16978d59f5ee3bb9188c2b987674ab91d"
+    },
+    "manifest.json": {
+      "sha256": "b3825e3fc503ed5718671994d4022a65c8579bd90a1e5d41bd82d36bcf42362f",
+      "baseline_sha256": "29b3cdcd7d51470205c746798d8dc8eb2ada1dfd4674d2ee97ea21fa0779ed4d"
+    },
+    "roles.js": {
+      "sha256": "e843c4e184ceb6759f6034dd8c452219c828f5fdea60144e4b7228c892c7e81f",
+      "baseline_sha256": "63f96b23fc8cec41274a5c1e9e0c0adfc2a9fd04c742bc7f9cf965e625809fa1"
+    },
+    "selector-es/index.html": {
+      "sha256": "93230b96c5ba91b6bbb920d6851281183b6ad9dfd4c925206379eb7974284dbf",
+      "baseline_sha256": "ce8bffb2d7b751d817f60f9217b76395aee77ce4decac7349e8af820165ecf34"
+    },
+    "sw.js": {
+      "sha256": "68f6cb9fd8bdea2fd070f446a397355935498c105d570dbb1dd2828b8657ce6c",
+      "baseline_sha256": "07c3ee13930e1b02632b48fff3b876324681f68fc5598ff8144b411731aa276a"
+    },
+    "tests/v50007/assembly.cjs": {
+      "sha256": "5ca319c163f99106ed43a2791fbec16cc2054c1b02010ace3dc89028b655ea5b",
+      "baseline_sha256": null
+    },
+    "tests/v50007/browser.cjs": {
+      "sha256": "6e886a8072d95ba358b3db8bd8cd0cda8663036e97e542b9bb20275db2e26bdd",
+      "baseline_sha256": null
+    },
+    "tests/v50007/catalogue-transfer.cjs": {
+      "sha256": "9ff1ed4976819fc5079461b66e5d8b86301e400f48834fd1eb1f7b7d0cd1a031",
+      "baseline_sha256": null
+    },
+    "tests/v50007/continuation-pdf.cjs": {
+      "sha256": "abae4ab4454fb484f363d7d4818b287379732194747a23a9ef39481c43e8dfed",
+      "baseline_sha256": null
+    },
+    "tests/v50007/navigation.cjs": {
+      "sha256": "9fd487d64aa41fd4ba967abc45a238bbc67ef6a0023e6713809f0ee459eff162",
+      "baseline_sha256": null
+    },
+    "tests/v50007/quotation-layout.cjs": {
+      "sha256": "55f11abd9ca2807b28c3592c0406bd6fe318deff144b9160cc01a6243213a03a",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/browser.txt": {
+      "sha256": "e646f78208207a91ddaf6a0831344d08fc69d4c933ed0c88934cc9613cf8fe3e",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/catalogue-transfer.txt": {
+      "sha256": "b3a300b81579f124dbb7df5e3ceeb729cd778e74ead651940ed76475d88b6ef9",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/continuation-pdf.txt": {
+      "sha256": "3cd01c80e3ab87a181ea2974499573f410be4187e57955e94219fbca6933fd94",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/court-entrance.png": {
+      "sha256": "68e42849f28fc61d4be02004ad01ca5f9c9dd726aaeb0d3b736df51718ddb3d0",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/hq-entrance.png": {
+      "sha256": "7bfe14014299a352349e621678c029b9ec3080dc1f1bf7f204b9c5a821393d5a",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/navigation.txt": {
+      "sha256": "d54562da15d0a66f8d97cc9489bfd0640b5f7a0823f3aabdfd91469857dfd60e",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/quotation-layout.txt": {
+      "sha256": "def6e7527cfe8b15db6a13677595f2ef1960572830b242820ffddc0718f59ac6",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/regressions.json": {
+      "sha256": "6d3cb95e19ef43a76ee6013fcb442d5f8d1a08b69ac73590aa356927ebdb8b42",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/sealed-pdf.txt": {
+      "sha256": "f886b6e537c7ccad53a2092fc339ff7801db8e89a61464221ad93438103c86ea",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/syntax.json": {
+      "sha256": "11d718700ec0e3db60c358edb6c588ce6ebf7b6afc228e24d57949030c4557a1",
+      "baseline_sha256": null
+    },
+    "tests/v50007/results/tower.png": {
+      "sha256": "ab059970982797a71fafd0fb38c1f685830c6bb1e2e3be2151e04d5f12527eed",
+      "baseline_sha256": null
+    },
+    "tests/v50007/sealed-pdf.cjs": {
+      "sha256": "11b1789f540cec889da97ca30f2b925c00ad1be6fa783f9e2d745618ab9dd45e",
+      "baseline_sha256": null
+    },
+    "tools/build_v50007_release.py": {
+      "sha256": "85649e0e5f5303847a785526a7482173424533312e069e3835cb6341a77bf249",
+      "baseline_sha256": null
+    },
+    "v40001-multibrand.js": {
+      "sha256": "e9ad4062fb276ba671688715be0151953fbe171076cc7cd06e98616756d4cde9",
+      "baseline_sha256": "e39330892aba541fce232a50324dfb411ced37fb03e6b2248c9e54bfde5651da"
+    },
+    "v40407-role-authority.js": {
+      "sha256": "b6ab304fd7759e57c60616f423493989636d8ef69e219f84d62a5d7d74edf982",
+      "baseline_sha256": "3f2e65a7af4752e48818f85fb8bca1cd2a2f17f240272a6e4be98fb109376bed"
+    },
+    "v50007-version-lock.js": {
+      "sha256": "6de491201ed13b72dbe3dfea7f79f5f331c43ef51cdd6c3bfb4db77810bfaa3d",
+      "baseline_sha256": null
+    }
+  }
+}

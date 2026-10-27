@@ -5,8 +5,8 @@
   window.__KEYSUITE_V40407_ROLE_AUTHORITY__=true;
 
   const VERSION='4.22.03';
-  const FAMILIES=['CHC','CR','BFI','ES'];
-  const PRODUCT_PAGE_FAMILY={productChc:'CHC',productCr:'CR',crPriceList:'CR',productBfi:'BFI',productEs:'ES'};
+  const FAMILIES=['CHC','CR','BFI','BGF','ES'];
+  const PRODUCT_PAGE_FAMILY={productChc:'CHC',productCr:'CR',crPriceList:'CR',productBfi:'BFI',productBgf:'BGF',productEs:'ES'};
   // V4.17.02: Product → Keylargo is an Owner-assigned role scope.
   const KEYLARGO_PRODUCT_PAGE_FAMILY={
     productBaseplate:'BASEPLATE',
@@ -31,6 +31,7 @@
     if(group==='CHC'||group==='CHC_G1'||group==='CHC_G2')return 'CHC';
     if(group==='CR')return 'CR';
     if(group==='BFI')return 'BFI';
+    if(group==='BGF')return 'BGF';
     if(group==='ES')return 'ES';
     return '';
   };
