@@ -1,0 +1,12 @@
+PASS isolated PostgreSQL: migration, owner save, non-owner/anonymous denial, invalid product/rates, currency save, unrelated data preserved. [
+  {
+    nspname: 'keysuite_bgf_private',
+    proname: 'save_rule',
+    prosecdef: true
+  },
+  {
+    nspname: 'public',
+    proname: 'keysuite_save_bgf_category_rule_v50008',
+    prosecdef: false
+  }
+]

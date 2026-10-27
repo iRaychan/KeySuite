@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "pdfPath": "/Users/iraychan/.codex/.chatgpt-projects/g-p-6a5c5eff4184819181395a240940f750/tmp/pdfs/ks05-v50003-sealed.pdf",
+  "expected": "Capacity: 8 L/s (28.8 m³/hr) @ 25 Mtr",
+  "description": "Capacity: 8 L/s (28.8 m³/hr) @ 25 Mtr\nVertical Multistage Pump Model: CHC 32-20\nc/w\t5.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)\nSuction & Discharge: DN65 x DN65\nMaterial: SS304 (Cast Iron Connection) / Mechanical Seal",
+  "rowClass": "print-system-item-desc-row print-capacity-item",
+  "model": "KeyPLC VSD Booster System (2Pumps System)",
+  "status": "sealed"
+}

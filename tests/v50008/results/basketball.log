@@ -1,0 +1,14 @@
+free-throw one-hand {"status":"finished","shots":10,"makes":10,"scores":{"A":10,"B":0},"elapsed":25.019999999999555}
+three-point one-hand {"status":"finished","shots":12,"makes":12,"scores":{"A":36,"B":0},"elapsed":30.01999999999945}
+1-on-1 one-hand {"status":"finished","shots":11,"makes":11,"scores":{"A":12,"B":10},"elapsed":67.18000000000377}
+3-on-3 one-hand {"status":"finished","shots":12,"makes":11,"scores":{"A":10,"B":12},"elapsed":73.52000000000251}
+dunk one-hand {"status":"finished","shots":3,"makes":3,"scores":{"A":120,"B":0},"elapsed":7.519999999999928}
+dunk two-hand {"status":"finished","shots":3,"makes":3,"scores":{"A":135,"B":0},"elapsed":7.519999999999928}
+dunk 360 {"status":"finished","shots":3,"makes":3,"scores":{"A":150,"B":0},"elapsed":7.519999999999928}
+time-attack one-hand {"status":"finished","shots":12,"makes":12,"scores":{"A":24,"B":0},"elapsed":30.01999999999945}
+PASS configuration { mode: 'free-throw', shots: 20 } shots 20 racks 1
+PASS configuration { mode: 'three-point', seconds: 120 } shots 25 racks 5
+PASS configuration { mode: 'time-attack', seconds: 30 } shots 12 racks 1
+PASS configuration { mode: 'time-attack', seconds: 60 } shots 24 racks 1
+PASS configuration { mode: 'time-attack', seconds: 120 } shots 48 racks 1
+PASS manual movement/sprint, teammate pass, nearby defensive steal, jump without possession, charged shot.

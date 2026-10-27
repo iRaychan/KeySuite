@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {createBasketballArena} from './basketball-arena.js';
 // World units are metres. The football playing surface is 68 × 105 metres.
 export const destinations=[
  {id:'hq',name:'Headquarters',x:-35,z:0,y:7,d:102},
@@ -30,7 +31,7 @@ export function createCampus(renderer){
   const angle=ry+new T.Euler().setFromQuaternion(group.getWorldQuaternion(new T.Quaternion())).y;
   obstacles[floor].push({x:center.x,z:center.z,w:Math.abs(w*Math.cos(angle))+Math.abs(d*Math.sin(angle)),d:Math.abs(w*Math.sin(angle))+Math.abs(d*Math.cos(angle))});
  }
- let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[],tags:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());const building=(floor!=='all'||group.name==='building-exterior');b.tags.push(building&&geo==='box'&&((h>=1.2&&Math.min(w,d)<=1.2)||(h<.5&&w>3&&d>3))?{floor,kind:h<.5?'slab':'wall'}:null);}
+ let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[],tags:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());const building=(floor!=='all'||group.name==='building-exterior');b.tags.push(building&&geo==='box'&&((h>=1.2&&Math.min(w,d)<=1.2&&Math.max(w,d)>=1.5&&(m===glass||group.name.startsWith('facade')||group.name==='building-exterior'))||(h<.5&&w>3&&d>3))?{floor,kind:h<.5?'slab':'wall'}:null);}
  const box=(x,y,z,w,h,d,m=white,ry=0)=>{
  if(w>=59&&w<=64&&d>=37&&d<=41&&h<.5&&x===-35&&z===0){
   const left=x-w/2,right=x+w/2,back=z-d/2,front=z+d/2;
@@ -99,7 +100,21 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  else{for(const dx of [-width/2,width/2])box(x+dx,y+1.6,z,.22,3.2,.22,frame);box(x,y+3.25,z,width+.3,.3,.25,frame);box(x,y+.05,z,width-.4,.05,2.2,mark);}
  const sign=text(title,x+(side?.17:0),y+3.3,z+(side?0:.17),Math.min(width,4),'#edfaff');if(side)sign.rotation.y=Math.PI/2;
  }
- function fence(x,z,w,d,h=3){if(w<100)entry(x+w/2,z,4,'ACCESS',true);if(w<100)obstacles.all.push({x,z:z-d/2,w,d:.08},{x,z:z+d/2,w,d:.08},{x:x-w/2,z,w:.08,d},{x:x+w/2,z:z-d/4-1,w:.08,d:d/2-2},{x:x+w/2,z:z+d/4+1,w:.08,d:d/2-2});const fm=mat('#526658');for(let a=-w/2;a<=w/2;a+=5){cyl(x+a,h/2,z-d/2,.09,h,fm);cyl(x+a,h/2,z+d/2,.09,h,fm)}for(let a=-d/2;a<=d/2;a+=5){cyl(x-w/2,h/2,z+a,.09,h,fm);if(w>=100||Math.abs(a)>=2)cyl(x+w/2,h/2,z+a,.09,h,fm)}const net=mat('#6c8671',{transparent:true,opacity:.15});box(x,h/2,z-d/2,w,h,.03,net);box(x,h/2,z+d/2,w,h,.03,net);box(x-w/2,h/2,z,.03,h,d,net);box(x+w/2,h/2,z-d/4-1,.03,h,d/2-2,net);box(x+w/2,h/2,z+d/4+1,.03,h,d/2-2,net);line([[x-w/2,h,z-d/2],[x+w/2,h,z-d/2],[x+w/2,h,z+d/2],[x-w/2,h,z+d/2],[x-w/2,h,z-d/2]],'#526658')}
+ function perimeterFence(x,z,w,d,h=3){if(w<100)entry(x+w/2,z,4,'ACCESS',true);if(w<100)obstacles.all.push({x,z:z-d/2,w,d:.08},{x,z:z+d/2,w,d:.08},{x:x-w/2,z,w:.08,d},{x:x+w/2,z:z-d/4-1,w:.08,d:d/2-2},{x:x+w/2,z:z+d/4+1,w:.08,d:d/2-2});const fm=mat('#526658');for(let a=-w/2;a<=w/2;a+=5){cyl(x+a,h/2,z-d/2,.09,h,fm);cyl(x+a,h/2,z+d/2,.09,h,fm)}for(let a=-d/2;a<=d/2;a+=5){cyl(x-w/2,h/2,z+a,.09,h,fm);if(w>=100||Math.abs(a)>=2)cyl(x+w/2,h/2,z+a,.09,h,fm)}const net=mat('#6c8671',{transparent:true,opacity:.15});box(x,h/2,z-d/2,w,h,.03,net);box(x,h/2,z+d/2,w,h,.03,net);box(x-w/2,h/2,z,.03,h,d,net);box(x+w/2,h/2,z-d/4-1,.03,h,d/2-2,net);box(x+w/2,h/2,z+d/4+1,.03,h,d/2-2,net);line([[x-w/2,h,z-d/2],[x+w/2,h,z-d/2],[x+w/2,h,z+d/2],[x-w/2,h,z+d/2],[x-w/2,h,z-d/2]],'#526658')}
+ function fence(x,z,w,d,h=3){
+ if(w>=100)return perimeterFence(x,z,w,d,h);
+ const fm=mat('#526658'),net=mat('#6c8671',{transparent:true,opacity:.15});
+ for(const sign of [-1,1]){
+  const edge=x+sign*w/2;entry(edge,z,4,sign<0&&x>0?'HQ ACCESS':'ACCESS',true);
+  // One geometry source also registers exact matching collision rectangles.
+  for(const part of [-1,1])box(edge,h/2,z+part*(d/4+1),.08,h,d/2-2,net);
+  box(x,h/2,z+sign*d/2,w,h,.08,net);
+  for(let a=-w/2;a<=w/2;a+=5)cyl(x+a,h/2,z+sign*d/2,.09,h,fm);
+  for(let a=-d/2;a<=d/2;a+=5)if(Math.abs(a)>=2.2)cyl(edge,h/2,z+a,.09,h,fm);
+  box(edge+sign*2,.08,z,4,.08,3,stone);
+ }
+ line([[x-w/2,h,z-d/2],[x+w/2,h,z-d/2],[x+w/2,h,z+d/2],[x-w/2,h,z+d/2],[x-w/2,h,z-d/2]],'#526658');
+ }
  function lamp(x,z,h=6){cyl(x,h/2,z,.09,h,dark);box(x,h,z,.7,.14,.7,warm);}
  // Coast, park ground, surrounding skyline.
  box(0,-2.2,-10,245,4,260,mat('#c2bea0'));box(0,-.09,-10,237,.2,252,grass);box(0,-2.6,-370,2200,1,500,mat('#79b8c5',{roughness:.25,metalness:.2}));box(0,-1.2,-148,600,1,27,mat('#c6c6a5'));
@@ -116,9 +131,9 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
   group=new T.Group();group.name='floor-'+f;scene.add(group);floorGroups.push(group);const y=f*fh;
   box(bx,y+.18,bz,bw+2,.36,bd+2,white);box(bx,y+.38,bz,bw-.3,.06,bd-.3,mat('#d9d4bd'));const interiorGroup=group,ceiling=new T.Group();interiorGroup.add(ceiling);ceilings.push(ceiling);group=ceiling;box(bx,y+fh-.17,bz,bw+3,.34,bd+3,white);group=interiorGroup;
   const fg=new T.Group();fg.name='facade-'+f;group.add(fg);facades.push(fg);const interior=group;group=fg;
-  if(f===0){box(-51,y+2.55,19,28,4.35,.1,glass);box(-19,y+2.55,19,28,4.35,.1,glass);}else box(bx,y+2.55,19,60,4.35,.1,glass);box(-65,y+2.55,0,.1,4.35,38,glass);box(-5,y+2.55,0,.1,4.35,38,glass);if(f===0){box(-55,y+2.55,-19,20,4.35,.1,glass);box(-23,y+2.55,-19,36,4.35,.1,glass);}else box(bx,y+2.55,-19,60,4.35,.1,glass);
+  if(f===0){box(-51,y+2.55,19,28,4.35,.1,glass);box(-19,y+2.55,19,28,4.35,.1,glass);}else box(bx,y+2.55,19,60,4.35,.1,glass);for(const [x,doorZ] of [[-65,6],[-5,-3]]){if(f!==0)box(x,y+2.55,0,.1,4.35,38,glass);else{const lo=doorZ-1.2,hi=doorZ+1.2;box(x,y+2.55,(-19+lo)/2,.1,4.35,lo+19,glass);box(x,y+2.55,(19+hi)/2,.1,4.35,19-hi,glass);box(x,4.05,doorZ,.1,1.35,2.4,glass);}}if(f===0){box(-55,y+2.55,-19,20,4.35,.1,glass);box(-23,y+2.55,-19,36,4.35,.1,glass);}else box(bx,y+2.55,-19,60,4.35,.1,glass);
   for(let x=-65;x<=-5;x+=5){if(f!==0||x!==-35)box(x,y+2.55,19,.11,4.5,.18,trim);if(f!==0||x!==-45)box(x,y+2.55,-19,.11,4.5,.18,trim)}
-  for(let z=-19;z<=19;z+=4.75){box(-65,y+2.55,z,.18,4.5,.11,trim);box(-5,y+2.55,z,.18,4.5,.11,trim)}
+  for(let z=-19;z<=19;z+=4.75){if(f!==0||Math.abs(z-6)>1.3)box(-65,y+2.55,z,.18,4.5,.11,trim);if(f!==0||Math.abs(z+3)>1.3)box(-5,y+2.55,z,.18,4.5,.11,trim)}
   box(-47,y+2.5,19.2,13,4.8,.65,white);group=interior;
   for(let x=-62;x<-5;x+=14){if(f!==0||x!==-34)box(x,y+2.5,17,.48,4.5,.48,white);box(x,y+2.5,-17,.48,4.5,.48,white)}
   group=ceiling;for(let x=-59;x<-8;x+=10)for(let z=-13;z<18;z+=10){box(x,y+4.4,z,3,.05,.8,warm)}group=interiorGroup;
@@ -181,8 +196,8 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  const fieldY=.36;const rect=(x,z,w,d,y=fieldY,c='#eef1d7')=>line([[x-w/2,y,z-d/2],[x+w/2,y,z-d/2],[x+w/2,y,z+d/2],[x-w/2,y,z+d/2],[x-w/2,y,z-d/2]],c);
  rect(fx,fz,68,105);line([[fx-34,fieldY,fz],[fx+34,fieldY,fz]]);ring(fx,fieldY,fz,9.15);for(const sign of [-1,1]){const end=fz+sign*52.5;rect(fx,end-sign*8.25,40.32,16.5);rect(fx,end-sign*2.75,18.32,5.5);for(const dx of [-3.66,3.66])cyl(fx+dx,1.54,end,.13,2.44,white);box(fx,2.76,end,7.45,.13,.13,white);box(fx,1.5,end+sign*.9,7.32,2.44,1.8,mat('#dde6d0',{transparent:true,opacity:.16}));cyl(fx,fieldY,end-sign*11,.25,.02,white)}fence(fx,fz,76,114,5);label('FOOTBALL · 105 × 68 m',fx,1,fz);
  for(const x of [18,96])for(const z of [-112,-65,-16]){lamp(x,z,15);box(x,15,z,3,.7,.5,warm)}
- // Basketball 28 × 15 metres, two hoops.
- box(57,.18,8,34,.36,21,mat('#69858b'));box(57,.38,8,28,.03,15,mat('#3e76b6'));rect(57,8,28,15,.41);line([[57,.41,.5],[57,.41,15.5]]);ring(57,.41,8,1.8);for(const sign of [-1,1]){const x=57+sign*12.4;box(x,.4,8,4.8,.025,4.9,mat('#b98a6b'));rect(x,8,4.8,4.9,.44);cyl(57+sign*15,1.8,8,.14,3.6,white);box(x,3.6,8,.12,1.05,1.8,white);const hoop=ring(x-sign*.6,3.05,8,.45,'#e18150');}fence(57,8,35,22,2.4);label('BASKETBALL',57,1,19);
+ // Basketball: preserve the existing 28 × 15 m footprint and location.
+ const basketball=createBasketballArena({scene,box,cyl,line,ring,mat,text,bench,lamp,planter});fence(57,8,35,22,2.4);label('KEYLARGO BASKETBALL ARENA',57,1,19);
  // Deferred outdoor detail generation after the primary architecture is visible.
  lazyZones.push(()=>{
  // Tennis and pickleball regulation playing surfaces.
@@ -211,6 +226,9 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  // Electric golf cart, animated on a safe exterior route.
  const cart=new T.Group();cart.name='parked-cart-retired';scene.add(cart);group=cart;box(0,.6,0,1.7,.3,3,white);box(0,1.1,.35,1.5,.6,1,dark);box(0,2.1,0,1.9,.1,2.6,white);for(const x of [-.8,.8]){box(x,1.4,-1,.06,1.4,.06,trim);for(const z of [-.9,.9])sphere(x,.4,z,.32,.6,.6,dark)}box(0,1.5,-.9,1.4,.7,.04,glass);cart.position.set(1,.1,71);cart.visible=false;group=scene;
  entry(-43,-19,4,'GARDEN ENTRANCE');entry(36,46,3,'CAFÉ');entry(43,40,3,'POOL');
+ for(const [x,z]of [[-5,-3],[-65,6]]){entry(x,z,2.4,x===-5?'SPORTS EXIT':'GARDEN EXIT',true,.2);const ramp=new T.Mesh(new T.BoxGeometry(3,.1,2.3),stone);ramp.position.set(x+(x===-5?1.5:-1.5),.25,z);ramp.rotation.z=(x===-5?-1:1)*Math.atan2(.2,3);scene.add(ramp);}
+ // Pavement follows existing clear corridors, avoiding the planted central strip.
+ for(const [x,z,w,d]of [[-1,-3,5,2.3],[1,-4.5,2.3,3],[7.5,-6,13,2.3],[25.5,-6,23,2.3],[37,1,2.3,14],[38.2,8,2.4,2.3],[-68,6,6,2.3],[16.5,-64,5,2.3]])box(x,.10,z,w,.08,d,stone);
  const entranceStone=mat('#c9cece'),entranceFrame=mat('#182e34'),entranceLight=mat('#fff1ce',{emissive:'#ffe3a3',emissiveIntensity:1.8});
  box(-35,4.25,19,4.6,.45,.5,entranceFrame);for(const x of [-37.1,-32.9])box(x,2.1,19,.17,4.1,.22,entranceFrame);text('MAIN ENTRANCE',-35,4.25,19.28,4,'#fff4d4');
  box(-35,4.05,21,6,.22,4.5,entranceFrame);box(-35,3.90,21,4,.05,1.7,entranceLight);box(-35,.10,27.5,4.5,.20,11,entranceStone);const entryRamp=new T.Mesh(new T.BoxGeometry(4.5,.1,Math.hypot(3,.2)),entranceStone);entryRamp.position.set(-35,.25,20.5);entryRamp.rotation.x=Math.atan2(.2,3);scene.add(entryRamp);
@@ -220,8 +238,8 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  function setFloor(value,owner=false){floorGroups.forEach((g,i)=>{g.visible=value==='all'||(value==='roof')||i<=Number(value);facades[i].visible=value==='all'||value==='roof'||i<Number(value);ceilings[i].visible=facades[i].visible});roof.visible=value==='all'||value==='roof';exterior.visible=value==='all'||value==='roof';ownerGroup.visible=owner;}
  const servicePath=new T.Mesh(new T.BoxGeometry(4,.08,12),stone);servicePath.position.set(-43,.16,-28);scene.add(servicePath);const rearRamp=new T.Mesh(new T.BoxGeometry(4,.1,Math.hypot(3,.2)),stone);rearRamp.position.set(-43,.25,-20.5);rearRamp.rotation.x=-Math.atan2(.2,3);scene.add(rearRamp);
  const doors=[];
- for(const [x,z,width] of [[-35,19,4],[-43,-19,4]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+side*width/4,2.1,z);const pane=new T.Mesh(new T.BoxGeometry(width/2,3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.10,3.8,.12),mat('#173a49'));rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,leaves,open:0})}
- function updateDoors(actors,dt){for(const d of doors){const near=actors.some(a=>(a.floor==='all'||a.floor==='0')&&Math.hypot(a.rig.model.position.x-d.x,a.rig.model.position.z-d.z)<5);d.open=T.MathUtils.damp(d.open,near?1:0,8,dt);for(const {leaf,side}of d.leaves)leaf.position.x=d.x+side*(d.width/4+d.open*d.width/2)}}
+ for(const [x,z,width,sideDoor=false] of [[-35,19,4],[-43,-19,4],[-5,-3,2.4,true],[-65,6,2.4,true]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+(sideDoor?0:side*width/4),sideDoor?1.7:2.1,z+(sideDoor?side*width/4:0));if(sideDoor)leaf.rotation.y=Math.PI/2;const pane=new T.Mesh(new T.BoxGeometry(width/2,sideDoor?2.8:3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.10,sideDoor?2.8:3.8,.12),mat('#173a49'));rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,sideDoor,leaves,open:0})}
+ function updateDoors(actors,dt){for(const d of doors){const near=actors.some(a=>(a.floor==='all'||a.floor==='0')&&Math.hypot(a.rig.model.position.x-d.x,a.rig.model.position.z-d.z)<5);d.open=T.MathUtils.damp(d.open,near?1:0,8,dt);for(const {leaf,side}of d.leaves){if(d.sideDoor)leaf.position.z=d.z+side*(d.width/4+d.open*d.width/2);else leaf.position.x=d.x+side*(d.width/4+d.open*d.width/2);}}}
  // Both sides of the ground entrance share the exact same wall/furniture collisions.
  const groundObstacles=[...obstacles.all,...obstacles[0]];obstacles.all=groundObstacles;obstacles[0]=groundObstacles;
  const palettes={night:{bg:'#152d40',hemi:.65,sun:.4,color:'#9fb7ec',height:45,warm:3,neon:4.5,lamps:1},day:{bg:'#b7d9e3',hemi:2.3,sun:3.5,color:'#ffe1b0',height:150,warm:1,neon:.5,lamps:0},sunset:{bg:'#d6baa2',hemi:1.8,sun:2.4,color:'#ffd5a0',height:55,warm:1.5,neon:2,lamps:.3}};
@@ -229,5 +247,5 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  const mix=k=>T.MathUtils.lerp(a[k],b[k],t);scene.background.set(a.bg).lerp(new T.Color(b.bg),t);scene.fog.color.copy(scene.background);hemi.intensity=mix('hemi');sun.intensity=mix('sun');sun.color.set(a.color).lerp(new T.Color(b.color),t);sun.position.set(-90,mix('height'),85);warm.emissiveIntensity=mix('warm');neon.emissiveIntensity=mix('neon');for(const light of neonLights)light.intensity=light.userData.nightPower*mix('lamps');for(const halo of logoHalos)halo.uniforms.strength.value=1.6*mix('lamps');glass.color.set('#a6c7be');}
 
  function buildDistant(){while(lazyZones.length){group=scene;lazyZones.shift()();}flush();}
- return {scene,workstations,seats,cutawaySections,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
+ return {scene,basketball,workstations,seats,cutawaySections,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
 }

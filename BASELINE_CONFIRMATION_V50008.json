@@ -1,0 +1,29 @@
+{
+  "baseline": "KeySuite_V5.00.07_FULL_CLEAN_GitHub.zip",
+  "sha256": "aecee4e217fd6086f7f30610e717a57185f30522fa6ac7519c148b40297bd184",
+  "baselineFileCount": 870,
+  "deleted": [],
+  "protectedIdenticalCount": 218,
+  "sharedCalculatePriceUnchanged": true,
+  "modified": [
+    "VERSION.txt",
+    "auth.js",
+    "bgf-v50006.js",
+    "categories.js",
+    "index.html",
+    "keyhq/campus/camera-safety.js",
+    "keyhq/campus/campus.css",
+    "keyhq/campus/carry.js",
+    "keyhq/campus/games.js",
+    "keyhq/campus/leisure.js",
+    "keyhq/campus/main.js",
+    "keyhq/campus/monitor.js",
+    "keyhq/campus/navigation.js",
+    "keyhq/campus/scene.js",
+    "keyhq/campus/vehicles.js",
+    "keyhq/index.html",
+    "manifest.json",
+    "pricing.js",
+    "sw.js"
+  ]
+}

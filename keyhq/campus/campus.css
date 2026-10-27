@@ -34,3 +34,11 @@
 .floors.minimized > :not(#toggleExplore){display:none!important}.floors.minimized{width:auto;min-width:170px;max-height:none}#toggleExplore{display:flex;justify-content:space-between;gap:16px;width:100%}
 
 .dive-controls{position:fixed;bottom:105px;left:50%;transform:translateX(-50%);padding:12px;width:290px;z-index:15}.dive-controls[hidden]{display:none}.dive-controls label{display:inline-block;margin:4px}.dive-controls p{font-size:12px;margin:6px 0}
+
+/* V5.00.08 compact controls share one centred row. */
+nav.floors[hidden],#compactExplore[hidden]{display:none!important}
+.bottom-controls{position:fixed;z-index:25;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:8px;max-width:calc(100vw - 24px);width:max-content}
+.bottom-controls .camera{position:static!important;transform:none!important;max-width:100%;min-width:0;margin:0;min-height:48px;box-sizing:border-box;overflow-x:auto;flex:1 1 auto}
+#compactExplore{flex:0 0 auto;white-space:nowrap;min-height:48px;background:#eef3e8;color:#214a42;border:1px solid #9dbab0;border-radius:12px;padding:8px 12px}
+.invitation-list label{display:flex;align-items:center;gap:8px;padding:8px 0}.invitation-list input{width:auto}.invitation-footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:600px){.bottom-controls{bottom:18px;gap:4px;max-width:calc(100vw - 12px)}#compactExplore{font-size:11px;padding:6px}}

@@ -1,0 +1,184 @@
+{
+  "climbs": [
+    {
+      "level": 10,
+      "y": 10.2
+    },
+    {
+      "level": 20,
+      "y": 20.2
+    },
+    {
+      "level": 30,
+      "y": 30.2
+    }
+  ],
+  "dives": [
+    {
+      "level": 10,
+      "style": "forward",
+      "spins": 2,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 10,
+      "style": "backward",
+      "spins": 2,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 10,
+      "style": "twisting",
+      "spins": 2,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 20,
+      "style": "forward",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 20,
+      "style": "backward",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 20,
+      "style": "twisting",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 30,
+      "style": "forward",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 30,
+      "style": "backward",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    },
+    {
+      "level": 30,
+      "style": "twisting",
+      "spins": 3,
+      "started": true,
+      "complete": true,
+      "splash": true,
+      "recovered": true,
+      "position": [
+        88,
+        0.2,
+        40
+      ]
+    }
+  ],
+  "guided": true,
+  "guidedReady": true,
+  "controlsReady": true,
+  "held": true,
+  "exited": true,
+  "hidden": 88,
+  "restored": true,
+  "freeStable": true,
+  "entrances": [
+    {
+      "name": "main",
+      "clear": true
+    },
+    {
+      "name": "rear",
+      "clear": true
+    },
+    {
+      "name": "football",
+      "clear": true
+    },
+    {
+      "name": "basketball",
+      "clear": true
+    },
+    {
+      "name": "tennis",
+      "clear": true
+    },
+    {
+      "name": "pickleball",
+      "clear": true
+    },
+    {
+      "name": "badminton",
+      "clear": true
+    }
+  ],
+  "drawCalls": 336
+}
+PASS browser: persistent Explore, six manual stair flights, three platform edges, nine dives, FREE roofs, entrance access.

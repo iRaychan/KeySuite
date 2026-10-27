@@ -15,10 +15,16 @@ const currency=()=>['MYR','USD','RMB'].includes($('bgfPriceCurrency')?.value)?$(
 const priceKey=cur=>`price_${cur.toLowerCase()}`,rarityKey=cur=>`rarity_${cur.toLowerCase()}`;
 function normalize(row){return {id:row.id,model:row.model,sourceModel:row.source_model||row.sourceModel||row.model,sourceRow:Number(row.source_row||row.sourceRow||0),motorKw:Number(row.motor_kw??row.motorKw??0),motorHp:Number(row.motor_hp??row.motorHp??0),inlet:row.inlet||'',outlet:row.outlet||'',stages:Number(row.stages||0),type:row.drive_type||row.type||'',price_myr:Number(row.price_myr||0),price_usd:Number(row.price_usd||0),price_rmb:Number(row.price_rmb||0),rarity_myr:String(row.rarity_myr||'common'),rarity_usd:String(row.rarity_usd||'common'),rarity_rmb:String(row.rarity_rmb||'common')}}
 function message(text,type='info'){const box=$('bgfPriceListMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
+function quote(p){
+ const api=window.KeySuitePricing,found=api?.findBgfPrice?.(p.id),error=$('bgfQuoteMessage');
+ if(!found||!Number.isFinite(found.calc.finalPrice)||found.calc.finalPrice<=0){error.textContent='Select a quotation customer and configure positive BGF source prices and applicable BGF category rules before quoting.';return;}
+ const reason=api.quoteBlockReason?.(found.calc);if(reason){error.textContent=reason;return;}
+ const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:p.model,qty:1,unitPrice:found.calc.finalPrice,description:`B.G.Reich Close Coupled Pump Model: ${p.model}\n${p.motorKw} kW / ${p.motorHp} HP · ${p.type}\nSuction ${p.inlet} · Discharge ${p.outlet}`,pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:$('ksDashFlow')?.value||'',capacityUnit:$('ksDashFlowUnit')?.value||'m3h',headValue:$('ksDashHead')?.value||'',headUnit:$('ksDashHeadUnit')?.value||'m'});
+ if(row){error.textContent='';if(typeof showPage==='function')showPage('quotation');else document.querySelector('[data-page="quotation"]')?.click();}
+}
 function renderProduct(){
  const body=$('bgfProductRows');if(!body)return;body.innerHTML='';
- for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td>${esc(p.stages)}</td><td><button class="btn secondary" type="button">View model</button></td>`;
- tr.querySelector('button').onclick=()=>{$('bgfModelDetails').innerHTML=`<h2>${esc(p.model)}</h2><p>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP · ${esc(p.type)} · ${esc(p.stages)} stages</p><p>Suction ${esc(p.inlet)} · Discharge ${esc(p.outlet)}</p><p class="muted">Source: ${esc(SOURCE)}, row ${esc(p.sourceRow)}${p.sourceModel!==p.model?` (source row labelled ${esc(p.sourceModel)})`:''}.</p><p>Flow, head, curves and dimensions: not supplied.</p>`;$('bgfModelDialog').showModal()};body.appendChild(tr)}
+ for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td><button class="btn" type="button">Quote</button></td>`;tr.querySelector('button').onclick=()=>quote(p);body.appendChild(tr)}
 }
 document.addEventListener('DOMContentLoaded',renderProduct);
 function render(){renderProduct();

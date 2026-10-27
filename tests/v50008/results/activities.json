@@ -1,0 +1,33 @@
+{
+  "invites": {
+    "checked": 2,
+    "failedOpen": true,
+    "error": "Controlled failure",
+    "disabled": 1,
+    "closed": true,
+    "attempts": [
+      1,
+      2
+    ],
+    "rows": 2
+  },
+  "game": {
+    "status": "finished",
+    "scores": {
+      "A": 10,
+      "B": 12
+    },
+    "players": [
+      "00000000-0000-0000-0000-000000000001"
+    ],
+    "bots": [
+      "AI:0",
+      "AI:1",
+      "AI:2",
+      "AI:3",
+      "AI:4"
+    ],
+    "hud": "10 — 12 · 74s · Team B wins · 11 makes / 1 misses · 92%"
+  },
+  "errors": []
+}

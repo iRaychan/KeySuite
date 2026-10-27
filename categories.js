@@ -157,7 +157,7 @@
       let rules=c.product_rules||{};if(typeof rules==='string'){try{rules=JSON.parse(rules)}catch(_){rules={}}}
       const legacy={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]},other={margin:0,normal:0,rare:0,transport:0,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]};
       const normalize=(code,fallback=other)=>normalizeRule(rules?.[code]||{},fallback);
-      return {id:c.id,name:String(c.category_name||c.name||'Unnamed Category'),productRules:{CHC:normalize('CHC',legacy),CHC_G1:normalize('CHC_G1',other),CHC_G2:normalizeRule(rules?.CHC_G2||rules?.CHC||{},legacy),CR:normalize('CR'),BFI:normalize('BFI'),ES:normalize('ES'),GWS:normalize('GWS'),KEYPLC:normalize('KEYPLC'),MANIFOLD:normalize('MANIFOLD'),MOTOR:normalize('MOTOR'),COUPLING:normalize('COUPLING'),BASEPLATE:normalize('BASEPLATE')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)};
+      return {id:c.id,name:String(c.category_name||c.name||'Unnamed Category'),productRules:{CHC:normalize('CHC',legacy),CHC_G1:normalize('CHC_G1',other),CHC_G2:normalizeRule(rules?.CHC_G2||rules?.CHC||{},legacy),CR:normalize('CR'),BFI:normalize('BFI'),BGF:normalize('BGF'),ES:normalize('ES'),GWS:normalize('GWS'),KEYPLC:normalize('KEYPLC'),MANIFOLD:normalize('MANIFOLD'),MOTOR:normalize('MOTOR'),COUPLING:normalize('COUPLING'),BASEPLATE:normalize('BASEPLATE')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)};
     });
   }
   async function reload(){
@@ -179,7 +179,8 @@
     try{
       const params={p_category_id:selectedId||null,p_category_name:name,p_product_code:selectedProduct,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       let rpc,args;
-      if(selectedProduct==='BASEPLATE'){
+      if(selectedProduct==='BGF'){if(!selectedId)throw new Error('Save a category first, then configure BGF.');rpc='keysuite_save_bgf_category_rule_v50008';args={...params,p_currencies:rule.currencies};
+      }else if(selectedProduct==='BASEPLATE'){
         rpc='keysuite_save_baseplate_category_rule_v40401';args={p_category_id:selectedId||null,p_category_name:name,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       }else if(['CHC_G1','CHC_G2'].includes(selectedProduct)&&selectedId){
         rpc='keysuite_save_chc_generation_category_rule_v41412';args=params;
@@ -193,7 +194,7 @@
       const {error}=await client.rpc(rpc,args);if(error)throw error;
       let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').ilike('category_name',name).limit(1);if(lookup.error)throw lookup.error;targetId=String(lookup.data?.[0]?.id||'')}
       if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Currency.');
-      const currencySave=await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
+      const currencySave=selectedProduct==='BGF'?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
       const rows=await reload(),saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());openCategory(saved||rows[0],false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Currency selected.`,'info');
     }catch(error){console.error(error);message(String(error?.message||error||'Pricing Category could not be saved.'),'error')}
     finally{button.disabled=false;button.textContent=original}

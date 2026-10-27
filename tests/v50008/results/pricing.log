@@ -1,0 +1,3 @@
+PASS C4 IE2 / C6 IE3 defaults and alternative efficiency price differences
+PASS shelter toggles: RM1000 per panel, independent of pump count, BOM/display/quote
+PASS all 8 accessory combinations × 1/2/3 pumps and display/quotation totals

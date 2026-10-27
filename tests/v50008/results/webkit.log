@@ -1,0 +1,25 @@
+{
+  width: 1280,
+  heights: [ 48, 48 ],
+  gap: 8,
+  top: [ 828, 828 ],
+  left: 423.5,
+  right: 856.25
+}
+{
+  width: 768,
+  heights: [ 48, 48 ],
+  gap: 8,
+  top: [ 828, 828 ],
+  left: 167.5,
+  right: 600.25
+}
+{
+  width: 390,
+  heights: [ 48, 48 ],
+  gap: 4,
+  top: [ 834, 834 ],
+  left: 6,
+  right: 384
+}
+PASS WebKit: campus load and responsive collapsed controls at 1280, 768 and 390 pixels.

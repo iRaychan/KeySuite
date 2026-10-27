@@ -14,7 +14,7 @@ export class CameraSafety {
  }
  if(hide){section.hideSince ??= now;hide=section.hidden||now-section.hideSince>=150;section.clearSince=0;}else section.hideSince=null;
  if(hide){section.clearSince=0;}else if(section.hidden&&enabled){section.clearSince ||= now;hide=now-section.clearSince<650;}
- if(hide!==section.hidden){section.hidden=hide;section.mesh.setMatrixAt(section.id,hide?this.zero:section.transform);touched.add(section.mesh);}
+ if(hide!==section.hidden){section.hidden=hide;section.mesh.setMatrixAt(section.id,hide?(section.kind==='wall'?this.lowWall(section):this.zero):section.transform);touched.add(section.mesh);}
  if(hide)this.hidden.push({object:section.mesh.uuid,instance:section.id,kind:section.kind,floor:section.floor});
  }
  for(const mesh of touched){mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}
@@ -25,5 +25,6 @@ export class CameraSafety {
  if(!finite&&this.lastGood){camera.position.copy(this.lastGood.position);camera.quaternion.copy(this.lastGood.quaternion);this.recoveries++;}
  if(camera.position.toArray().every(Number.isFinite))this.lastGood={position:camera.position.clone(),quaternion:camera.quaternion.clone()};
  }
+ lowWall(section){if(!section.low){const p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3();section.transform.decompose(p,q,s);p.y-=(s.y-.18)/2;s.y=.18;section.low=new T.Matrix4().compose(p,q,s);}return section.low;}
  snapshot(){return this.hidden;}
 }

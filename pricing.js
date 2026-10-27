@@ -44,7 +44,7 @@
   }
 
   const familyLabel=family=>family==='CHC_G1'?'CHC G1':family==='CHC_G2'?'CHC G2':String(family||'');
-  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','BFI','ES','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
+  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','BFI','BGF','ES','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
   function multipliers(family='CHC_G2'){
     const raw=normalizedFamily(family),code=raw==='CHC'?'CHC_G2':raw;
     const book=secureData.productMultipliers||{};
@@ -492,6 +492,14 @@
     return calc?{product,material:pumpMaterial,variant,rarity:calc.rarity,calc,category:cat,customer,family:'BFI',sourceExtra:{motor_phase:variant,pump_material:pumpMaterial,material_variant:pumpMaterial==='SS316'?'BFIN':'BFI',bfi_identity_suffix:status.identity?.suffix||'',default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:Number((options.motor_hp??product.motor_hp)||0),motor_pole:Number(options.pole||2),...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}: {})}}:null;
   }
 
+  function findBgfPrice(model,options={}){
+    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);
+    const product=(window.KeySuiteBGF?.models?.()||secureData.bgfProducts||[]).find(p=>[p.id,p.model].some(v=>String(v).toLowerCase()===String(model).toLowerCase()));
+    if(!product||!customer)return null;
+    const book={},rarity={};for(const c of ['USD','RMB','MYR']){book[c]={BGF:Number(product['price_'+c.toLowerCase()]||0)};rarity[c]={BGF:product['rarity_'+c.toLowerCase()]||'common'};}
+    const calc=calculatePrice(book,'BGF',cat,'BGF',{...options,customer,rarityBook:rarity});
+    return calc?{product,material:'BGF',variant:'BGF',calc,category:cat,customer,family:'BGF'}:null;
+  }
   function findGwsPrice(model,pressure,options={}){
     const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer)return null;
     const wanted=String(model||'').toLowerCase(),product=(secureData.gwsProducts||[]).find(p=>String(p.id).toLowerCase()===wanted||String(p.model).toLowerCase()===wanted);if(!product)return null;
@@ -521,6 +529,7 @@
     const pricingMode=normalizePricingMode(mode),customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
     if(family==='CR'){const material=source.material||source.variant||'CR',base=source.technical_model||String(source.price_model||source.model||'').replace(/^CR[SN]\b/i,'CR'),model=material==='CR'?base:base.replace(/^CR\b/i,material);return findCrPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Car / Sic',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
+    if(family==='BGF')return findBgfPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
     if(family==='BFI')return findBfiPrice(source.product_id||source.model,source.motor_phase||source.variant||'3Ph',{...options,customer,category:cat,pricingMode,material:source.pump_material||source.material_variant||source.material,motor_hp:Number(source.motor_hp||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class});
     if(family==='GWS')return findGwsPrice(source.product_id||source.model,null,{...options,customer,category:cat,pricingMode});
     if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode});
@@ -837,5 +846,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();
