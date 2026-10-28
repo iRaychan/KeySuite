@@ -492,6 +492,21 @@
     return calc?{product,material:pumpMaterial,variant,rarity:calc.rarity,calc,category:cat,customer,family:'BFI',sourceExtra:{motor_phase:variant,pump_material:pumpMaterial,material_variant:pumpMaterial==='SS316'?'BFIN':'BFI',bfi_identity_suffix:status.identity?.suffix||'',default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:Number((options.motor_hp??product.motor_hp)||0),motor_pole:Number(options.pole||2),...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}: {})}}:null;
   }
 
+  // Diagnostics only: use the existing shared engine, including its fixed-price bypass.
+  function bgfPriceProblem(model,found){
+    const customer=quotationCustomer(),cat=categoryForCustomer(customer),product=(window.KeySuiteBGF?.models?.()||secureData.bgfProducts||[]).find(p=>p.id===model||p.model===model);
+    if(!product)return 'Pricing lookup error: BGF model was not found.';
+    if(!customer)return 'Select a quotation pricing customer.';
+    if(found?.calc?.fixedPrice)return Number.isFinite(found.calc.finalPrice)&&found.calc.finalPrice>0?'':'Pricing lookup error: invalid fixed-price result.';
+    if(!cat)return 'No pricing category is assigned to the quotation customer.';
+    if(!cat.productRules?.BGF)return 'The assigned pricing category has no BGF pricing rules.';
+    const rule=categoryRule(cat,'BGF');
+    if(!rule.currencies?.length)return 'No source currency is enabled in the BGF category rules.';
+    if(!rule.currencies.some(c=>Number(product['price_'+c.toLowerCase()])>0))return 'No positive model price is saved in the enabled BGF currencies: '+rule.currencies.join(', ')+'.';
+    if(!(rule.margin>0))return 'The BGF category margin is missing or 0%.';
+    if(!found?.calc||!Number.isFinite(found.calc.finalPrice)||found.calc.finalPrice<=0)return 'Pricing lookup error: the configured source could not produce a valid price. Check currency conversion and pricing settings.';
+    return quoteBlockReason(found.calc);
+  }
   function findBgfPrice(model,options={}){
     const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);
     const product=(window.KeySuiteBGF?.models?.()||secureData.bgfProducts||[]).find(p=>[p.id,p.model].some(v=>String(v).toLowerCase()===String(model).toLowerCase()));
@@ -846,5 +861,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();

@@ -1,0 +1,15 @@
+# KeySuite V5.00.09 — 28 October 2026
+
+Built from the supplied V5.00.08 ZIP. Only the nine requested changes and release metadata were changed. No GitHub operations or live database changes were performed.
+
+1. **BGF pricing errors:** the product page now shows and focuses a visible model-specific alert for missing customer, category, BGF rules, enabled currency, source model price or margin. Exceptions and failed quote insertion are identified as lookup/system errors. Existing fixed-price handling and shared price calculation are preserved.
+2. **BGF descriptions:** multiline descriptions use workbook text and model-specific HP/connections. Electric wording follows the group identified in B9 and B10:B13; diesel wording follows B17:B20. No voltage/frequency or efficiency class was invented. B7 says BGF 550 while B9 says BGF 500; the user explicitly confirmed **BGF 550**. The saved `bgf-500` ID and its prices remain intact. Historic quotations are not renamed.
+3. **Quote styling:** BGF uses the existing `btn action-quote product-action-button` classes shared by the other product families.
+4. **Wall cutaway:** interior opaque partitions, including reception, are now registered alongside glass walls and facade frames. Camera rays sample the avatar and nearby room. Hidden walls retain 0.18 m above the actual floor. Adjacent logo/sign/door meshes hide and restore with their wall sections. Collision data is untouched. FREE mode restores full geometry.
+5. **Main entrance / flooring:** the entrance-obstructing tree is removed. Pedestrian rectangles are combined into non-overlapping geometry at one elevation/material, replacing conflicting entrance and walkway surfaces instead of covering them.
+6. **Center action popups:** shared stacked full-width controls, spacing, title focus, separate Close, responsive width and internal scrolling. This covers elevator, interactions, activities, vehicles, capsule, diving, smoking and invitation actions; appearance inputs also use one row each. Phone and navigation panels retain their layouts.
+7. **Basketball:** deep-blue court and existing regulation-inspired markings, original unmodified Keylargo globe/script texture at native aspect ratio. The ball mesh now exists before service/readiness early returns, with a valid on-court position, and is cleaned up/recreated on restart. Existing authoritative physics/rules remain unchanged. Autonomous legacy play retains its own ball without creating a second waiting preview.
+8. **NPC startup:** initial fixed and per-avatar delays are removed; the autonomous scheduler processes newly initialized NPCs immediately once the existing navigation is ready. Walking speed, routes and later behavior delays are unchanged.
+9. **Sports Exit:** a straight 2.3 m path connects the doorway to the campus pedestrian network. Nearby palm/flower positions are relocated outside the route; the old zigzag connectors are removed. Existing door/ramp and unrelated landscape remain.
+
+Source evidence: `source/004 - BGF -  261026 - V1.0.xlsx`, sheet BGF, B4:H7, B9:B13 and B16:B20. Workbook and original logo assets are byte-identical to the supplied baseline.

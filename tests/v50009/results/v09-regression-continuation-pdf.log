@@ -1,0 +1,25 @@
+{
+  "pass": true,
+  "pdfPath": "/Users/iraychan/.codex/.chatgpt-projects/g-p-6a5c5eff4184819181395a240940f750/tmp/pdfs/ks08-v50004-three-page.pdf",
+  "pageCount": 3,
+  "detail": [
+    {
+      "items": [
+        "1",
+        "2"
+      ],
+      "summaryRules": 0,
+      "pseudo": "none",
+      "headerBorder": "solid"
+    },
+    {
+      "items": [
+        "3",
+        "4"
+      ],
+      "summaryRules": 3,
+      "pseudo": "none",
+      "headerBorder": "solid"
+    }
+  ]
+}

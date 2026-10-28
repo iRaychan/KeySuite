@@ -42,3 +42,21 @@ nav.floors[hidden],#compactExplore[hidden]{display:none!important}
 #compactExplore{flex:0 0 auto;white-space:nowrap;min-height:48px;background:#eef3e8;color:#214a42;border:1px solid #9dbab0;border-radius:12px;padding:8px 12px}
 .invitation-list label{display:flex;align-items:center;gap:8px;padding:8px 0}.invitation-list input{width:auto}.invitation-footer{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 @media(max-width:600px){.bottom-controls{bottom:18px;gap:4px;max-width:calc(100vw - 12px)}#compactExplore{font-size:11px;padding:6px}}
+
+/* V5.00.09: shared center action dialogs, including nested invitation controls. */
+dialog.action-dialog{box-sizing:border-box;width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:24px;overflow:auto;}
+dialog.action-dialog[open]{display:flex;flex-direction:column;gap:12px;}
+.action-dialog h2,.action-dialog h3,.action-dialog p{margin:0;}
+.action-dialog h2{order:-2;padding-bottom:8px;}
+.action-dialog button,.action-dialog select,.action-dialog input:not([type=checkbox]):not([type=radio]){box-sizing:border-box;width:100%;min-height:40px;margin:0;}
+.action-dialog>div:not([hidden]),.action-dialog .invitation-footer{display:flex;flex-direction:column;gap:12px;}
+.action-dialog label:not([hidden]){display:flex;flex-direction:column;gap:6px;}
+.action-dialog .invitation-list label{flex-direction:row;align-items:center;}
+.action-dialog .dialog-close{order:99;margin-top:12px;border-top:1px solid #9eafb4;}
+.action-dialog [hidden]{display:none!important;}
+
+#appearanceDialog.action-dialog #appearanceForm{display:flex;flex-direction:column;gap:12px;}
+#appearanceDialog.action-dialog #appearanceFields{grid-template-columns:1fr;}
+#appearanceDialog.action-dialog .studio-preview{position:static;float:none;max-width:100%;align-self:center;}
+#appearanceDialog.action-dialog .panel-head{display:contents;}
+#appearanceDialog.action-dialog [data-close]{order:99;}

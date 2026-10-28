@@ -31,7 +31,7 @@ export function createCampus(renderer){
   const angle=ry+new T.Euler().setFromQuaternion(group.getWorldQuaternion(new T.Quaternion())).y;
   obstacles[floor].push({x:center.x,z:center.z,w:Math.abs(w*Math.cos(angle))+Math.abs(d*Math.sin(angle)),d:Math.abs(w*Math.sin(angle))+Math.abs(d*Math.cos(angle))});
  }
- let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[],tags:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());const building=(floor!=='all'||group.name==='building-exterior');b.tags.push(building&&geo==='box'&&((h>=1.2&&Math.min(w,d)<=1.2&&Math.max(w,d)>=1.5&&(m===glass||group.name.startsWith('facade')||group.name==='building-exterior'))||(h<.5&&w>3&&d>3))?{floor,kind:h<.5?'slab':'wall'}:null);}
+ let groups=batches.get(group);if(!groups)batches.set(group,groups=new Map());const key=geo+':'+m.uuid;let b=groups.get(key);if(!b)groups.set(key,b={geo:unit[geo],mat:m,transforms:[],tags:[]});q.setFromEuler(new T.Euler(rx,ry,rz));matrix.compose(v.set(x,y,z),q,s.set(w,h,d));b.transforms.push(matrix.clone());const building=(floor!=='all'||group.name==='building-exterior');b.tags.push(building&&geo==='box'&&((h>=1.2&&Math.min(w,d)<=1.2&&(Math.max(w,d)>=1.5||group.name.startsWith('facade'))&&(m===glass||h>=2.6||group.name.startsWith('facade')||group.name==='building-exterior'))||(h<.5&&w>3&&d>3))?{floor,floorY:floor==='roof'?14.83:floor==='all'?.2:Number(floor)*4.8+.41,kind:h<.5?'slab':'wall'}:null);}
  const box=(x,y,z,w,h,d,m=white,ry=0)=>{
  if(w>=59&&w<=64&&d>=37&&d<=41&&h<.5&&x===-35&&z===0){
   const left=x-w/2,right=x+w/2,back=z-d/2,front=z+d/2;
@@ -120,8 +120,10 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  box(0,-2.2,-10,245,4,260,mat('#c2bea0'));box(0,-.09,-10,237,.2,252,grass);box(0,-2.6,-370,2200,1,500,mat('#79b8c5',{roughness:.25,metalness:.2}));box(0,-1.2,-148,600,1,27,mat('#c6c6a5'));
  for(let i=0;i<45;i++){const x=-350+i*17,h=7+(Math.sin(i*12.34)+1)*16;box(x,h/2-1,-310-(i%4)*17,8,h,8,mat(['#b0c3c9','#9cb6bc','#c8d0cc'][i%3]));}
  for(let i=0;i<14;i++)primitive('cone',-450+i*75,2,-480,150,70+(i%4)*23,100,mat('#9cbfc6'));
+ const pavement=[];
+ function pave(x,z,w,d){let pieces=[{x1:x-w/2,x2:x+w/2,z1:z-d/2,z2:z+d/2}];for(const old of pavement){pieces=pieces.flatMap(r=>{const l=Math.max(r.x1,old.x1),h=Math.min(r.x2,old.x2),b=Math.max(r.z1,old.z1),t=Math.min(r.z2,old.z2);if(l>=h||b>=t)return [r];return [{x1:r.x1,x2:l,z1:r.z1,z2:r.z2},{x1:h,x2:r.x2,z1:r.z1,z2:r.z2},{x1:l,x2:h,z1:r.z1,z2:b},{x1:l,x2:h,z1:t,z2:r.z2}].filter(r=>r.x2-r.x1>1e-6&&r.z2-r.z1>1e-6);});}pavement.push(...pieces);}
  // Driveway, pedestrian avenues, entrance.
- box(-48,.035,58,114,.12,45,mat('#7a8582'));box(18,.04,53,9,.12,92,stone);box(-34,.1,30,67,.2,11,stone);box(-34,.02,-30,70,.08,8,stone);box(-70,.03,-20,7,.1,110,stone);box(14,.04,-36,8,.1,151,stone);box(57,.04,-4,86,.1,9,stone);box(58,.04,33,86,.1,7,stone);
+ box(-48,.035,58,114,.12,45,mat('#7a8582'));pave(18,53,9,92);pave(-34,30,67,11);pave(-34,-30,70,8);pave(-70,-20,7,110);pave(14,-36,8,151);pave(57,-4,86,9);pave(58,33,86,7);
  for(let z=38;z<80;z+=10)box(3,.12,z,.15,.015,4,white);
  box(-12,.06,88,65,.1,9,mat('#7a8582'));box(24,2.2,86,18,4.4,1.1,white);logo(24,2.4,86.62,9);box(9,1.8,86,6,3.6,5,glass);box(9,3.7,86,7,.35,6,white);box(-1,1.3,85,12,.13,.13,white);for(let i=0;i<8;i++)box(-6+i*1.5,1.3,85,.65,.15,.15,mat('#be6554'));
  fence(-3,-12,222,230,2);for(let z=-114;z<=94;z+=14){palm(-110,z,8+(z%3));palm(105,z,10);lamp(101,z)}
@@ -212,14 +214,14 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  // Parking and cars.
  for(let i=0;i<9;i++){const x=-101+i*5.4;box(x,.13,78,.12,.015,8,white);if(i%3!==2){const carMat=mat(['#e3e4d8','#254659','#82958e'][i%3]);box(x+2.4,.9,77,2.1,1.1,4.5,carMat);box(x+2.4,1.65,77,1.8,.7,2.4,dark);for(const xx of [-1,1])for(const zz of [-1.4,1.4])sphere(x+2.4+xx,.5,77+zz,.35,.65,.65,dark)}}
  // Garden paths and seating behind the headquarters.
- box(-35,.04,-67,40,.12,3,stone);box(-35,.04,-67,3,.12,62,stone);
+ pave(-35,-67,40,3);pave(-35,-67,3,62);
  for(const x of [-57,-14])for(const z of [-45,-68,-91]){tree(x,z,7);flowers(x+2,z+2,4,2);bench(x,0,z+4);}
  for(const x of [-45,-25])for(const z of [-48,-85]){cyl(x,.2,z,8,.3,stone);tableSet(x,.4,z);umbrella(x,.4,z);}
  text('SMOKING CORNER',-12,1.6,-89,4);label('DESIGNATED SMOKING CORNER',-12,2,-87,'all');
  // Garden massing: repeated geometry shares instanced buffers.
  for(let x=-100;x<102;x+=9){flowers(x,94,5,2);tree(x,-126,6+(x%3));if(x<-67||x>3)palm(x,81,8)}
- for(let z=-110;z<80;z+=12){flowers(10,z,2,5);palm(6,z,8);if(z<20)tree(-72,z,6)}
- for(let x=-62;x<-3;x+=7){if(Math.abs(x+35)>4)flowers(x,26,5,2);if(x%2===0)tree(x,29,5)}
+ for(let z=-110;z<80;z+=12){flowers(10,Math.abs(z+3)<5?-12:z,2,5);palm(6,Math.abs(z+3)<5?-12:z,8);if(z<20)tree(-72,z,6)}
+ for(let x=-62;x<-3;x+=7){if(Math.abs(x+35)>4)flowers(x,26,5,2);if(x%2===0&&Math.abs(x+35)>5)tree(x,29,5)}
  for(const [x,z] of [[-66,44],[-55,58],[-10,59],[22,42],[98,45],[98,68],[39,77],[-72,27],[-72,-43]]){palm(x,z,10);flowers(x+2,z+2,3,2)}
  for(let z=-103;z<85;z+=22){lamp(-69,z);lamp(16,z)}for(let x=-100;x<100;x+=20)lamp(x,92);
  for(const x of [-58,-46,-14])bench(x,.2,34);for(const z of [-35,0,34])bench(17,.2,z,Math.PI/2);
@@ -227,16 +229,19 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  const cart=new T.Group();cart.name='parked-cart-retired';scene.add(cart);group=cart;box(0,.6,0,1.7,.3,3,white);box(0,1.1,.35,1.5,.6,1,dark);box(0,2.1,0,1.9,.1,2.6,white);for(const x of [-.8,.8]){box(x,1.4,-1,.06,1.4,.06,trim);for(const z of [-.9,.9])sphere(x,.4,z,.32,.6,.6,dark)}box(0,1.5,-.9,1.4,.7,.04,glass);cart.position.set(1,.1,71);cart.visible=false;group=scene;
  entry(-43,-19,4,'GARDEN ENTRANCE');entry(36,46,3,'CAFÉ');entry(43,40,3,'POOL');
  for(const [x,z]of [[-5,-3],[-65,6]]){entry(x,z,2.4,x===-5?'SPORTS EXIT':'GARDEN EXIT',true,.2);const ramp=new T.Mesh(new T.BoxGeometry(3,.1,2.3),stone);ramp.position.set(x+(x===-5?1.5:-1.5),.25,z);ramp.rotation.z=(x===-5?-1:1)*Math.atan2(.2,3);scene.add(ramp);}
- // Pavement follows existing clear corridors, avoiding the planted central strip.
- for(const [x,z,w,d]of [[-1,-3,5,2.3],[1,-4.5,2.3,3],[7.5,-6,13,2.3],[25.5,-6,23,2.3],[37,1,2.3,14],[38.2,8,2.4,2.3],[-68,6,6,2.3],[16.5,-64,5,2.3]])box(x,.10,z,w,.08,d,stone);
- const entranceStone=mat('#c9cece'),entranceFrame=mat('#182e34'),entranceLight=mat('#fff1ce',{emissive:'#ffe3a3',emissiveIntensity:1.8});
+ // Straight Sports Exit connection. Landscape is relocated outside the pedestrian corridor.
+ for(const [x,z,w,d]of [[6,-3,16,2.3],[37,4.25,2.3,7.5],[38.2,8,2.4,2.3],[-69.5,6,3,2.3],[16.5,-64,5,2.3]])pave(x,z,w,d);
+
+ const entranceStone=stone,entranceFrame=mat('#182e34'),entranceLight=mat('#fff1ce',{emissive:'#ffe3a3',emissiveIntensity:1.8});
  box(-35,4.25,19,4.6,.45,.5,entranceFrame);for(const x of [-37.1,-32.9])box(x,2.1,19,.17,4.1,.22,entranceFrame);text('MAIN ENTRANCE',-35,4.25,19.28,4,'#fff4d4');
- box(-35,4.05,21,6,.22,4.5,entranceFrame);box(-35,3.90,21,4,.05,1.7,entranceLight);box(-35,.10,27.5,4.5,.20,11,entranceStone);const entryRamp=new T.Mesh(new T.BoxGeometry(4.5,.1,Math.hypot(3,.2)),entranceStone);entryRamp.position.set(-35,.25,20.5);entryRamp.rotation.x=Math.atan2(.2,3);scene.add(entryRamp);
+ box(-35,4.05,21,6,.22,4.5,entranceFrame);box(-35,3.90,21,4,.05,1.7,entranceLight);pave(-35,27.5,4.5,11);const entryRamp=new T.Mesh(new T.BoxGeometry(4.5,.1,Math.hypot(3,.2)),entranceStone);entryRamp.position.set(-35,.25,20.5);entryRamp.rotation.x=Math.atan2(.2,3);scene.add(entryRamp);
  const entryLamp=new T.PointLight('#ffedca',40,12);entryLamp.position.set(-35,3.7,20);scene.add(entryLamp);
+ pave(-43,-28,4,12);
+ for(const r of pavement)box((r.x1+r.x2)/2,.14,(r.z1+r.z2)/2,r.x2-r.x1,.12,r.z2-r.z1,stone);
  function flush(){for(const [parent,groups] of batches){for(const b of groups.values()){const mesh=new T.InstancedMesh(b.geo,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=!b.mat.transparent;mesh.receiveShadow=true;if(b.geo===unit.sphere&&b.transforms.length>10){const low=new T.InstancedMesh(coarseSphere,b.mat,b.transforms.length);b.transforms.forEach((m,i)=>low.setMatrixAt(i,m));low.instanceMatrix.needsUpdate=true;low.castShadow=mesh.castShadow;low.receiveShadow=true;const lod=new T.LOD();lod.addLevel(mesh,0);lod.addLevel(low,180);parent.add(lod)}else parent.add(mesh);mesh.updateWorldMatrix(true,false);b.tags.forEach((tag,id)=>{if(tag){const transform=b.transforms[id].clone(),bounds=new T.Box3(new T.Vector3(-.5,-.5,-.5),new T.Vector3(.5,.5,.5)).applyMatrix4(transform).applyMatrix4(mesh.matrixWorld);cutawaySections.push({...tag,mesh,id,transform,bounds,hidden:false,clearSince:0});}})}}batches.clear()}
  flush();
  function setFloor(value,owner=false){floorGroups.forEach((g,i)=>{g.visible=value==='all'||(value==='roof')||i<=Number(value);facades[i].visible=value==='all'||value==='roof'||i<Number(value);ceilings[i].visible=facades[i].visible});roof.visible=value==='all'||value==='roof';exterior.visible=value==='all'||value==='roof';ownerGroup.visible=owner;}
- const servicePath=new T.Mesh(new T.BoxGeometry(4,.08,12),stone);servicePath.position.set(-43,.16,-28);scene.add(servicePath);const rearRamp=new T.Mesh(new T.BoxGeometry(4,.1,Math.hypot(3,.2)),stone);rearRamp.position.set(-43,.25,-20.5);rearRamp.rotation.x=-Math.atan2(.2,3);scene.add(rearRamp);
+ const rearRamp=new T.Mesh(new T.BoxGeometry(4,.1,Math.hypot(3,.2)),stone);rearRamp.position.set(-43,.25,-20.5);rearRamp.rotation.x=-Math.atan2(.2,3);scene.add(rearRamp);
  const doors=[];
  for(const [x,z,width,sideDoor=false] of [[-35,19,4],[-43,-19,4],[-5,-3,2.4,true],[-65,6,2.4,true]]){const leaves=[];for(const side of [-1,1]){const leaf=new T.Group();leaf.position.set(x+(sideDoor?0:side*width/4),sideDoor?1.7:2.1,z+(sideDoor?side*width/4:0));if(sideDoor)leaf.rotation.y=Math.PI/2;const pane=new T.Mesh(new T.BoxGeometry(width/2,sideDoor?2.8:3.8,.08),glass);leaf.add(pane);const rail=new T.Mesh(new T.BoxGeometry(.10,sideDoor?2.8:3.8,.12),mat('#173a49'));rail.position.x=side*width/4;leaf.add(rail);floorGroups[0].add(leaf);leaves.push({leaf,side})}doors.push({x,z,width,sideDoor,leaves,open:0})}
  function updateDoors(actors,dt){for(const d of doors){const near=actors.some(a=>(a.floor==='all'||a.floor==='0')&&Math.hypot(a.rig.model.position.x-d.x,a.rig.model.position.z-d.z)<5);d.open=T.MathUtils.damp(d.open,near?1:0,8,dt);for(const {leaf,side}of d.leaves){if(d.sideDoor)leaf.position.z=d.z+side*(d.width/4+d.open*d.width/2);else leaf.position.x=d.x+side*(d.width/4+d.open*d.width/2);}}}
@@ -247,5 +252,5 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  const mix=k=>T.MathUtils.lerp(a[k],b[k],t);scene.background.set(a.bg).lerp(new T.Color(b.bg),t);scene.fog.color.copy(scene.background);hemi.intensity=mix('hemi');sun.intensity=mix('sun');sun.color.set(a.color).lerp(new T.Color(b.color),t);sun.position.set(-90,mix('height'),85);warm.emissiveIntensity=mix('warm');neon.emissiveIntensity=mix('neon');for(const light of neonLights)light.intensity=light.userData.nightPower*mix('lamps');for(const halo of logoHalos)halo.uniforms.strength.value=1.6*mix('lamps');glass.color.set('#a6c7be');}
 
  function buildDistant(){while(lazyZones.length){group=scene;lazyZones.shift()();}flush();}
- return {scene,basketball,workstations,seats,cutawaySections,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
+ return {scene,pavement,basketball,workstations,seats,cutawaySections,labels,buildDistant,floorGroups,roof,ownerGroup,cart,water,obstacles,doors,updateDoors,setFloor,lighting,sun,details,dimensions:{football:{width:68,length:105},floors:3,floorHeight:4.8,building:{x:-35,z:0,width:60,depth:38}}};
 }

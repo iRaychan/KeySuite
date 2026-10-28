@@ -1,0 +1,276 @@
+{
+  "alignment": {
+    "height": [
+      48,
+      48
+    ],
+    "gap": 8,
+    "center": 720,
+    "width": 1440,
+    "hidden": "none"
+  },
+  "heights": [
+    0.18000000715255737,
+    0.18000000715255737
+  ],
+  "free": true,
+  "collisions": 1307,
+  "entrances": [
+    {
+      "name": "main",
+      "clear": true
+    },
+    {
+      "name": "rear",
+      "clear": true
+    },
+    {
+      "name": "side-east",
+      "clear": true
+    },
+    {
+      "name": "side-west",
+      "clear": true
+    },
+    {
+      "name": "football-east",
+      "clear": true
+    },
+    {
+      "name": "football-west",
+      "clear": true
+    },
+    {
+      "name": "basket-east",
+      "clear": true
+    },
+    {
+      "name": "basket-west",
+      "clear": true
+    },
+    {
+      "name": "tennis-east",
+      "clear": true
+    },
+    {
+      "name": "tennis-west",
+      "clear": true
+    },
+    {
+      "name": "pickle-east",
+      "clear": true
+    },
+    {
+      "name": "pickle-west",
+      "clear": true
+    },
+    {
+      "name": "badminton-east",
+      "clear": true
+    },
+    {
+      "name": "badminton-west",
+      "clear": true
+    }
+  ],
+  "rides": [
+    {
+      "id": "bicycle",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "bicycle",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "bicycle",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "scooter",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "scooter",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "scooter",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "golfcart",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "golfcart",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "golfcart",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_office",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_office",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_office",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_lift",
+      "cycle": 0,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_lift",
+      "cycle": 1,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    },
+    {
+      "id": "hoverboard_lift",
+      "cycle": 2,
+      "exit": true,
+      "manual": true,
+      "clear": true,
+      "moved": true
+    }
+  ],
+  "capsule": {
+    "summon": true,
+    "summoned": true,
+    "returned": true,
+    "home": true,
+    "count": true
+  },
+  "smoking": [
+    {
+      "yaw": 0,
+      "filter": 0.249422708231226,
+      "tip": 0.3806060645999277,
+      "rotation": 0
+    },
+    {
+      "yaw": 1.5707963267948966,
+      "filter": 0.24942270823122403,
+      "tip": 0.38060606459992735,
+      "rotation": 1.5707963267948966
+    },
+    {
+      "yaw": 3.141592653589793,
+      "filter": 0.24942270823122398,
+      "tip": 0.38060606459992724,
+      "rotation": 3.141592653589793
+    },
+    {
+      "yaw": 4.71238898038469,
+      "filter": 0.24942270823122456,
+      "tip": 0.3806060645999268,
+      "rotation": 4.71238898038469
+    }
+  ],
+  "routes": [
+    {
+      "name": "sports",
+      "ok": true,
+      "position": [
+        41,
+        0.2,
+        8
+      ]
+    },
+    {
+      "name": "garden",
+      "ok": true,
+      "position": [
+        -67.98399999999958,
+        0.2010666666666945,
+        6
+      ]
+    }
+  ],
+  "errors": []
+}

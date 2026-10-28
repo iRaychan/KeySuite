@@ -1,18 +1,20 @@
 {
-  "version": "5.00.07",
-  "baseline": "5.00.06",
-  "upgrade_supported_from": "5.00.06",
+  "version": "5.00.09",
+  "baseline": "5.00.08",
+  "upgrade_supported_from": "5.00.08",
   "new_database_migration_required": false,
   "edge_function_deploy_required": false,
   "production_deployed": false,
+  "github_pushed": false,
   "changes": [
-    "BGF Product catalogue using existing supplied model data",
-    "Pumpset selected duty units and precision",
-    "Motor-owned automatic coupling quantities and deduplication",
-    "Persistent Explore panel minimize/expand",
-    "FREE roof restoration and stable FOLLOW cutaways",
-    "Contrasting entrance frames and clear sports gates",
-    "Stainless 10/20/30 m tower, manual stairs and configurable dives",
-    "Remove ground-floor entrance pillar and its collider"
+    "Visible model-specific BGF pricing diagnostics",
+    "Workbook-based multiline BGF descriptions; user-confirmed BGF 550",
+    "Shared product Quote button styling",
+    "Floor-relative wall cutaways and attached-object restoration",
+    "Clear main entrance and disjoint continuous pavement",
+    "Stacked responsive center action popups",
+    "Original Keylargo logo basketball court and early visible ball",
+    "Remove artificial NPC startup scheduling delays",
+    "Straight clear Sports Exit pedestrian corridor"
   ]
 }

@@ -1,0 +1,526 @@
+{
+  "bgf": {
+    "messages": [
+      {
+        "text": "BGF 350M: Select a quotation pricing customer.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: No pricing category is assigned to the quotation customer.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: The assigned pricing category has no BGF pricing rules.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: No source currency is enabled in the BGF category rules.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: No positive model price is saved in the enabled BGF currencies: MYR.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: The BGF category margin is missing or 0%.",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: Pricing lookup / system error. Fixture lookup failure",
+        "visible": true,
+        "role": "alert"
+      },
+      {
+        "text": "BGF 350M: Pricing lookup / system error. The quotation item could not be added.",
+        "visible": true,
+        "role": "alert"
+      }
+    ],
+    "descriptions": [
+      "B.G.Reich Close Coupled Pump Model: BGF 350M\nc/w 3HP 2Pole Motor\nSuction x Discharge: G1½ x G1¼\nPump Material: CI / BZ / SS / Mech Seal",
+      "B.G.Reich Close Coupled Pump Model: BGF 350E\nc/w 5HP 3600rpm Diesel Engine\nSuction x Discharge: G1½ x G1¼\nPump Material: CI / BZ / SS / Mech Seal",
+      "B.G.Reich Close Coupled Pump Model: BGF 400\nc/w 4HP 2Pole Motor\nSuction x Discharge: G1½ x G1¼\nPump Material: CI / BZ / SS / Mech Seal",
+      "B.G.Reich Close Coupled Pump Model: BGF 550\nc/w 5.5HP 2Pole Motor\nSuction x Discharge: G1½ x G1¼\nPump Material: CI / BZ / SS / Mech Seal"
+    ],
+    "models": [
+      [
+        "bgf-350m",
+        "BGF 350M"
+      ],
+      [
+        "bgf-350e",
+        "BGF 350E"
+      ],
+      [
+        "bgf-400",
+        "BGF 400"
+      ],
+      [
+        "bgf-500",
+        "BGF 550"
+      ]
+    ]
+  },
+  "styles": {
+    "normal": {
+      "bg": "rgb(22, 163, 74)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1"
+    },
+    "hover": {
+      "bg": "rgb(21, 128, 61)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1"
+    },
+    "leave": {
+      "bg": "rgb(22, 163, 74)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1"
+    },
+    "disabled": {
+      "bg": "rgb(22, 163, 74)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1"
+    }
+  },
+  "campus": {
+    "bases": [
+      {
+        "height": 0.18000000715255737,
+        "base": 0.4099999964237213
+      }
+    ],
+    "logos": [
+      {
+        "hidden": true,
+        "visible": false
+      },
+      {
+        "hidden": true,
+        "visible": false
+      }
+    ],
+    "overlaps": 0,
+    "pavement": 22,
+    "corridors": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "collisionsUnchanged": true
+  },
+  "popups": [
+    {
+      "width": 1440,
+      "dialogWidth": 440,
+      "scroll": true,
+      "scrollTop": 0,
+      "buttons": [
+        {
+          "x": 525,
+          "width": 390,
+          "y": 875
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 83
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 135
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 187
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 239
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 291
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 343
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 395
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 447
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 499
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 551
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 603
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 655
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 707
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 759
+        },
+        {
+          "x": 525,
+          "width": 390,
+          "y": 811
+        }
+      ],
+      "closeLast": true
+    },
+    {
+      "width": 768,
+      "dialogWidth": 440,
+      "scroll": true,
+      "scrollTop": 0,
+      "buttons": [
+        {
+          "x": 189,
+          "width": 390,
+          "y": 875
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 83
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 135
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 187
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 239
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 291
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 343
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 395
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 447
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 499
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 551
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 603
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 655
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 707
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 759
+        },
+        {
+          "x": 189,
+          "width": 390,
+          "y": 811
+        }
+      ],
+      "closeLast": true
+    },
+    {
+      "width": 390,
+      "dialogWidth": 366,
+      "scroll": true,
+      "scrollTop": 0,
+      "buttons": [
+        {
+          "x": 37,
+          "width": 316,
+          "y": 875
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 83
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 135
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 187
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 239
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 291
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 343
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 395
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 447
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 499
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 551
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 603
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 655
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 707
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 759
+        },
+        {
+          "x": 37,
+          "width": 316,
+          "y": 811
+        }
+      ],
+      "closeLast": true
+    }
+  ],
+  "elevator": [
+    {
+      "text": "Close ×",
+      "y": 637,
+      "width": 390
+    },
+    {
+      "text": "Call and enter elevator",
+      "y": 365,
+      "width": 390
+    },
+    {
+      "text": "Travel to Ground floor",
+      "y": 417,
+      "width": 390
+    },
+    {
+      "text": "Travel to Floor 2",
+      "y": 469,
+      "width": 390
+    },
+    {
+      "text": "Travel to Floor 3",
+      "y": 521,
+      "width": 390
+    },
+    {
+      "text": "Travel to Roof terrace",
+      "y": 573,
+      "width": 390
+    }
+  ],
+  "rotation": [
+    {
+      "floor": "0",
+      "x": -25,
+      "z": 30,
+      "count": 2
+    },
+    {
+      "floor": "0",
+      "x": -25,
+      "z": 24,
+      "count": 2
+    },
+    {
+      "floor": "0",
+      "x": -25,
+      "z": -30,
+      "count": 2
+    },
+    {
+      "floor": "0",
+      "x": -75,
+      "z": 0,
+      "count": 4
+    },
+    {
+      "floor": "0",
+      "x": 5,
+      "z": 0,
+      "count": 2
+    },
+    {
+      "floor": "1",
+      "x": -25,
+      "z": 30,
+      "count": 5
+    },
+    {
+      "floor": "1",
+      "x": -25,
+      "z": 24,
+      "count": 5
+    },
+    {
+      "floor": "1",
+      "x": -25,
+      "z": -30,
+      "count": 4
+    },
+    {
+      "floor": "1",
+      "x": -75,
+      "z": 0,
+      "count": 2
+    },
+    {
+      "floor": "1",
+      "x": 5,
+      "z": 0,
+      "count": 2
+    },
+    {
+      "floor": "2",
+      "x": -25,
+      "z": 30,
+      "count": 2
+    },
+    {
+      "floor": "2",
+      "x": -25,
+      "z": 24,
+      "count": 2
+    },
+    {
+      "floor": "2",
+      "x": -25,
+      "z": -30,
+      "count": 2
+    },
+    {
+      "floor": "2",
+      "x": -75,
+      "z": 0,
+      "count": 4
+    },
+    {
+      "floor": "2",
+      "x": 5,
+      "z": 0,
+      "count": 2
+    }
+  ],
+  "ball": {
+    "visible": true,
+    "position": [
+      61,
+      0.55,
+      8
+    ],
+    "hasParent": true,
+    "cleaned": true,
+    "restart": true
+  },
+  "errors": []
+}

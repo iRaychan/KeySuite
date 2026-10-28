@@ -1,22 +1,19 @@
 {
-  "keysuite_version": "5.00.06",
-  "keyhq_version": "V5.00.01 campus corrections and diving",
-  "status": "Source and local verification complete; live multi-account/device acceptance pending",
-  "database_migration": "20261025162321_keyhq_v42926_avatar_state.sql",
+  "keysuite_version": "5.00.09",
+  "keyhq_version": "V5.00.09 campus corrections",
+  "status": "Locally verified; live multi-account acceptance not tested",
+  "new_database_migration_required": false,
   "new_migration_deployed": false,
   "github_pushed": false,
   "frontend_deployed": false,
-  "review": "README_UPGRADE_V50006.md",
-  "upgrade": "README_UPGRADE_V50006.md",
-  "new_database_migration_required": true,
-  "keysuite_v50004_migrations_deployed": true,
-  "production_deployed": false,
+  "review": "VERIFICATION_V50009.md",
+  "upgrade": "README_UPGRADE_V50009.md",
   "changes": [
-    "CHC C4 IE2 and C6 IE3 included motor baselines",
-    "Panel shelter and manifold add-ons retained in assembly consolidation",
-    "Stable controls, autonomous activities and avatar pass-through",
-    "Rider-only bicycle updates; beer and swimming motion",
-    "Solo leisure, explicit invitations, and shared three-level diving staircase",
-    "System-to-Quotation Capacity and Head preservation through seal/history/PDF; PDF V1.08 layout retained"
+    "Floor-relative wall cutaways and attached-object restoration",
+    "Clear main entrance and disjoint continuous pavement",
+    "Stacked responsive center action popups",
+    "Original Keylargo logo basketball court and early visible ball",
+    "Remove artificial NPC startup scheduling delays",
+    "Straight clear Sports Exit pedestrian corridor"
   ]
 }
