@@ -1,0 +1,22 @@
+{
+  "project": "skidqdixnnnuhvarekxp",
+  "migrations": [
+    "20261028093313",
+    "20261028145829"
+  ],
+  "pose_height31": true,
+  "coffee_allowed": true,
+  "anon_pose_execute": false,
+  "anon_quote_execute": false,
+  "authenticated_quote_execute": true,
+  "revision_lock": true,
+  "rollback_test": {
+    "R1_R2_R3": true,
+    "dates": true,
+    "items_preserved": true,
+    "original_preserved": true,
+    "normal_sequence_unchanged": true,
+    "fixtures_rolled_back": true
+  },
+  "authenticated_browser_test": false
+}

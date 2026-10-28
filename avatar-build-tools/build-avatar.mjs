@@ -11,28 +11,28 @@ for(const [side,sgn] of [['L',-1],['R',1]]){bone(side+'Arm','Spine',sgn*.235,.22
 root.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones),parts=new Map();
 const colors={skin:'#d9a27e',shirt:'#284a70',pants:'#273446',shoes:'#182332',eyes:'#24313b',white:'#fff9eb',hair:'#39291f',mouth:'#ad6458',business:'#eef1e7',uniform:'#f5ad32',glasses:'#19212b'};
 function part(group,joint,geo,x,y,z,sx=1,sy=1,sz=1){geo=geo.index?geo.toNonIndexed():geo;geo.scale(sx,sy,sz);geo.translate(x,y,z);const idx=[],weights=[];for(let i=0;i<geo.attributes.position.count;i++){idx.push(ids[joint],0,0,0);weights.push(1,0,0,0)}geo.setAttribute('skinIndex',new T.Uint16BufferAttribute(idx,4));geo.setAttribute('skinWeight',new T.Float32BufferAttribute(weights,4));if(!parts.has(group))parts.set(group,[]);parts.get(group).push(geo)}
-function oval(g,b,x,y,z,rx,ry,rz){part(g,b,new T.SphereGeometry(1,24,16),x,y,z,rx,ry,rz)}
+function oval(g,b,x,y,z,rx,ry,rz){part(g,b,new T.SphereGeometry(1,32,24),x,y,z,rx,ry,rz)}
 function block(g,b,x,y,z,w,h,d){part(g,b,new T.BoxGeometry(w,h,d),x,y,z)}
 oval('shirt','Spine',0,1.16,0,.225,.275,.155);
 oval('pants','Hips',0,.88,0,.19,.14,.14);oval('skin','Head',0,1.46,0,.075,.10,.075);
 oval('skin','Head',0,1.66,0,.23,.26,.21);
 for(const [side,sgn] of [['L',-1],['R',1]]){
- oval('shirt',side+'Arm',sgn*.24,1.34,0,.095,.11,.095);
- part('shirt',side+'Arm',new T.CylinderGeometry(.09,.076,.24,10),sgn*.235,1.24,0);
- oval('skin',side+'Forearm',sgn*.235,1.06,0,.076,.08,.076);
- part('skin',side+'Forearm',new T.CylinderGeometry(.072,.052,.25,10),sgn*.235,.955,0);
+ oval('shirt',side+'Arm',sgn*.24,1.34,0,.087,.095,.087);
+ part('shirt',side+'Arm',new T.CylinderGeometry(.09,.076,.24,24),sgn*.235,1.24,0);
+ oval('skin',side+'Forearm',sgn*.235,1.06,0,.071,.073,.071);
+ part('skin',side+'Forearm',new T.CylinderGeometry(.072,.052,.25,24),sgn*.235,.955,0);
  oval('skin',side+'Hand',sgn*.235,.79,.005,.057,.08,.041);
- part('pants',side+'Thigh',new T.CylinderGeometry(.095,.078,.38,10),sgn*.105,.67,0);
- oval('pants',side+'Shin',sgn*.105,.46,0,.077,.08,.077);
- part('pants',side+'Shin',new T.CylinderGeometry(.077,.058,.38,10),sgn*.105,.27,0);
+ part('pants',side+'Thigh',new T.CylinderGeometry(.095,.078,.38,24),sgn*.105,.67,0);
+ oval('pants',side+'Shin',sgn*.105,.46,0,.075,.074,.075);
+ part('pants',side+'Shin',new T.CylinderGeometry(.077,.058,.38,24),sgn*.105,.27,0);
  oval('shoes',side+'Foot',sgn*.105,.075,.048,.077,.067,.135);
  block('white',side+'Foot',sgn*.105,.035,.048,.12,.018,.20);
 }
 // Hair options share the same head joint and topology family.
-part('hair_short','Head',new T.SphereGeometry(1,12,6,0,Math.PI*2,0,Math.PI*.53),0,1.74,0,.237,.22,.218);
-part('hair_bob','Head',new T.SphereGeometry(1,12,8,0,Math.PI*2,0,Math.PI*.57),0,1.74,-.012,.24,.23,.225);
+part('hair_short','Head',new T.SphereGeometry(1,32,18,0,Math.PI*2,0,Math.PI*.53),0,1.74,0,.237,.22,.218);
+part('hair_bob','Head',new T.SphereGeometry(1,32,20,0,Math.PI*2,0,Math.PI*.57),0,1.74,-.012,.24,.23,.225);
 for(const s of [-1,1])oval('hair_bob','Head',s*.211,1.61,-.04,.05,.20,.16);
-part('hair_long','Head',new T.SphereGeometry(1,12,8,0,Math.PI*2,0,Math.PI*.55),0,1.74,0,.237,.22,.218);
+part('hair_long','Head',new T.SphereGeometry(1,32,20,0,Math.PI*2,0,Math.PI*.55),0,1.74,0,.237,.22,.218);
 oval('hair_long','Head',0,1.48,-.14,.22,.29,.085);
 for(let i=0;i<12;i++){const a=i*Math.PI*2/12;oval('hair_curly','Head',Math.cos(a)*.18,1.84+Math.sin(i*3)*.03,Math.sin(a)*.16,.09,.08,.085)}
 // Clothing details can be selected without replacing the skeleton.
@@ -40,7 +40,7 @@ for(const sign of [-1,1]){const geo=new T.BoxGeometry(.07,.19,.018);geo.rotateZ(
 block('uniform','Spine',-.09,1.26,.137,.065,.03,.015);
 for(const sign of [-1,1]){part('glasses','Head',new T.TorusGeometry(.054,.006,8,24),sign*.085,1.70,.233);}
 block('glasses','Head',0,1.70,.233,.06,.007,.008);
-for(const [name,geos] of parts){const base=name.startsWith('hair_')?'hair':name,material=new T.MeshStandardMaterial({color:colors[base],roughness:.56,metalness:0});material.name=base;const mesh=new T.SkinnedMesh(mergeVertices(mergeGeometries(geos)),material);mesh.name=name;root.add(mesh);mesh.bind(skeleton);mesh.frustumCulled=false}
+for(const [name,geos] of parts){const base=name.startsWith('hair_')?'hair':name,material=new T.MeshStandardMaterial({color:colors[base],roughness:.46,metalness:0});material.name=base;const mesh=new T.SkinnedMesh(mergeVertices(mergeGeometries(geos)),material);mesh.name=name;root.add(mesh);mesh.bind(skeleton);mesh.frustumCulled=false}
 function quat(x=0,y=0,z=0){return new T.Quaternion().setFromEuler(new T.Euler(x,y,z)).toArray()}
 const names=['idle','walk','sit','work','talk','wave'],clips=[];
 for(const name of names){let tracks=[],duration=name==='walk'?1:3,times=[0,duration/4,duration/2,duration*3/4,duration];

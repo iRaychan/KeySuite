@@ -1,0 +1,88 @@
+{
+  "tests": [
+    {
+      "family": "BFI",
+      "model": "ABC BFI11 1231122",
+      "description": "My edited BFI description\nSecond line\n  Indented line",
+      "price": 125
+    },
+    {
+      "family": "BGF",
+      "model": "ABC BGF11 1231122",
+      "description": "My edited BGF description\nSecond line\n  Indented line",
+      "price": 125
+    },
+    {
+      "family": "CHC",
+      "model": "ABC CHC11 1231122",
+      "description": "My edited CHC description\nSecond line\n  Indented line",
+      "price": 125
+    },
+    {
+      "family": "KEYPLC",
+      "model": "ABC KEY11PLC 1231122",
+      "description": "My edited KEYPLC description\nSecond line\n  Indented line",
+      "price": 125
+    },
+    {
+      "family": "ASSEMBLY",
+      "model": "ABC ASS11EMBLY 1231122",
+      "description": "My edited ASSEMBLY description\nSecond line\n  Indented line",
+      "price": 125
+    }
+  ],
+  "manual": [
+    {
+      "brands": [
+        "Keylargo",
+        "Other Pump"
+      ],
+      "modelManuallyEdited": false,
+      "model": "Mixed assembly",
+      "qty": 1,
+      "unit": "unit",
+      "unitPrice": 100,
+      "internalRemark": "",
+      "descriptionManuallyEdited": false,
+      "pumpData": null,
+      "motorData": null,
+      "pricingSource": null,
+      "couplingData": null,
+      "description": "Assembly text",
+      "displayCapacity": false,
+      "capacityValue": "",
+      "capacityUnit": "m³/hr",
+      "headValue": "",
+      "headUnit": "Mtr"
+    },
+    {
+      "manualItem": true,
+      "productFamily": "MANUAL",
+      "model": "Manual pump",
+      "description": "Custom supply\nIncludes commissioning",
+      "brand": "Client Brand",
+      "manualCapacity": "10 m³/hr @ 50 m",
+      "unit": "lot",
+      "qty": 3,
+      "unitPrice": 123.45,
+      "modelManuallyEdited": true,
+      "descriptionManuallyEdited": true
+    }
+  ],
+  "total": 470.35,
+  "sorted": [
+    "B.G.Reich",
+    "Task",
+    " Alpha ",
+    "Zebra",
+    null,
+    "",
+    "  ",
+    "-"
+  ],
+  "dates": {
+    "original": "Tuesday, 20 October 2026",
+    "revised": "Friday, 30 October 2026"
+  },
+  "print": "\n   \n   \n     Date:Tuesday, 20 October 2026\n     Our Reference:RC-2610-0235-R2\n   \n   \n     Pos.QtyUnit PriceTotal\n     1Mixed assemblyBrand: Keylargo / Other Pump\nAssembly text1 Unit100.00100.002Manual pumpBrand: Client Brand\nCapacity: 10 m³/hr @ 50 m\nCustom supply\nIncludes commissioning3 lot123.45370.35\n   \n   Sub-total470.35\n   0% SST0.00\n   \n   Total470.35\n   \n   \n   E & O.E.Page 2 of 2\n "
+}

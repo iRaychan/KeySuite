@@ -342,12 +342,13 @@
     const master=masterBrand();
     if(String(brand.id)===String(master?.id)){
       let masterDesc=baseDesc;
-      if(['CHC','ES','MOTOR'].includes(family)&&!/B\.G\.Reich/i.test(masterDesc)){
+      const masterName=String(brand.brand_name||brand.name||'').trim();
+      if(['CHC','ES','MOTOR'].includes(family)&&masterName&&!masterDesc.toLowerCase().includes(masterName.toLowerCase())){
         const lines=masterDesc.split('\n'),idx=Math.max(0,lines.findIndex(line=>line.trim()&&!/^Capacity:/i.test(line.trim())));
-        if(lines[idx])lines[idx]=`B.G.Reich ${lines[idx].trim()}`;
+        if(lines[idx])lines[idx]=`${masterName} ${lines[idx].trim()}`;
         masterDesc=lines.join('\n');
       }
-      modelInput.value=baseModel;descInput.value=masterDesc;reapplyQuoteCapacity(row);return;
+      if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==baseModel)modelInput.value=baseModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==masterDesc)descInput.value=masterDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);return;
     }
 
     const priceGroup=normalizeProductGroup(
@@ -402,7 +403,7 @@
       nextPump.keysuite_master_series=masterSeries;nextPump.keysuite_selling_series=sellingSeries;nextPump.quotation_model=shownModel;
       row.dataset.pumpData=JSON.stringify(nextPump);
     }
-    modelInput.value=shownModel;descInput.value=shownDesc;reapplyQuoteCapacity(row);
+    if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==shownModel)modelInput.value=shownModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==shownDesc)descInput.value=shownDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);
   }
   function calculateWithBrandMargin(source,brandMargin){
     const base=num(source?.base_myr,NaN);if(!(base>0))return null;

@@ -1,19 +1,11 @@
 {
-  "keysuite_version": "5.00.09",
-  "keyhq_version": "V5.00.09 campus corrections",
-  "status": "Locally verified; live multi-account acceptance not tested",
-  "new_database_migration_required": false,
-  "new_migration_deployed": false,
-  "github_pushed": false,
+  "keysuite_version": "5.00.10",
+  "keyhq_version": "V5.00.10",
+  "status": "Local automated browser tests passed; authenticated multi-account acceptance not performed",
+  "new_database_migration_required": true,
+  "new_migration_deployed": true,
   "frontend_deployed": false,
-  "review": "VERIFICATION_V50009.md",
-  "upgrade": "README_UPGRADE_V50009.md",
-  "changes": [
-    "Floor-relative wall cutaways and attached-object restoration",
-    "Clear main entrance and disjoint continuous pavement",
-    "Stacked responsive center action popups",
-    "Original Keylargo logo basketball court and early visible ball",
-    "Remove artificial NPC startup scheduling delays",
-    "Straight clear Sports Exit pedestrian corridor"
-  ]
+  "github_pushed": false,
+  "review": "VERIFICATION_V50010.md",
+  "upgrade": "README_UPGRADE_V50010.md"
 }

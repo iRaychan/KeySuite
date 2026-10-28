@@ -87,14 +87,7 @@
       })
       .slice();
     return [KEYLARGO_ROLE_BRAND,GWS_ROLE_BRAND,...databaseBrands]
-      .sort((a,b)=>{
-        const ak=String(a.brand_key||'').toLowerCase(),bk=String(b.brand_key||'').toLowerCase();
-        if(ak==='keylargo'&&bk!=='keylargo')return -1;
-        if(bk==='keylargo'&&ak!=='keylargo')return 1;
-        if(ak==='gws'&&bk!=='gws')return -1;
-        if(bk==='gws'&&ak!=='gws')return 1;
-        return String(a.brand_name||'').localeCompare(String(b.brand_name||''),undefined,{numeric:true,sensitivity:'base'});
-      });
+      .sort((a,b)=>window.compareBrandPriority(a,b));
   }
   function selectionEntries(){
     const api=multibrandApi(),brands=selectionBrands(),maps=(api?.state?.mappings||[]).filter(m=>m&&m.active!==false),out=[];

@@ -27,7 +27,7 @@ const hydraulicFamily=v=>{const g=normalizeGroup(v);return g==='CHC'||g==='CHC_G
 const state={requestId:0,pending:null,results:{},responded:{},savedKeys:new Set(),prefLoaded:false,queue:[],currentEntry:null,currentFamily:null,familyTimer:null,preferenceLoading:false,customerPriceLoading:false,customerPriceError:'',customerPriceErrorCid:'',enhancedCHC:false,enhancedKeys:new Set(),includeColdItems:false};
 const isKeylargo=b=>norm(b?.brand_key).toLowerCase()==='keylargo';
 const isMaster=b=>String(b?.brand_type||'').toLowerCase()==='master'||norm(b?.brand_key).toLowerCase()==='b.g.reich'||norm(b?.brand_name).toLowerCase()==='b.g.reich';
-const brands=()=>((api()?.state?.brands)||[]).filter(b=>b&&b.active!==false&&!isKeylargo(b));
+const brands=()=>((api()?.state?.brands)||[]).filter(b=>b&&b.active!==false&&!isKeylargo(b)).slice().sort((a,b)=>window.compareBrandPriority(a,b));
 const visibleBrands=()=>{
   const all=brands();
   if(!accountScopeReady())return [];

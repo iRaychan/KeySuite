@@ -648,7 +648,7 @@ async function quotePumpsetSelection(items=[],meta={}){
  const displayPricing=consolidatedPricing(d,'assembly');const pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:'PUMPSET_DIRECT_ES',carried_final_price:true,calculated_price:Number(unitPrice||0)};
  if(await window.KeySuiteApp?.selectCustomerForQuotation?.(customerId)===false)return false;window.KeySuiteApp?.showPage?.('quotation');
  const pumpData=meta.pumpData||items.find(item=>item.section==='pump'&&item.pumpData)?.pumpData||null;
- const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:d.model_item,qty:d.quote_qty,unitPrice:Number(unitPrice||0),description:d.description,unit:'set',sourceType:'pumpset',pricingSource,pumpData,displayCapacity:!!d.display_capacity,capacityValue:d.capacity_value||'',capacityUnit:d.capacity_unit||'m³/hr',headValue:d.head_value||'',headUnit:d.head_unit||'Mtr'});
+ const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:d.model_item,qty:d.quote_qty,unitPrice:Number(unitPrice||0),description:d.description,unit:'set',sourceType:'pumpset',brands:window.quoteItemBrands?.({items:d.items})||[],pricingSource,pumpData,displayCapacity:!!d.display_capacity,capacityValue:d.capacity_value||'',capacityUnit:d.capacity_unit||'m³/hr',headValue:d.head_value||'',headUnit:d.head_unit||'Mtr'});
  if(!row){alert('Unable to add the ES Pumpset to Quotation.');return false}
  return true;
 }
@@ -665,7 +665,7 @@ async function toQuotation(){
  // A completed System duty point must survive the System → Quotation → PDF handoff,
  // including drafts whose display flag was not persisted by an older version.
  const displayCapacity=!!current.display_capacity||!!(capacityValue&&headValue);
- const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:current.model_item||current.name||'',qty:Number(current.quote_qty||1),unitPrice:Number(unitPrice||0),description,unit:'set',sourceType:type,pricingSource,displayCapacity,capacityValue,capacityUnit:current.capacity_unit||'m³/hr',headValue,headUnit:current.head_unit||'Mtr'});if(!row){alert('Unable to add the assembly to Quotation.');return}
+ const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:current.model_item||current.name||'',qty:Number(current.quote_qty||1),unitPrice:Number(unitPrice||0),description,unit:'set',sourceType:type,brands:window.quoteItemBrands?.({items:current.items})||[],pricingSource,displayCapacity,capacityValue,capacityUnit:current.capacity_unit||'m³/hr',headValue,headUnit:current.head_unit||'Mtr'});if(!row){alert('Unable to add the assembly to Quotation.');return}
  current.status='quoted';dirtyDraftIds.delete(current.id);try{await persist(current)}catch(e){alert(`Assembly quotation was created, but the assembly status could not be saved: ${e.message||e}`)}
  const missing=pricingSource?.missing_bom_prices||[];if(missing.length)alert(`Pumpset added to Quotation. ${missing.length} BOM component price${missing.length===1?' is':'s are'} missing; complete the quotation Unit Price before sealing.`)
 }

@@ -1,0 +1,125 @@
+{
+  "ride": {
+    "mounted": true,
+    "exited": true
+  },
+  "emptyIdle": true,
+  "blocked": {
+    "state": "idle",
+    "retries": 5,
+    "failed": true
+  },
+  "visitor": {
+    "office": true,
+    "groundOffice": true,
+    "door": true,
+    "public": true,
+    "control": false
+  },
+  "dives": [
+    {
+      "level": 10,
+      "style": "forward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 10.198037999999999
+    },
+    {
+      "level": 10,
+      "style": "backward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 10.198037999999999
+    },
+    {
+      "level": 10,
+      "style": "twisting",
+      "jumped": true,
+      "finished": true,
+      "maxY": 10.198037999999999
+    },
+    {
+      "level": 20,
+      "style": "forward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 20.198038
+    },
+    {
+      "level": 20,
+      "style": "backward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 20.198038
+    },
+    {
+      "level": 20,
+      "style": "twisting",
+      "jumped": true,
+      "finished": true,
+      "maxY": 20.198038
+    },
+    {
+      "level": 30,
+      "style": "forward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 30.198038
+    },
+    {
+      "level": 30,
+      "style": "backward",
+      "jumped": true,
+      "finished": true,
+      "maxY": 30.198038
+    },
+    {
+      "level": 30,
+      "style": "twisting",
+      "jumped": true,
+      "finished": true,
+      "maxY": 30.198038
+    }
+  ],
+  "props": [
+    {
+      "mode": "coffee",
+      "resting": true,
+      "held": true,
+      "returned": true,
+      "seated": true,
+      "smoke": 0
+    },
+    {
+      "mode": "beer",
+      "resting": true,
+      "held": true,
+      "returned": true,
+      "seated": true,
+      "smoke": 0
+    },
+    {
+      "mode": "smoke",
+      "resting": true,
+      "held": true,
+      "returned": true,
+      "seated": true,
+      "smoke": 3
+    },
+    {
+      "mode": "both",
+      "resting": true,
+      "held": true,
+      "returned": true,
+      "seated": true,
+      "smoke": 3
+    }
+  ],
+  "cutaway": {
+    "upperHidden": true,
+    "roofHidden": true,
+    "currentVisible": true,
+    "restored": true
+  },
+  "poseRecovered": true
+}

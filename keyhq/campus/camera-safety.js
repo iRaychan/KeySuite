@@ -6,6 +6,9 @@ export class CameraSafety {
  world.scene.updateMatrixWorld(true);world.scene.traverse(o=>{if(!o.isMesh||o.isInstancedMesh)return;const b=new T.Box3().setFromObject(o);if(b.isEmpty())return;const size=b.getSize(new T.Vector3());if(Math.min(size.x,size.z)>.35||size.y<.1)return;const walls=this.sections.filter(s=>s.kind==='wall'&&s.bounds.clone().expandByScalar(.4).intersectsBox(b));if(walls.length)this.attachments.push({object:o,walls,hidden:false});});}
  update(camera,actor,dt,now,enabled=true){
  const p=actor?.rig.model.position,inside=p&&p.x>-66&&p.x<-4&&p.z>-20&&p.z<20&&actor.floor!=='roof';
+ const indoorFollow=enabled&&inside;this.floorVisibility??=new Map();
+ if(!indoorFollow){for(const [object,visible]of this.floorVisibility)object.visible=visible;this.floorVisibility.clear();}
+ else{const occupied=Math.max(0,Math.min(2,Math.floor((p.y-.39)/4.8)));const hidden=new Set([...(this.world.floorGroups||[]).filter((g,i)=>i>occupied),...(this.world.ceilings||[]).filter((g,i)=>i>=occupied),this.world.roof].filter(Boolean));for(const [object,visible]of this.floorVisibility)if(!hidden.has(object)){object.visible=visible;this.floorVisibility.delete(object);}for(const object of hidden){if(!this.floorVisibility.has(object))this.floorVisibility.set(object,object.visible);object.visible=false;}}
  const aim=p?.clone().add(new T.Vector3(0,1.35,0));const touched=new Set();this.hidden=[];
  for(const section of this.sections){const box=section.bounds;let hide=false;
  if(enabled&&aim){const expanded=box.clone().expandByScalar(section.kind==='wall'?.45:.15);

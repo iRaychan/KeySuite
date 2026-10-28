@@ -4,10 +4,15 @@ export function createBasketballArena({scene,box,cyl,line,ring,mat,text,bench,la
  const blue=mat('#183e66'),teal=mat('#102d50'),white=mat('#e7f5f7'),steel=mat('#aebec4',{metalness:.55,roughness:.35});
  box(57,.18,8,34,.36,21,teal);box(57,.38,8,28,.03,15,blue);
  const rect=(x,z,w,d)=>line([[x-w/2,.415,z-d/2],[x+w/2,.415,z-d/2],[x+w/2,.415,z+d/2],[x-w/2,.415,z+d/2],[x-w/2,.415,z-d/2]],'#e7f5f7');
- rect(57,8,28,15);line([[57,.42,.5],[57,.42,15.5]],'#e7f5f7');ring(57,.42,8,1.8,'#e7f5f7');
+ rect(57,8,28,15);line([[57,.42,.5],[57,.42,15.5]],'#e7f5f7');ring(57,.42,8,1.65,'#e7f5f7');
  // Original supplied globe-and-script artwork, native aspect ratio and unmodified pixels.
  const logoTexture=new T.TextureLoader().load('../keylargo-logo.png',texture=>{const im=texture.image;logo.scale.y=im.height/im.width;});logoTexture.colorSpace=T.SRGBColorSpace;
- const logo=new T.Mesh(new T.PlaneGeometry(7,7),new T.MeshBasicMaterial({map:logoTexture,transparent:true,depthWrite:false,toneMapped:false}));logo.name='basketball-original-keylargo-logo';logo.rotation.x=-Math.PI/2;logo.position.set(57,.445,8);logo.scale.y=219/546;scene.add(logo);
+ const logoMaterial=new T.MeshBasicMaterial({map:logoTexture,transparent:true,depthWrite:false,toneMapped:false});
+ logoMaterial.onBeforeCompile=shader=>{shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+ float paper=min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b));
+ diffuseColor.a*=1.0-smoothstep(.76,.98,paper);
+ diffuseColor.rgb=vec3(1.0);`);};
+ const logo=new T.Mesh(new T.PlaneGeometry(2.75,2.75),logoMaterial);logo.name='basketball-original-keylargo-logo';logo.rotation.x=-Math.PI/2;logo.position.set(57,.445,8);logo.scale.y=219/546;scene.add(logo);
  const nets=[];
  for(const sign of [-1,1]){const hoopX=57+sign*11.8,boardX=57+sign*12.4,baseline=57+sign*14,free=57+sign*8.2;
  box(57+sign*11.1,.405,8,5.8,.015,4.9,teal);rect(57+sign*11.1,8,5.8,4.9);ring(free,.43,8,1.8,'#e7f5f7');

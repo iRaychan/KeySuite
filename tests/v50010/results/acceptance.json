@@ -1,0 +1,1217 @@
+{
+  "manual": {
+    "id": "employee:00000000-0000-0000-0000-000000000001",
+    "name": "You Test",
+    "userId": "00000000-0000-0000-0000-000000000001",
+    "kind": "human",
+    "presence": "offline",
+    "floor": "1",
+    "state": "idle",
+    "auto": false,
+    "manual": true,
+    "controlMode": "manual",
+    "lock": null,
+    "carry": null,
+    "rotation": [
+      0,
+      3.141592653589793,
+      0,
+      "XYZ"
+    ],
+    "position": [
+      -59,
+      5.165,
+      -3.2
+    ],
+    "pathLength": 0,
+    "canControl": true
+  },
+  "basketball": {
+    "makes": 1,
+    "score": 1,
+    "visible": true,
+    "position": [
+      63.1092043166953,
+      0.42,
+      8.190729299309554
+    ]
+  },
+  "camera": {
+    "before": {
+      "pivot": [
+        61,
+        1,
+        8
+      ],
+      "screenOffset": [
+        0,
+        0
+      ],
+      "theta": 0.52,
+      "phi": 1.1,
+      "radius": 22,
+      "mode": "orbit",
+      "viewMode": "free",
+      "position": [
+        70.74211119012293,
+        10.979114671362701,
+        25.014950482886373
+      ]
+    },
+    "after": {
+      "pivot": [
+        61,
+        1,
+        8
+      ],
+      "screenOffset": [
+        0,
+        0
+      ],
+      "theta": 0.52,
+      "phi": 1.1,
+      "radius": 22,
+      "mode": "orbit",
+      "viewMode": "free",
+      "position": [
+        66.74211119012293,
+        10.979114671362701,
+        25.014950482886373
+      ]
+    }
+  },
+  "pending": {
+    "moved": 0.24596747752497605,
+    "manual": true,
+    "auto": false
+  },
+  "stairs": {
+    "up": {
+      "steps": 345,
+      "maxRise": 0.022000000000000686,
+      "p": [
+        -41.70014565223208,
+        5.2,
+        -8.119213115408346
+      ],
+      "floor": "1"
+    },
+    "down": {
+      "steps": 347,
+      "maxRise": 0.021999999994268382,
+      "p": [
+        -44.299853722324194,
+        0.4,
+        -8.119348972648952
+      ],
+      "floor": "0"
+    },
+    "npc": {
+      "routed": true,
+      "steps": 388,
+      "left": 0,
+      "p": [
+        -41.7,
+        5.2,
+        -7
+      ],
+      "floor": "1"
+    }
+  },
+  "appearance": {
+    "gender": {
+      "options": 3,
+      "distinct": 3
+    },
+    "face": {
+      "options": 3,
+      "distinct": 3
+    },
+    "body": {
+      "options": 3,
+      "distinct": 3
+    },
+    "hair": {
+      "options": 12,
+      "distinct": 12
+    },
+    "outfit": {
+      "options": 5,
+      "distinct": 5
+    },
+    "shoes": {
+      "options": 3,
+      "distinct": 3
+    },
+    "accessory": {
+      "options": 3,
+      "distinct": 3
+    },
+    "facialHair": {
+      "options": 5,
+      "distinct": 5
+    },
+    "hat": {
+      "options": 3,
+      "distinct": 3
+    },
+    "earrings": {
+      "options": 3,
+      "distinct": 3
+    },
+    "watch": {
+      "options": 3,
+      "distinct": 3
+    },
+    "nose": {
+      "options": 3,
+      "distinct": 3
+    },
+    "ears": {
+      "options": 3,
+      "distinct": 3
+    },
+    "lips": {
+      "options": 3,
+      "distinct": 3
+    },
+    "brows": {
+      "options": 3,
+      "distinct": 3
+    },
+    "eyeSize": {
+      "options": 3,
+      "distinct": 3
+    },
+    "eyeSpacing": {
+      "options": 3,
+      "distinct": 3
+    },
+    "skin": {
+      "distinct": 2
+    },
+    "hairColor": {
+      "distinct": 2
+    },
+    "eyeColor": {
+      "distinct": 2
+    },
+    "outfitColor": {
+      "distinct": 2
+    }
+  },
+  "preview": {
+    "gender": "male",
+    "head": [
+      1.18,
+      1.14,
+      1.14
+    ],
+    "spine": [
+      1.08,
+      1,
+      1
+    ]
+  },
+  "saved": {
+    "profile": {
+      "name": "You Test",
+      "gender": "male",
+      "face": "soft",
+      "body": "slim",
+      "hair": "pigtails",
+      "hairColor": "#57382b",
+      "skin": "#d9a27e",
+      "outfit": "dress",
+      "shoes": "brown",
+      "accessory": "none",
+      "facialHair": "none",
+      "hat": "none",
+      "earrings": "hoops",
+      "watch": "none",
+      "nose": "medium",
+      "ears": "medium",
+      "lips": "medium",
+      "brows": "soft",
+      "eyeSize": "medium",
+      "eyeSpacing": "medium",
+      "eyeColor": "#513a2b",
+      "outfitColor": "#305577"
+    },
+    "gender": "male"
+  },
+  "reloadAppearance": {
+    "hair": "pigtails",
+    "earrings": "hoops",
+    "gender": "male"
+  },
+  "visitors": {
+    "count": 12,
+    "unique": 12,
+    "auto": true,
+    "floor": "all",
+    "desk": false
+  },
+  "render": {
+    "camera": {
+      "pivot": [
+        -22,
+        5,
+        10
+      ],
+      "screenOffset": [
+        0,
+        0
+      ],
+      "theta": 0.52,
+      "phi": 1.12,
+      "radius": 165,
+      "mode": "orbit",
+      "viewMode": "free",
+      "position": [
+        51.7949352440086,
+        76.8876036356575,
+        138.88553051392228
+      ]
+    },
+    "floor": "all",
+    "quality": "balanced",
+    "elevator": {
+      "floor": "0",
+      "y": 0.4,
+      "phase": "idle",
+      "door": 0,
+      "capacity": 4,
+      "queue": 0,
+      "passengers": []
+    },
+    "vehicles": [
+      {
+        "id": "bicycle",
+        "capacity": 1,
+        "position": [
+          -29,
+          0.2,
+          28
+        ],
+        "speed": 0,
+        "occupants": []
+      },
+      {
+        "id": "scooter",
+        "capacity": 2,
+        "position": [
+          1,
+          0.2,
+          63
+        ],
+        "speed": 0,
+        "occupants": []
+      },
+      {
+        "id": "hoverboard",
+        "capacity": 1,
+        "position": [
+          -31,
+          0.4,
+          15
+        ],
+        "speed": 0,
+        "occupants": []
+      },
+      {
+        "id": "golfcart",
+        "capacity": 4,
+        "position": [
+          1,
+          0.2,
+          71
+        ],
+        "speed": 0,
+        "occupants": []
+      },
+      {
+        "id": "hoverboard_office",
+        "capacity": 1,
+        "position": [
+          -31,
+          5.2,
+          -5
+        ],
+        "speed": 0,
+        "occupants": []
+      },
+      {
+        "id": "hoverboard_lift",
+        "capacity": 1,
+        "position": [
+          -30,
+          10,
+          -7
+        ],
+        "speed": 0,
+        "occupants": []
+      }
+    ],
+    "obstructions": [],
+    "cameraRecoveries": 0,
+    "graphicsLost": false,
+    "sharedAvatarStateReady": false,
+    "lighting": "live",
+    "doors": [
+      {
+        "z": 19,
+        "open": 0
+      },
+      {
+        "z": -19,
+        "open": 0
+      },
+      {
+        "z": -3,
+        "open": 0
+      },
+      {
+        "z": 6,
+        "open": 0
+      }
+    ],
+    "selected": "employee:00000000-0000-0000-0000-000000000001",
+    "actors": [
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000001",
+        "name": "You Test",
+        "userId": "00000000-0000-0000-0000-000000000001",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "1",
+        "state": "idle",
+        "auto": false,
+        "manual": true,
+        "controlMode": "manual",
+        "lock": null,
+        "carry": null,
+        "rotation": [
+          0,
+          3.141592653589793,
+          0,
+          "XYZ"
+        ],
+        "position": [
+          -59,
+          5.165,
+          -3.2
+        ],
+        "pathLength": 0,
+        "canControl": true
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000002",
+        "name": "Zoe",
+        "userId": "00000000-0000-0000-0000-000000000002",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": null,
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": null,
+        "carry": null,
+        "rotation": [
+          0,
+          1.6579872906662847,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -31.1,
+          0.2,
+          32
+        ],
+        "pathLength": 0,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000003",
+        "name": "Anna",
+        "userId": "00000000-0000-0000-0000-000000000003",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "pickleball",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.6903283125068738,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -30.24797140242549,
+          0.2,
+          31.901011391820415
+        ],
+        "pathLength": 7,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000004",
+        "name": "Ben",
+        "userId": "00000000-0000-0000-0000-000000000004",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "badminton",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.254747534892861,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -29.38525903797232,
+          0.2,
+          31.930495349479088
+        ],
+        "pathLength": 4,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000005",
+        "name": "Carla",
+        "userId": "00000000-0000-0000-0000-000000000005",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "tennis",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.6699770857274654,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -28.44997586910756,
+          0.2,
+          31.902008099789096
+        ],
+        "pathLength": 6,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000006",
+        "name": "Dan",
+        "userId": "00000000-0000-0000-0000-000000000006",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "garden",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.677945044588987,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -27.549193495504994,
+          0.2,
+          31.901613008990008
+        ],
+        "pathLength": 7,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000007",
+        "name": "Eli",
+        "userId": "00000000-0000-0000-0000-000000000007",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "swim",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          1.3006014690955965,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -26.493990920626533,
+          0.2,
+          32.02936111527836
+        ],
+        "pathLength": 1,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000008",
+        "name": "Fran",
+        "userId": "00000000-0000-0000-0000-000000000008",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "rooftop",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.431321646103107,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -25.771724319571085,
+          0.2,
+          31.916599628405717
+        ],
+        "pathLength": 7,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000009",
+        "name": "Grace",
+        "userId": "00000000-0000-0000-0000-000000000009",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "coffee",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          1.4557003269102582,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -24.69072778595254,
+          0.2,
+          32.01263262590144
+        ],
+        "pathLength": 4,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000010",
+        "name": "Hana",
+        "userId": "00000000-0000-0000-0000-000000000010",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "gym",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          -2.2477111786373736,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -23.98574598282726,
+          0.2,
+          31.931096978085236
+        ],
+        "pathLength": 8,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000011",
+        "name": "Ivan",
+        "userId": "00000000-0000-0000-0000-000000000011",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "activity": "football",
+        "state": "walk",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": "activity",
+        "carry": null,
+        "rotation": [
+          0,
+          2.158798930342464,
+          0,
+          "YXZ"
+        ],
+        "position": [
+          -22.90847446762284,
+          0.2,
+          31.938982978415225
+        ],
+        "pathLength": 8,
+        "canControl": false
+      },
+      {
+        "id": "employee:00000000-0000-0000-0000-000000000012",
+        "name": "Jess",
+        "userId": "00000000-0000-0000-0000-000000000012",
+        "kind": "human",
+        "presence": "offline",
+        "floor": "all",
+        "state": "idle",
+        "auto": true,
+        "manual": false,
+        "controlMode": "auto",
+        "lock": null,
+        "carry": null,
+        "rotation": [
+          0,
+          0,
+          0,
+          "XYZ"
+        ],
+        "position": [
+          -22.1,
+          0.2,
+          32
+        ],
+        "pathLength": 0,
+        "canControl": false
+      }
+    ],
+    "matches": [
+      {
+        "id": "local:efb3a926-924c-4e62-8d10-a501567cc2cf",
+        "activity": "pickleball",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000003",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:320053ce-57e9-46b4-9ccc-6f912749d50b",
+        "activity": "badminton",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000004",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:f13be89c-a055-406a-a5fb-d8ebd0283be7",
+        "activity": "tennis",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000005",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:08e60c0d-1fbf-4bb9-8e74-07895274ec62",
+        "activity": "garden",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000006",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:e8f43958-f218-4303-af80-abdbec2d1d27",
+        "activity": "swim",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000007",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:46924549-5f5b-4250-8047-db3fe28d7db8",
+        "activity": "rooftop",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000008",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:fbefd00b-3772-44b1-a02d-e10b956cf3e9",
+        "activity": "coffee",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000009",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:078f57a0-18d5-45bc-befe-12f968da7821",
+        "activity": "gym",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000010",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      },
+      {
+        "id": "local:4e198908-4a35-4d4c-927d-69ae28bef879",
+        "activity": "football",
+        "status": "waiting",
+        "members": [
+          {
+            "id": "employee:00000000-0000-0000-0000-000000000011",
+            "arrived": false
+          }
+        ],
+        "equipment": false
+      }
+    ],
+    "workstations": [
+      {
+        "deskNo": 0,
+        "floor": "0",
+        "seat": [
+          -60,
+          0.365,
+          -9.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2029852523658847,
+          0.16359789983576384,
+          0.9987084089882695
+        ]
+      },
+      {
+        "deskNo": 0,
+        "floor": "0",
+        "seat": [
+          -55,
+          0.365,
+          -9.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.16645919697542177,
+          0.15150653571806386,
+          0.9986913151763872
+        ]
+      },
+      {
+        "deskNo": 0,
+        "floor": "0",
+        "seat": [
+          -50,
+          0.365,
+          -9.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.129094389495368,
+          0.1391375161894166,
+          0.9986738288372997
+        ]
+      },
+      {
+        "deskNo": 1,
+        "floor": "1",
+        "seat": [
+          -59,
+          5.165,
+          -3.2
+        ],
+        "facing": 3.141592653589793,
+        "email": "u1@example.test",
+        "screen": [
+          -0.23002801312274304,
+          0.19402075976251076,
+          0.9986517432968081
+        ]
+      },
+      {
+        "deskNo": 2,
+        "floor": "1",
+        "seat": [
+          -59,
+          5.165,
+          1.8
+        ],
+        "facing": 3.141592653589793,
+        "email": "u2@example.test",
+        "screen": [
+          -0.2580879940855511,
+          0.17253584744767372,
+          0.9986193000989386
+        ]
+      },
+      {
+        "deskNo": 3,
+        "floor": "1",
+        "seat": [
+          -59,
+          5.165,
+          6.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2873378872341282,
+          0.1501398454564935,
+          0.9985854811140881
+        ]
+      },
+      {
+        "deskNo": 4,
+        "floor": "1",
+        "seat": [
+          -59,
+          5.165,
+          11.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.3178550213356905,
+          0.1267735448470516,
+          0.9985501969340532
+        ]
+      },
+      {
+        "deskNo": 5,
+        "floor": "1",
+        "seat": [
+          -54.5,
+          5.165,
+          -3.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.19622960406072257,
+          0.1830597701445633,
+          0.9986351917023771
+        ]
+      },
+      {
+        "deskNo": 6,
+        "floor": "1",
+        "seat": [
+          -54.5,
+          5.165,
+          1.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2238837123546728,
+          0.16111245907817973,
+          0.9986020502612952
+        ]
+      },
+      {
+        "deskNo": 7,
+        "floor": "1",
+        "seat": [
+          -54.5,
+          5.165,
+          6.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2527234758953553,
+          0.13822416867372028,
+          0.9985674878984795
+        ]
+      },
+      {
+        "deskNo": 8,
+        "floor": "1",
+        "seat": [
+          -54.5,
+          5.165,
+          11.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2828268166248919,
+          0.11433305722996387,
+          0.9985314112301396
+        ]
+      },
+      {
+        "deskNo": 9,
+        "floor": "1",
+        "seat": [
+          -50,
+          5.165,
+          -3.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.16170750473830656,
+          0.17186408423022348,
+          0.9986182857058302
+        ]
+      },
+      {
+        "deskNo": 10,
+        "floor": "1",
+        "seat": [
+          -50,
+          5.165,
+          1.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.1889315110694915,
+          0.14943928398300133,
+          0.9985844232342993
+        ]
+      },
+      {
+        "deskNo": 11,
+        "floor": "1",
+        "seat": [
+          -50,
+          5.165,
+          6.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.2173357701854495,
+          0.12604229277248796,
+          0.9985490927100563
+        ]
+      },
+      {
+        "deskNo": 12,
+        "floor": "1",
+        "seat": [
+          -50,
+          5.165,
+          11.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.24699873460450494,
+          0.10160848814631844,
+          0.99851219655025
+        ]
+      },
+      {
+        "deskNo": 13,
+        "floor": "1",
+        "seat": [
+          -45.5,
+          5.165,
+          -3.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.12643822017583456,
+          0.1604260824824991,
+          0.998601013801319
+        ]
+      },
+      {
+        "deskNo": 14,
+        "floor": "1",
+        "seat": [
+          -45.5,
+          5.165,
+          1.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.15320658776165608,
+          0.13750803874807002,
+          0.9985664065096175
+        ]
+      },
+      {
+        "deskNo": 15,
+        "floor": "1",
+        "seat": [
+          -45.5,
+          5.165,
+          6.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.18114856400246893,
+          0.11358519655531282,
+          0.9985302819263989
+        ]
+      },
+      {
+        "deskNo": 16,
+        "floor": "1",
+        "seat": [
+          -45.5,
+          5.165,
+          11.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.21034306076049525,
+          0.08858999461182598,
+          0.9984925380310289
+        ]
+      },
+      {
+        "deskNo": 17,
+        "floor": "1",
+        "seat": [
+          -41,
+          5.165,
+          -3.2
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.09039722723143881,
+          0.14873781192635752,
+          0.9985833639794881
+        ]
+      },
+      {
+        "deskNo": 18,
+        "floor": "1",
+        "seat": [
+          -41,
+          5.165,
+          1.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.11668303104063339,
+          0.12531006960659757,
+          0.9985479870196673
+        ]
+      },
+      {
+        "deskNo": 19,
+        "floor": "1",
+        "seat": [
+          -41,
+          5.165,
+          6.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.14413445358712834,
+          0.10084344654273798,
+          0.9985110413025227
+        ]
+      },
+      {
+        "deskNo": 20,
+        "floor": "1",
+        "seat": [
+          -41,
+          5.165,
+          11.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.1728307852651159,
+          0.07526727360337004,
+          0.9984724201144416
+        ]
+      },
+      {
+        "deskNo": 0,
+        "floor": "2",
+        "seat": [
+          -53,
+          9.965,
+          9.8
+        ],
+        "facing": 3.141592653589793,
+        "screen": [
+          -0.26189049220569777,
+          0.18323121431617334,
+          0.9985200081621055
+        ]
+      }
+    ],
+    "dimensions": {
+      "football": {
+        "width": 68,
+        "length": 105
+      },
+      "floors": 3,
+      "floorHeight": 4.8,
+      "building": {
+        "x": -35,
+        "z": 0,
+        "width": 60,
+        "depth": 38
+      }
+    },
+    "visibleFloors": [
+      true,
+      true,
+      true
+    ],
+    "roofVisible": true,
+    "ownerVisible": false,
+    "enquiries": 0,
+    "drawCalls": 1255,
+    "triangles": 1065266,
+    "fps": 0,
+    "cartRide": false
+  }
+}
