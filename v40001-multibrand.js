@@ -166,7 +166,7 @@
   function pumpDataOfRow(row){try{return JSON.parse(row?.dataset?.pumpData||'{}')}catch(_){return {}}}
   function sourceFamily(source,row=null){return String(source?.product_family||source?.family||source?.productFamily||row?.dataset?.productFamily||'').toUpperCase()}
   function inferFamilyFromPage(page=''){
-    const map={productChc:'CHC',productCr:'CR',productBfi:'BFI',productBgf:'BGF',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorBfi:'BFI',selectorEs:'ES'};
+    const map={productChc:'CHC',productCr:'CR',productBfi:'BFI',productBgf:'BGF',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorBfi:'BFI',selectorEs:'ES'};
     return map[page]||'';
   }
   function inferSeries(model,source={}){
@@ -406,6 +406,12 @@
     if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==shownModel)modelInput.value=shownModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==shownDesc)descInput.value=shownDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);
   }
   function calculateWithBrandMargin(source,brandMargin){
+    if(source?.manual_override===true)return null;
+    const result=calculateBaseWithBrandMargin(source,brandMargin);if(!result)return null;
+    const addon=source?.fixed_price?0:num(source?.seal_addon_myr,0)+num(source?.component_addon_myr,0);
+    return {...result,final:result.final+addon,unrounded:result.unrounded+addon};
+  }
+  function calculateBaseWithBrandMargin(source,brandMargin){
     const base=num(source?.base_myr,NaN);if(!(base>0))return null;
     const safe=v=>{v=num(v,0);return v>=0&&v<1?v:0};
     const rarity=String(source?.rarity||'many').toLowerCase();
@@ -437,7 +443,7 @@
   }
   function applyBrandMargin(row,{resetBase=false}={}){
     if(!row||state.applyingMargin)return;const price=row.querySelector('.item-price');if(!price)return;
-    const bid=rowBrandId(row);if(!bid)return;const source=sourceOfRow(row),cid=quoteCustomerId(),margin=customerBrandMargin(cid,bid);
+    const bid=rowBrandId(row);if(!bid)return;const source=sourceOfRow(row);if(source.manual_override===true)return;const cid=quoteCustomerId(),margin=customerBrandMargin(cid,bid);
     state.applyingMargin=true;
     try{
       const adjusted=calculateWithBrandMargin(source,margin);
@@ -756,6 +762,7 @@
       {label:'BFI',family:'BFI',productGroup:'BFI',page:'productBfi'},
       {label:'BGF',family:'BGF',productGroup:'BGF',page:'productBgf'},
       {label:'End Suction',family:'ES',page:'productEs'},
+      {label:'ISO',family:'ISO',page:'productIso'},
       {label:'Motor',family:'MOTOR',page:'productMotor'}
     ],
     'keylargo':[{label:'Baseplate',family:'BASEPLATE',page:'productBaseplate'},{label:'Coupling',family:'COUPLING',page:'productCoupling'},{label:'KeyPLC Panel',family:'KEYPLC',page:'productKeyplc'},{label:'Manifold',family:'MANIFOLD',page:'productManifold'}]
@@ -767,7 +774,7 @@
     try{sessionStorage.setItem('keysuite-v41412-product-chc-generation',code)}catch(_){}
     window.KeySuiteProduct?.setChcGeneration?.(code);
   }
-  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',BFI:'productBfi',BGF:'productBgf',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
+  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',BFI:'productBfi',BGF:'productBgf',ISO:'productIso',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
   function brandFamilies(brand){
     const key=String(brand.brand_key||'').toLowerCase(),built=isMasterBrand(brand)?BUILTIN_FAMILIES['b.g.reich']:BUILTIN_FAMILIES[key];
     if(built)return built.map(f=>{

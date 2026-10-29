@@ -102,6 +102,11 @@
     return out;
   }
 
+  function lookupIsoPump(model){
+    var key=str(model).replace(/^ISO\s+/i,'').trim(),p=(g.KEYSUITE_ISO_PRODUCTS||[]).find(x=>x.model.toLowerCase()===key.toLowerCase()),d=p?.dimensions;
+    if(!d||!['a','f','h1','h2','m1','n1','shaft_mm'].every(k=>Number(d[k])>0))return {available:false,code:'ISO_DIMENSIONS_UNAVAILABLE',message:'Required ISO dimensions have not been supplied.'};
+    return {available:true,model:'ISO '+p.model,masterModel:p.model,A:d.a,F:d.f,h1:d.h1,h2:d.h2,M1:d.m1,N1:d.n1,shaft:d.shaft_mm,suction:d.suction,discharge:d.discharge,kg:d.weight_kg,source:'005 - ISO Imp (Selection) 261029 - V1.1.xlsx'};
+  }
   function selectBaseplate(input){
     input=input||{};
     var hp=num(input.motorHp!==undefined?input.motorHp:input.hp);
@@ -131,7 +136,7 @@
   function calculateEsPumpset(input){
     input=input||{};
     var model=input.masterModel||input.master_model||input.engineeringModel||input.engineering_model||input.model||input.pumpModel||input.pump_model;
-    var pump=lookupEsPump(model);
+    var pump=input.family==='ISO'?lookupIsoPump(model):lookupEsPump(model);
     if(!pump.available) return {available:false,code:pump.code,message:pump.message,pump:pump};
 
     var hp=num(input.motorHp!==undefined?input.motorHp:input.motor_hp);
@@ -174,7 +179,7 @@
       source:{
         motor:'004 - Motor 260811 - V1.2.xlsx',
         baseplate:'004 - Baseplate 260812 - V1.0.xlsx',
-        es:'005 - ES Imp (Selection) 260808 - V1.2.xlsx'
+        pump:input.family==='ISO'?'005 - ISO Imp (Selection) 261029 - V1.1.xlsx':'005 - ES Imp (Selection) 260808 - V1.2.xlsx',es:input.family==='ISO'?null:'005 - ES Imp (Selection) 260808 - V1.2.xlsx'
       },
       pump:pump,motor:motor,baseplate:base,
       dimensions:{

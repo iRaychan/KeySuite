@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.10</title>
-  <script>window.KEYSUITE_VERSION='5.00.10';window.KEYSUITE_BUILD='V5.00.10';</script>
+  <title>KeySuite V5.00.11</title>
+  <script>window.KEYSUITE_VERSION='5.00.11';window.KEYSUITE_BUILD='V5.00.11';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.10</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.11</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,17 +658,17 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.10</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.11</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <div class="nav-group" data-nav-group="selectorMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="selectorMenu"><span>Selection</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorBfi">BFI</button><button data-page="selectorEs">ES</button></div>
+        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorBfi">BFI</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productMotor">Motor</button></div></details></div></div>
+        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productIso">ISO</button><button data-page="productMotor">Motor</button></div></details></div></div>
       </div>
       <button data-page="keyLab">KeyLab</button>
       <button data-page="quotation">Quotation</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.10</div>
+    <div class="suite-version">KeySuite V5.00.11</div>
   </aside>
 
   <main>
@@ -1015,6 +1015,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     </section>
 
 
+    <section id="productIso" class="page"><h1>ISO End Suction Pumps</h1><div class="card"><label>Model <input id="isoSearch" placeholder="Search ISO model"></label><label>Material <select id="isoMaterial"></select></label><label>Seal <select id="isoSeal"><option>Car/Cer</option><option>SiC/SiC</option></select></label><label>O-ring <select id="isoElastomer"><option>Viton</option><option>EPDM</option></select></label><p>Product quotations are bare shaft. Use Selection for a duty-sized motor, or Assembly to configure the complete pumpset.</p></div><div id="isoProducts"></div></section>
+    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50011" title="ISO Selection" style="width:100%;height:2600px;border:0"></iframe></section>
+    <section id="isoPriceList" class="page"><h1>ISO Price List</h1><div id="isoPrices"></div></section>
     <section id="productEs" class="page">
       <div class="page-title-row"><div><h1>Product · End Suction</h1><div class="muted">B.G.Reich ES bare-shaft pump products.</div></div></div>
       <div class="card es-product-toolbar">
@@ -1355,7 +1358,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                   <button class="category-product-button" type="button" data-category-product="CR">CR</button>
                   <button class="category-product-button" type="button" data-category-product="BFI">BFI</button>
                   <button class="category-product-button" type="button" data-category-product="BGF">BGF</button>
-                  <button class="category-product-button" type="button" data-category-product="ES">ES</button>
+                  <button class="category-product-button" type="button" data-category-product="ES">ES</button><button class="category-product-button" type="button" data-category-product="ISO">ISO</button>
                   <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
                   <button class="category-product-button" type="button" data-category-product="KEYPLC">KeyPLC</button>
                   <button class="category-product-button" type="button" data-category-product="MANIFOLD">Manifold</button>
@@ -1458,6 +1461,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="bgfPriceList">
           <span class="module-icon">BGF</span><h2>BGF</h2><p>Maintain BGF 350M, BGF 350E, BGF 400 and BGF 500 source prices from the supplied BGF reference.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="isoPriceList">ISO Price List</button>
         <button type="button" class="key-module-card" data-go="esPriceList">
           <span class="module-icon">ES</span><h2>End Suction</h2><p>Maintain B.G.Reich ES source prices by material construction.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
@@ -2087,15 +2091,19 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="permissions.js?v=42821"></script>
-<script src="v40407-role-authority.js?v=50010"></script>
+<script src="v40407-role-authority.js?v=50011"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50010"></script>
+<script src="assembly.js?v=50011"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50010"></script>
-<script src="pricing.js?v=50010"></script>
+<script src="app.js?v=50011"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js"></script>
+<script src="selector-es/es-data.js"></script>
+<script src="component-prices-v50011.js"></script>
+<script src="manual-price-v50011.js"></script>
+<script src="pricing.js?v=50011"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=42824"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
@@ -2105,9 +2113,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=42872"></script>
 <script src="bfi-v42302.js?v=42821"></script>
-<script src="bgf-v50006.js?v=50010"></script>
+<script src="bgf-v50006.js?v=50011"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50010"></script>
+<script src="roles.js?v=50011"></script>
 <script src="motor.js?v=409"></script>
 <script src="coupling.js?v=42922"></script>
 <script src="baseplate.js?v=42872"></script>
@@ -2212,7 +2220,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50010-version-lock.js?v=50010"></script>
+<script src="v50011-version-lock.js?v=50011"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

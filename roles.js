@@ -117,6 +117,7 @@
           ['BFI','BFI'],
           ['BGF','BGF'],
           ['ES','ES'],
+          ['ISO','ISO'],
           ['MOTOR','MOTOR']
         ].forEach(([group,family])=>out.push({brand,family,productGroup:group,key:`${brand.id}|${group}`,series:String(api?.brandSeriesFor?.(brand,group)||({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',BFI:'BFI',ES:'End Suction',MOTOR:'Motor'}[group]||family))}));
         return;

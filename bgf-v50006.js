@@ -24,7 +24,7 @@ function quote(p){
  const api=window.KeySuitePricing;
  if(!api?.findBgfPrice||!api?.bgfPriceProblem||!window.KeySuiteApp?.addExternalQuoteItem)throw new Error('Quotation services are not ready. Reload and try again.');
  const found=api.findBgfPrice(p.id),problem=api.bgfPriceProblem(p.id,found);
- if(problem){fail(problem);return;}
+ if(problem){void window.KeySuiteManualPrice.offer({model:p.model,description:description(p),productFamily:'BGF',pricingSource:{product_family:'BGF',product_id:p.id}},problem);return;}
  const row=window.KeySuiteApp.addExternalQuoteItem({model:p.model,brand:p.brandName,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:$('ksDashFlow')?.value||'',capacityUnit:$('ksDashFlowUnit')?.value||'m3h',headValue:$('ksDashHead')?.value||'',headUnit:$('ksDashHeadUnit')?.value||'m'});
  if(!row)throw new Error('The quotation item could not be added.');
  error.textContent='';error.className='auth-message';if(typeof showPage==='function')showPage('quotation');else document.querySelector('[data-page="quotation"]')?.click();

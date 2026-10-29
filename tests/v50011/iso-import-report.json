@@ -1,0 +1,121 @@
+{
+  "models": 39,
+  "variants": 381,
+  "curveRows": 37,
+  "technicalModels": 32,
+  "priceOnlyModels": [
+    "250-200-200",
+    "250-200-250",
+    "250-200-315",
+    "50-32-160",
+    "65-40-200",
+    "65-40-315",
+    "80-65-160"
+  ],
+  "missingCurveRows": [
+    {
+      "model": "50-32-160",
+      "row": 4,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-40-200",
+      "row": 6,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-40-315",
+      "row": 8,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "80-50-315",
+      "row": 12,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "80-65-160",
+      "row": 13,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "50-32-160",
+      "row": 44,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "50-32-200",
+      "row": 45,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-40-200",
+      "row": 46,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-40-250",
+      "row": 47,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-40-315",
+      "row": 48,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "65-50-160",
+      "row": 49,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "80-50-200",
+      "row": 50,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "80-50-250",
+      "row": 51,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "80-65-160",
+      "row": 53,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "100-65-315",
+      "row": 56,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "125-100-250",
+      "row": 60,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "150-125-250",
+      "row": 64,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "250-200-200",
+      "row": 71,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "250-200-250",
+      "row": 72,
+      "reason": "Q/H absent"
+    },
+    {
+      "model": "250-200-315",
+      "row": 73,
+      "reason": "Q/H absent"
+    }
+  ],
+  "sha256": {
+    "005 - ISO Imp (Selection) 261029 - V1.1.xlsx": "970db788def4c9b891a1c700fee3ee8c526f449ae824d7cdf69e3a52fbd52ed5",
+    "010 - ISO (Pricelist) - 261029 - V1.0.xlsx": "c3ad6568e4e1c185d06751d5732857c5e6833b0ddba756b5bae041897e304fa2"
+  }
+}

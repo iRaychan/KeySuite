@@ -152,13 +152,14 @@ function orderedItems(d=current){
  const order=sections[d?.assembly_type||type]||[];return order.flatMap(section=>(d?.items||[]).filter(item=>item.section===section));
 }
 function pumpDescriptionParts(item){
- const lines=String(item?.description||'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trimEnd()).filter(Boolean),modelFromItem=String(item?.pumpData?.quotation_model||item?.pumpData?.model||item?.model||'').replace(/^ES\s*/i,'').trim();
+ const iso=String(item?.productFamily||sourceObject(item).product_family||'').toUpperCase()==='ISO';
+ const lines=String(item?.description||'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trimEnd()).filter(Boolean),modelFromItem=String(item?.pumpData?.quotation_model||item?.pumpData?.model||item?.model||'').replace(/^(?:ES|ISO)\s*/i,'').trim();
  const duty=String(item?.pumpData?.quotation_duty||'').trim(),capacity=lines.find(line=>/^Capacity:/i.test(line))||(duty?`Capacity: ${duty}`:'');
- let modelLine=lines.find(line=>/^B\.G\.Reich End Suction Pump Model:/i.test(line))||`B.G.Reich End Suction Pump Model: ${modelFromItem}`;
- modelLine=modelLine.replace(/(Model:\s*)(?:ES\s*)?/i,'$1ES ');
+ let modelLine=lines.find(line=>/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line))||`B.G.Reich End Suction Pump Model: ${modelFromItem}`;
+ modelLine=modelLine.replace(/(Model:\s*)(?:(?:ES|ISO)\s*)?/i,iso?'$1ISO ':'$1ES ');
  const suction=lines.find(line=>/^Suction\s*x\s*Discharge:/i.test(line))||'';
  const material=lines.find(line=>/^Pump Material:/i.test(line))||'';
- const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!/^B\.G\.Reich End Suction Pump Model:/i.test(line)&&!/Bare shaft pump only/i.test(line));
+ const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line)&&!/Bare shaft pump only/i.test(line));
  return {capacity,model:modelLine,suction,material,extras};
 }
 function completedPumpsetDescription(d=current){
@@ -370,7 +371,7 @@ function syncCouplingItems(d=current){
 function removeAutomaticBaseplate(d=current){if(!d)return;d.items=(d.items||[]).filter(item=>!(item?.baseplateData?.autoSized||sourceObject(item).auto_sized_baseplate))}
 function syncAutomaticBaseplate(d=current){
  if(!d||d.assembly_type!=='pumpset')return;
- const pump=(d.items||[]).find(item=>item.section==='pump'&&String(item?.pumpData?.product||item?.pumpData?.productFamily||item?.pumpData?.product_family||item?.pumpData?.series||item?.pumpData?.product||'ES').toUpperCase().includes('ES')&&item?.pumpData?.baseplate_detail&&item?.pumpData?.pumpset_dimension);
+ const pump=(d.items||[]).find(item=>item.section==='pump'&&String(item?.pumpData?.product||item?.pumpData?.productFamily||item?.pumpData?.product_family||item?.pumpData?.series||item?.pumpData?.product||'ES').toUpperCase().match(/^(ES|ISO)$/)&&item?.pumpData?.baseplate_detail&&item?.pumpData?.pumpset_dimension);
  if(!pump){removeAutomaticBaseplate(d);return}
  const pd=pump.pumpData||{},bp=pd.baseplate_detail||{},dim=pd.pumpset_dimension||{};
  let item=(d.items||[]).find(entry=>entry?.baseplateData?.autoSized||sourceObject(entry).auto_sized_baseplate),qty=Math.max(1,Number(pump.qty)||1),manualFrame=!!item?.baseplateData?.manualFrame,chosenFrame=Number(manualFrame?item.baseplateData.frame:bp.frame);

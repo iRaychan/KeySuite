@@ -74,11 +74,11 @@
   }
   function setEditable(on){
     editing=!!on;
-    const name=byId('categoryNameInput');if(name)name.disabled=!editing;
+    const name=byId('categoryNameInput');if(name)name.disabled=!editing||selectedProduct==='ISO';
     const edit=byId('editCategoryRule');if(edit){edit.style.display=isOwner()&&selectedId&&!editing?'inline-block':'none';edit.textContent='Hold 3s to Edit'}
     const save=byId('saveCategoryRule');if(save)save.disabled=!editing;
     const cancel=byId('cancelCategoryEdit');if(cancel)cancel.disabled=!editing;
-    byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);setRuleFieldsEditable(editing);
+    byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);setRuleFieldsEditable(editing);renderRows();
   }
   function selectedCurrenciesFromUi(){return ['USD','RMB','MYR'].filter(code=>!!byId(`categoryCurrency${code}`)?.checked)}
   function showCurrencySummary(){
@@ -139,7 +139,7 @@
     fillCompanyFactorValues();
     byId('categoryProductHeading').textContent=`${productLabel(selectedProduct)} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${productLabel(selectedProduct)} Margin`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
-    refreshZeroMarginIndicators(category);setRuleFieldsEditable(editing);showCurrencySummary();updateFormula();
+    refreshZeroMarginIndicators(category);setRuleFieldsEditable(editing);showCurrencySummary();updateFormula();renderRows();
   }
   function fill(category=null){
     selectedId=category?.id||'';const name=category?.name||'';
@@ -150,14 +150,16 @@
   function renderRows(){
     const body=byId('categoryRows');if(!body)return;const rows=sortedRows(categories());
     if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
-    body.innerHTML=rows.map(category=>{const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></td></tr>`}).join('');
+    const head=body.closest('table')?.querySelector('thead tr');if(head)head.innerHTML='<th>Category</th><th>USD</th><th>RMB</th><th>MYR</th><th>Margin %</th><th>Normal %</th><th>Rare %</th><th>Transport RM</th>';
+    body.innerHTML=rows.map(category=>{const rule=ruleFor(category,selectedProduct);if(editing&&category.id===selectedId)rule.currencies=selectedCurrenciesFromUi();const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></td>${['USD','RMB','MYR'].map(code=>`<td><input type="checkbox" aria-label="${esc(name)} ${code}" data-row-currency="${code}" data-row-category="${esc(category.id)}" ${rule.currencies.includes(code)?'checked':''} ${editing&&category.id===selectedId?'':'disabled'}></td>`).join('')}<td>${num(rule.margin*100)}</td><td>${num(rule.normal*100)}</td><td>${num(rule.rare*100)}</td><td>${num(rule.transport)}</td></tr>`}).join('');
+    body.querySelectorAll('[data-row-currency]').forEach(input=>input.onchange=()=>{const editor=byId('categoryCurrency'+input.dataset.rowCurrency);if(editor){editor.checked=input.checked;showCurrencySummary();updateFormula()}});
   }
   function mapRows(rows){
     return (rows||[]).map(c=>{
       let rules=c.product_rules||{};if(typeof rules==='string'){try{rules=JSON.parse(rules)}catch(_){rules={}}}
       const legacy={margin:Number(c.chc_margin??c.chc_factor??.38),normal:0,rare:0,transport:Number(c.transport??30),useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]},other={margin:0,normal:0,rare:0,transport:0,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]};
       const normalize=(code,fallback=other)=>normalizeRule(rules?.[code]||{},fallback);
-      return {id:c.id,name:String(c.category_name||c.name||'Unnamed Category'),productRules:{CHC:normalize('CHC',legacy),CHC_G1:normalize('CHC_G1',other),CHC_G2:normalizeRule(rules?.CHC_G2||rules?.CHC||{},legacy),CR:normalize('CR'),BFI:normalize('BFI'),BGF:normalize('BGF'),ES:normalize('ES'),GWS:normalize('GWS'),KEYPLC:normalize('KEYPLC'),MANIFOLD:normalize('MANIFOLD'),MOTOR:normalize('MOTOR'),COUPLING:normalize('COUPLING'),BASEPLATE:normalize('BASEPLATE')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)};
+      return {id:c.id,name:String(c.category_name||c.name||'Unnamed Category'),productRules:{CHC:normalize('CHC',legacy),CHC_G1:normalize('CHC_G1',other),CHC_G2:normalizeRule(rules?.CHC_G2||rules?.CHC||{},legacy),CR:normalize('CR'),BFI:normalize('BFI'),BGF:normalize('BGF'),ISO:normalize('ISO'),ES:normalize('ES'),GWS:normalize('GWS'),KEYPLC:normalize('KEYPLC'),MANIFOLD:normalize('MANIFOLD'),MOTOR:normalize('MOTOR'),COUPLING:normalize('COUPLING'),BASEPLATE:normalize('BASEPLATE')},margins:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},factors:{CHC:Number(c.chc_margin??c.chc_factor??0),CHC_G2:Number(c.chc_margin??c.chc_factor??0)},transport:Number(c.transport||0)};
     });
   }
   async function reload(){
@@ -179,7 +181,8 @@
     try{
       const params={p_category_id:selectedId||null,p_category_name:name,p_product_code:selectedProduct,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       let rpc,args;
-      if(selectedProduct==='BGF'){if(!selectedId)throw new Error('Save a category first, then configure BGF.');rpc='keysuite_save_bgf_category_rule_v50008';args={...params,p_currencies:rule.currencies};
+      if(selectedProduct==='ISO'){if(!selectedId)throw new Error('Create a category first, then configure ISO.');rpc='keysuite_save_category_v50011';args={p_category_id:selectedId,p_product_code:'ISO',p_rule:rule};
+      }else if(selectedProduct==='BGF'){if(!selectedId)throw new Error('Save a category first, then configure BGF.');rpc='keysuite_save_bgf_category_rule_v50008';args={...params,p_currencies:rule.currencies};
       }else if(selectedProduct==='BASEPLATE'){
         rpc='keysuite_save_baseplate_category_rule_v40401';args={p_category_id:selectedId||null,p_category_name:name,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       }else if(['CHC_G1','CHC_G2'].includes(selectedProduct)&&selectedId){
@@ -194,7 +197,7 @@
       const {error}=await client.rpc(rpc,args);if(error)throw error;
       let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').ilike('category_name',name).limit(1);if(lookup.error)throw lookup.error;targetId=String(lookup.data?.[0]?.id||'')}
       if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Currency.');
-      const currencySave=selectedProduct==='BGF'?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
+      const currencySave=['BGF','ISO'].includes(selectedProduct)?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
       const rows=await reload(),saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());openCategory(saved||rows[0],false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Currency selected.`,'info');
     }catch(error){console.error(error);message(String(error?.message||error||'Pricing Category could not be saved.'),'error')}
     finally{button.disabled=false;button.textContent=original}
@@ -217,7 +220,7 @@
     byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
     document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(editing?`${selectedProduct} pricing rule loaded. Fields and Use choices are unlocked.`:`${selectedProduct} pricing rule loaded. Hold the Edit button for 3 seconds to make changes.`,'info')}));
     ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTransportInput','categoryUseCommission','categoryUseSetDiscount','categoryUseFinalDiscount','categoryUseFuelCharge'].forEach(id=>{byId(id)?.addEventListener('input',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())});byId(id)?.addEventListener('change',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())})});
-    ['USD','RMB','MYR'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula()}));
+    ['USD','RMB','MYR'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula();const input=document.querySelector(`[data-row-category="${CSS.escape(selectedId)}"][data-row-currency="${code}"]`);if(input)input.checked=byId(`categoryCurrency${code}`).checked}));
     ['categoryManualCost','categoryManualCurrency','categoryManualRarity'].forEach(id=>{byId(id)?.addEventListener('input',updateManualQuote);byId(id)?.addEventListener('change',updateManualQuote)});
   }
   function render(){

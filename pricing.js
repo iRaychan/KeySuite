@@ -44,7 +44,7 @@
   }
 
   const familyLabel=family=>family==='CHC_G1'?'CHC G1':family==='CHC_G2'?'CHC G2':String(family||'');
-  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','BFI','BGF','ES','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
+  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','BFI','BGF','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
   function multipliers(family='CHC_G2'){
     const raw=normalizedFamily(family),code=raw==='CHC'?'CHC_G2':raw;
     const book=secureData.productMultipliers||{};
@@ -150,6 +150,7 @@
   }
 
   function quoteBlockReason(calc){
+    if(calc?.componentPricingError)return String(calc.componentPricingError);
     if(calc?.motorPricingError)return String(calc.motorPricingError);
     if(calc?.snapshotFallback&&Number(calc.beforeFuel)>0)return '';
     if(!calc||!(Number(calc.baseMyr)>0))return 'Cannot quote: No valid USD, RMB or MYR cost is available.';
@@ -162,8 +163,9 @@
     alert(`${reason}${label?`\n\nItem: ${label}`:''}`);return false;
   }
   function pricingSourceBlockReason(source={}){
+    if(source.manual_override===true)return '';
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
-    if(family==='MANUAL')return '';
+    if(family==='MANUAL'||source.manual_override===true)return '';
     if(family==='ASSEMBLY'){
       if(source.carried_final_price===true||String(source.pricing_mode||'').toLowerCase()==='carried_final')return '';
       for(const entry of source.assembly_items||[]){
@@ -198,7 +200,7 @@
     const source=input?.pricingSource||input?.pricing_source||input?.source||input||{},family=String(source.product_family||source.family||input?.productFamily||'').toUpperCase();
     if(family==='ASSEMBLY'&&(source.carried_final_price===true||String(source.pricing_mode||'').toLowerCase()==='carried_final'))return '';
     const nested=source.assembly_items||source.items||[];if(nested.length){for(const entry of nested){const reason=pricingSourceMarginBlockReason(entry);if(reason)return reason}if(family==='ASSEMBLY'||family==='MANUAL'||!family)return ''}
-    if(!family||family==='MANUAL')return '';
+    if(source.manual_override===true||!family||family==='MANUAL')return '';
     if(source.fixed_price===true||normalizeRarity(source.rarity)==='fixed')return '';
     const customer=quotationCustomer(),cat=categoryForCustomer(customer)||(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||category(),rule=cat?categoryRule(cat,family):null,margin=Number(rule?.margin??source.margin??0);
     return margin>0?'':'Margin is blank or 0%. Please update the Category Pricing Rule before adding this item.';
@@ -333,8 +335,8 @@
     if(!calc||calc.fixedPrice)return calc;
     const seal=options.seal??options.keysuite_seal??options.sealFaces??'Car/Cer';
     const elastomer=options.elastomer??options.keysuite_elastomer??'Viton';
-    const addon=chcSealAddon(model,seal,options.generation_code||options.generation||'G2'),baseFinal=Number(calc.finalPrice||0);
-    return {...calc,baseFinalPrice:baseFinal,sealAddon:addon,sealFaces:normalizeChcSealFaces(seal),sealElastomer:String(elastomer||'Viton'),sealDescription:chcSealDescription(seal,elastomer),finalPrice:baseFinal+addon};
+    const addon=chcSealAddon(model,seal,options.generation_code||options.generation||'G2'),baseFinal=Number(calc.baseFinalPrice??calc.finalPrice??0);
+    return window.KeySuiteComponents.apply({...calc,componentBasePrice:undefined,baseFinalPrice:baseFinal,sealAddon:addon,sealFaces:normalizeChcSealFaces(seal),sealElastomer:String(elastomer||'Viton'),sealDescription:chcSealDescription(seal,elastomer),finalPrice:baseFinal+addon},'CHC',model,{...options,seal,elastomer});
   }
 
   function motorProductPriceBook(product){return product?.pricesByCurrency||{USD:{MOTOR:Number(product?.priceUsd??product?.price_usd??0)},RMB:{MOTOR:Number(product?.priceRmb??product?.price_rmb??0)},MYR:{MOTOR:Number(product?.priceMyr??product?.price_myr??0)}}}
@@ -430,7 +432,7 @@
   function crSealGroup(model){const series=Number((String(model||'').match(/^CR\s+(\d+)/i)||[])[1]||0);if(series<=5)return 'CR 1 to CR 5';if(series<=20)return 'CR 8 to CR 20';if(series<=90)return 'CR 32 to CR 90';if(series<=200)return 'CR 120to 200';return 'CR 320'}
   function crSealAddon(model,seal){
     const normalized=String(seal||'Car / Sic').toLowerCase().replace(/[^a-z0-9]+/g,'');
-    const wanted=normalized.includes('tungsten')||normalized.includes('tctc')?'tctc':normalized.includes('sicsic')||normalized.includes('siliconsilicon')?'sicsic':'carsic';
+    const wanted=normalized.includes('tungsten')||normalized.includes('tctc')||normalized.includes('tuctic')||normalized.includes('tuctuc')?'tctc':normalized.includes('sicsic')||normalized.includes('siliconsilicon')?'sicsic':'carsic';
     const rows=secureData.crSealAddons?.length?secureData.crSealAddons:(window.KeySuiteCRPriceData?.seals||[]),row=rows.find(item=>{const key=String(item.material||'').toLowerCase().replace(/[^a-z0-9]+/g,'');return wanted==='tctc'?key.includes('tctc')||key.includes('tuctic')||key.includes('tungsten'):wanted==='sicsic'?key.includes('sicsic')||key.includes('silicon'):key.includes('carsic')||key.includes('carbon')});
     return Number(row?.prices?.[crSealGroup(model)]||0);
   }
@@ -441,7 +443,7 @@
     const rawCalc=calculatePrice(product.pricesByCurrency||{},identity.material,cat,'CR',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
     const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency=pumpDefaultMotorEfficiency(hp,'IE2'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency);
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
-    const seal=options.seal??options.keysuite_seal??'Car / Sic',elastomer=options.elastomer??options.keysuite_elastomer??'Viton',addon=motorCalc.fixedPrice?0:crSealAddon(identity.base,seal),calc={...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),sealAddon:addon,sealDescription:chcSealDescription(seal,elastomer),finalPrice:Number(motorCalc.finalPrice||0)+addon};
+    const seal=options.seal??options.keysuite_seal??'Car / Sic',elastomer=options.elastomer??options.keysuite_elastomer??'Viton',addon=motorCalc.fixedPrice?0:crSealAddon(identity.base,seal),calc=window.KeySuiteComponents.apply({...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),sealAddon:addon,sealDescription:chcSealDescription(seal,elastomer),finalPrice:Number(motorCalc.finalPrice||0)+addon},'CR',identity.base,{...options,seal,elastomer});
     return {product,material:identity.material,variant:identity.material,rarity:calc.rarity,calc,category:cat,customer,family:'CR',sourceExtra:{technical_model:identity.base,price_model:product.model,seal_faces:String(seal),seal_elastomer:String(elastomer),seal_addon_myr:addon,seal_description:calc.sealDescription,default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
   }
   function buildCrAssemblyItem(model,options={}){
@@ -537,17 +539,18 @@
     return {product:{id:'BASEPLATE-ES',model:label},material:'BASEPLATE',variant:'BASEPLATE',calc,category:cat,customer,family:'BASEPLATE',sourceExtra:{configuration:config,raw_cost_myr:Number(raw.total),baseplate_frame:frame}};
   }
 
-  function sourceSnapshot(found){return {fixed_price:!!found.calc.fixedPrice,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:found.variant||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
+  function sourceSnapshot(found){return {fixed_price:!!found.calc.fixedPrice,component_addon_myr:found.calc.componentAddon??null,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:typeof found.variant==='string'?found.variant:found.variant?.material||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
 
 
   function repriceSource(source={},mode='quotation',options={}){
     const pricingMode=normalizePricingMode(mode),customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
     if(family==='CR'){const material=source.material||source.variant||'CR',base=source.technical_model||String(source.price_model||source.model||'').replace(/^CR[SN]\b/i,'CR'),model=material==='CR'?base:base.replace(/^CR\b/i,material);return findCrPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Car / Sic',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
+    if(family==='ISO')return window.KeySuiteISO?.findPrice(source.product_id,source.material,{...options,customer,category:cat,pricingMode,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='BGF')return findBgfPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
     if(family==='BFI')return findBfiPrice(source.product_id||source.model,source.motor_phase||source.variant||'3Ph',{...options,customer,category:cat,pricingMode,material:source.pump_material||source.material_variant||source.material,motor_hp:Number(source.motor_hp||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class});
     if(family==='GWS')return findGwsPrice(source.product_id||source.model,null,{...options,customer,category:cat,pricingMode});
-    if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode});
+    if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='KEYPLC'){
       const qty=Math.max(1,Number(String(source.variant||source.material||'1').replace(/\D/g,''))||1);
       return findKeyplcPrice(source.product_id,qty,{...options,customer,category:cat,pricingMode,enclosure:source.panel_type||'indoor'});
@@ -662,6 +665,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const customer=quotationCustomer(),cat=categoryForCustomer(customer);if(!customer||!cat)return;
     for(const row of [...document.querySelectorAll('.quote-item[data-pricing-source]')]){
       let source={};try{source=JSON.parse(row.dataset.pricingSource||'{}')}catch(_){ }
+      if(source.manual_override===true)continue;
       if(String(source.product_family||'').toUpperCase()==='ASSEMBLY'){
         // V4.28.71 Assembly/System quotations carry the already-final assembly
         // unit price. Customer/category refresh must not re-run leaf pricing or Fuel.
@@ -669,11 +673,11 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
           delete row.dataset.pricingValidationError;continue;
         }
         const result=priceAssemblyForQuotation((source.assembly_items||[]).map(entry=>({id:entry.id,model:entry.model,qty:entry.qty,pricingSource:entry.pricingSource||entry.source||entry})),{customer,category:cat});
-        if(result.error){row.querySelector('.item-price').value='0.00';row.dataset.pricingValidationError=result.error;continue}
+        if(result.error){row.dataset.pricingValidationError=result.error;continue}
         delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=Number(result.total||0).toFixed(2);row.dataset.pricingSource=JSON.stringify(result.source);continue;
       }
       const found=repriceSource(source,'quotation',{customer,category:cat});if(!found)continue;
-      const blocked=quoteBlockReason(found.calc);if(blocked){row.querySelector('.item-price').value='0.00';row.dataset.pricingValidationError=blocked;continue}
+      const blocked=quoteBlockReason(found.calc);if(blocked){row.dataset.pricingValidationError=blocked;continue}
       delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);const refreshed=sourceSnapshot(found);if(source.product_family==='ES'){refreshed.seal_material=source.seal_material||ES_DEFAULT_SEAL;refreshed.elastomer=source.elastomer||ES_DEFAULT_ELASTOMER}row.dataset.pricingSource=JSON.stringify(refreshed);
     }
     if(typeof calcTotal==='function')calcTotal();
@@ -685,9 +689,11 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
     const customer=quotationCustomer();if(!customer){if(typeof showPage==='function')showPage('quotation');alert('Select a pricing customer before adding an item.');return}
     const cat=categoryForCustomer(customer);if(!cat){alert(`No Pricing Category is assigned to ${customer.company}.`);return}
-    const row=visibleRows[index];if(!row)return;const calc=calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer,rarityBook:row.product.rarityByCurrency||{}});if(!ensureQuoteableCalculation(calc,row.product.model))return;
+    const row=visibleRows[index];if(!row)return;
     const shownModel=row.material==='CHC'?row.product.model:row.product.model.replace(/^CHC\b/,row.material),description=`B.G.Reich Vertical Multistage Pump Model: ${shownModel}`;
-    const quoteRow=window.KeySuiteApp?.addExternalQuoteItem?.({model:shownModel,qty:1,unitPrice:calc.finalPrice,description,pricingSource:sourceSnapshot({product:row.product,material:row.material,rarity:calc.rarity,calc,category:cat,customer,family:'CHC'}),productFamily:'CHC'});if(quoteRow)showPage('quotation');
+    const found=findPrice(shownModel,{customer,category:cat,generation_code:row.product.generation_code||'G2'});
+    if(!found||quoteBlockReason(found.calc)){void window.KeySuiteManualPrice.offer({model:shownModel,description,productFamily:'CHC',pricingSource:{product_family:'CHC',product_id:row.product.id,material:row.material,generation_code:row.product.generation_code||'G2'}},quoteBlockReason(found?.calc));return;}
+    const quoteRow=window.KeySuiteApp?.addExternalQuoteItem?.({model:shownModel,qty:1,unitPrice:found.calc.finalPrice,description,pricingSource:sourceSnapshot(found),productFamily:'CHC'});if(quoteRow)showPage('quotation');
   }
 
   function gwsQuoteTitle(product){const litres=Number(product?.sizeLitres||String(product?.sizeCode||'').replace(/\D/g,'')||0);return `${litres.toLocaleString('en-MY')} Litres (${Number(product?.pressureBar||0)} Bar)`}
@@ -760,8 +766,9 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const variants=product.variants||[];
     const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
     if(!variant)return null;
-    const calc=calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'});
-    return calc?{product,variant,material:variant.material,calc,category:cat,customer:options.customer||selectedCustomer(),family:'ES'}:null;
+    const dims=window.ES_SELECTOR_DB?.pumps?.find(p=>p.model===esModelName(product.model))?.dimensions||product.dimensions||{};
+    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material,shaft_mm:dims.shaft_mm});
+    return calc?{product,variant,material:variant.material,calc,category:cat,customer:options.customer||selectedCustomer(),family:'ES',sourceExtra:{seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
   }
 
   const ES_DEFAULT_SEAL='Carbon Ceramic (Ca Ce)';
@@ -793,8 +800,11 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   }
   function addEs(id,route='quotation',material='CI / SS / SS / MS',options={}){
     if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add an ES pump to the ${route==='assembly'?'Assembly':'quotation'}`))return;
-    const found=findEsPrice(id,material,{...options,pricingMode:route==='assembly'?'assembly':'quotation'});if(!found){alert(`No ES source price or ES Category Pricing Rule is available for ${material}.`);return}
-    const {product,variant,calc}=found;if(route!=='assembly'&&!ensureQuoteableCalculation(calc,product?.model||'End Suction Pump'))return;const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),description=esDescription(product,variant.material,{seal,elastomer});
+    const found=findEsPrice(id,material,{...options,pricingMode:route==='assembly'?'assembly':'quotation'});
+    const product=found?.product||(secureData.esProducts||[]).find(x=>x.id===id);if(!product)return;
+    const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),description=esDescription(product,material,{seal,elastomer});
+    if(!found||quoteBlockReason(found.calc)){void window.KeySuiteManualPrice.offer({model:product.model,description,productFamily:'ES',pricingSource:{product_family:'ES',product_id:product.id,material,variant:material,seal_material:seal,elastomer}},quoteBlockReason(found?.calc));return;}
+    const {variant,calc}=found;
     const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const item={model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
     if(route==='assembly'){window.KeySuiteAssembly?.addItem?.(item);return}
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;

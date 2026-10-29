@@ -86,7 +86,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
   cyl(0,1.01,-.20,.045,.3,trim);box(0,.87,-.20,.30,.03,.20,dark);
   const monitor=new T.Mesh(unit.box,mat('#83b6c1',{emissive:'#8cb5bc',emissiveIntensity:.25}));
   monitor.position.set(0,1.24,-.20);monitor.scale.set(.91,.50,.035);box(0,1.24,-.23,.97,.56,.055,dark);group.add(monitor);box(0,1.24,-.21,.93,.52,.02,trim);
-  box(0,.9,.17,.45,.025,.15,dark);sphere(.39,.90,.17,.08,.04,.12,dark);
+  box(0,.9,.17,.45,.025,.15,dark);for(let row=0;row<4;row++)for(let col=0;col<12;col++)box(-.20+col*.036,.916,.117+row*.032,.027,.008,.023,trim);box(-.5,.865,.22,.21,.035,.29,white);box(-.5,.888,.22,.18,.006,.26,mat('#ece8da'));cyl(.73,.91,-.18,.12,.16,white);for(let j=0;j<5;j++)sphere(.73+Math.sin(j)*.055,1.06+j*.016,-.18+Math.cos(j)*.055,.09,.16,.07,leaf);sphere(.39,.90,.17,.08,.04,.12,dark);
   chair(0,0,.80,0,true);
   const station={group,monitor,floor:String(floor),deskNo:floor===1?workstations.filter(w=>w.floor==='1').length+1:0,employee:null,
    seat:new T.Vector3(0,-.035,.80),facing:Math.PI+rotation};
@@ -96,7 +96,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  function couch(x,y,z,w=3,rot=0){for(let dx=-w/2+.65;dx<w/2-.3;dx+=.9)registerSeat('sofa',x+dx*Math.cos(rot),y+.705,z-dx*Math.sin(rot),rot);(obstacles[y>14?'roof':String(Math.round((y-.4)/4.8))]||[]).push({x,z,w,d:1.1});box(x,y+.38,z,w,.65,1.1,mat('#c7bfa4'),rot);box(x,y+.95,z-.45,w,.9,.22,mat('#b4b69f'),rot);for(const dx of [-w/2,w/2])box(x+dx,y+.65,z,.22,.7,1.1,mat('#b4b69f'),rot)}
  function tableSet(x,y,z){(obstacles[y>14?'roof':y<1?'all':String(Math.round((y-.4)/4.8))]||[]).push({x,z,w:1.6,d:1.6});cyl(x,y+.8,z,1.5,.12,wood);cyl(x,y+.4,z,.15,.8,trim);for(const [sx,sz,rot]of [[x-1.1,z,Math.PI/2],[x+1.1,z,-Math.PI/2],[x,z+1.1,0]]){const seat=chair(sx,y,sz,rot);seat.table=new T.Vector3(x+(sx-x)*.45,y+.86,z+(sz-z)*.45);}}
  function umbrella(x,y,z){cyl(x,y+1.5,z,.08,3,trim);primitive('cone',x,y+3,z,5,.85,5,white)}
- function lounge(x,y,z){registerSeat('lounger',x,y+.45,z,0);box(x,y+.36,z,.9,.18,2.3,white);box(x,y+.62,z-.75,.9,.7,.17,mat('#d7cbaa'));}
+ function lounge(x,y,z){registerSeat('lounger',x,y+.49,z,0);box(x,y+.36,z+.35,.9,.18,1.6,white);primitive('box',x,y+.73,z-.48,.9,.13,.95,mat('#d7cbaa'),0,0,.62);for(const side of [-1,1])box(x+side*.36,y+.18,z+.4,.07,.36,1.55,trim);}
  function entry(x,z,width,title,side=false,y=0){
  const frame=mat('#173a49'),mark=mat('#d4eaf0');
  if(side){for(const dz of [-width/2,width/2])box(x,y+1.6,z+dz,.22,3.2,.22,frame);box(x,y+3.25,z,.25,.3,width+.3,frame);box(x,y+.05,z,2.2,.05,width-.4,mark);}
@@ -237,7 +237,7 @@ diffuseColor.a *= 1.0-smoothstep(0.76,0.98,whiteBackground);`)};
  for(let z=-110;z<80;z+=12){flowers(10,Math.abs(z+3)<5?-12:z,2,5);palm(6,Math.abs(z+3)<5?-12:z,8);if(z<20)tree(-72,z,6)}
  for(let x=-62;x<-3;x+=7){if(Math.abs(x+35)>4)flowers(x,26,5,2);if(x%2===0&&Math.abs(x+35)>5)tree(x,29,5)}
  for(const [x,z] of [[-66,44],[-55,58],[-10,59],[22,42],[98,45],[98,68],[39,77],[-72,27],[-72,-43]]){palm(x,z,10);flowers(x+2,z+2,3,2)}
- for(let z=-103;z<85;z+=22){lamp(-69,z);lamp(24,z)}for(let x=-100;x<100;x+=20)lamp(x,92);
+ for(let z=-103;z<85;z+=22){lamp(-75,z);lamp(24,z)}for(let x=-100;x<100;x+=20)lamp(x,92);
  for(const x of [-58,-46,-14])bench(x,.2,34);for(const z of [-35,0,34])bench(17,.2,z,Math.PI/2);
  // Electric golf cart, animated on a safe exterior route.
  const cart=new T.Group();cart.name='parked-cart-retired';scene.add(cart);group=cart;box(0,.6,0,1.7,.3,3,white);box(0,1.1,.35,1.5,.6,1,dark);box(0,2.1,0,1.9,.1,2.6,white);for(const x of [-.8,.8]){box(x,1.4,-1,.06,1.4,.06,trim);for(const z of [-.9,.9])sphere(x,.4,z,.32,.6,.6,dark)}box(0,1.5,-.9,1.4,.7,.04,glass);cart.position.set(1,.1,71);cart.visible=false;group=scene;

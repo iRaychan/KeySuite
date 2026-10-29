@@ -170,7 +170,7 @@ document.querySelectorAll('[data-nav-toggle]').forEach(button=>button.addEventLi
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
-const KEY_PAGE_PERMISSIONS={keyDashboard:'key_dashboard',roleManagement:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',chcPriceList:'manage_price_list',bfiPriceList:'manage_price_list',gwsPriceList:'manage_price_list',esPriceList:'manage_price_list',keyplcPriceList:'manage_price_list',manifoldPriceList:'manage_price_list',baseplateSeriesList:'manage_price_list',baseplatePriceList:'manage_price_list',motorPriceList:'manage_price_list',couplingPriceList:'manage_price_list',keyLabPriceList:'manage_price_list',companySettings:'customer_settings',companyPricing:'company_pricing',keyAiSettings:'keyai_access'};
+const KEY_PAGE_PERMISSIONS={selectorIso:'use_selector',productIso:'use_product',isoPriceList:'manage_price_list',keyDashboard:'key_dashboard',roleManagement:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',chcPriceList:'manage_price_list',bfiPriceList:'manage_price_list',gwsPriceList:'manage_price_list',esPriceList:'manage_price_list',keyplcPriceList:'manage_price_list',manifoldPriceList:'manage_price_list',baseplateSeriesList:'manage_price_list',baseplatePriceList:'manage_price_list',motorPriceList:'manage_price_list',couplingPriceList:'manage_price_list',keyLabPriceList:'manage_price_list',companySettings:'customer_settings',companyPricing:'company_pricing',keyAiSettings:'keyai_access'};
 function permissionLevel(key){return window.KeySuitePermissions?.level?.(key,currentRole())||(currentRole()==='owner'?'full':'none')}
 function hasPermission(key){return permissionLevel(key)!=='none'}
 function syncOwnerKeyVisibility(){
@@ -531,7 +531,8 @@ function quotationHistoryDate(q){return (q?.revisionOf||quoteRevisionNumberFromN
 function quotationHistoryDateTimestamp(q){const raw=String(quotationHistoryDate(q)).slice(0,10);const value=Date.parse(raw?`${raw}T00:00:00Z`:'');return Number.isFinite(value)?value:0}
 function compareQuotationHistoryNewest(a,b){
  const dateDiff=quotationHistoryDateTimestamp(b)-quotationHistoryDateTimestamp(a);if(dateDiff)return dateDiff;
- const noDiff=canonicalQuotationNumber(b?.no).localeCompare(canonicalQuotationNumber(a?.no),undefined,{numeric:true,sensitivity:'base'});if(noDiff)return noDiff;
+ const originalRef=q=>canonicalQuotationNumber(q?.no).replace(/-R\d+$/,'');
+ const noDiff=originalRef(b).localeCompare(originalRef(a),undefined,{numeric:true,sensitivity:'base'});if(noDiff)return noDiff;
  const revisionDiff=Number(b?.revisionNumber||quoteRevisionNumberFromNo(b?.no)||0)-Number(a?.revisionNumber||quoteRevisionNumberFromNo(a?.no)||0);if(revisionDiff)return revisionDiff;
  const createdDiff=quotationHistoryTimestamp(b)-quotationHistoryTimestamp(a);if(createdDiff)return createdDiff;
  return quotationHistoryUpdatedTimestamp(b)-quotationHistoryUpdatedTimestamp(a)
@@ -1079,7 +1080,7 @@ function quoteItemRow(data={}){
  if(data.pumpData)wrap.dataset.pumpData=JSON.stringify(data.pumpData);if(data.pricingSource)wrap.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data.couplingData)wrap.dataset.couplingData=JSON.stringify(data.couplingData);if(data.motorData)wrap.dataset.motorData=JSON.stringify(data.motorData);
  if(data.descriptionManuallyEdited)wrap.dataset.descriptionManuallyEdited='true';if(data.modelManuallyEdited)wrap.dataset.modelManuallyEdited='true';
  wrap.dataset.itemBrands=JSON.stringify(quoteItemBrands(data));if(data.manualItem){wrap.dataset.manualItem='true';wrap.dataset.quoteKind='manual';}
- wrap.addEventListener('input',e=>{if(e.target.matches('.item-model'))wrap.dataset.modelManuallyEdited='true';if(e.target.matches('.item-description'))wrap.dataset.descriptionManuallyEdited='true';},true);
+ wrap.addEventListener('input',e=>{if(e.isTrusted&&e.target.matches('.item-price')){let source={};try{source=JSON.parse(wrap.dataset.pricingSource||'{}')}catch(_){}wrap.dataset.pricingSource=JSON.stringify({...source,manual_override:true,manual_price_reason:source.manual_price_reason||'Selling price edited by user'});delete wrap.dataset.pricingValidationError;}if(e.target.matches('.item-model'))wrap.dataset.modelManuallyEdited='true';if(e.target.matches('.item-description'))wrap.dataset.descriptionManuallyEdited='true';},true);
  const savedRemark=String(data.internalRemark??data.remark??'').trim();if(savedRemark)wrap.dataset.internalRemark=savedRemark;
  const normalizedDescription=normalizeDescriptionIndentation(data.description||''),rawDescription=motorItem?normalizedDescription:stripQuotationBrand(normalizedDescription),capacityState=capacityStateFromData(data,rawDescription),shaftState=shaftStateFromData(data,rawDescription),description=data.manualItem||data.descriptionManuallyEdited?String(data.description||''):couplingItem?shaftText(rawDescription,shaftState):motorItem?normalizeMotorQuotationDescription(rawDescription):capacityText(rawDescription,capacityState),baseModel=couplingItem?normalizeCouplingQuoteModel(data.model||'',data):stripQuotationBrand(data.model||''),cleanModel=data.modelManuallyEdited?String(data.model||''):(!couplingItem&&!noCapacityItem)?capacityModelText(baseModel,capacityState):baseModel;
  const infoRow=data.manualItem?`<div class="quote-item-grid"><div><label>Brand (optional)</label><input class="item-manual-brand" value="${esc(data.brand||'')}"></div><div><label>Capacity (optional)</label><input class="item-manual-capacity" value="${esc(data.manualCapacity||'')}" placeholder="10 m³/hr @ 50 m"></div><div><label>Unit</label><input class="item-manual-unit" value="${esc(data.unit||'unit')}"></div></div>`:couplingItem?`<div class="quote-capacity-row quote-shaft-row no-print"><label class="quote-capacity-toggle"><input class="item-display-shaft" type="checkbox" ${shaftState.displayShaftInfo?'checked':''}> Display Shaft Information</label><div><label>Pump Shaft (mm)</label><input class="item-pump-shaft" type="number" min="0" step="any" value="${esc(shaftState.pumpShaft)}"></div><div><label>Motor Shaft (mm)</label><input class="item-motor-shaft" type="number" min="0" step="any" value="${esc(shaftState.motorShaft)}"></div><div><label>Motor Pole</label><select class="item-motor-pole">${[2,4,6,8].map(pole=>`<option value="${pole}" ${Number(shaftState.motorPole)===pole?'selected':''}>${pole} Pole · ${motorSpeedForPole(pole).toLocaleString('en-MY')} rpm</option>`).join('')}</select></div></div>`:noCapacityItem?'':`<div class="quote-capacity-row no-print"><label class="quote-capacity-toggle"><input class="item-display-capacity" type="checkbox" ${capacityState.displayCapacity?'checked':''}> Display Capacity</label><div><label>Capacity</label><div class="capacity-input-pair"><input class="item-capacity-value" type="number" min="0" step="any" value="${esc(capacityState.capacityValue)}"><select class="item-capacity-unit">${capacityOptions(CAPACITY_UNITS,capacityState.capacityUnit)}</select></div></div><span class="capacity-at">@</span><div><label>Head</label><div class="capacity-input-pair"><input class="item-head-value" type="number" min="0" step="any" value="${esc(capacityState.headValue)}"><select class="item-head-unit">${capacityOptions(HEAD_UNITS,capacityState.headUnit)}</select></div></div></div>`;
@@ -1569,9 +1570,12 @@ async function routeEsSelection(p={},route='quotation'){
  const id=esSelectionProductId(p),material=String(p.keysuite_material||'CI / SS / SS / MS');
  // Complete ES sets use the same Assembly component pricing/BOM as Move to Pumpset → Move to Quotation.
  const pricingMode=(target==='assembly'||!bare)?'assembly':'quotation';
- const found=window.KeySuitePricing?.findEsPrice?.(id,material,{pricingMode});
- if(!found){alert(`No ES source price or ES Category Pricing Rule is available for ${p.quotation_model||p.model||material}.`);return}
- if(target==='quotation'&&bare&&!window.KeySuitePricing?.ensureQuoteableCalculation?.(found.calc,found.product?.model||p.model||'End Suction Pump'))return;
+ const found=window.KeySuitePricing?.findEsPrice?.(id,material,{pricingMode,seal:p.keysuite_seal,elastomer:p.keysuite_elastomer});
+ if(!found||window.KeySuitePricing.quoteBlockReason(found.calc)){
+   const description=window.KeySuitePricing.esDescription({model:p.quotation_model||p.model},material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare});
+   const capacity=esSelectionCapacity(p);
+   void window.KeySuiteManualPrice.offer({model:p.quotation_model||p.model,description:[capacity?capacityLine(capacity):'',description,!bare?`Motor: ${p.motor_hp||'-'}HP ${p.pole||2}Pole ${p.motor_efficiency_class||'IE3'}`:''].filter(Boolean).join('\n'),pumpData:p,productFamily:'ES',pricingSource:bare?{product_family:'ES',product_id:id,material,variant:material,seal_material:p.keysuite_seal,elastomer:p.keysuite_elastomer}:{}},window.KeySuitePricing.quoteBlockReason(found?.calc));return;
+ }
  const capacity=esSelectionCapacity(p),pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare})||String(p.description||'');
  const pumpDescription=String(pricedDescription||'').trim();
@@ -1591,6 +1595,7 @@ async function routeEsSelection(p={},route='quotation'){
 
 window.addEventListener('message',function(event){
  if(!event.data)return;
+ if(event.source===$('selectorIsoFrame')?.contentWindow){if(event.data.type==='KEYSUITE_ADD_SELECTION')void window.KeySuiteISO.route(event.data.payload||{},event.data.route||'quotation');return;}
  const fromEs=event.source===$('selectorEsFrame')?.contentWindow||String(event.data.product||'').toUpperCase()==='ES';
  const fromBfi=event.source===$('selectorBfiFrame')?.contentWindow||event.source===$('productBfiSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BFI';
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';
@@ -1686,8 +1691,7 @@ window.addEventListener('message',function(event){
    `Material: ${materialLine}`
  ].filter(Boolean);
  const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
- if(!pricedSelection){alert(window.KeySuitePricing?.chcPriceProblem?.(quotationModel,{generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare})||`Pump price not found: ${quotationModel}.`);return}
- if(!window.KeySuitePricing?.ensureQuoteableCalculation?.(pricedSelection?.calc,quotationModel))return;
+ if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){void window.KeySuiteManualPrice.offer({model:itemModel,description:lines.join('\n'),pumpData:p,productFamily:'CHC'},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;}
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});

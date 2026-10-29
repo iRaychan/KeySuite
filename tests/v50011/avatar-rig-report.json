@@ -1,0 +1,18 @@
+{
+  "meshes": 15,
+  "bones": 15,
+  "vertices": 87029,
+  "actions": [
+    "idle",
+    "sit",
+    "talk",
+    "walk",
+    "wave",
+    "work"
+  ],
+  "limitations": [
+    "Analytic body skin weights require visual review at elbows, shoulders and seated hips.",
+    "No authored facial morph rig or individual finger joints.",
+    "Fixed approved hairstyle and face geometry; profile values remain stored."
+  ]
+}
