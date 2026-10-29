@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../..'),read=name=>fs.readFileSync(path.join(root,name),'utf8');
+const roles=read('roles.js'),auth=read('auth.js'),html=read('index.html'),edge=read('supabase/functions/keysuite-manage-user-status/index.ts'),sql=read('proposals/user_archive_v50013.sql');
+
+assert(/users\.filter\(user=>user\.active!==false\)/.test(roles),'active list excludes archived users');
+assert(/users\.filter\(user=>user\.active===false\)/.test(roles),'archived list is separate');
+assert(/The Owner cannot archive their own account/.test(roles),'self-archive is blocked in the UI');
+assert(/confirm\(`Archive/.test(roles),'archive requires confirmation');
+assert(/keysuite-manage-user-status/.test(roles),'archive uses the privileged server endpoint');
+assert(/roleArchivedRows/.test(html)&&/roleArchivedCard/.test(html),'archived users have an Owner view');
+assert(!/<select id="roleUserActive"/.test(html),'role editing cannot silently deactivate an account');
+assert(/String\(caller\.role\)\.toLowerCase\(\) !== 'owner'/.test(edge),'server endpoint enforces Owner access');
+assert(/email === callerEmail/.test(edge),'server endpoint blocks self-archive');
+assert(/ban_duration: '876000h'/.test(edge)&&/ban_duration: 'none'/.test(edge),'archive blocks login and restore unblocks it');
+assert(/keysuite_revoke_user_sessions_v50013/.test(edge),'archive revokes sessions');
+assert(/keysuite_set_user_archive_v50013/.test(edge),'status and audit writes use the restricted server RPC');
+assert(/delete from auth\.sessions where user_id=v_user_id/.test(sql),'session rows are removed');
+assert(/revoke all on function public\.keysuite_revoke_user_sessions_v50013\(text,boolean\) from public, anon, authenticated/.test(sql),'session helper is unavailable to browser roles');
+assert(/grant execute on function public\.keysuite_revoke_user_sessions_v50013\(text,boolean\) to service_role/.test(sql),'session helper is service-role-only');
+assert(/ks_user_archive_audit_v50013/.test(sql),'archive/restore has an audit trail');
+assert(/grant execute on function public\.keysuite_set_user_archive_v50013\(text,text,text\) to service_role/.test(sql),'archive transaction is service-role-only');
+assert(/setInterval\(checkAccessStillActive,30000\)/.test(auth),'open clients re-check approved access');
+console.log('PASS V5.00.13: Owner-only user archive/restore, self-protection, active/archived separation, login ban, session revocation, access watchdog, and audit proposal.');

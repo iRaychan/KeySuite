@@ -187,10 +187,20 @@
   }
 
   function renderUsers(){
-    const rows=el('roleRows');if(!rows)return;if(!users.length){rows.innerHTML='<tr><td colspan="7" class="muted">No approved users found.</td></tr>';return}
-    rows.innerHTML=users.map(user=>{const userRole=String(user.role||'user').toLowerCase(),prefix=String(user.quotation_prefix||'').toUpperCase();return `<tr><td><b>${esc(user.display_name||'-')}</b></td><td>${esc(user.email)}</td><td>${prefix?`<span class="role-badge">${esc(prefix)}</span>`:'<span class="muted">Not assigned</span>'}</td><td><span class="role-badge ${esc(userRole)}">${esc(title(userRole))}</span></td><td>${user.active?'<span class="badge won">Active</span>':'<span class="badge lost">Inactive</span>'}</td><td>${user.auth_exists?'<span class="auth-state ok" title="Supabase Auth account exists. The user can create or reset a password from the login page.">Account created</span>':'<span class="auth-state missing">Invitation required</span>'}</td><td><div class="role-row-actions"><button class="btn secondary edit-role-user" type="button" data-email="${esc(user.email)}">Edit</button>${!user.auth_exists?`<button class="btn invite-role-user" type="button" data-invite-email="${esc(user.email)}">Invite</button>`:''}</div></td></tr>`}).join('');
+    const rows=el('roleRows');if(!rows)return;const activeUsers=users.filter(user=>user.active!==false);if(!activeUsers.length){rows.innerHTML='<tr><td colspan="7" class="muted">No active approved users found.</td></tr>';renderArchivedUsers();return}
+    const ownEmail=String(access?.email||'').toLowerCase();
+    rows.innerHTML=activeUsers.map(user=>{const userRole=String(user.role||'user').toLowerCase(),prefix=String(user.quotation_prefix||'').toUpperCase(),self=String(user.email||'').toLowerCase()===ownEmail,archiveButton=isOwner()?`<button class="btn secondary archive-role-user" type="button" data-archive-email="${esc(user.email)}" ${self?'disabled title="The Owner cannot archive their own account."':''}>Archive</button>`:'';return `<tr><td><b>${esc(user.display_name||'-')}</b></td><td>${esc(user.email)}</td><td>${prefix?`<span class="role-badge">${esc(prefix)}</span>`:'<span class="muted">Not assigned</span>'}</td><td><span class="role-badge ${esc(userRole)}">${esc(title(userRole))}</span></td><td><span class="badge won">Active</span></td><td>${user.auth_exists?'<span class="auth-state ok" title="Supabase Auth account exists. The user can create or reset a password from the login page.">Account created</span>':'<span class="auth-state missing">Invitation required</span>'}</td><td><div class="role-row-actions"><button class="btn secondary edit-role-user" type="button" data-email="${esc(user.email)}">Edit</button>${!user.auth_exists?`<button class="btn invite-role-user" type="button" data-invite-email="${esc(user.email)}">Invite</button>`:''}${archiveButton}</div></td></tr>`}).join('');
     rows.querySelectorAll('.edit-role-user').forEach(button=>button.addEventListener('click',()=>openEdit(button.dataset.email)));
     rows.querySelectorAll('.invite-role-user').forEach(button=>button.addEventListener('click',()=>inviteExisting(button.dataset.inviteEmail,button)));
+    rows.querySelectorAll('.archive-role-user').forEach(button=>button.addEventListener('click',()=>archiveUser(button.dataset.archiveEmail,button)));
+    renderArchivedUsers();
+  }
+
+  function renderArchivedUsers(){
+    const rows=el('roleArchivedRows'),card=el('roleArchivedCard');if(!rows||!card)return;const archived=users.filter(user=>user.active===false);card.style.display=isOwner()?'block':'none';if(!isOwner())return;
+    el('roleArchivedCount').textContent=String(archived.length);
+    rows.innerHTML=archived.length?archived.map(user=>{const userRole=String(user.role||'user').toLowerCase(),prefix=String(user.quotation_prefix||'').toUpperCase();return `<tr><td><b>${esc(user.display_name||'-')}</b></td><td>${esc(user.email)}</td><td>${prefix?`<span class="role-badge">${esc(prefix)}</span>`:'<span class="muted">Not assigned</span>'}</td><td><span class="role-badge ${esc(userRole)}">${esc(title(userRole))}</span></td><td><span class="badge lost">Archived</span></td><td><button class="btn secondary restore-role-user" type="button" data-restore-email="${esc(user.email)}">Restore</button></td></tr>`}).join(''):'<tr><td colspan="6" class="muted">No archived users.</td></tr>';
+    rows.querySelectorAll('.restore-role-user').forEach(button=>button.addEventListener('click',()=>restoreUser(button.dataset.restoreEmail,button)));
   }
 
   function renderAudit(){
@@ -225,7 +235,8 @@
       const prefixMap=new Map((prefixResult.data||[]).map(row=>[String(row.email||'').toLowerCase(),String(row.quotation_prefix||'').toUpperCase()]));
       const scopeMap=new Map((scopeResult.error?[]:(scopeResult.data||[])).map(row=>[String(row.email||'').toLowerCase(),row.selection_scope||{keys:[]} ]));
       users=(userResult.data||[]).map(user=>({...user,quotation_prefix:prefixMap.get(String(user.email||'').toLowerCase())||'',selection_scope:scopeMap.get(String(user.email||'').toLowerCase())||{keys:[]}}));audit=auditResult.data||[];
-      if(notice){notice.innerHTML=`<b>${users.length}</b> approved user${users.length===1?'':'s'}. New users can receive a secure invitation email to set their own password.`;notice.classList.add('active-customer')}
+      const activeCount=users.filter(user=>user.active!==false).length,archivedCount=users.length-activeCount;
+      if(notice){notice.innerHTML=`<b>${activeCount}</b> active approved user${activeCount===1?'':'s'}${isOwner()?` · <b>${archivedCount}</b> archived`:''}. New users can receive a secure invitation email to set their own password.`;notice.classList.add('active-customer')}
       renderUsers();renderAudit();
     }catch(error){console.error(error);if(notice)notice.textContent=`Role data could not be loaded: ${error.message||error}.`;users=[];audit=[];renderUsers();renderAudit()}
   }
@@ -304,7 +315,7 @@
   }
   function setInviteRow(show,checked=true){const row=el('roleInviteRow');if(row)row.style.display=show?'block':'none';const input=el('roleSendInvite');if(input)input.checked=checked}
   function openAdd(){if(!canManage())return;editingEmail='';editingUser={selection_scope:{keys:[]}};setMessage('roleDialogMessage','');el('roleDialogTitle').textContent='Add User';el('roleUserEmail').readOnly=false;el('roleUserEmail').value='';el('roleUserDisplayName').value='';if(el('roleUserQuotationPrefix')){el('roleUserQuotationPrefix').value='';el('roleUserQuotationPrefix').disabled=!isOwner()}setRoleOptions('user');el('roleUserActive').value='true';setInviteRow(true,true);renderSelectionScopeEditor(editingUser);el('roleUserDialog').showModal()}
-  function openEdit(email){const user=users.find(item=>String(item.email).toLowerCase()===String(email).toLowerCase());if(!user)return;editingEmail=user.email;editingUser=user;setMessage('roleDialogMessage','');el('roleDialogTitle').textContent='Edit User Role';el('roleUserEmail').value=user.email;el('roleUserEmail').readOnly=true;el('roleUserDisplayName').value=user.display_name||'';if(el('roleUserQuotationPrefix')){el('roleUserQuotationPrefix').value=user.quotation_prefix||'';el('roleUserQuotationPrefix').disabled=!isOwner()}setRoleOptions(user.role);el('roleUserActive').value=user.active?'true':'false';setInviteRow(!user.auth_exists,!user.auth_exists);renderSelectionScopeEditor(user);el('roleUserDialog').showModal()}
+  function openEdit(email){const user=users.find(item=>item.active!==false&&String(item.email).toLowerCase()===String(email).toLowerCase());if(!user)return;editingEmail=user.email;editingUser=user;setMessage('roleDialogMessage','');el('roleDialogTitle').textContent='Edit User Role';el('roleUserEmail').value=user.email;el('roleUserEmail').readOnly=true;el('roleUserDisplayName').value=user.display_name||'';if(el('roleUserQuotationPrefix')){el('roleUserQuotationPrefix').value=user.quotation_prefix||'';el('roleUserQuotationPrefix').disabled=!isOwner()}setRoleOptions(user.role);el('roleUserActive').value='true';setInviteRow(!user.auth_exists,!user.auth_exists);renderSelectionScopeEditor(user);el('roleUserDialog').showModal()}
   function closeDialog(){el('roleUserDialog')?.close()}
   async function openPermissions(){if(!canManage())return;permissionsEditing=false;setMessage('rolePermissionsMessage','');await loadPermissions();renderPermissions();el('rolePermissionsDialog')?.showModal()}
   function closePermissions(){stopPermissionHold();permissionsEditing=false;el('rolePermissionsDialog')?.close()}
@@ -317,9 +328,25 @@
   }
   async function inviteExisting(email,button){const user=users.find(item=>String(item.email).toLowerCase()===String(email).toLowerCase());if(!user)return;const original=button.textContent;button.disabled=true;button.textContent='Sending…';try{const result=await sendInvitation(user);if(result?.status==='already_exists')alert(`A login account already exists for ${user.email}. The user can use Forgot Password on the KeySuite login page to create/reset the password.`);else alert(`Invitation sent to ${user.email}. The user can create their own password from the email link.`);await load()}catch(error){console.error(error);alert(`Invitation could not be sent: ${error.message||error}`)}finally{button.disabled=false;button.textContent=original}}
 
+  async function changeArchiveStatus(action,email,button){
+    if(!isOwner())throw new Error('Only the Owner can archive or restore users.');const db=client();if(!db)throw new Error('Supabase is not connected.');const original=button.textContent;button.disabled=true;button.textContent=action==='archive'?'Archiving…':'Restoring…';
+    try{const {data,error}=await db.functions.invoke('keysuite-manage-user-status',{body:{action,email}});if(error)throw new Error(`${error.message||error}. Deploy the included Supabase Edge Function “keysuite-manage-user-status”.`);if(data?.error)throw new Error(data.error);await load();return data||{}}
+    finally{button.disabled=false;button.textContent=original}
+  }
+  async function archiveUser(email,button){
+    const user=users.find(item=>item.active!==false&&String(item.email).toLowerCase()===String(email).toLowerCase());if(!user||!isOwner())return;if(String(email).toLowerCase()===String(access?.email||'').toLowerCase()){alert('The Owner cannot archive their own account.');return}
+    if(!confirm(`Archive ${user.display_name||user.email}?\n\nTheir login will be blocked and active sessions will be revoked. Quotation history and audit records will be preserved.`))return;
+    try{await changeArchiveStatus('archive',email,button);alert(`${user.display_name||user.email} has been archived. Login is blocked and active sessions were revoked.`)}catch(error){console.error(error);alert(`The user could not be archived: ${error.message||error}`)}
+  }
+  async function restoreUser(email,button){
+    const user=users.find(item=>item.active===false&&String(item.email).toLowerCase()===String(email).toLowerCase());if(!user||!isOwner())return;
+    if(!confirm(`Restore ${user.display_name||user.email} to the active user list?`))return;
+    try{const result=await changeArchiveStatus('restore',email,button);alert(`${user.display_name||user.email} has been restored.${result?.auth_exists?' Their existing login is enabled.':' Send a new invitation before they can sign in.'}`)}catch(error){console.error(error);alert(`The user could not be restored: ${error.message||error}`)}
+  }
+
   async function save(event){
     event.preventDefault();if(!canManage())return;
-    const email=el('roleUserEmail').value.trim().toLowerCase(),displayName=el('roleUserDisplayName').value.trim(),nextRole=el('roleUserRole').value,active=el('roleUserActive').value==='true',sendInvite=!!el('roleSendInvite')?.checked;
+    const email=el('roleUserEmail').value.trim().toLowerCase(),displayName=el('roleUserDisplayName').value.trim(),nextRole=el('roleUserRole').value,active=true,sendInvite=!!el('roleSendInvite')?.checked;
     const quotationPrefix=isOwner()?String(el('roleUserQuotationPrefix')?.value||'').trim().toUpperCase():String(editingUser?.quotation_prefix||'').trim().toUpperCase();
     if(!/^\S+@\S+\.\S+$/.test(email)){setMessage('roleDialogMessage','Enter a valid email address.');return}if(!displayName){setMessage('roleDialogMessage','Display Name is required.');return}
     if(isOwner()&&quotationPrefix&&!/^[A-Z0-9]{1,8}$/.test(quotationPrefix)){setMessage('roleDialogMessage','Quotation Prefix must contain 1 to 8 letters or numbers only.');return}

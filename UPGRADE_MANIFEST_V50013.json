@@ -1,0 +1,76 @@
+{
+  "version": "5.00.13",
+  "baseline": "5.00.12 uploaded full build",
+  "review_build": true,
+  "production_deployed": false,
+  "supabase_deployed": true,
+  "migration_applied": true,
+  "frontend_deployed": false,
+  "deletions": [],
+  "files": {
+    "BUILD_STATUS_V50013.md": {
+      "sha256": "530c71a33cbbf3e558cc6a0a04bcbe409054d73e7737a63e7a7aecc356a6b06c",
+      "baseline_sha256": null
+    },
+    "CHANGELOG_V50013.md": {
+      "sha256": "43fe2179c775a86e0fbd173b531a2db4c8799800683ace6e0eb8dcbd9ce47fce",
+      "baseline_sha256": null
+    },
+    "README_UPGRADE_V50013.md": {
+      "sha256": "108c18d295972cd1b36feec779abe48eeba05c7a838f57944c63b9901c2a57fc",
+      "baseline_sha256": null
+    },
+    "SUPABASE_DEPLOYMENT_V50013.json": {
+      "sha256": "1431e44f728b9546deaa720f006db57293efe06b9cd89c1484fa4c2ab47f926d",
+      "baseline_sha256": null
+    },
+    "VERIFICATION_V50013.md": {
+      "sha256": "072e3a3f957ae53b85c042eb8d3cbfdf02ed14bc367d7956822e656578c4b98f",
+      "baseline_sha256": null
+    },
+    "VERSION.txt": {
+      "sha256": "d67e91f1fc81944052b4ef533fb600a3f49ce98a69ee39d6550eee7bbbe9afec",
+      "baseline_sha256": "31f7a203401e3b2e2223a487fd4a6fe6548deebae6d41fab8383b350d16d29d1"
+    },
+    "auth.js": {
+      "sha256": "232b23f76d50677d2ef8d8961ed85e197a9a5408695f4e9dfa63e28d3d661add",
+      "baseline_sha256": "856cfb2d4fb97807fea560d0b37df2f97cdd7a3cd6123982cc26b76b0e820542"
+    },
+    "index.html": {
+      "sha256": "622842e5e71f0dc5f0944f1fd426cc14b49ae7c4673ded31f18b51316c4feda0",
+      "baseline_sha256": "f364f430144ed4a652bea07340061489511dc0e03b2a97e8ec6db4def95283fa"
+    },
+    "manifest.json": {
+      "sha256": "81e6da79637197c6d923e3d1e2ec860f053a7a18b3e190b6e1940b1f7a0cf673",
+      "baseline_sha256": "5d689f0c186e4e88fa0d3bcff886005b2eac3c23d64c753bf77ed0510d07d24d"
+    },
+    "proposals/user_archive_v50013.sql": {
+      "sha256": "4a84199e76fdfc2c35d2428373e3b093cf186921658737e470a6f0f2e2467529",
+      "baseline_sha256": null
+    },
+    "roles.js": {
+      "sha256": "674a8230a90cca30020d680087a7b6a3f1e4a39c20a3bf0de8a78fdd33a235bb",
+      "baseline_sha256": "696fd4547414c1fcaf52916ccb8a297c277b1cd75c637e27446d943b7e0734b7"
+    },
+    "supabase/functions/keysuite-manage-user-status/index.ts": {
+      "sha256": "58f652cee8f464301ce9cd9ba2c8061df54dcdaf357735bb5eeda473f79a5b71",
+      "baseline_sha256": null
+    },
+    "sw.js": {
+      "sha256": "94cf44927e31ff88c7953d734ffe635accf347dc57170a412dcdc881676a77e6",
+      "baseline_sha256": "ebcb27ab977e6d237f887348a7b1eeb1e8793050cd3915f01a72fb27315cabee"
+    },
+    "tests/v50013/user-archive.cjs": {
+      "sha256": "daef768111beb389fe61178d8a7eb8f82e825b2f17f963bb9d5dde5cccb65e4f",
+      "baseline_sha256": null
+    },
+    "tools/package_v50013.py": {
+      "sha256": "08474f45e6c0c03628cce6f954729d348a27ab768847803b08d88a3582097f95",
+      "baseline_sha256": null
+    },
+    "v50013-version-lock.js": {
+      "sha256": "b4f7eea871a3dce7b36c138b1ed21bed1f26ce7957d0996bebd35042eee1ca5c",
+      "baseline_sha256": null
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "version": "5.00.13",
+  "baseline": "user-uploaded KeySuite V5.00.12 full build",
+  "project_id": "skidqdixnnnuhvarekxp",
+  "migration_files": [
+    "proposals/pricing_v50012.sql",
+    "proposals/user_archive_v50013.sql"
+  ],
+  "edge_functions": [
+    "supabase/functions/keysuite-manage-user-status"
+  ],
+  "migration_applied": true,
+  "migration_version": "20261029171514",
+  "edge_function_deployed": true,
+  "edge_function_version": 1,
+  "edge_function_verify_jwt": true,
+  "frontend_deployed": false,
+  "production_approval_received": false,
+  "supabase_deployment_approval_received": true,
+  "deployed_on": "2026-10-30",
+  "database_values_modified_by_build": false
+}

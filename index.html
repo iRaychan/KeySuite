@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.12</title>
-  <script>window.KEYSUITE_VERSION='5.00.12';window.KEYSUITE_BUILD='V5.00.12';</script>
+  <title>KeySuite V5.00.13</title>
+  <script>window.KEYSUITE_VERSION='5.00.13';window.KEYSUITE_BUILD='V5.00.13';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.12</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.13</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,7 +658,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.12</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.13</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.12</div>
+    <div class="suite-version">KeySuite V5.00.13</div>
   </aside>
 
   <main>
@@ -1016,7 +1016,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
 
     <section id="productIso" class="page"><h1>ISO End Suction Pumps</h1><div class="card"><label>Model <input id="isoSearch" placeholder="Search ISO model"></label><label>Material <select id="isoMaterial"></select></label><label>Seal <select id="isoSeal"><option>Car/Cer</option><option>SiC/SiC</option></select></label><label>O-ring <select id="isoElastomer"><option>Viton</option><option>EPDM</option></select></label><p>Product quotations are bare shaft. Use Selection for a duty-sized motor, or Assembly to configure the complete pumpset.</p></div><div id="isoProducts"></div></section>
-    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50012" title="ISO Selection" style="width:100%;height:2600px;border:0"></iframe></section>
+    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50013" title="ISO Selection" style="width:100%;height:2600px;border:0"></iframe></section>
     <section id="isoPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
       <div class="page-title-row"><div><h1>ISO Price List</h1><div class="muted">Maintain independent ISO source prices by material, selected currency and rarity.</div></div></div>
@@ -1335,6 +1335,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
             <tbody id="roleRows"></tbody>
           </table>
         </div>
+      </div>
+      <div class="card" id="roleArchivedCard" style="margin-top:16px;display:none">
+        <div class="role-toolbar"><div><h2 style="margin-bottom:4px">Archived Users <span class="role-badge" id="roleArchivedCount">0</span></h2><div class="role-note">Owner-only archive. Restoring keeps historical quotations and audit records; a new invitation may be required before login.</div></div></div>
+        <div class="table-wrap" style="margin-top:14px"><table class="role-table"><thead><tr><th>Name</th><th>Email</th><th>Quotation Prefix</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody id="roleArchivedRows"></tbody></table></div>
       </div>
       <div class="card" style="margin-top:16px">
         <h2>Recent Role Changes</h2>
@@ -1958,7 +1962,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="span-2"><label>Display Name *</label><input id="roleUserDisplayName" autocomplete="off" required></div>
       <div><label>Quotation Prefix</label><input id="roleUserQuotationPrefix" class="role-prefix-input" maxlength="8" autocomplete="off" placeholder="Example: R"><div class="role-note" style="margin-top:5px">Owner-assigned. Letters and numbers only; prefixes must be unique.</div></div>
       <div><label>Role</label><select id="roleUserRole"></select></div>
-      <div><label>Status</label><select id="roleUserActive"><option value="true" selected>Active</option><option value="false">Inactive</option></select></div>
+      <input id="roleUserActive" type="hidden" value="true">
     </div>
     <div id="roleSelectionScope" class="role-selection-scope">
       <label>Role Brand Assigned / Series</label>
@@ -2114,19 +2118,19 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="permissions.js?v=42821"></script>
-<script src="v40407-role-authority.js?v=50012"></script>
+<script src="v40407-role-authority.js?v=50013"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50012"></script>
+<script src="assembly.js?v=50013"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50012"></script>
+<script src="app.js?v=50013"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
-<script src="pricing.js?v=50012"></script>
+<script src="pricing.js?v=50013"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=42824"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
@@ -2136,9 +2140,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=42872"></script>
 <script src="bfi-v42302.js?v=42821"></script>
-<script src="bgf-v50006.js?v=50012"></script>
+<script src="bgf-v50006.js?v=50013"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50012"></script>
+<script src="roles.js?v=50013"></script>
 <script src="motor.js?v=409"></script>
 <script src="coupling.js?v=42922"></script>
 <script src="baseplate.js?v=42872"></script>
@@ -2243,7 +2247,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50012-version-lock.js?v=50012"></script>
+<script src="v50013-version-lock.js?v=50013"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

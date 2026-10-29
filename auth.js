@@ -17,6 +17,7 @@
   const SECURE_DATA_TIMEOUT_MS=20000;
   const MODULE_INIT_TIMEOUT_MS=12000;
   let authSubscription=null;
+  let accessWatchTimer=0,accessWatchRunning=false;
 
   function timeoutError(label='Authentication'){
     const error=new Error(`${label} timed out. Please try again.`);error.code='KEYSUITE_AUTH_TIMEOUT';return error;
@@ -116,7 +117,8 @@
   function setView(name){el('loginView').classList.toggle('hidden',name!=='login');el('loadingView').classList.toggle('hidden',name!=='loading');el('appView').classList.toggle('hidden',name!=='app')}
   function message(text,type='error'){const box=el('loginMessage');box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
   function busy(on){el('loginButton').disabled=on;el('loginButton').textContent=on?'Signing in…':'Sign in';el('loginEmail').disabled=on;el('loginPassword').disabled=on}
-  function showLogin(text='',type='error'){const key=el('keyButton');if(key){key.hidden=true;key.style.display='none'}setView('login');busy(false);message(text,type);el('loginPassword').value='';lockSelector()}
+  function stopAccessWatch(){if(accessWatchTimer)clearInterval(accessWatchTimer);accessWatchTimer=0}
+  function showLogin(text='',type='error'){stopAccessWatch();const key=el('keyButton');if(key){key.hidden=true;key.style.display='none'}setView('login');busy(false);message(text,type);el('loginPassword').value='';lockSelector()}
   function showLoading(text){el('loadingText').textContent=text||'Checking secure access…';setView('loading')}
   function friendly(error){const text=String(error?.message||'').toLowerCase();if(text.includes('invalid login credentials'))return 'The email or password is incorrect.';if(text.includes('email not confirmed'))return 'This email account has not been confirmed yet.';if(text.includes('rate limit'))return 'Too many attempts. Please try again later.';return error?.message||'Unable to sign in.'}
   function unlockSelector(){[['selectorFrame','selector/index.html'],['selectorEsFrame','selector-es/index.html'],['selectorBfiFrame','selector-bfi/index.html?v=42302']].forEach(([id,fallback])=>{const frame=el(id);if(frame&&frame.getAttribute('src')==='about:blank')frame.src=frame.dataset.src||fallback})}
@@ -127,6 +129,16 @@
     if(error)throw new Error(`Access check failed: ${error.message}`);
     return data?.[0]?.active?data[0]:null;
   }
+  async function checkAccessStillActive(){
+    if(accessWatchRunning||!client||!session?.user?.email)return true;accessWatchRunning=true;
+    try{
+      const current=await verify(session.user.email);if(current)return true;
+      try{await client.auth.signOut({scope:'local'})}catch(_){}
+      session=null;access=null;profile=null;window.KEYSUITE_SECURE_DATA=null;window.KEYSUITE_ACCESS=null;window.KEYSUITE_PROFILE=null;showLogin('This account has been archived. Contact the Owner if access should be restored.');return false;
+    }catch(error){console.warn('Approved-user status could not be refreshed.',error);return true}
+    finally{accessWatchRunning=false}
+  }
+  function startAccessWatch(){stopAccessWatch();accessWatchTimer=setInterval(checkAccessStillActive,30000)}
   async function loadData(userAccess=null){
     const [companies,users,categories,products,esProducts,gwsProducts,keyplcProducts,manifoldProducts,motorProducts,couplingProducts,settings]=await Promise.all([
       client.from('ks_companies').select('*').order('company_name'),
@@ -328,7 +340,7 @@
       try{await withDeadline(window.KeySuiteNoteStore?.load?.(),'Global Note loading',MODULE_INIT_TIMEOUT_MS)}catch(error){console.warn('Global Note load warning',error)}
       showLoading('Loading secure quotation history…');
       try{await withDeadline(window.KeySuiteQuotationStore?.load?.(),'Quotation history loading',MODULE_INIT_TIMEOUT_MS)}catch(error){console.warn('Quotation history load warning',error)}
-      refreshAll();setView('app');
+      refreshAll();setView('app');startAccessWatch();
       if(inviteFlowPending||recoveryFlowPending)setTimeout(openInvitePassword,250);
     }catch(error){console.error(error);try{await withDeadline(client.auth.signOut({scope:'local'}),'Local sign-out',2000)}catch(_){ }showLogin(`Secure data could not be loaded: ${error.message}`)}
   }
@@ -516,6 +528,7 @@
       catch(error){event.target.value='';settingsMessage(error.message||'The signature could not be loaded.')}
     });
     el('settingsRemoveSignature')?.addEventListener('click',()=>{pendingSignatureData='';removeSignatureRequested=true;el('settingsSignatureUpload').value='';renderSignaturePreview();settingsMessage('Signature will be removed when you save.','info')});
+    window.addEventListener('focus',checkAccessStillActive);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkAccessStillActive()});
     if(!configReady()){showLogin('Your existing config.js is missing or incomplete. Keep the config.js that already works on GitHub.','info');return}
     if(!window.supabase?.createClient){showLogin('The Supabase library could not be loaded. Check the internet connection.');return}
     client=createAuthClient();
