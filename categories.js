@@ -14,8 +14,8 @@
   const isOwner=()=>permissionLevel('manage_categories')==='full';
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
 
-  const defaultRule=()=>({margin:.38,normal:0,rare:0,transport:30,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]});
-  const newCategoryRule=()=>({margin:0,normal:0,rare:0,transport:0,useCommission:false,useSetDiscount:false,useFinalDiscount:false,useFuelCharge:false,currencies:[]});
+  const defaultRule=()=>({margin:.38,normal:0,rare:0,trimming:0,transport:30,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]});
+  const newCategoryRule=()=>({margin:0,normal:0,rare:0,trimming:0,transport:0,useCommission:false,useSetDiscount:false,useFinalDiscount:false,useFuelCharge:false,currencies:[]});
 
   function message(text,type='info'){
     const box=byId('categoryMessage');if(!box)return;
@@ -24,7 +24,7 @@
   function boolValue(value,fallback=true){return value===undefined||value===null?fallback:!!value}
   function normalizeRule(rule={},fallback=defaultRule()){
     return {
-      margin:Number(rule.margin??fallback.margin),normal:Number(rule.normal??fallback.normal??0),rare:Number(rule.rare??fallback.rare??0),transport:Number(rule.transport??fallback.transport),
+      margin:Number(rule.margin??fallback.margin),normal:Number(rule.normal??fallback.normal??0),rare:Number(rule.rare??fallback.rare??0),trimming:Number(rule.trimming??fallback.trimming??0),transport:Number(rule.transport??fallback.transport),
       useCommission:boolValue(rule.useCommission??rule.use_commission??rule.includeCommission??rule.include_commission,fallback.useCommission),
       useSetDiscount:boolValue(rule.useSetDiscount??rule.use_set_discount??rule.includeSetDiscount??rule.include_set_discount,fallback.useSetDiscount),
       useFinalDiscount:boolValue(rule.useFinalDiscount??rule.use_final_discount??rule.includeFinalDiscount??rule.include_final_discount,fallback.useFinalDiscount),
@@ -91,7 +91,7 @@
     if(!(rule?.currencies||[]).length)return 'No Price List Currency selected → Price unavailable';
     if(rarity==='fixed')return `${currencyFormula(rule)} → Fixed final selling price (no Margin / Normal / Rare / Transport / Commission / Set Discount / Final Discount / Fuel / RM10 rounding)`;
     const parts=[currencyFormula(rule),'÷ (1 − Margin)'];
-    if(rarity==='common'||rarity==='rare')parts.push('÷ (1 − Normal)');if(rarity==='rare')parts.push('÷ (1 − Rare)');parts.push('+ Transport');
+    if(rarity==='common'||rarity==='rare')parts.push('÷ (1 − Normal)');if(rarity==='rare')parts.push('÷ (1 − Rare)');if(['ES','ISO'].includes(selectedProduct))parts.push('+ Trimming');parts.push('+ Transport');
     if(rule.useCommission)parts.push('÷ (1 − Customer Commission)');
     if(mode==='quotation'&&rule.useSetDiscount)parts.push('÷ (1 − Customer Set Discount)');
     if(rule.useFinalDiscount)parts.push('÷ (1 − Customer Final Discount)');
@@ -133,7 +133,7 @@
   }
   function fillRule(category){
     const rule=category?ruleFor(category,selectedProduct):newCategoryRule();
-    byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
+    byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTrimmingInput').value=num(rule.trimming,2).replace(/,/g,'');byId('categoryLock_trimming').hidden=!['ES','ISO'].includes(selectedProduct);byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
     byId('categoryUseCommission').checked=rule.useCommission;byId('categoryUseSetDiscount').checked=rule.useSetDiscount;byId('categoryUseFinalDiscount').checked=rule.useFinalDiscount;byId('categoryUseFuelCharge').checked=rule.useFuelCharge;
     ['USD','RMB','MYR'].forEach(code=>{const input=byId(`categoryCurrency${code}`);if(input)input.checked=(rule.currencies||[]).includes(code)});
     fillCompanyFactorValues();
@@ -169,8 +169,8 @@
   }
   function percentValue(id,label,validate=true){const value=Number(byId(id)?.value);if(validate&&(!Number.isFinite(value)||value<0||value>=100))throw new Error(`${label} must be from 0% to below 100%.`);return Number.isFinite(value)?value/100:0}
   function readRule(validate=true){
-    const transport=Number(byId('categoryTransportInput')?.value||0);if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');
-    return {margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),normal:percentValue('categoryNormalInput','Normal',validate),rare:percentValue('categoryRareInput','Rare',validate),transport:Number.isFinite(transport)?transport:0,useCommission:!!byId('categoryUseCommission')?.checked,useSetDiscount:!!byId('categoryUseSetDiscount')?.checked,useFinalDiscount:!!byId('categoryUseFinalDiscount')?.checked,useFuelCharge:!!byId('categoryUseFuelCharge')?.checked,currencies:selectedCurrenciesFromUi()};
+    const trimming=Number(byId('categoryTrimmingInput')?.value||0),transport=Number(byId('categoryTransportInput')?.value||0);if(validate&&(!Number.isFinite(trimming)||trimming<0))throw new Error('Trimming must be RM0.00 or more.');if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');
+    return {margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),normal:percentValue('categoryNormalInput','Normal',validate),rare:percentValue('categoryRareInput','Rare',validate),trimming:Number.isFinite(trimming)?trimming:0,transport:Number.isFinite(transport)?transport:0,useCommission:!!byId('categoryUseCommission')?.checked,useSetDiscount:!!byId('categoryUseSetDiscount')?.checked,useFinalDiscount:!!byId('categoryUseFinalDiscount')?.checked,useFuelCharge:!!byId('categoryUseFuelCharge')?.checked,currencies:selectedCurrenciesFromUi()};
   }
   async function save(event){
     event.preventDefault();if(!editing)return;if(!isOwner()){message('Your role is not allowed to edit pricing categories.','error');return}
@@ -181,7 +181,7 @@
     try{
       const params={p_category_id:selectedId||null,p_category_name:name,p_product_code:selectedProduct,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       let rpc,args;
-      if(selectedProduct==='ISO'){if(!selectedId)throw new Error('Create a category first, then configure ISO.');rpc='keysuite_save_category_v50011';args={p_category_id:selectedId,p_product_code:'ISO',p_rule:rule};
+      if(['ES','ISO'].includes(selectedProduct)){if(!selectedId)throw new Error(`Create a category first, then configure ${selectedProduct}.`);rpc='keysuite_save_category_v50012';args={p_category_id:selectedId,p_product_code:selectedProduct,p_rule:rule};
       }else if(selectedProduct==='BGF'){if(!selectedId)throw new Error('Save a category first, then configure BGF.');rpc='keysuite_save_bgf_category_rule_v50008';args={...params,p_currencies:rule.currencies};
       }else if(selectedProduct==='BASEPLATE'){
         rpc='keysuite_save_baseplate_category_rule_v40401';args={p_category_id:selectedId||null,p_category_name:name,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
@@ -219,7 +219,7 @@
     const editButton=byId('editCategoryRule');if(editButton)bindEditLongHold(editButton,unlockCategoryEditor);
     byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
     document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(editing?`${selectedProduct} pricing rule loaded. Fields and Use choices are unlocked.`:`${selectedProduct} pricing rule loaded. Hold the Edit button for 3 seconds to make changes.`,'info')}));
-    ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTransportInput','categoryUseCommission','categoryUseSetDiscount','categoryUseFinalDiscount','categoryUseFuelCharge'].forEach(id=>{byId(id)?.addEventListener('input',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())});byId(id)?.addEventListener('change',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())})});
+    ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTrimmingInput','categoryTransportInput','categoryUseCommission','categoryUseSetDiscount','categoryUseFinalDiscount','categoryUseFuelCharge'].forEach(id=>{byId(id)?.addEventListener('input',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())});byId(id)?.addEventListener('change',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())})});
     ['USD','RMB','MYR'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula();const input=document.querySelector(`[data-row-category="${CSS.escape(selectedId)}"][data-row-currency="${code}"]`);if(input)input.checked=byId(`categoryCurrency${code}`).checked}));
     ['categoryManualCost','categoryManualCurrency','categoryManualRarity'].forEach(id=>{byId(id)?.addEventListener('input',updateManualQuote);byId(id)?.addEventListener('change',updateManualQuote)});
   }

@@ -1065,7 +1065,8 @@ function updateQuotationContactInfo(){
  if(person.email)parts.push(person.email);
  $('qContactInfo').textContent=parts.join(' · ')||'-';updateCustomerSummary();
 }
-function compareBrandPriority(a,b){const name=x=>String(typeof x==='string'?x:x?.brand_name??x?.name??'').trim(),rank=x=>{const n=name(x).toLowerCase();return !n||n==='-'?3:n==='b.g.reich'?0:n==='task'?1:2};return rank(a)-rank(b)||name(a).localeCompare(name(b),undefined,{sensitivity:'base'});}
+function compareBrandPriority(a,b){const name=x=>String(typeof x==='string'?x:x?.brand_name??x?.name??'').trim(),rank=x=>{const n=name(x).toLowerCase();if(n==='b.g.reich')return 0;if(n==='tesk')return 1;if(!n||n==='-'||!/[a-z0-9]/i.test(n[0]))return 3;return 2};return rank(a)-rank(b)||name(a).localeCompare(name(b),undefined,{sensitivity:'base'});}
+function brandDisplayOrder(values=[]){const sorted=[...(values||[])].sort(compareBrandPriority);if(sorted.length<3)return sorted;const order=[sorted[0],sorted[2],sorted[1],sorted[3],...sorted.slice(4)];return order.filter(Boolean)}
 function quoteItemBrands(data={},seen=new Set()){ 
  if(!data||typeof data!=='object'||seen.has(data))return [];seen.add(data);const names=[];
  for(const key of ['brand','brandName','brand_name','keysuite_brand_name','v391_brand_name'])if(typeof data[key]==='string'&&data[key].trim()&&data[key].trim()!=='-')names.push(data[key].trim());

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.11</title>
-  <script>window.KEYSUITE_VERSION='5.00.11';window.KEYSUITE_BUILD='V5.00.11';</script>
+  <title>KeySuite V5.00.12</title>
+  <script>window.KEYSUITE_VERSION='5.00.12';window.KEYSUITE_BUILD='V5.00.12';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -642,7 +642,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.11</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.12</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -658,7 +658,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.11</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.12</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -684,7 +684,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.11</div>
+    <div class="suite-version">KeySuite V5.00.12</div>
   </aside>
 
   <main>
@@ -1016,8 +1016,26 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
 
     <section id="productIso" class="page"><h1>ISO End Suction Pumps</h1><div class="card"><label>Model <input id="isoSearch" placeholder="Search ISO model"></label><label>Material <select id="isoMaterial"></select></label><label>Seal <select id="isoSeal"><option>Car/Cer</option><option>SiC/SiC</option></select></label><label>O-ring <select id="isoElastomer"><option>Viton</option><option>EPDM</option></select></label><p>Product quotations are bare shaft. Use Selection for a duty-sized motor, or Assembly to configure the complete pumpset.</p></div><div id="isoProducts"></div></section>
-    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50011" title="ISO Selection" style="width:100%;height:2600px;border:0"></iframe></section>
-    <section id="isoPriceList" class="page"><h1>ISO Price List</h1><div id="isoPrices"></div></section>
+    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50012" title="ISO Selection" style="width:100%;height:2600px;border:0"></iframe></section>
+    <section id="isoPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>ISO Price List</h1><div class="muted">Maintain independent ISO source prices by material, selected currency and rarity.</div></div></div>
+      <div id="isoPriceListMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div class="pricelist-currency-setting"><label>Currency Selection</label><select id="isoPriceCurrency"><option value="USD">USD</option><option value="RMB">RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-multiplier-lock locked" id="isoMultiplierLock_USD" data-multiplier-prefix="iso" data-multiplier-currency="USD"><label>USD → MYR</label><input id="isoUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="5.8000" readonly><div class="multiplier-hold-feedback">(Hold 3s to edit)</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+            <div class="pricelist-multiplier-lock locked" id="isoMultiplierLock_RMB" data-multiplier-prefix="iso" data-multiplier-currency="RMB"><label>RMB → MYR</label><input id="isoRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" placeholder="0.6500" readonly><div class="multiplier-hold-feedback">(Hold 3s to edit)</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">Select USD, RMB or MYR to edit one source price per material. Each ISO material keeps its own saved price.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px"><div class="page-title-row"><div><h2 style="margin:0">ISO Models</h2><div id="isoPriceListCount" class="muted"></div></div><div class="price-list-search"><label for="isoPriceSearch">Search Model</label><input id="isoPriceSearch" placeholder="Example: 100-80-160"></div></div>
+        <div class="table-wrap" style="max-height:680px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Rarity</th><th>Material Selection</th><th>Selected Currency Price</th><th></th></tr></thead><tbody id="isoPriceRows"></tbody></table></div>
+      </div>
+    </section>
     <section id="productEs" class="page">
       <div class="page-title-row"><div><h1>Product · End Suction</h1><div class="muted">B.G.Reich ES bare-shaft pump products.</div></div></div>
       <div class="card es-product-toolbar">
@@ -1396,6 +1414,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                       <div class="category-inline-input"><input id="categoryRareInput" type="number" min="0" max="99.99" step="0.01" value="0.00" readonly><span>%</span></div>
                       <span class="category-inline-check" aria-hidden="true"></span>
                     </div>
+                    <div class="category-lock-field locked category-inline-rule" id="categoryLock_trimming" data-lock-key="trimming" data-lock-label="Trimming" hidden>
+                      <label for="categoryTrimmingInput">Trimming</label>
+                      <div class="category-inline-input"><span>RM</span><input id="categoryTrimmingInput" type="number" min="0" step="0.01" value="0.00" readonly></div>
+                      <span class="category-inline-check" aria-hidden="true"></span>
+                    </div>
                     <div class="category-lock-field locked category-inline-rule" id="categoryLock_transport" data-lock-key="transport" data-lock-label="Transport">
                       <label for="categoryTransportInput">Transport</label>
                       <div class="category-inline-input"><span>RM</span><input id="categoryTransportInput" type="number" min="0" step="0.01" value="30.00" readonly></div>
@@ -1461,7 +1484,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="bgfPriceList">
           <span class="module-icon">BGF</span><h2>BGF</h2><p>Maintain BGF 350M, BGF 350E, BGF 400 and BGF 500 source prices from the supplied BGF reference.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
-        <button type="button" class="key-module-card" data-go="isoPriceList">ISO Price List</button>
+        <button type="button" class="key-module-card" data-go="isoPriceList"><span class="module-icon">ISO</span><h2>ISO End Suction</h2><p>Maintain independent ISO source prices by material, currency and rarity.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="esPriceList">
           <span class="module-icon">ES</span><h2>End Suction</h2><p>Maintain B.G.Reich ES source prices by material construction.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
@@ -1637,7 +1660,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">CR Models</h2><div id="crPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="crPriceSearch" placeholder="Example: CR 32-4"></div></div>
         <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th rowspan="2">Model</th><th class="group-head" colspan="2">CR</th><th class="group-head" colspan="2">CRS</th><th class="group-head" colspan="2">CRN</th><th rowspan="2"></th></tr><tr><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th></tr></thead><tbody id="crPriceRows"></tbody></table></div>
       </div>
-      <div class="card" style="margin-top:16px"><h2>CR Mechanical Seal Add-on</h2><div class="muted" style="margin-bottom:10px">Add-on values in MYR. Owners can edit and save each mechanical-seal row.</div><div class="table-wrap"><table class="pricelist-table seal-price-table"><thead><tr id="crSealHead"></tr></thead><tbody id="crSealRows"></tbody></table></div></div>
+      <div class="card" style="margin-top:16px"><h2>CR Mechanical Seal Add-on</h2><div class="muted" style="margin-bottom:10px">Add-on values in MYR. Ca/SiC remains the existing standard value; SiC/SiC and TC/TiC add-ons are saved by pump size group, including CR 320.</div><div class="table-wrap"><table class="pricelist-table seal-price-table"><thead><tr id="crSealHead"></tr></thead><tbody id="crSealRows"></tbody></table></div></div>
     </section>
 
 
@@ -2091,19 +2114,19 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="permissions.js?v=42821"></script>
-<script src="v40407-role-authority.js?v=50011"></script>
+<script src="v40407-role-authority.js?v=50012"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50011"></script>
+<script src="assembly.js?v=50012"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50011"></script>
+<script src="app.js?v=50012"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
-<script src="pricing.js?v=50011"></script>
+<script src="pricing.js?v=50012"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=42824"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
@@ -2113,9 +2136,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=42872"></script>
 <script src="bfi-v42302.js?v=42821"></script>
-<script src="bgf-v50006.js?v=50011"></script>
+<script src="bgf-v50006.js?v=50012"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50011"></script>
+<script src="roles.js?v=50012"></script>
 <script src="motor.js?v=409"></script>
 <script src="coupling.js?v=42922"></script>
 <script src="baseplate.js?v=42872"></script>
@@ -2220,7 +2243,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50011-version-lock.js?v=50011"></script>
+<script src="v50012-version-lock.js?v=50012"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

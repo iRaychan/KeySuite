@@ -8,6 +8,7 @@ const customer={id:'customer-cr',pricingCategoryId:'cat-cr',distanceKm:0};
 const context={console,setTimeout,clearTimeout,window:{addEventListener(){},KEYSUITE_ACCESS:{role:'owner'},KeySuiteApp:{getCustomers:()=>[customer],getPricingCustomer:()=>customer,getSelectedCustomer:()=>customer}},document:{readyState:'loading',addEventListener(){},getElementById(){return element()},querySelectorAll(){return []}},CustomEvent:function(){}};
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root,'cr-price-data-v42854.js'),'utf8'),context);
+vm.runInContext(fs.readFileSync(path.join(root,'component-prices-v50011.js'),'utf8'),context);
 vm.runInContext(fs.readFileSync(path.join(root,'pricing.js'),'utf8'),context);
 const category={id:'cat-cr',productRules:{CR:{margin:.2,normal:0,rare:0,transport:0,currencies:['RMB','MYR']},MOTOR:{margin:.2,currencies:['RMB','MYR']}}};
 const product=context.window.KeySuiteCRPriceData.models.find(row=>row.model==='CR 2-7');

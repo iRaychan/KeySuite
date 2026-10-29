@@ -1,0 +1,16 @@
+{
+  "version": "5.00.12",
+  "project_id": "skidqdixnnnuhvarekxp",
+  "migration_file": "proposals/pricing_v50012.sql",
+  "migration_applied": false,
+  "frontend_deployed": false,
+  "production_approval_received": false,
+  "database_values_modified_by_build": false,
+  "deployment_required_for_candidate": true,
+  "deployment_notes": [
+    "Review SQL function signatures, grants, and role checks against the target project.",
+    "Test the migration and frontend against staging before production approval.",
+    "Do not apply this migration to production without explicit user approval.",
+    "Requirements 004 and 017 remain unresolved; see BUILD_STATUS_V50012.md."
+  ]
+}

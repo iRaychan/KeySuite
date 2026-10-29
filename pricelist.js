@@ -2,7 +2,7 @@
   'use strict';
 
   let access=null;
-  let secureData={products:[],chcG1Products:[],chcSealAddons:[],esProducts:[],gwsProducts:[],keyplcProducts:[],productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1}}};
+  let secureData={products:[],chcG1Products:[],chcSealAddons:[],esProducts:[],gwsProducts:[],keyplcProducts:[],productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1}}};
   let selectedChcGeneration='G2';
   let bound=false;
   const unlockedMultipliers=new Set();
@@ -24,7 +24,7 @@
   const validRarity=value=>['common','many','rare','fixed'].includes(String(value||'').toLowerCase())?String(value).toLowerCase():'common';
   const currencyStorageKey=prefix=>prefix==='chc'?`ks_chc_${selectedChcGeneration.toLowerCase()}_price_currency`:`ks_${prefix}_price_currency`;
   const currentCurrency=prefix=>validCurrency(el(`${prefix}PriceCurrency`)?.value||localStorage.getItem(currencyStorageKey(prefix))||(prefix==='chc'&&selectedChcGeneration==='G2'?localStorage.getItem('ks_chc_price_currency'):'')||'USD');
-  const familyCode=prefix=>{const family=String(prefix||'chc').toUpperCase();return ['CHC','BFI','ES','GWS','KEYPLC'].includes(family)?family:'CHC'};
+  const familyCode=prefix=>{const family=String(prefix||'chc').toUpperCase();return ['CHC','BFI','ES','ISO','GWS','KEYPLC'].includes(family)?family:'CHC'};
   const multiplierFamilyCode=prefix=>prefix==='chc'?(selectedChcGeneration==='G1'?'CHC_G1':'CHC_G2'):familyCode(prefix);
   const multiplierFamilyLabel=prefix=>prefix==='chc'?`CHC ${selectedChcGeneration}`:familyCode(prefix);
   const multiplierStateKey=(prefix,currency)=>prefix==='chc'?`chc:${selectedChcGeneration}:${currency}`:`${prefix}:${currency}`;
@@ -491,17 +491,17 @@
     esTopScroll?.addEventListener('scroll',()=>{if(syncingEsScroll||!esTableWrap)return;syncingEsScroll=true;esTableWrap.scrollLeft=esTopScroll.scrollLeft;requestAnimationFrame(()=>syncingEsScroll=false)});
     esTableWrap?.addEventListener('scroll',()=>{if(syncingEsScroll||!esTopScroll)return;syncingEsScroll=true;esTopScroll.scrollLeft=esTableWrap.scrollLeft;requestAnimationFrame(()=>syncingEsScroll=false)});
     window.addEventListener('resize',syncEsScrollWidth);
-    bindCurrency('chc',renderChcRows);bindCurrency('es',renderEsRows);bindCurrency('gws',renderGwsRows);bindCurrency('keyplc',renderKeyplcRows);
+    bindCurrency('chc',renderChcRows);bindCurrency('es',renderEsRows);bindCurrency('iso',()=>window.KeySuiteISO?.renderPrices?.());bindCurrency('gws',renderGwsRows);bindCurrency('keyplc',renderKeyplcRows);
     document.querySelectorAll('.pricelist-multiplier-lock').forEach(bindMultiplierGroup);
     window.addEventListener('keysuite-price-list-rendered',applyAuthorityMode);
   }
 
   function applyAuthorityMode(){
     const editable=isOwner();
-    ['chcPriceList','bfiPriceList','esPriceList','gwsPriceList','keyplcPriceList'].forEach(pageId=>{
+    ['chcPriceList','bfiPriceList','esPriceList','isoPriceList','gwsPriceList','keyplcPriceList'].forEach(pageId=>{
       const page=el(pageId);if(!page)return;
       page.querySelectorAll('.pricelist-table input,.pricelist-table select').forEach(control=>control.disabled=!editable);
-      page.querySelectorAll('[data-save-chc-row],[data-save-chc-seal],[data-bfi-save],[data-save-es-row],[data-save-gws-row],[data-save-keyplc-row]').forEach(button=>button.style.display=editable?'grid':'none');
+      page.querySelectorAll('[data-save-chc-row],[data-save-chc-seal],[data-bfi-save],[data-save-es-row],[data-save-iso-row],[data-save-gws-row],[data-save-keyplc-row]').forEach(button=>button.style.display=editable?'grid':'none');
       page.querySelectorAll('.multiplier-hold-input').forEach(input=>{if(!editable){input.readOnly=true;input.disabled=true}else input.disabled=false});
       page.querySelectorAll('.multiplier-actions').forEach(actions=>{if(!editable)actions.style.display='none'});
     });
@@ -529,7 +529,7 @@
 
   function render(){
     if(!canView())return;
-    renderSettings('chc');renderSettings('bfi');renderSettings('es');renderSettings('gws');renderSettings('keyplc');renderChcRows();renderChcSealAddons();renderEsRows();renderGwsRows();renderKeyplcRows();applyAuthorityMode();applyChcGenerationMode();
+    renderSettings('chc');renderSettings('bfi');renderSettings('es');renderSettings('iso');renderSettings('gws');renderSettings('keyplc');renderChcRows();renderChcSealAddons();renderEsRows();window.KeySuiteISO?.renderPrices?.();renderGwsRows();renderKeyplcRows();applyAuthorityMode();applyChcGenerationMode();
     const notice=el('priceListAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'user')}</b>. Each product family keeps its own USD/RMB rates. CHC/GWS rarity is stored per currency; ES and KeyPLC rarity is stored once per model.${isOwner()?'':' View-only access.'}`;
   }
 
@@ -539,7 +539,7 @@
     const generation=el('chcPriceGeneration');if(generation)generation.value=selectedChcGeneration;
     bind();render();
   }
-  function pageShown(id){if(['priceListDashboard','chcPriceList','bfiPriceList','esPriceList','gwsPriceList','keyplcPriceList'].includes(id))render()}
+  function pageShown(id){if(['priceListDashboard','chcPriceList','bfiPriceList','esPriceList','isoPriceList','gwsPriceList','keyplcPriceList'].includes(id))render()}
 
   window.KeySuitePriceList={init,pageShown,render};
 })();

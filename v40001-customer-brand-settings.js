@@ -40,13 +40,13 @@
     if(!b||b.active===false)return false;
     const key=low(b.brand_key),name=low(b.brand_name);
     return key!=='keylargo'&&name!=='keylargo'&&key!=='gws'&&name!=='gws';
-  });
-  const priceBrands=()=>[virtualKeylargo(),virtualGws(),...brands()];
+  }).sort((a,b)=>window.compareBrandPriority(a,b));
+  const priceBrands=()=>window.brandDisplayOrder?.([virtualKeylargo(),virtualGws(),...brands()])||[virtualKeylargo(),virtualGws(),...brands()];
   const visibleBrands=()=>{
     const all=brands();
-    if(isOwnerAccount())return all;
+    if(isOwnerAccount())return window.brandDisplayOrder?.(all)||all;
     if(!accountScopeReady())return [];
-    return all.filter(b=>HYDRAULIC_FAMILIES.some(f=>accountAllows(b.id,f)));
+    return window.brandDisplayOrder?.(all.filter(b=>HYDRAULIC_FAMILIES.some(f=>accountAllows(b.id,f))))||all.filter(b=>HYDRAULIC_FAMILIES.some(f=>accountAllows(b.id,f)));
   };
   const byId=id=>priceBrands().find(b=>String(b.id)===String(id))||null;
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
