@@ -204,7 +204,7 @@
   }
   function cancel(){if(selectedId){const category=currentCategory();if(category)openCategory(category,false)}else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}}
   function unlockCategoryEditor(){if(!isOwner()||!selectedId)return;setEditable(true);message('Category fields and Use choices unlocked. Edit them, then press Save Category or Cancel.','info');byId('categoryNameInput')?.focus();byId('categoryNameInput')?.select()}
-  function setListEditing(on){listEditing=!!on;const button=byId('editCategoryList');if(button)button.textContent=listEditing?'Delete Enabled':'Hold 5s to Edit';renderRows()}
+  function setListEditing(on){listEditing=!!on;const button=byId('editCategoryList');if(button)button.textContent=listEditing?'Done':'Edit';renderRows()}
   async function archiveCategory(id,name){
     if(!listEditing||!isOwner())return;
     if(!confirm(`Archive pricing category “${name}”?\n\nHistorical quotations and pricing snapshots will be preserved.`))return;
@@ -216,8 +216,9 @@
     }catch(error){message(String(error?.message||error||'Category could not be archived.'),'error')}
   }
   function bindListEditLongHold(target){
-    let timer=null,progress=null,start=0;const idle='Hold 5s to Edit',stop=(restore=true)=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');if(restore&&!listEditing)target.textContent=idle};
-    target.textContent=idle;target.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();if(listEditing||!isOwner())return;start=Date.now();target.classList.add('holding');progress=setInterval(()=>{const elapsed=Math.min(5,Math.max(1,Math.ceil((Date.now()-start)/1000)));target.textContent=`Hold ${elapsed}/5s`},200);timer=setTimeout(()=>{stop(false);setListEditing(true)},5000)});['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>stop(true)));target.addEventListener('click',event=>{event.preventDefault();if(listEditing)setListEditing(false)});target.addEventListener('contextmenu',event=>event.preventDefault());
+    let timer=null,progress=null,start=0;const idle='Edit',stop=(restore=true)=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');if(restore&&!listEditing)target.textContent=idle};
+    const update=()=>{const elapsed=Math.max(0,Date.now()-start),remaining=Math.max(1,5-Math.floor(elapsed/1000));target.textContent=String(remaining)};
+    target.textContent=idle;target.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();if(listEditing||!isOwner())return;start=Date.now();target.classList.add('holding');update();progress=setInterval(update,100);timer=setTimeout(()=>{stop(false);setListEditing(true)},5000)});['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>stop(true)));target.addEventListener('click',event=>{event.preventDefault();if(listEditing)setListEditing(false)});target.addEventListener('contextmenu',event=>event.preventDefault());
   }
   function bindEditLongHold(target,callback){
     let timer=null,progress=null,start=0;const idle='Hold 3s to Edit';

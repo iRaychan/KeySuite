@@ -1921,7 +1921,7 @@ alternatives.innerHTML='';
  function liveOptions(){const o=window.keysuiteExportPayload||{};return {keysuite_material:o.keysuite_material||'SS304 (Cast Iron Connection)',keysuite_seal:o.keysuite_seal||'Car/Cer',keysuite_elastomer:o.keysuite_elastomer||'Viton',keysuite_connection_type:o.keysuite_connection_type||'round',keysuite_bare_shaft:!!o.keysuite_bare_shaft}}
  function syncControlsFromState(){
   try{flow.value=(selectionState.rawFlow??selectionState.q??'');head.value=(selectionState.rawHead??selectionState.h??'');fu.value=selectionState.flowUnit||'m3h';hu.value=selectionState.headUnit||'m';
-   motorEff.value=selectionState.motorEffClass||'IE2';motorPhase.value=selectionState.motorPhase||'3Ph';updateMotorVoltageRange();
+   motorEff.value=selectionState.motorEffClass||'IE3';motorPhase.value=selectionState.motorPhase||'3Ph';updateMotorVoltageRange();
    const hz=Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=hz.toFixed(1);selectionState.curveHz=hz;selectionState.hz=hz;
   }catch(e){}
  }
@@ -1937,7 +1937,7 @@ alternatives.innerHTML='';
   let configured=keycrProductConfiguredModel(model),evaluated=evaluateModel(configured,q,0,50);if(!evaluated){q=productAuto1((Number(curve.flow?.[0]||0)+Number(curve.flow?.[curve.flow.length-1]||1))/2);configured=keycrProductConfiguredModel(model);evaluated=evaluateModel(configured,q,0,50)}if(!evaluated)return null;
   const h=Math.max(1,Math.floor(Number(evaluated.predHead)||0)),selectedEval=evaluateModel(configured,q,h,50)||evaluated,impellerCfg=selectionState.productImpellerConfig;
   // V4.28.71: keep q/h precision for curve calculations, but show the automatic duty as whole numbers.
-  selectionState={q,h,hz:50,selectionHz:50,curveHz:50,rawFlow:Math.round(q),rawHead:Math.round(h),flowUnit:'m3h',headUnit:'m',motorEffClass:'IE2',motorPhase:'3Ph',motorVoltage:415,models:[selectedEval],selectedIndex:0,productMode:true,productImpellerConfig:impellerCfg,productImpellerEditorOpen:false};
+  selectionState={q,h,hz:50,selectionHz:50,curveHz:50,rawFlow:Math.round(q),rawHead:Math.round(h),flowUnit:'m3h',headUnit:'m',motorEffClass:'IE3',motorPhase:'3Ph',motorVoltage:415,models:[selectedEval],selectedIndex:0,productMode:true,productImpellerConfig:impellerCfg,productImpellerEditorOpen:false};
   window.keysuiteExportPayload={quotation_model:selectedEval._keysuiteDisplayModel||model.model,base_model:selectedEval._keysuitePricingBaseModel||selectedEval._keysuiteSourceModel||model.model,display_model:selectedEval._keysuiteDisplayModel||model.model,keysuite_material:opts.material||'SS304 (Cast Iron Connection)',keysuite_seal:opts.seal||'Car/Cer',keysuite_elastomer:opts.elastomer||'Viton',keysuite_connection_type:opts.connection||'round',keysuite_bare_shaft:!!opts.bare,product_mode:true};
   syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'CR',model:model.model,display_model:(selectedEval._keysuiteDisplayModel||model.model),flowM3h:q,headM:h,enhanced:false,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
  }
@@ -1958,7 +1958,7 @@ alternatives.innerHTML='';
     return null;
   }
   productModelName=model.model;
-  selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,flowUnit,headUnit,motorEffClass:motorEff.value||'IE2',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),models:[evaluated],selectedIndex:0,productMode:true,productImpellerConfig:selectionState.productImpellerConfig};
+  selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,flowUnit,headUnit,motorEffClass:motorEff.value||'IE3',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),models:[evaluated],selectedIndex:0,productMode:true,productImpellerConfig:selectionState.productImpellerConfig};
   syncControlsFromState();renderAlternatives();renderSelected();
   const payload=currentSelection();
   window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'CR',model:model.model,display_model:(evaluated._keysuiteDisplayModel||model.model),flowM3h:q,headM:h,enhanced:false,valid:true,message:evaluated.margin>=0?'Duty point updated.':'Duty point is above the pump curve; curve retained for reference.'},'*');

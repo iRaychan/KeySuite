@@ -383,11 +383,14 @@
     const bareShaft=options.bareShaft===true||options.keysuite_bare_shaft===true;
     const selected=String(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultEfficiency).toUpperCase(),included=String(defaultEfficiency||'IE3').toUpperCase();if(!bareShaft&&selected===included)return calc;
     const hp=Number(options.motor_hp??options.motorHp),kw=Number(options.motor_kw??options.motorKw),pole=Number(options.pole||2)||2,customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if((!(hp>0)&&!(kw>0))||!customer||!cat)return null;
-    // The C1/C2/BFI list price already includes its standard motor. A bare
-    // shaft removes that motor's raw Price List cost. Any IE upgrade/downgrade
-    // removes the included raw cost, then adds the selected motor calculated
-    // with the MOTOR pricing rule.
-    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null},includedMatch=pricedMotor(included),replacementMatch=pricedMotor(selected);if(!includedMatch||!replacementMatch)return null;
+    // Each applicable pump list price already includes its series-standard
+    // motor. A bare shaft removes that motor's raw Price List cost. Any actual
+    // IE substitution removes the included raw cost, then adds the selected
+    // motor calculated with the MOTOR pricing rule.
+    const motorSpec=efficiency=>`${hp>0?`${Number(hp)} HP`:`${Number(kw)} kW`}, ${pole}-pole ${efficiency}`;
+    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null};
+    const includedMatch=pricedMotor(included);if(!includedMatch)return {...calc,motorPricingError:`Cannot quote: Included motor price is missing for ${motorSpec(included)}. Update the Motor Price List before using bare-shaft or motor-substitution pricing.`};
+    const replacementMatch=bareShaft?includedMatch:pricedMotor(selected);if(!replacementMatch)return {...calc,motorPricingError:`Cannot quote: Replacement motor price is missing for ${motorSpec(selected)}. Update the Motor Price List before quoting this motor substitution.`};
     const includedMotor=includedMatch.product,replacementMotor=replacementMatch.product,includedCalc=includedMatch.calc,replacementCalc=replacementMatch.calc;
     const includedMotorRawPriceMyr=Number(includedCalc.baseMyr||0),includedMotorQuotedPrice=Number(includedCalc.finalPrice||0),replacementMotorRawPriceMyr=bareShaft?0:Number(replacementCalc.baseMyr||0),replacementMotorQuotedPrice=bareShaft?0:Number(replacementCalc.finalPrice||0),preMotorReplacementPrice=Number(calc.finalPrice||0);
     const higherEfficiency=!bareShaft&&efficiencyRank(selected)>efficiencyRank(included);
@@ -417,9 +420,8 @@
     const pricingFamily=generation==='G1'?'CHC_G1':'CHC_G2';
     const motorHp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),motorKw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2;
     const defaultMotorEfficiency=(generation==='G1'?'IE2':'IE3'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency)||defaultMotorEfficiency);
-    // C1/C2 price records are complete pump packages including the standard
-    // IE2 motor.  Do not add a motor again.  Only a non-standard IE class
-    // replaces the included motor through the independent MOTOR price table.
+    // Pump price records are complete packages: C4/G1 includes IE2 and C6/G2
+    // includes IE3. Only a non-standard IE class uses MOTOR substitution.
     const rawCalc=calculatePrice(product.pricesByCurrency||{},material,cat,pricingFamily,{...options,customer,rarityBook:product.rarityByCurrency||{}});
     const replacedCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:motorHp,motor_kw:motorKw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);
     const calc=applyChcSealAddon(replacedCalc,base,{...options,generation_code:generation});
@@ -433,8 +435,7 @@
     if(!product)return `Pump price not found: ${model}.`;
     const material=/^CHCS\b/i.test(String(model))?'CHCS':/^CHCN\b/i.test(String(model))?'CHCN':'CHC',pumpCandidates=currencyCandidates(product.pricesByCurrency||{},product.rarityByCurrency||{},material,generation==='G1'?'CHC_G1':'CHC_G2');
     if(!pumpCandidates.length)return `Pump price not found: ${model} (${material}).`;
-    const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,eff=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||pumpDefaultMotorEfficiency(hp,'IE2'))||'IE2';
-    const included=pumpDefaultMotorEfficiency(hp,'IE2');
+    const included=generation==='G1'?'IE2':'IE3',hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,eff=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||included)||included;
     if(options.bareShaft||options.keysuite_bare_shaft)return `Included motor price not found for bare-shaft deduction: ${kw>0?`${kw} kW / `:''}${hp>0?`${hp} HP / `:''}${pole}P / ${included}.`;
     if(eff===included)return 'CHC package pricing is unavailable for this customer or Category Pricing Rule.';
     return `Motor replacement price not found: ${kw>0?`${kw} kW / `:''}${hp>0?`${hp} HP / `:''}${pole}P / ${included} or ${eff}.`;
@@ -443,6 +444,15 @@
   function crModelIdentity(model){
     const raw=String(model||'').trim(),material=/^CRS\b/i.test(raw)?'CRS':/^CRN\b/i.test(raw)?'CRN':'CR',base=raw.replace(/^CR[SN]?\b/i,'CR');
     return {raw,material,base};
+  }
+  function crMaterialDescription(material='CR',seal='Car / Sic',elastomer='Viton'){
+    const code=String(material||'CR').trim().toUpperCase(),construction=code==='CRN'?'SS316':code==='CRS'?'SS304':'SS304 (Cast Iron Connection)';
+    return `${construction} / ${chcSealDescription(seal,elastomer)}`;
+  }
+  function crDescription(model,product={},options={}){
+    const identity=crModelIdentity(model),bare=options.bareShaft===true||options.keysuite_bare_shaft===true,hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),pole=Number(options.pole??product.pole??2)||2,efficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||'IE3')||'IE3';
+    const voltage=Number(options.motor_voltage||415)||415,phase=String(options.motor_phase||'3Ph'),frequency=Number(options.frequency_hz||50)||50,connection=String(options.connection||product.connection||'-');
+    return [`B.G.Reich Vertical Multistage Pump Model: ${identity.raw||identity.base}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${crMaterialDescription(identity.material,options.seal||options.keysuite_seal,options.elastomer||options.keysuite_elastomer)}`].join('\n');
   }
   function crLegacyPriceModel(model){
     return String(model||'').replace(/^CR\s+155-(\d+)0(?=-|$)/i,(_,stage)=>`CR 155-${stage}`);
@@ -459,14 +469,14 @@
     const identity=crModelIdentity(model),catalogue=(secureData.crProducts?.length?secureData.crProducts:(window.KeySuiteCRPriceData?.models||[]));
     const lookup=[identity.base,crLegacyPriceModel(identity.base)].map(value=>String(value).toLowerCase()),product=catalogue.find(row=>lookup.includes(String(row.model||'').toLowerCase()));if(!product)return null;
     const rawCalc=calculatePrice(product.pricesByCurrency||{},identity.material,cat,'CR',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
-    const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency=pumpDefaultMotorEfficiency(hp,'IE2'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency);
+    const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
     const seal=options.seal??options.keysuite_seal??'Car / Sic',elastomer=options.elastomer??options.keysuite_elastomer??'Viton',addon=motorCalc.fixedPrice?0:crSealAddon(identity.base,seal),calc=window.KeySuiteComponents.apply({...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),sealAddon:addon,sealDescription:chcSealDescription(seal,elastomer),finalPrice:Number(motorCalc.finalPrice||0)+addon},'CR',identity.base,{...options,seal,elastomer});
-    return {product,material:identity.material,variant:identity.material,rarity:calc.rarity,calc,category:cat,customer,family:'CR',sourceExtra:{technical_model:identity.base,price_model:product.model,seal_faces:String(seal),seal_elastomer:String(elastomer),seal_addon_myr:addon,seal_description:calc.sealDescription,default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
+    return {product,material:identity.material,variant:identity.material,rarity:calc.rarity,calc,category:cat,customer,family:'CR',sourceExtra:{technical_model:identity.base,price_model:product.model,material_description:crMaterialDescription(identity.material,seal,elastomer),seal_faces:String(seal),seal_elastomer:String(elastomer),seal_addon_myr:addon,seal_description:calc.sealDescription,default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
   }
   function buildCrAssemblyItem(model,options={}){
     const found=findCrPrice(model,{...options,pricingMode:'assembly'});if(!found)return null;const shown=String(model||found.product.model),bare=!!(options.bareShaft||options.keysuite_bare_shaft);
-    return {model:shown,description:`B.G.Reich Vertical Multistage Pump Model: ${shown}`,qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'CR',assemblyLevel:bare?'PUMPSET_COMPONENT':'COMPLETE_PUMPSET',assemblySection:bare?'pump':'pumpset'};
+    return {model:shown,description:crDescription(shown,found.product,{...options,bareShaft:bare}),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'CR',assemblyLevel:bare?'PUMPSET_COMPONENT':'COMPLETE_PUMPSET',assemblySection:bare?'pump':'pumpset'};
   }
 
 
@@ -890,5 +900,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();

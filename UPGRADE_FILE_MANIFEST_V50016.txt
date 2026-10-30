@@ -1,0 +1,31 @@
+KeySuite V5.00.16 upgrade overlay
+Baseline: KeySuite V5.00.15
+
+Runtime replacements:
+VERSION.txt
+RELEASE.json
+manifest.json
+index.html
+sw.js
+v50016-version-lock.js
+categories.js
+v3944-categories.js
+pricing.js
+cr-product.js
+selector-cr/index.html
+selector-cr/product.html
+
+Release documentation:
+README_UPGRADE_V50016.md
+CHANGELOG_V50016.md
+MODIFIED_FILES_V50016.md
+REGRESSION_TEST_REPORT_V50016.md
+UPGRADE_FILE_MANIFEST_V50016.txt
+
+Regression tests:
+tests/v50016-phase3-regression.cjs
+tests/v42821-pricing-regression.js
+tests/v50016/browser.cjs
+
+No files are deleted by this overlay.
+No Supabase migration or Edge Function replacement is included.

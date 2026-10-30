@@ -1,19 +1,17 @@
 {
-  "version": "5.00.15",
-  "baseline": "5.00.14",
-  "upgrade_supported_from": "5.00.14",
-  "new_database_migration_required": true,
+  "version": "5.00.16",
+  "baseline": "5.00.15",
+  "upgrade_supported_from": "5.00.15",
+  "new_database_migration_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Protected owner-only pricing category archival",
-    "Complete 13-group Company & Pricing registry with CR routing",
-    "Customer Brand Margin ordering and invalid empty-brand suppression",
-    "ISO Product exact ES layout structure",
-    "Quotation authentication refresh, idempotent retry and persistence confirmation",
-    "Quotation item Clone plus account-scoped Copy and Paste",
-    "ISO Selection V4.28.72 responsive container integration",
-    "Dedicated ISO Product Curve responsive integration"
+    "Category Normal View five-second Edit countdown and Done relock",
+    "Bold Category Compare product tabs",
+    "Correct CR, CRS and CRN material descriptions",
+    "Correct standard included-motor rules for CHC C4, CHC C6 and CR",
+    "Precise missing included/replacement motor price errors",
+    "CR 5-36 standard IE3 package pricing correction"
   ]
 }

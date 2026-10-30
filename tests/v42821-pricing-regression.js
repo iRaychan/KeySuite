@@ -3,7 +3,7 @@ const assert=require('assert');
 const fs=require('fs');
 const vm=require('vm');
 const element=()=>({style:{},classList:{toggle(){},add(){},remove(){}},addEventListener(){},querySelector(){return element()},querySelectorAll(){return []},appendChild(){},closest(){return element()},removeAttribute(){},setAttribute(){},value:'',textContent:'',innerHTML:'',disabled:false});
-const context={console,setTimeout,clearTimeout,window:{addEventListener(){},KEYSUITE_ACCESS:{role:'owner'},KeySuiteApp:{getCustomers:()=>[customer],getPricingCustomer:()=>customer,getSelectedCustomer:()=>customer}},document:{readyState:'loading',addEventListener(){},getElementById(){return element()},querySelectorAll(){return []}},CustomEvent:function(){}};
+const context={console,setTimeout,clearTimeout,window:{addEventListener(){},KEYSUITE_ACCESS:{role:'owner'},KeySuiteComponents:{apply:calc=>calc},KeySuiteApp:{getCustomers:()=>[customer],getPricingCustomer:()=>customer,getSelectedCustomer:()=>customer}},document:{readyState:'loading',addEventListener(){},getElementById(){return element()},querySelectorAll(){return []}},CustomEvent:function(){}};
 const customer={id:'customer-1',pricingCategoryId:'cat-1',distanceKm:0};
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(require('path').join(__dirname,'..','pricing.js'),'utf8'),context);
@@ -13,11 +13,11 @@ const motors=['IE1','IE2','IE3','IE4','IE5'].map((efficiencyClass,index)=>({id:`
 const api=context.window.KeySuitePricing;
 api.init({categories:[category],products:[pump],chcG1Products:[pump],motorProducts:motors,chcSealAddons:[{generation:'G1',groupCode:'32_90',minSeries:32,maxSeries:90,sicSicMyr:515,tcTcMyr:615},{generation:'G2',groupCode:'32_90',minSeries:32,maxSeries:90,sicSicMyr:525,tcTcMyr:625}],productMultipliers:{CHC_G1:{USD:5.8,RMB:.867,MYR:1},CHC_G2:{USD:5.8,RMB:.8,MYR:1},MOTOR:{USD:5.8,RMB:.8,MYR:1}}},{role:'owner'});
 const priced={};
-for(const motor of motors){const found=api.findPrice('CHC 32-2-2',{customer,category,generation_code:'G2',motor_hp:4,motor_kw:3,pole:2,motor_efficiency_class:motor.efficiencyClass});assert(found,`${motor.efficiencyClass} must resolve`);assert.strictEqual(found.calc.sourcePrice,100,'the C1 package price already includes its standard motor');priced[motor.efficiencyClass]=found;}
+for(const motor of motors){const found=api.findPrice('CHC 32-2-2',{customer,category,generation_code:'G1',motor_hp:4,motor_kw:3,pole:2,motor_efficiency_class:motor.efficiencyClass});assert(found,`${motor.efficiencyClass} must resolve`);assert.strictEqual(found.calc.sourcePrice,100,'the C4/G1 package price already includes its standard motor');priced[motor.efficiencyClass]=found;}
 assert.strictEqual(priced.IE2.calc.finalPrice,priced.IE2.calc.baseFinalPrice,'IE2 keeps the package price without adding a motor');
 assert(priced.IE3.calc.motorReplacement,'IE3 replaces the included IE2 motor');
 assert.notStrictEqual(priced.IE3.calc.finalPrice,priced.IE2.calc.finalPrice,'IE3 uses the motor pricing rule only for the replacement difference');
-const bare=api.findPrice('CHC 32-2-2',{customer,category,generation_code:'G2',motor_hp:4,motor_kw:3,pole:2,bareShaft:true});
+const bare=api.findPrice('CHC 32-2-2',{customer,category,generation_code:'G1',motor_hp:4,motor_kw:3,pole:2,bareShaft:true});
 assert(bare?.calc?.motorReplacement?.bareShaft,'bare shaft removes the package-included motor');
 assert(bare.calc.finalPrice<priced.IE2.calc.finalPrice,'bare shaft is the package price less the included IE2 raw Price List cost');
 assert.strictEqual(bare.calc.motorReplacement.includedMotorRawPriceMyr,api.calculatePrice(motors[1].pricesByCurrency,'MOTOR',category,'MOTOR',{customer}).baseMyr,'bare-shaft deduction uses raw price converted to MYR, without motor margin');
@@ -27,7 +27,9 @@ assert.strictEqual(api.chcSealAddon('CHC 32-2-2','SiC/SiC','G1'),515,'CHC C4/G1 
 assert.strictEqual(api.chcSealAddon('CHC 32-20-2','SiC/SiC','G2'),525,'CHC C6/G2 uses its independently editable seal add-on');
 assert.strictEqual(api.chcSealAddon('CHC 32-2-2','TC/TC','G1'),615,'CHC C4/G1 TC/TC add-on is editable');
 assert.strictEqual(api.chcSealAddon('CHC 32-20-2','TC/TC','G2'),625,'CHC C6/G2 TC/TC add-on is editable');
-assert.match(api.chcPriceProblem('CHC 32-2-2',{customer,category,generation_code:'G2',motor_hp:5,motor_kw:3.7,pole:2,motor_efficiency_class:'IE3'}),/^Motor replacement price not found:/);
+const c6Standard=api.findPrice('CHC 32-2-2',{customer,category,generation_code:'G2',motor_hp:4,motor_kw:3,pole:2,motor_efficiency_class:'IE3'});
+assert(c6Standard&&!c6Standard.calc.motorReplacement,'C6/G2 IE3 uses its complete package price without motor substitution');
+assert.match(api.chcPriceProblem('CHC 32-2-2',{customer,category,generation_code:'G2',motor_hp:5,motor_kw:3.7,pole:2,motor_efficiency_class:'IE4'}),/^Motor replacement price not found:/);
 assert.notStrictEqual(api.calculatePrice({RMB:{X:1}},'X',category,'CHC_G1',{customer}).multiplier,api.calculatePrice({RMB:{X:1}},'X',category,'CHC_G2',{customer}).multiplier,'G1/G2 keep independent stored rates');
 const rates=fs.readFileSync(require('path').join(__dirname,'..','v40001-multibrand.js'),'utf8');
 assert(rates.includes("return num(base)*(actual/based);"),'effective rate keeps calculation precision');
