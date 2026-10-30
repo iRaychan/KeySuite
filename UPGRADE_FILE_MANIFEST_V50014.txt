@@ -1,0 +1,17 @@
+VERSION.txt
+RELEASE.json
+manifest.json
+sw.js
+index.html
+app.js
+categories.js
+bgf-v50006.js
+iso-v50011.js
+v40001-customer-brand-settings.js
+v40001-multibrand.js
+v50014-version-lock.js
+CHANGELOG_V50014.md
+CHANGE_TEST_REPORT_V50014.md
+README_UPGRADE_V50014.md
+UPGRADE_FILE_MANIFEST_V50014.txt
+tests/v50014-release-regression.cjs

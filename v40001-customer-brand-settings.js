@@ -52,8 +52,9 @@
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
   const isMaster=b=>!!b&&(low(b.brand_type)==='master'||low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich');
   const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
-  const HYDRAULIC_FAMILIES=['CHC','CR','BFI','ES'];
-  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','BFI','ES','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
+  const HYDRAULIC_FAMILIES=['CHC','CR','BFI','ES','ISO'];
+  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','BFI','BGF','ES','ISO','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
+  const priceGroups=()=>{const found=new Set(PRICE_GROUPS);document.querySelectorAll('[data-category-product]').forEach(button=>found.add(normalizeGroup(button.dataset.categoryProduct)));(window.KEYSUITE_SECURE_DATA?.categories||[]).forEach(category=>Object.keys(category?.productRules||{}).forEach(group=>found.add(normalizeGroup(group))));found.delete('GENERAL');found.delete('KEYLAB');return [...found].filter(Boolean)};
   const FAMILIES=HYDRAULIC_FAMILIES;
   const normalizeGroup=v=>String(v??'').trim().toUpperCase().replace(/\s+/g,'_');
   const hydraulicFamily=v=>{
@@ -93,6 +94,7 @@
         out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
         out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
         out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+        out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
         return;
       }
       const groups=mappings().filter(m=>String(m.brand_id)===String(b.id)).map(m=>normalizeGroup(m.master_family));
@@ -102,6 +104,7 @@
       if(groups.includes('CR'))out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
       if(groups.includes('BFI'))out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
       if(groups.includes('ES'))out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+      if(groups.includes('ISO'))out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
     });
     return out;
   }
@@ -120,20 +123,22 @@
         out.push({brand:b,priceGroup:'CHC_G2',family:'CHC',selectionKey:keyOf(b.id,'CHC'),key:priceKeyOf(b.id,'CHC_G2')});
         out.push({brand:b,priceGroup:'CR',family:'CR',selectionKey:keyOf(b.id,'CR'),key:priceKeyOf(b.id,'CR')});
         out.push({brand:b,priceGroup:'BFI',family:'BFI',selectionKey:keyOf(b.id,'BFI'),key:priceKeyOf(b.id,'BFI')});
+        out.push({brand:b,priceGroup:'BGF',family:'BGF',selectionKey:'',key:priceKeyOf(b.id,'BGF')});
         out.push({brand:b,priceGroup:'ES',family:'ES',selectionKey:keyOf(b.id,'ES'),key:priceKeyOf(b.id,'ES')});
+        out.push({brand:b,priceGroup:'ISO',family:'ISO',selectionKey:keyOf(b.id,'ISO'),key:priceKeyOf(b.id,'ISO')});
         out.push({brand:b,priceGroup:'MOTOR',family:'MOTOR',selectionKey:'',key:priceKeyOf(b.id,'MOTOR'),label:'Motor'});
         return;
       }
       const groups=[...new Set(
         mappings().filter(m=>String(m.brand_id)===String(b.id))
           .map(m=>normalizedPriceGroup(m.master_family))
-          .filter(g=>['CHC_G1','CHC_G2','CR','BFI','ES','MOTOR'].includes(g))
+          .filter(g=>priceGroups().includes(g))
       )];
       groups.forEach(g=>out.push({
         brand:b,
         priceGroup:g,
-        family:g==='ES'?'ES':g==='BFI'?'BFI':g==='CR'?'CR':g==='MOTOR'?'MOTOR':'CHC',
-        selectionKey:g==='CHC_G1'?keyOf(b.id,'CHC_G1'):g==='CHC_G2'?keyOf(b.id,'CHC'):g==='CR'?keyOf(b.id,'CR'):g==='BFI'?keyOf(b.id,'BFI'):g==='ES'?keyOf(b.id,'ES'):'',
+        family:g==='ES'?'ES':g==='ISO'?'ISO':g==='BGF'?'BGF':g==='BFI'?'BFI':g==='CR'?'CR':g==='MOTOR'?'MOTOR':'CHC',
+        selectionKey:g==='CHC_G1'?keyOf(b.id,'CHC_G1'):g==='CHC_G2'?keyOf(b.id,'CHC'):g==='CR'?keyOf(b.id,'CR'):g==='BFI'?keyOf(b.id,'BFI'):g==='ES'?keyOf(b.id,'ES'):g==='ISO'?keyOf(b.id,'ISO'):'',
         key:priceKeyOf(b.id,g),
         label:g==='MOTOR'?'Motor':''
       }));
@@ -147,6 +152,8 @@
     ].forEach(([group,family,label])=>out.push({brand:keylargo,priceGroup:group,family,selectionKey:'',key:priceKeyOf(keylargo.id,group),label}));
     const gws=virtualGws();
     out.push({brand:gws,priceGroup:'GWS',family:'TANK',selectionKey:'',key:priceKeyOf(gws.id,'GWS'),label:'GWS Tank'});
+    const master=brands().find(isMaster),existing=new Set(out.map(entry=>normalizedPriceGroup(entry.priceGroup)));
+    if(master)priceGroups().filter(group=>!existing.has(group)).forEach(group=>out.push({brand:master,priceGroup:group,family:group,selectionKey:group==='ISO'?keyOf(master.id,'ISO'):'',key:priceKeyOf(master.id,group),label:priceGroupLabel(group)}));
     return out;
   }
   function allPriceEntries(){
@@ -157,7 +164,7 @@
     return priceBrands().filter(b=>allowed.has(String(b.id)));
   }
   function priceGroupLabel(group){
-    return ({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',BFI:'BFI',ES:'End Suction',MOTOR:'Motor',BASEPLATE:'Baseplate',COUPLING:'Coupling',KEYPLC:'KeyPLC Panel',MANIFOLD:'Manifold',GWS:'GWS Tank'})[normalizedPriceGroup(group)]||String(group||'');
+    return ({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',BFI:'BFI',BGF:'BGF',ES:'End Suction',ISO:'ISO',MOTOR:'Motor',BASEPLATE:'Baseplate',COUPLING:'Coupling',KEYPLC:'KeyPLC Panel',MANIFOLD:'Manifold',GWS:'GWS Tank'})[normalizedPriceGroup(group)]||String(group||'').replace(/_/g,' ');
   }
   function priceEntrySeriesLabel(entry){
     if(entry.label)return String(entry.label);
@@ -433,7 +440,7 @@
   function pricePreferenceEditorHtml(cid){
     const pref=cache.get(String(cid))||defaultPreference(),priceSet=new Set(pref.price_keys||[]),editable=canEditCustomerSettings();
     const cards=visiblePriceBrands().map(b=>{
-      const bid=String(b.id),rows=allPriceEntries().filter(e=>String(e.brand.id)===bid);
+      const bid=String(b.id),rows=allPriceEntries().filter(e=>String(e.brand.id)===bid).sort((a,b)=>priceEntrySeriesLabel(a).localeCompare(priceEntrySeriesLabel(b),undefined,{numeric:true,sensitivity:'base'}));
       if(!rows.length)return '';
       const checkedCount=rows.filter(e=>priceSet.has(e.key)).length,allChecked=checkedCount===rows.length&&rows.length>0;
       return `<div class="v3964-pref-card" data-v41506-price-brand="${esc(bid)}">
@@ -610,7 +617,7 @@
   }
   function isPriceAllowed(brandId,priceGroup,cid=currentPreferenceCustomerId()){
     const group=normalizedPriceGroup(priceGroup);
-    if(!PRICE_GROUPS.includes(group))return true;
+    if(!priceGroups().includes(group))return true;
     if(!cid)return true;
     const key=priceKeyOf(brandId,group);
     if(!allPriceEntries().some(e=>e.key===key))return false;
@@ -619,10 +626,10 @@
   }
   function isSelectionAllowed(brandId,priceGroup,cid=currentPreferenceCustomerId()){
     const group=normalizedPriceGroup(priceGroup);
-    if(!['CHC_G1','CHC_G2','CR','BFI','ES'].includes(group))return false;
+    if(!['CHC_G1','CHC_G2','CR','BFI','ES','ISO'].includes(group))return false;
     if(isPriceAllowed(brandId,group,cid)!==true)return false;
     const pref=cache.get(String(cid));if(!pref)return false;
-    const selectionKey=group==='CHC_G1'?keyOf(brandId,'CHC_G1'):group==='CHC_G2'?keyOf(brandId,'CHC'):group==='CR'?keyOf(brandId,'CR'):group==='BFI'?keyOf(brandId,'BFI'):keyOf(brandId,'ES');
+    const selectionKey=group==='CHC_G1'?keyOf(brandId,'CHC_G1'):group==='CHC_G2'?keyOf(brandId,'CHC'):group==='CR'?keyOf(brandId,'CR'):group==='BFI'?keyOf(brandId,'BFI'):group==='ISO'?keyOf(brandId,'ISO'):keyOf(brandId,'ES');
     return new Set(pref.keys||[]).has(selectionKey);
   }
   function isTeskMeteringEnabled(cid=currentPreferenceCustomerId()){
@@ -644,6 +651,8 @@
     if(!group){
       if(family==='BFI')group='BFI';
       else if(family==='ES')group='ES';
+      else if(family==='ISO')group='ISO';
+      else if(family==='BGF')group='BGF';
       else if(family==='CR')group='CR';
       else if(family==='CHC')group=String(source.generation_code||pump.keysuite_generation_code||'G2').toUpperCase()==='G1'?'CHC_G1':'CHC_G2';
       else if(family==='MOTOR')group='MOTOR';
@@ -661,7 +670,7 @@
     let brandId=String(ctx?.id||state.selectedBrandId||''),name=String(ctx?.name||'Selected Brand');
     if(['BASEPLATE','COUPLING','KEYPLC','MANIFOLD'].includes(group)){brandId=KEYLARGO_SCOPE_ID;name='Keylargo'}
     if(group==='GWS'||String(state.selectedBrandId||'')===GWS_SCOPE_ID){group='GWS';brandId=GWS_SCOPE_ID;name='GWS'}
-    if(!PRICE_GROUPS.includes(group)||!brandId)return '';
+    if(!priceGroups().includes(group)||!brandId)return '';
     const cid=currentPreferenceCustomerId();if(!cid)return '';
     if(!cache.has(cid)){loadPreference(cid).then(()=>refresh()).catch(()=>{});return 'Customer Price Preference is still loading. Please try again.'}
     const pref=cache.get(cid);if(pref?._readError)return `Customer Price Preference could not be loaded from Supabase: ${pref._readError}`;

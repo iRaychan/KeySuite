@@ -32,7 +32,7 @@ function quote(p){
 }
 function renderProduct(){
  const body=$('bgfProductRows');if(!body)return;body.innerHTML='';
- for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td><button class="btn action-quote product-action-button" type="button">Quote</button></td>`;tr.querySelector('button').onclick=()=>quote(p);body.appendChild(tr)}
+ for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td style="width:96px;text-align:right"><button class="btn action-quote product-action-button" style="width:auto;min-width:72px;padding:7px 10px!important" type="button">Quote</button></td>`;tr.querySelector('button').onclick=()=>quote(p);body.appendChild(tr)}
 }
 document.addEventListener('DOMContentLoaded',renderProduct);
 function render(){renderProduct();

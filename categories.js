@@ -41,9 +41,9 @@
     if(product==='CHC_G2'){fallback.margin=Number(category?.margins?.CHC_G2??category?.margins?.CHC??category?.factors?.CHC_G2??category?.factors?.CHC??fallback.margin);fallback.transport=Number(category?.transport??fallback.transport)}
     return normalizeRule(category?.productRules?.[product]||{},fallback);
   }
-  function sortedRows(input=categories()){const rows=[...(input||[])],dir=categorySort.dir==='desc'?-1:1;return rows.sort((a,b)=>String(a?.name||a?.category_name||'').localeCompare(String(b?.name||b?.category_name||''),undefined,{numeric:true,sensitivity:'base'})*dir)}
+  function sortedRows(input=categories()){return [...(input||[])].sort((a,b)=>String(a?.name||a?.category_name||'').localeCompare(String(b?.name||b?.category_name||''),undefined,{numeric:true,sensitivity:'base'}))}
   function saveCategorySort(){try{localStorage.setItem(CATEGORY_SORT_KEY,JSON.stringify(categorySort))}catch(_){}}
-  function syncCategorySortUi(){const direction=byId('categorySortDirection');if(direction){direction.textContent=categorySort.dir==='asc'?'A→Z':'Z→A';direction.title=`Category · ${categorySort.dir==='asc'?'A to Z':'Z to A'}`}}
+  function syncCategorySortUi(){categorySort.dir='asc';const direction=byId('categorySortDirection');if(direction){direction.textContent='A→Z';direction.title='Categories are fixed A to Z';direction.hidden=true}}
   function saveProductSort(){try{localStorage.setItem(PRODUCT_SORT_KEY,JSON.stringify(productSort))}catch(_){}}
   function applyProductSort(){const box=document.querySelector('#categoryForm .category-product-buttons');if(!box)return;const buttons=[...box.querySelectorAll('[data-category-product]')];buttons.sort((a,b)=>String(a.dataset.categoryProduct||'').localeCompare(String(b.dataset.categoryProduct||''),undefined,{numeric:true,sensitivity:'base'})*(productSort.dir==='desc'?-1:1));buttons.forEach(button=>box.appendChild(button));const control=byId('categoryProductSortDirection');if(control){control.textContent=productSort.dir==='asc'?'A→Z':'Z→A';control.title=`Product rules · ${productSort.dir==='asc'?'A to Z':'Z to A'}`}}
   function currentCategory(){return categories().find(item=>item.id===selectedId)||null}
@@ -150,9 +150,8 @@
   function renderRows(){
     const body=byId('categoryRows');if(!body)return;const rows=sortedRows(categories());
     if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
-    const head=body.closest('table')?.querySelector('thead tr');if(head)head.innerHTML='<th>Category</th><th>USD</th><th>RMB</th><th>MYR</th><th>Margin %</th><th>Normal %</th><th>Rare %</th><th>Transport RM</th>';
-    body.innerHTML=rows.map(category=>{const rule=ruleFor(category,selectedProduct);if(editing&&category.id===selectedId)rule.currencies=selectedCurrenciesFromUi();const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></td>${['USD','RMB','MYR'].map(code=>`<td><input type="checkbox" aria-label="${esc(name)} ${code}" data-row-currency="${code}" data-row-category="${esc(category.id)}" ${rule.currencies.includes(code)?'checked':''} ${editing&&category.id===selectedId?'':'disabled'}></td>`).join('')}<td>${num(rule.margin*100)}</td><td>${num(rule.normal*100)}</td><td>${num(rule.rare*100)}</td><td>${num(rule.transport)}</td></tr>`}).join('');
-    body.querySelectorAll('[data-row-currency]').forEach(input=>input.onchange=()=>{const editor=byId('categoryCurrency'+input.dataset.rowCurrency);if(editor){editor.checked=input.checked;showCurrencySummary();updateFormula()}});
+    const head=body.closest('table')?.querySelector('thead tr');if(head)head.innerHTML='<th>Category</th>';
+    body.innerHTML=rows.map(category=>{const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></td></tr>`}).join('');
   }
   function mapRows(rows){
     return (rows||[]).map(c=>{
@@ -214,7 +213,7 @@
   function bind(){
     if(bound)return;bound=true;
     byId('categoryForm')?.addEventListener('submit',save);byId('newPricingCategory')?.addEventListener('click',newCategory);byId('cancelCategoryEdit')?.addEventListener('click',cancel);
-    byId('categorySortDirection')?.addEventListener('click',()=>{categorySort.dir=categorySort.dir==='asc'?'desc':'asc';saveCategorySort();syncCategorySortUi();renderRows()});
+    byId('categorySortDirection')?.addEventListener('click',()=>{categorySort.dir='asc';saveCategorySort();syncCategorySortUi();renderRows()});
     byId('categoryProductSortDirection')?.addEventListener('click',()=>{productSort.dir=productSort.dir==='asc'?'desc':'asc';saveProductSort();applyProductSort()});
     const editButton=byId('editCategoryRule');if(editButton)bindEditLongHold(editButton,unlockCategoryEditor);
     byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});

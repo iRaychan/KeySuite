@@ -339,7 +339,10 @@ function normalizeRemoteQuote(row={}){
  const logicalId=firstQuoteText(payload.id,payload.quotation_id,payload.quote_id,outer.logical_id,outer.logicalId,outer.quotation_id,outer.quote_id,outer.id)||newUuid();
  const topLevelStorageId=firstQuoteText(row.remoteStorageId,row.remote_storage_id,hasStorageWrapper?row.id:'',hasStorageWrapper?row.quotation_id:'',hasStorageWrapper?row.quote_id:'');
  const remoteStorageId=firstQuoteText(topLevelStorageId,outer.remoteStorageId,outer.remote_storage_id,outer.id,outer.quotation_id,outer.quote_id,payload.id)||logicalId;
- return {...merged,id:logicalId,remoteStorageId,no,date,items:normalizeQuoteItemQuantities(merged.items),documentType:firstQuoteText(outer.document_type,outer.documentType,payload.documentType,payload.document_type)||'Quotation',customerId,printedCompany,total:Number(outer.total??outer.grand_total??payload.total??payload.grandTotal??0),status:firstQuoteText(outer.status,payload.status)||'saved',createdByEmail:firstQuoteText(outer.created_by_email,outer.createdByEmail,payload.createdByEmail,payload.created_by_email,payload.createdBy).toLowerCase(),createdByName:firstQuoteText(outer.created_by_name,outer.createdByName,payload.createdByName,payload.created_by_name),updatedByEmail:firstQuoteText(outer.updated_by_email,outer.updatedByEmail,payload.updatedByEmail,payload.updated_by_email).toLowerCase(),createdAt:firstQuoteText(outer.created_at,outer.createdAt,payload.createdAt,payload.created_at),updatedAt:firstQuoteText(outer.updated_at,outer.updatedAt,payload.updatedAt,payload.updated_at,date)}
+ const revisionDate=quoteDateValue(firstQuoteText(outer.revision_date,outer.revisionDate,payload.revisionDate,payload.revision_date));
+ const revisionOf=firstQuoteText(outer.revision_of,outer.revisionOf,payload.revisionOf,payload.revision_of);
+ const revisionNumber=Number(outer.revision_number??outer.revisionNumber??payload.revisionNumber??payload.revision_number??quoteRevisionNumberFromNo(no)??0);
+ return {...merged,id:logicalId,remoteStorageId,no,date,revisionDate,revisionOf,revisionNumber,items:normalizeQuoteItemQuantities(merged.items),documentType:firstQuoteText(outer.document_type,outer.documentType,payload.documentType,payload.document_type)||'Quotation',customerId,printedCompany,total:Number(outer.total??outer.grand_total??payload.total??payload.grandTotal??0),status:firstQuoteText(outer.status,payload.status)||'saved',createdByEmail:firstQuoteText(outer.created_by_email,outer.createdByEmail,payload.createdByEmail,payload.created_by_email,payload.createdBy).toLowerCase(),createdByName:firstQuoteText(outer.created_by_name,outer.createdByName,payload.createdByName,payload.created_by_name),updatedByEmail:firstQuoteText(outer.updated_by_email,outer.updatedByEmail,payload.updatedByEmail,payload.updated_by_email).toLowerCase(),createdAt:firstQuoteText(outer.created_at,outer.createdAt,payload.createdAt,payload.created_at),updatedAt:firstQuoteText(outer.updated_at,outer.updatedAt,payload.updatedAt,payload.updated_at,date)}
 }
 function quotationRowRank(q={}){const sealed=String(q.status||'').toLowerCase()==='sealed'?1:0,time=Date.parse(q.updatedAt||q.createdAt||q.date||'')||0;return sealed*1e15+time}
 function dedupeQuotationRows(rows=[]){
@@ -531,8 +534,8 @@ function quotationHistoryDate(q){return (q?.revisionOf||quoteRevisionNumberFromN
 function quotationHistoryDateTimestamp(q){const raw=String(quotationHistoryDate(q)).slice(0,10);const value=Date.parse(raw?`${raw}T00:00:00Z`:'');return Number.isFinite(value)?value:0}
 function compareQuotationHistoryNewest(a,b){
  const dateDiff=quotationHistoryDateTimestamp(b)-quotationHistoryDateTimestamp(a);if(dateDiff)return dateDiff;
- const originalRef=q=>canonicalQuotationNumber(q?.no).replace(/-R\d+$/,'');
- const noDiff=originalRef(b).localeCompare(originalRef(a),undefined,{numeric:true,sensitivity:'base'});if(noDiff)return noDiff;
+ const originalSequence=q=>{const original=canonicalQuotationNumber(q?.no).replace(/-R\d+$/i,''),match=original.match(/(\d+)(?!.*\d)/);return match?Number(match[1]):-1};
+ const noDiff=originalSequence(b)-originalSequence(a);if(noDiff)return noDiff;
  const revisionDiff=Number(b?.revisionNumber||quoteRevisionNumberFromNo(b?.no)||0)-Number(a?.revisionNumber||quoteRevisionNumberFromNo(a?.no)||0);if(revisionDiff)return revisionDiff;
  const createdDiff=quotationHistoryTimestamp(b)-quotationHistoryTimestamp(a);if(createdDiff)return createdDiff;
  return quotationHistoryUpdatedTimestamp(b)-quotationHistoryUpdatedTimestamp(a)
@@ -1065,8 +1068,8 @@ function updateQuotationContactInfo(){
  if(person.email)parts.push(person.email);
  $('qContactInfo').textContent=parts.join(' · ')||'-';updateCustomerSummary();
 }
-function compareBrandPriority(a,b){const name=x=>String(typeof x==='string'?x:x?.brand_name??x?.name??'').trim(),rank=x=>{const n=name(x).toLowerCase();if(n==='b.g.reich')return 0;if(n==='tesk')return 1;if(!n||n==='-'||!/[a-z0-9]/i.test(n[0]))return 3;return 2};return rank(a)-rank(b)||name(a).localeCompare(name(b),undefined,{sensitivity:'base'});}
-function brandDisplayOrder(values=[]){const sorted=[...(values||[])].sort(compareBrandPriority);if(sorted.length<3)return sorted;const order=[sorted[0],sorted[2],sorted[1],sorted[3],...sorted.slice(4)];return order.filter(Boolean)}
+function compareBrandPriority(a,b){const name=x=>String(typeof x==='string'?x:x?.brand_name??x?.name??'').trim(),rank=x=>{const n=name(x).toLowerCase();if(n==='b.g.reich')return 0;if(n==='keylargo')return 1;if(n==='tesk')return 2;if(!n||n==='-'||!/[a-z0-9]/i.test(n[0]))return 4;return 3};return rank(a)-rank(b)||name(a).localeCompare(name(b),undefined,{numeric:true,sensitivity:'base'});}
+function brandDisplayOrder(values=[]){return [...(values||[])].sort(compareBrandPriority)}
 function quoteItemBrands(data={},seen=new Set()){ 
  if(!data||typeof data!=='object'||seen.has(data))return [];seen.add(data);const names=[];
  for(const key of ['brand','brandName','brand_name','keysuite_brand_name','v391_brand_name'])if(typeof data[key]==='string'&&data[key].trim()&&data[key].trim()!=='-')names.push(data[key].trim());
