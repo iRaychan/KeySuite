@@ -1,19 +1,19 @@
 {
-  "version": "5.00.14",
-  "baseline": "5.00.13",
-  "upgrade_supported_from": "5.00.13",
-  "new_database_migration_required": false,
+  "version": "5.00.15",
+  "baseline": "5.00.14",
+  "upgrade_supported_from": "5.00.14",
+  "new_database_migration_required": true,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Category Normal View category-name-only A-Z list",
-    "Dynamic Company & Pricing product groups with CR, BGF and ISO",
-    "Customer Brand / Series fixed grid ordering",
-    "ISO Selection nested under B.G.Reich",
-    "ISO Product ES-style series and model layout",
-    "BGF compact Quote buttons",
-    "Quotation History effective-date and numeric sequence ordering",
-    "ISO Selection and Product Curve responsive containment"
+    "Protected owner-only pricing category archival",
+    "Complete 13-group Company & Pricing registry with CR routing",
+    "Customer Brand Margin ordering and invalid empty-brand suppression",
+    "ISO Product exact ES layout structure",
+    "Quotation authentication refresh, idempotent retry and persistence confirmation",
+    "Quotation item Clone plus account-scoped Copy and Paste",
+    "ISO Selection V4.28.72 responsive container integration",
+    "Dedicated ISO Product Curve responsive integration"
   ]
 }

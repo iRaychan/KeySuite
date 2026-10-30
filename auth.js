@@ -29,14 +29,17 @@
       new Promise((_,reject)=>{timer=setTimeout(()=>reject(timeoutError(label)),timeoutMs)})
     ]).finally(()=>clearTimeout(timer));
   }
-  function timeoutFetch(input,init={},timeoutMs=AUTH_REQUEST_TIMEOUT_MS){
+  function timeoutFetch(input,init={},timeoutMs){
+    const url=String(typeof input==='string'?input:input?.url||'');
+    const requestTimeout=Number(timeoutMs)||(/\/auth\/v1\//i.test(url)?AUTH_REQUEST_TIMEOUT_MS:SECURE_DATA_TIMEOUT_MS);
     const controller=new AbortController();
     const upstream=init?.signal;
     const abort=()=>controller.abort(upstream?.reason);
     if(upstream){if(upstream.aborted)abort();else upstream.addEventListener('abort',abort,{once:true})}
-    const timer=setTimeout(()=>controller.abort(timeoutError('Authentication request')),timeoutMs);
+    const label=/\/auth\/v1\//i.test(url)?'Authentication request':'Secure data request';
+    const timer=setTimeout(()=>controller.abort(timeoutError(label)),requestTimeout);
     return fetch(input,{...init,signal:controller.signal}).catch(error=>{
-      if(controller.signal.aborted&&!upstream?.aborted)throw timeoutError('Authentication request');
+      if(controller.signal.aborted&&!upstream?.aborted)throw timeoutError(label);
       throw error;
     }).finally(()=>{
       clearTimeout(timer);
@@ -460,9 +463,16 @@
     });
   }
   function closeSettings(){el('settingsDialog')?.close()}
-  async function ensureActiveSession(){
-    const current=await client.auth.getSession();
-    if(current.data?.session){session=current.data.session;return session}
+  async function ensureActiveSession(options={}){
+    const forceRefresh=options===true||options?.forceRefresh===true;
+    const current=await withDeadline(client.auth.getSession(),'Session check',AUTH_REQUEST_TIMEOUT_MS);
+    const active=current.data?.session;
+    const expiresSoon=Number(active?.expires_at||0)*1000-Date.now()<60000;
+    if(active&&!forceRefresh&&!expiresSoon){session=active;return session}
+    if(active?.refresh_token||session?.refresh_token){
+      const refreshed=await withDeadline(client.auth.refreshSession({refresh_token:active?.refresh_token||session.refresh_token}),'Session refresh',AUTH_REQUEST_TIMEOUT_MS);
+      if(refreshed.data?.session){session=refreshed.data.session;return session}
+    }
     if(session?.access_token&&session?.refresh_token){
       const restored=await client.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
       if(restored.data?.session){session=restored.data.session;return session}
@@ -556,7 +566,7 @@
     }
   }
 
-  window.KeySuiteAuth={getClient:()=>client,getSession:()=>session,getAccess:()=>access,getProfile:()=>profile,openSettings,refreshSecure,getAuthRedirectUrl:authRedirectUrl};
+  window.KeySuiteAuth={getClient:()=>client,getSession:()=>session,getAccess:()=>access,getProfile:()=>profile,ensureActiveSession,openSettings,refreshSecure,getAuthRedirectUrl:authRedirectUrl};
   if(window.KEYSUITE_TEST_MODE===true)window.KeySuiteAuthTest={readInitialSession,withDeadline,timeoutFetch,timeoutError};
   init();
 })();

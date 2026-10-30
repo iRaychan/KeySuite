@@ -41,10 +41,14 @@
     .filter(b=>{
       if(!b||b.active===false)return false;
       const key=String(b.brand_key||'').trim().toLowerCase(),name=String(b.brand_name||'').trim().toLowerCase();
-      return key!=='keylargo'&&name!=='keylargo'&&key!=='gws'&&name!=='gws';
+      return !!key&&!!name&&key!=='keylargo'&&name!=='keylargo'&&key!=='gws'&&name!=='gws';
     })
     .slice()
-    .sort((a,b)=>String(a.brand_name||'').localeCompare(String(b.brand_name||''),undefined,{numeric:true,sensitivity:'base'}));
+    .sort((a,b)=>{
+      const name=value=>String(value?.brand_name||'').trim(),lowName=value=>name(value).toLowerCase();
+      const priority=value=>['b.g.reich','b.g. reich'].includes(lowName(value))?0:lowName(value)==='tesk'?1:/^[a-z0-9]/i.test(name(value))?2:3;
+      return priority(a)-priority(b)||name(a).localeCompare(name(b),undefined,{numeric:true,sensitivity:'base'});
+    });
   const byBrandId=id=>{
     const key=String(id||'');
     if(key===KEYLARGO_SCOPE_ID)return virtualKeylargo();
