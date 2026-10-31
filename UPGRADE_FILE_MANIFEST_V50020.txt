@@ -1,0 +1,13 @@
+CHANGELOG_V50020.md
+MODIFIED_FILES_V50020.md
+README_UPGRADE_V50020.md
+REGRESSION_TEST_REPORT_V50020.md
+RELEASE.json
+SUPABASE_DEPLOYMENT_V50020.md
+VERSION.txt
+index.html
+manifest.json
+sw.js
+tests/v50020-regression.cjs
+v3944-categories.js
+v50020-version-lock.js

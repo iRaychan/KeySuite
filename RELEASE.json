@@ -1,8 +1,8 @@
 {
-  "version": "5.00.19",
-  "baseline": "5.00.18",
-  "upgrade_supported_from": "5.00.18",
-  "new_database_migration_required": true,
+  "version": "5.00.20",
+  "baseline": "5.00.19",
+  "upgrade_supported_from": "5.00.19",
+  "new_database_migration_required": false,
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
   "supabase_migration_version": "20261031063308",
@@ -13,12 +13,8 @@
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "KV Selection now follows the V4.28.72 standard responsive container and CR header/action layout",
-    "KV Product curve opens through a Safari-safe native dialog and no longer remains on about:blank",
-    "BGF 350M has a fixed-speed 2900 rpm workbook performance curve",
-    "BGF 350E has a variable 1800–3500 rpm performance view based on the workbook 2900 rpm curve and affinity scaling",
-    "BGF 400 and BGF 550 remain Quote-only because their workbook performance rows contain no curve data",
-    "Supabase migration 20261031121319 aligns BGF 550 and all four BGF source-workbook references with 004 - BGF 261030 - V1.0.xlsx while preserving row IDs and prices",
-    "Existing CR behaviour and frozen quotation PDF layout preserved"
+    "Compare View now displays CR, KV, BFI, BGF, ISO, ES and GWS in uppercase",
+    "CHC G1, CHC G2 and KeyPLC labels are preserved",
+    "Pricing rules, Supabase data and the frozen quotation PDF layout are unchanged"
   ]
 }
