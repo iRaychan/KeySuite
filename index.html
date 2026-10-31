@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.20</title>
-  <script>window.KEYSUITE_VERSION='5.00.20';window.KEYSUITE_BUILD='V5.00.20';</script>
+  <title>KeySuite V5.00.21</title>
+  <script>window.KEYSUITE_VERSION='5.00.21';window.KEYSUITE_BUILD='V5.00.21';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -638,15 +638,15 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </style>
 
   <style id="v42853-selection-scale">
-    #selectorEs,#selectorCr,#selectorKv,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
-    #selectorCrFrame,#selectorKvFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
+    #selectorEs,#selectorCr,#selectorKv,#selectorBgf,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+    #selectorCrFrame,#selectorKvFrame,#selectorBgfFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
     .card.selection-curve-shell{width:100%;min-width:0;padding:0!important;margin-bottom:0!important;border:1px solid var(--line)!important;border-radius:12px!important;background:#fff!important;box-shadow:var(--shadow)!important;overflow:hidden!important}
   </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.20</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.21</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -662,13 +662,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.20</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.21</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <div class="nav-group" data-nav-group="selectorMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="selectorMenu"><span>Selection</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorKv">KV</button><button data-page="selectorBfi">BFI</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
+        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorKv">KV</button><button data-page="selectorBfi">BFI</button><button data-page="selectorBgf">BGF</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
@@ -688,7 +688,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.20</div>
+    <div class="suite-version">KeySuite V5.00.21</div>
   </aside>
 
   <main>
@@ -893,7 +893,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50019&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50019&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50021&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50021&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+      </div>
+    </section>
+
+    <section id="selectorBgf" class="page">
+      <div class="page-title-row"><div><h1>Selector · BGF</h1><div class="muted">Select BGF 350M at its fixed motor speed or BGF 350E at a variable engine speed using verified workbook curve data.</div></div></div>
+      <div class="card selection-curve-shell">
+        <iframe id="selectorBgfFrame" src="selector-bgf/index.html?v=50021&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" data-src="selector-bgf/index.html?v=50021&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" title="KeySelector BGF Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 
@@ -948,7 +955,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><h2>KV Series</h2><div class="product-series-list"><button class="active" type="button">KV1</button></div></div>
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV1 Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
       </div>
-      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50019" title="KV Product Curve" style="display:none"></iframe>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50021" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -1764,6 +1771,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     <section id="productBgf" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · BGF</h1><div class="muted">Close-coupled pumps · Performance curves appear only where workbook data is available</div></div></div>
       <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Drive</th><th>Suction × Discharge</th><th></th></tr></thead><tbody id="bgfProductRows"></tbody></table></div><p id="bgfQuoteMessage" role="status"></p></div>
+      <iframe id="productBgfSelectorFrame" src="about:blank" data-src="selector-bgf/index.html?product=1&amp;v=50021" title="BGF Product Curve" style="display:none"></iframe>
     </section>
     <section id="bgfPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
@@ -2219,9 +2227,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="chc-g1-product-data-v41411.js?v=42872"></script>
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=50016"></script>
-<script src="kv-product-v50017.js?v=50019"></script>
+<script src="kv-product-v50017.js?v=50021"></script>
 <script src="bfi-v42302.js?v=42821"></script>
-<script src="bgf-curve-v50019.js?v=50019"></script>
+<script src="bgf-curve-v50021.js?v=50021"></script>
 <script src="bgf-v50006.js?v=50019"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=50013"></script>
@@ -2329,7 +2337,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50020-version-lock.js?v=50020"></script>
+<script src="v50021-version-lock.js?v=50021"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2345,8 +2353,8 @@ document.addEventListener('click',event=>{
 <script id="v42317-product-action-navigation">
 (()=>{
   'use strict';
-  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorKv,#selectorBfi,#productChc,#productCr,#productKv,#productBfi';
-  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorKvFrame','selectorBfiFrame','productSelectorFrame','productCrSelectorFrame','productKvSelectorFrame','productBfiSelectorFrame'];
+  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorKv,#selectorBfi,#selectorBgf,#productChc,#productCr,#productKv,#productBfi,#productBgf';
+  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorKvFrame','selectorBfiFrame','selectorBgfFrame','productSelectorFrame','productCrSelectorFrame','productKvSelectorFrame','productBfiSelectorFrame','productBgfSelectorFrame'];
   let navigationTimer=0;
 
   function actionOfButton(button){

@@ -23,7 +23,7 @@
   const brands=()=>((api()?.state?.brands)||[]).filter(Boolean);
   const byId=id=>brands().find(b=>String(b.id)===String(id))||null;
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
-  const frameFor=f=>{const fam=String(f).toUpperCase();return $(fam==='ISO'?'productIsoSelectorFrame':fam==='ES'?'productEsSelectorFrame':fam==='BFI'?'productBfiSelectorFrame':fam==='CR'?'productCrSelectorFrame':'productSelectorFrame')};
+  const frameFor=f=>{const fam=String(f).toUpperCase();return $(fam==='BGF'?'productBgfSelectorFrame':fam==='KV'?'productKvSelectorFrame':fam==='ISO'?'productIsoSelectorFrame':fam==='ES'?'productEsSelectorFrame':fam==='BFI'?'productBfiSelectorFrame':fam==='CR'?'productCrSelectorFrame':'productSelectorFrame')};
   const productDialog=()=>$('productCurveDialog');
 
   let inlineOpen=false;
@@ -35,7 +35,7 @@
   let selectionIsoHome=null;
   let currentFamily='CHC';
   let lastScrollY=0;
-  const lastDuty={CHC:null,CR:null,BFI:null,ES:null,ISO:null};
+  const lastDuty={CHC:null,CR:null,KV:null,BGF:null,BFI:null,ES:null,ISO:null};
   let nativeShowModal=null;
   let nativeClose=null;
   const visibleTextMaster=new WeakMap();
@@ -48,7 +48,9 @@
     document.querySelectorAll('.suite-version').forEach(n=>n.textContent='KeySuite V'+VERSION);
   }
   function activeFamily(){
-    const iso=frameFor('ISO'),es=frameFor('ES'),bfi=frameFor('BFI'),cr=frameFor('CR'),chc=frameFor('CHC');
+    const bgf=frameFor('BGF'),kv=frameFor('KV'),iso=frameFor('ISO'),es=frameFor('ES'),bfi=frameFor('BFI'),cr=frameFor('CR'),chc=frameFor('CHC');
+    if(bgf&&(bgf.style.display==='block'||bgf.getAttribute('data-active')==='1'))return 'BGF';
+    if(kv&&(kv.style.display==='block'||kv.getAttribute('data-active')==='1'))return 'KV';
     if(iso&&(iso.style.display==='block'||iso.getAttribute('data-active')==='1'))return 'ISO';
     if(es&&(es.style.display==='block'||es.getAttribute('data-active')==='1'))return 'ES';
     if(bfi&&(bfi.style.display==='block'||bfi.getAttribute('data-active')==='1'))return 'BFI';
@@ -187,7 +189,7 @@
       #productCurveDialog[data-ks-selection-es-inline="1"] #ks39445DialogReturn,#productCurveDialog[data-ks-selection-bfi-inline="1"] #ks39445DialogReturn,#productCurveDialog[data-ks-selection-iso-inline="1"] #ks39445DialogReturn{display:none!important}
       #productCurveDialog.ks3963-inline #closeProductCurve{margin-left:0!important;min-width:88px}
       #productCurveDialog.ks3963-inline #productCurveHost{position:relative;width:100%;min-width:0;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;overflow:visible!important}
-      #productCurveDialog.ks3963-inline #productSelectorFrame,#productCurveDialog.ks3963-inline #productCrSelectorFrame,#productCurveDialog.ks3963-inline #productBfiSelectorFrame,#productCurveDialog.ks3963-inline #productEsSelectorFrame,#productCurveDialog.ks3963-inline #productIsoSelectorFrame,#productCurveDialog.ks3963-inline #selectorEsFrame,#productCurveDialog.ks3963-inline #selectorBfiFrame,#productCurveDialog.ks3963-inline #selectorIsoFrame{display:block;width:100%!important;max-width:100%!important;min-width:0!important;min-height:1080px;border:0!important;overflow:hidden!important;transition:opacity .08s linear;box-sizing:border-box}
+      #productCurveDialog.ks3963-inline #productSelectorFrame,#productCurveDialog.ks3963-inline #productCrSelectorFrame,#productCurveDialog.ks3963-inline #productKvSelectorFrame,#productCurveDialog.ks3963-inline #productBgfSelectorFrame,#productCurveDialog.ks3963-inline #productBfiSelectorFrame,#productCurveDialog.ks3963-inline #productEsSelectorFrame,#productCurveDialog.ks3963-inline #productIsoSelectorFrame,#productCurveDialog.ks3963-inline #selectorEsFrame,#productCurveDialog.ks3963-inline #selectorBfiFrame,#productCurveDialog.ks3963-inline #selectorIsoFrame{display:block;width:100%!important;max-width:100%!important;min-width:0!important;min-height:1080px;border:0!important;overflow:hidden!important;transition:opacity .08s linear;box-sizing:border-box}
       #productCurveDialog.ks3963-inline #productCurveHost[data-ks3963-loading="1"]:before{content:'Loading selected model…';position:absolute;inset:0;z-index:2;display:flex;align-items:flex-start;justify-content:center;padding-top:56px;background:#fff;color:#687b89;font-size:13px;font-weight:700}
     `;document.head.appendChild(st);
   }
@@ -212,7 +214,7 @@
     currentFamily=activeFamily();const dlg=productDialog(),main=mainHost(),fr=frameFor(currentFamily);if(!dlg||!main||!fr)return false;
     lastScrollY=window.scrollY||0;if(dlg.parentNode!==main)main.appendChild(dlg);
     inlineOpen=true;main.classList.add('ks3963-product-curve-open');dlg.classList.add('ks3963-inline');dlg.setAttribute('open','');dlg.dataset.ks3963Inline='1';setBackLabel(true);fr.style.display='block';hideFrame(fr);
-    ['CHC','CR','BFI','ES','ISO'].forEach(f=>{const other=frameFor(f);if(other&&f!==currentFamily)other.style.display='none'});
+    ['CHC','CR','KV','BGF','BFI','ES','ISO'].forEach(f=>{const other=frameFor(f);if(other&&f!==currentFamily){other.style.display='none';other.dataset.active='0'}});fr.dataset.active='1';
     setTimeout(()=>{resizeFrame(fr);markVersion();window.scrollTo({top:0,behavior:'auto'})},0);return true;
   }
   function closeInline(force=false){
@@ -234,7 +236,7 @@
       try{dlg.returnValue=''}catch(_){}
     }
     const host=$('productCurveHost');if(host)delete host.dataset.ks3963Loading;
-    ['CHC','CR','BFI','ES','ISO'].forEach(f=>{const fr=frameFor(f);if(fr){fr.style.opacity='1';fr.style.visibility='visible';if(f==='ISO'){fr.style.display='none';fr.dataset.active='0'}}});
+    ['CHC','CR','KV','BGF','BFI','ES','ISO'].forEach(f=>{const fr=frameFor(f);if(fr){fr.style.opacity='1';fr.style.visibility='visible';fr.style.display='none';fr.dataset.active='0'}});
     const floatingBack=document.getElementById('ks39445DialogReturn');if(floatingBack)floatingBack.hidden=true;
     setBackLabel(false);
     try{window.KeySuiteModelReturn?.syncUniversalButton?.()}catch(_){}
@@ -245,6 +247,7 @@
     markVersion();return true;
   }
   function forceCloseInline(){return closeInline(true)}
+  window.addEventListener('KEYSUITE_PAGE_CHANGED',()=>{['KV','BGF'].forEach(f=>{const frame=frameFor(f);if(frame){frame.style.display='none';frame.style.visibility='hidden';frame.style.opacity='0';frame.dataset.active='0'}})});
   function installDialogBridge(){
     const dlg=productDialog();if(!dlg||dlg.dataset.ks3963Bridge==='1')return !!dlg;
     dlg.dataset.ks3963Bridge='1';nativeShowModal=HTMLDialogElement.prototype.showModal.bind(dlg);nativeClose=HTMLDialogElement.prototype.close.bind(dlg);

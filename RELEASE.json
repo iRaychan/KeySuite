@@ -1,7 +1,7 @@
 {
-  "version": "5.00.20",
-  "baseline": "5.00.19",
-  "upgrade_supported_from": "5.00.19",
+  "version": "5.00.21",
+  "baseline": "5.00.20",
+  "upgrade_supported_from": "5.00.20",
   "new_database_migration_required": false,
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
@@ -13,8 +13,12 @@
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Compare View now displays CR, KV, BFI, BGF, ISO, ES and GWS in uppercase",
-    "CHC G1, CHC G2 and KeyPLC labels are preserved",
-    "Pricing rules, Supabase data and the frozen quotation PDF layout are unchanged"
+    "Selection now includes BGF under B.G.Reich",
+    "KV and BGF use the V4.28.72 standard responsive selector layout",
+    "KV and BGF Product curves use the shared standard curve container",
+    "Leaving or closing a KV/BGF curve clears its frame so it cannot cover CHC, CR, BFI or ISO",
+    "BGF 350M is fixed at 2900 rpm and BGF 350E supports 1800 to 3500 rpm",
+    "BGF 400 and BGF 550 remain Quote-only because verified curve data is unavailable",
+    "Frozen quotation PDF layout is unchanged"
   ]
 }

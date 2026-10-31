@@ -17,7 +17,7 @@ function normalize(row){return {brandName:row.brand_name||row.brandName||FALLBAC
 function message(text,type='info'){const box=$('bgfPriceListMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
 // Workbook B10:B13 and B17:B20; B9 groups electric models. HP comes from D4:D7.
 function description(p){return `B.G.Reich Close Coupled Pump Model: ${p.model}\n${p.type==='Engine'?`c/w ${p.motorHp}HP 3600rpm Diesel Engine`:`c/w ${p.motorHp}HP 2Pole Motor`}\nSuction x Discharge: ${p.inlet} x ${p.outlet}\nPump Material: CI / BZ / SS / Mech Seal`;}
-function quote(p){
+function quote(p,duty={}){
  const error=$('bgfQuoteMessage');
  const fail=text=>{error.textContent=`${p.model}: ${text}`;error.className='auth-message show error';error.setAttribute('role','alert');error.tabIndex=-1;error.scrollIntoView({block:'nearest'});error.focus({preventScroll:true});};
  try{
@@ -25,7 +25,7 @@ function quote(p){
  if(!api?.findBgfPrice||!api?.bgfPriceProblem||!window.KeySuiteApp?.addExternalQuoteItem)throw new Error('Quotation services are not ready. Reload and try again.');
  const found=api.findBgfPrice(p.id),problem=api.bgfPriceProblem(p.id,found);
  if(problem){void window.KeySuiteManualPrice.offer({model:p.model,description:description(p),productFamily:'BGF',pricingSource:{product_family:'BGF',product_id:p.id}},problem);return;}
- const row=window.KeySuiteApp.addExternalQuoteItem({model:p.model,brand:p.brandName,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:$('ksDashFlow')?.value||'',capacityUnit:$('ksDashFlowUnit')?.value||'m3h',headValue:$('ksDashHead')?.value||'',headUnit:$('ksDashHeadUnit')?.value||'m'});
+ const row=window.KeySuiteApp.addExternalQuoteItem({model:p.model,brand:p.brandName,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:duty.flow??$('ksDashFlow')?.value??'',capacityUnit:duty.flowUnit||$('ksDashFlowUnit')?.value||'m3h',headValue:duty.head??$('ksDashHead')?.value??'',headUnit:duty.headUnit||$('ksDashHeadUnit')?.value||'m',pumpData:{family:'BGF',model:p.model,flow_m3h:Number(duty.flow||0),head_m:Number(duty.head||0),speed_rpm:Number(duty.rpm||0),drive_type:p.type}});
  if(!row)throw new Error('The quotation item could not be added.');
  error.textContent='';error.className='auth-message';if(typeof showPage==='function')showPage('quotation');else document.querySelector('[data-page="quotation"]')?.click();
  }catch(e){console.error('BGF quotation lookup failed',e);fail('Pricing lookup / system error. '+(e.message||'Try again or contact the administrator.'));}
@@ -49,5 +49,5 @@ async function save(product,tr,cur){
  finally{button.disabled=false;button.textContent='Save'}
 }
 function init(data,nextAccess){access=nextAccess||{};const loaded=(data?.bgfProducts||[]).map(normalize),byId=new Map(loaded.map(row=>[row.id,row]));rows=FALLBACK.map(base=>normalize({...base,...(byId.get(base.id)||{})}));$('bgfPriceCurrency')?.addEventListener('change',render);render();if(!loaded.length)message(`BGF database rows are not installed. Apply the V5.00.06 migration. Prices in ${SOURCE} are blank and remain unpriced.`,'info');else message(`Verified against ${SOURCE}. Blank source prices remain 0 and are not quotable.`,'info')}
-window.KeySuiteBGF={version:'5.00.19',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row}))};
+window.KeySuiteBGF={version:'5.00.21',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row})),quoteModel:(model,duty={})=>{const row=rows.find(p=>String(p.model).toUpperCase()===String(model||'').toUpperCase());return row?quote(row,duty):false}};
 })();
