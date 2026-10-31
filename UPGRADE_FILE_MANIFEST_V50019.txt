@@ -1,0 +1,19 @@
+KeySuite V5.00.19 upgrade overlay
+Required baseline: V5.00.18
+
+RELEASE.json
+VERSION.txt
+bgf-curve-v50019.js
+bgf-v50006.js
+index.html
+kv-product-v50017.js
+manifest.json
+selector-kv/index.html
+sw.js
+supabase/migrations/20261031121319_v50019_bgf_catalogue_metadata.sql
+v50019-version-lock.js
+
+Documentation:
+README_UPGRADE_V50019.md
+SUPABASE_DEPLOYMENT_V50019.md
+UPGRADE_FILE_MANIFEST_V50019.txt

@@ -1,7 +1,7 @@
-/* KeySuite V5.00.09 — BGF Price List from 004 - BGF - 261026 - V1.0.xlsx. */
+/* KeySuite V5.00.19 — BGF catalogue, quotation and workbook curve availability. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id),esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-const SOURCE='004 - BGF -  261026 - V1.0.xlsx';
+const SOURCE='004 - BGF 261030 - V1.0.xlsx';
 const FALLBACK=[
  {id:'bgf-350m',model:'BGF 350M',sourceModel:'BGF 350M',brandName:'B.G.Reich',sourceRow:4,motorKw:2.2,motorHp:3,inlet:'G1½',outlet:'G1¼',stages:2,type:'Motor'},
  {id:'bgf-350e',model:'BGF 350E',sourceModel:'BGF 350E',brandName:'B.G.Reich',sourceRow:5,motorKw:3.7,motorHp:5,inlet:'G1½',outlet:'G1¼',stages:2,type:'Engine'},
@@ -32,7 +32,7 @@ function quote(p){
 }
 function renderProduct(){
  const body=$('bgfProductRows');if(!body)return;body.innerHTML='';
- for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td style="width:96px;text-align:right"><button class="btn action-quote product-action-button" style="width:auto;min-width:72px;padding:7px 10px!important" type="button">Quote</button></td>`;tr.querySelector('button').onclick=()=>quote(p);body.appendChild(tr)}
+ for(const p of rows){const available=!!window.KeySuiteBGFCurves?.hasCurve?.(p.model),tr=document.createElement('tr');tr.innerHTML=`<td><b>${esc(p.model)}</b></td><td>${esc(p.motorKw)} kW / ${esc(p.motorHp)} HP</td><td>${esc(p.type)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td style="width:190px;text-align:right"><span class="product-model-actions" style="justify-content:flex-end">${available?'<button class="btn secondary product-action-button" data-bgf-curve style="width:auto;min-width:72px;padding:7px 10px!important" type="button">Curve</button>':''}<button class="btn action-quote product-action-button" data-bgf-quote style="width:auto;min-width:72px;padding:7px 10px!important" type="button">Quote</button></span></td>`;tr.querySelector('[data-bgf-curve]')?.addEventListener('click',()=>window.KeySuiteBGFCurves.open(p.model));tr.querySelector('[data-bgf-quote]').onclick=()=>quote(p);body.appendChild(tr)}
 }
 document.addEventListener('DOMContentLoaded',renderProduct);
 function render(){renderProduct();
@@ -49,5 +49,5 @@ async function save(product,tr,cur){
  finally{button.disabled=false;button.textContent='Save'}
 }
 function init(data,nextAccess){access=nextAccess||{};const loaded=(data?.bgfProducts||[]).map(normalize),byId=new Map(loaded.map(row=>[row.id,row]));rows=FALLBACK.map(base=>normalize({...base,...(byId.get(base.id)||{})}));$('bgfPriceCurrency')?.addEventListener('change',render);render();if(!loaded.length)message(`BGF database rows are not installed. Apply the V5.00.06 migration. Prices in ${SOURCE} are blank and remain unpriced.`,'info');else message(`Verified against ${SOURCE}. Blank source prices remain 0 and are not quotable.`,'info')}
-window.KeySuiteBGF={init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row}))};
+window.KeySuiteBGF={version:'5.00.19',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row}))};
 })();
