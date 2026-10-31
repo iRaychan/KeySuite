@@ -1,17 +1,19 @@
 {
-  "version": "5.00.16",
-  "baseline": "5.00.15",
-  "upgrade_supported_from": "5.00.15",
-  "new_database_migration_required": false,
+  "version": "5.00.17",
+  "baseline": "5.00.16",
+  "upgrade_supported_from": "5.00.16",
+  "new_database_migration_required": true,
+  "supabase_migration_deployed": true,
+  "supabase_project_ref": "skidqdixnnnuhvarekxp",
+  "supabase_migration_version": "20261031063308",
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Category Normal View five-second Edit countdown and Done relock",
-    "Bold Category Compare product tabs",
-    "Correct CR, CRS and CRN material descriptions",
-    "Correct standard included-motor rules for CHC C4, CHC C6 and CR",
-    "Precise missing included/replacement motor price errors",
-    "CR 5-36 standard IE3 package pricing correction"
+    "KV1 selector and product curves for 39 complete workbook models",
+    "Workbook-exact KV shutoff power at Q=0",
+    "KV category rules, price list, Assembly and quotation pricing",
+    "Incomplete and unavailable KV models remain hidden",
+    "Existing CR behaviour and frozen quotation PDF layout preserved"
   ]
 }

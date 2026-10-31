@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.16</title>
-  <script>window.KEYSUITE_VERSION='5.00.16';window.KEYSUITE_BUILD='V5.00.16';</script>
+  <title>KeySuite V5.00.17</title>
+  <script>window.KEYSUITE_VERSION='5.00.17';window.KEYSUITE_BUILD='V5.00.17';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -635,15 +635,15 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </style>
 
   <style id="v42853-selection-scale">
-    #selectorEs,#selectorCr,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
-    #selectorCrFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
+    #selectorEs,#selectorCr,#selectorKv,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+    #selectorCrFrame,#selectorKvFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
     .card.selection-curve-shell{width:100%;min-width:0;padding:0!important;margin-bottom:0!important;border:1px solid var(--line)!important;border-radius:12px!important;background:#fff!important;box-shadow:var(--shadow)!important;overflow:hidden!important}
   </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.16</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.17</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -659,17 +659,17 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.16</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.17</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <div class="nav-group" data-nav-group="selectorMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="selectorMenu"><span>Selection</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorBfi">BFI</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
+        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorKv">KV</button><button data-page="selectorBfi">BFI</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productIso">ISO</button><button data-page="productMotor">Motor</button></div></details></div></div>
+        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productKv">KV</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productIso">ISO</button><button data-page="productMotor">Motor</button></div></details></div></div>
       </div>
       <button data-page="keyLab">KeyLab</button>
       <button data-page="quotation">Quotation</button>
@@ -685,7 +685,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.16</div>
+    <div class="suite-version">KeySuite V5.00.17</div>
   </aside>
 
   <main>
@@ -882,6 +882,18 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       </div>
     </section>
 
+    <section id="selectorKv" class="page">
+      <div class="page-title-row"><div><h1>Selector · KV</h1><div class="muted">Enter flow and head to select from the 39 complete KV1 models, review the workbook-derived curves, then continue to Assembly or Quote.</div></div></div>
+      <div class="card selector-toolbar">
+        <div><label>Mechanical Seal</label><select id="kvSealFaces" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
+        <div><label>Elastomer</label><select id="kvSealElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
+        <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
+      </div>
+      <div class="card selection-curve-shell">
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50017&amp;ks-visible=1" data-src="selector-kv/index.html?v=50017&amp;ks-visible=1" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+      </div>
+    </section>
+
     <section id="selectorBfi" class="page">
       <button id="quickSelectionReturnBfi" class="btn secondary quick-selection-return" type="button" hidden title="Return to Quick Selection" aria-label="Return to Quick Selection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5"></path><path d="M4 12h10a6 6 0 0 1 6 6"></path></svg></button>
       <iframe id="selectorBfiFrame" src="selector-bfi/index.html?v=42872" data-src="selector-bfi/index.html?v=42872" title="KeySelector BFI" style="width:100%;height:1900px;border:0;display:block"></iframe>
@@ -919,6 +931,21 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="crProductSeriesTitle" style="margin:0">CR Models</h2><div id="crProductModelCount" class="muted"></div></div></div><div id="crProductModelGrid" class="product-model-grid"></div></div>
       </div>
       <iframe id="productCrSelectorFrame" src="about:blank" data-src="selector-cr/product.html?product=1&amp;v=42872" title="CR Product Curve" style="display:none"></iframe>
+    </section>
+
+    <section id="productKv" class="page">
+      <div class="page-title-row"><div><h1>Product · KV</h1><div class="muted">B.G.Reich KV vertical multistage pump range. Only complete KV1 models from the approved workbook are shown.</div></div></div>
+      <div class="card product-toolbar">
+        <div><label>Model</label><input id="kvProductModelInput" list="kvProductModelOptions" placeholder="Example: KV 1-20"><datalist id="kvProductModelOptions"></datalist></div>
+        <div><label>Mechanical Seal</label><select id="kvProductSeal" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
+        <div><label>Elastomer</label><select id="kvProductElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
+        <div><label>Supply</label><label class="default-choice-control"><input id="kvProductBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
+      </div>
+      <div class="product-layout">
+        <div class="card"><h2>KV Series</h2><div class="product-series-list"><button class="active" type="button">KV1</button></div></div>
+        <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV1 Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
+      </div>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50017" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -1385,6 +1412,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                   <button class="category-product-button" type="button" data-category-product="CHC_G1">CHC G1</button>
                   <button class="category-product-button active" type="button" data-category-product="CHC_G2">CHC G2</button>
                   <button class="category-product-button" type="button" data-category-product="CR">CR</button>
+                  <button class="category-product-button" type="button" data-category-product="KV">KV</button>
                   <button class="category-product-button" type="button" data-category-product="BFI">BFI</button>
                   <button class="category-product-button" type="button" data-category-product="BGF">BGF</button>
                   <button class="category-product-button" type="button" data-category-product="ES">ES</button><button class="category-product-button" type="button" data-category-product="ISO">ISO</button>
@@ -1486,6 +1514,12 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="crPriceList">
           <span class="module-icon">CR</span><h2>CR / CRS / CRN</h2>
           <p>Maintain B.G.Reich CR, CRS and CRN source prices and rarity by currency.</p>
+          <span class="module-order">OPEN PRICE LIST</span>
+        </button>
+
+        <button type="button" class="key-module-card" data-go="kvPriceList">
+          <span class="module-icon">KV</span><h2>KV</h2>
+          <p>Maintain the 39 complete KV1 model source prices and rarity by currency.</p>
           <span class="module-order">OPEN PRICE LIST</span>
         </button>
 
@@ -1672,6 +1706,27 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th rowspan="2">Model</th><th class="group-head" colspan="2">CR</th><th class="group-head" colspan="2">CRS</th><th class="group-head" colspan="2">CRN</th><th rowspan="2"></th></tr><tr><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th></tr></thead><tbody id="crPriceRows"></tbody></table></div>
       </div>
       <div class="card" style="margin-top:16px"><h2>CR Mechanical Seal Add-on</h2><div class="muted" style="margin-bottom:10px">Add-on values in MYR. Ca/SiC remains the existing standard value; SiC/SiC and TC/TiC add-ons are saved by pump size group, including CR 320.</div><div class="table-wrap"><table class="pricelist-table seal-price-table"><thead><tr id="crSealHead"></tr></thead><tbody id="crSealRows"></tbody></table></div></div>
+    </section>
+
+    <section id="kvPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>KV Price List</h1><div class="muted">B.G.Reich KV1 pricing for the 39 complete workbook models.</div></div></div>
+      <div id="kvPriceListMessage" class="auth-message"></div>
+      <details class="card pricelist-currency-panel">
+        <summary>Currency &amp; Multipliers</summary>
+        <div class="pricelist-currency-panel-body">
+          <div class="pricelist-settings">
+            <div class="pricelist-currency-setting"><label>KV Currency Selection</label><select id="kvPriceCurrency"><option value="USD">USD</option><option value="RMB" selected>RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-multiplier-lock locked" id="kvMultiplierLock_USD"><label>KV · USD → MYR</label><input id="kvUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+            <div class="pricelist-multiplier-lock locked" id="kvMultiplierLock_RMB"><label>KV · RMB → MYR</label><input id="kvRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
+          </div>
+          <div class="pricelist-note" style="margin-top:12px">KV keeps independent USD, RMB and MYR prices. Zero values remain unpriced. Hold a locked rate for 3 seconds to edit it.</div>
+        </div>
+      </details>
+      <div class="card" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV1 Models</h2><div id="kvPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="kvPriceSearch" placeholder="Example: KV 1-20"></div></div>
+        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Motor</th><th>Price</th><th>Rarity</th><th></th></tr></thead><tbody id="kvPriceRows"></tbody></table></div>
+      </div>
     </section>
 
 
@@ -2135,21 +2190,25 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
+<script src="supabase/functions/shared-kv/kv-data.js?v=50017"></script>
+<script src="kv-price-data-v50017.js?v=50017"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50016"></script>
+<script src="app.js?v=50017"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50016"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
-<script src="pricing.js?v=50016"></script>
+<script src="pricing.js?v=50017"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50016"></script>
+<script src="categories.js?v=50017"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=42821"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
+<script src="kv-pricelist-v50017.js?v=50017"></script>
 <script src="chc-g1-product-data-v41411.js?v=42872"></script>
 <script src="product.js?v=42821"></script>
 <script src="cr-product.js?v=50016"></script>
+<script src="kv-product-v50017.js?v=50017"></script>
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-v50006.js?v=50016"></script>
 <script src="manifold.js?v=42821"></script>
@@ -2258,7 +2317,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50016-version-lock.js?v=50016"></script>
+<script src="v50017-version-lock.js?v=50017"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2274,8 +2333,8 @@ document.addEventListener('click',event=>{
 <script id="v42317-product-action-navigation">
 (()=>{
   'use strict';
-  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorBfi,#productChc,#productCr,#productBfi';
-  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorBfiFrame','productSelectorFrame','productCrSelectorFrame','productBfiSelectorFrame'];
+  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorKv,#selectorBfi,#productChc,#productCr,#productKv,#productBfi';
+  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorKvFrame','selectorBfiFrame','productSelectorFrame','productCrSelectorFrame','productKvSelectorFrame','productBfiSelectorFrame'];
   let navigationTimer=0;
 
   function actionOfButton(button){

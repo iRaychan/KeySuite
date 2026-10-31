@@ -170,7 +170,7 @@ document.querySelectorAll('[data-nav-toggle]').forEach(button=>button.addEventLi
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go)));
 const keyButton=document.getElementById('keyButton');
 if(keyButton){keyButton.addEventListener('click',()=>showPage('keyDashboard'));}
-const KEY_PAGE_PERMISSIONS={selectorIso:'use_selector',productIso:'use_product',isoPriceList:'manage_price_list',keyDashboard:'key_dashboard',roleManagement:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',chcPriceList:'manage_price_list',bfiPriceList:'manage_price_list',gwsPriceList:'manage_price_list',esPriceList:'manage_price_list',keyplcPriceList:'manage_price_list',manifoldPriceList:'manage_price_list',baseplateSeriesList:'manage_price_list',baseplatePriceList:'manage_price_list',motorPriceList:'manage_price_list',couplingPriceList:'manage_price_list',keyLabPriceList:'manage_price_list',companySettings:'customer_settings',companyPricing:'company_pricing',keyAiSettings:'keyai_access'};
+const KEY_PAGE_PERMISSIONS={selectorIso:'use_selector',productIso:'use_product',isoPriceList:'manage_price_list',kvPriceList:'manage_price_list',keyDashboard:'key_dashboard',roleManagement:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',chcPriceList:'manage_price_list',bfiPriceList:'manage_price_list',gwsPriceList:'manage_price_list',esPriceList:'manage_price_list',keyplcPriceList:'manage_price_list',manifoldPriceList:'manage_price_list',baseplateSeriesList:'manage_price_list',baseplatePriceList:'manage_price_list',motorPriceList:'manage_price_list',couplingPriceList:'manage_price_list',keyLabPriceList:'manage_price_list',companySettings:'customer_settings',companyPricing:'company_pricing',keyAiSettings:'keyai_access'};
 function permissionLevel(key){return window.KeySuitePermissions?.level?.(key,currentRole())||(currentRole()==='owner'?'full':'none')}
 function hasPermission(key){return permissionLevel(key)!=='none'}
 function syncOwnerKeyVisibility(){
@@ -212,8 +212,10 @@ function showPage(id){
  window.KeySuiteCategories?.pageShown?.(id);
  window.KeySuitePriceList?.pageShown?.(id);
  window.KeySuiteCRPriceList?.pageShown?.(id);
+ window.KeySuiteKVPriceList?.pageShown?.(id);
  window.KeySuiteProduct?.pageShown?.(id);
  window.KeySuiteCRProduct?.pageShown?.(id);
+ window.KeySuiteKVProduct?.pageShown?.(id);
  window.KeySuiteBFI?.pageShown?.(id);
  window.KeySuiteManifold?.pageShown?.(id);
  window.KeySuiteMotor?.pageShown?.(id);
@@ -1618,16 +1620,18 @@ window.addEventListener('message',function(event){
  const fromEs=event.source===$('selectorEsFrame')?.contentWindow||String(event.data.product||'').toUpperCase()==='ES';
  const fromBfi=event.source===$('selectorBfiFrame')?.contentWindow||event.source===$('productBfiSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BFI';
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';
+ const fromKv=event.source===$('selectorKvFrame')?.contentWindow||event.source===$('productKvSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='KV';
  if(event.data.type==='KEYSUITE_SELECTOR_HEIGHT'&&(fromEs||fromBfi)){const frame=$(fromBfi?'selectorBfiFrame':'selectorEsFrame'),height=Math.max(1200,Math.min(6000,Number(event.data.height)||(fromBfi?1900:2600)));if(frame)frame.style.height=`${Math.ceil(height+8)}px`;return}
  if(event.data.type==='KEYSUITE_SELECTION_CHANGED'){
    if(!fromEs&&!fromBfi)updateConnectionAvailabilityFromSelection(event.data.payload||{});
    return;
  }
- if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
+ if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromKv?'KV':fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
  if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const rawPayload=event.data.payload||{};
  const p={...rawPayload};
  const route=event.data.route||pendingSelectionRoute||'quotation';pendingSelectionRoute='quotation';
+ if(fromKv||String(p.family||p.product||p.productFamily||'').toUpperCase()==='KV'){window.KeySuiteKVProduct?.routeSelection?.(p,route);return}
  if(fromCr||String(p.family||p.product||p.productFamily||'').toUpperCase()==='CR'){window.KeySuiteCRProduct?.routeSelection?.(p,route);return}
  if(fromBfi||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BFI'){window.KeySuiteBFI?.routeSelection?.(p,route);return}
  if(fromEs||isEsSelectionPayload(p)){void routeEsSelection(p,route).catch(error=>{console.error('ES selection routing failed',error);alert(error?.message||'Unable to route the ES selection.');});return}

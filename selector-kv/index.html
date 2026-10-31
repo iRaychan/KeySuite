@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>KeySelector KV</title>
+  <style>
+    :root{--ink:#17365d;--accent:#0b6aa2;--line:#d7e0e8;--soft:#f4f7fa;--ok:#116329;--warn:#9a3412}
+    *{box-sizing:border-box}body{margin:0;background:#eef3f7;color:#172033;font:14px Arial,sans-serif}button,input,select{font:inherit}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--ink);color:white}header h1{margin:0;font-size:20px}header small{opacity:.82}
+    main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;padding:16px}.card{background:white;border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 2px 8px #17365d10}
+    label{display:grid;gap:6px;margin-bottom:12px;font-weight:700}input,select{width:100%;height:42px;border:1px solid #aab8c6;border-radius:8px;padding:8px 10px;background:white}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:10px 13px;background:var(--accent);color:white;font-weight:700;cursor:pointer}.btn.secondary{background:#e6eef5;color:var(--ink)}.btn.quote{background:#166534}.btn.assembly{background:#7c3aed}
+    .muted{color:#607086;font-size:12px;line-height:1.45}.notice{padding:11px;border-radius:8px;background:#fff7ed;color:var(--warn);font-weight:700}.result{display:grid;gap:14px}.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.title-row h2{margin:0;color:var(--ink)}
+    .kpis{display:grid;grid-template-columns:repeat(5,minmax(115px,1fr));gap:10px}.kpi{border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--soft)}.kpi span{display:block;color:#607086;font-size:11px}.kpi b{display:block;margin-top:4px;font-size:17px;color:var(--ink)}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}.chart{border:1px solid var(--line);border-radius:9px;padding:10px}.chart h3{margin:0 0 7px;color:var(--ink);font-size:13px}.chart svg{width:100%;height:auto;display:block;background:white}.axis{stroke:#7b8794;stroke-width:1}.curve{fill:none;stroke:var(--accent);stroke-width:2.2}.duty{fill:#d7263d;stroke:white;stroke-width:1.5}.tick{font:10px Arial;fill:#536171}.axis-label{font:11px Arial;fill:#17365d;font-weight:700}
+    table{width:100%;border-collapse:collapse}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--ink);background:var(--soft)}tr.active{background:#edf8ff}.alt-button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;padding:0}
+    .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.spec{padding:9px;background:var(--soft);border-radius:7px}.spec span{display:block;font-size:11px;color:#607086}.spec b{display:block;margin-top:3px}
+    @media(max-width:900px){main{grid-template-columns:1fr}.charts{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.specs{grid-template-columns:repeat(2,1fr)}}
+    @media print{header,.controls,.route-actions{display:none!important}body{background:white}main{display:block;padding:0}.card{border:0;box-shadow:none}.charts{grid-template-columns:1fr 1fr}.alternatives{display:none}}
+  </style>
+</head>
+<body>
+<header><div><h1>KeySelector · KV</h1><small>KV1 · 50 Hz · approved workbook data</small></div><button class="btn secondary" id="printPage" type="button">Print / PDF</button></header>
+<main>
+  <aside class="card controls" id="controls">
+    <h2 style="margin-top:0;color:var(--ink)">Required Duty</h2>
+    <div class="grid2"><label>Flow (m³/h)<input id="flow" type="number" min="0" step="0.01" value="1.2"></label><label>Head (m)<input id="head" type="number" min="0" step="0.1" value="80"></label></div>
+    <label>Frequency<select id="frequency"><option value="50" selected>50 Hz</option><option value="60">60 Hz</option></select></label>
+    <button class="btn" id="selectPump" type="button">Select KV Pump</button>
+    <p class="muted">Selection uses the CR hydraulic method: valid duty, smallest motor, highest duty efficiency, BEP group, then head margin. Only complete KV1 models are available.</p>
+    <div class="notice">KV 2 and later families stay hidden until their model tables are complete.</div>
+  </aside>
+  <section class="result" id="result"><div class="card muted" style="padding:50px;text-align:center">Enter a duty point and select a KV pump.</div></section>
+</main>
+<script src="../supabase/functions/shared-kv/kv-data.js?v=50017"></script>
+<script src="../supabase/functions/shared-kv/kv-selector-core.js?v=50017"></script>
+<script>
+(() => {
+  'use strict';
+  const DB=globalThis.KeySuiteKVData,CORE=globalThis.KeySuiteKVCore,$=id=>document.getElementById(id);
+  const productMode=new URLSearchParams(location.search).get('product')==='1';
+  let state={q:0,h:0,hz:50,candidates:[],selectedIndex:0,productMode,options:{}};
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const number=(value,digits=2)=>Number(value||0).toLocaleString('en-MY',{minimumFractionDigits:0,maximumFractionDigits:digits});
+  function fitAt(fit,q){return CORE.fitValue(fit,q)}
+  function parentOptions(){
+    let fromParent={};try{if(parent&&parent!==window){const d=parent.document;fromParent={seal:d.getElementById('kvSealFaces')?.value,elastomer:d.getElementById('kvSealElastomer')?.value,bare:!!d.getElementById('kvBareShaft')?.checked}}}catch(_){}
+    return {seal:fromParent.seal||state.options.seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer:fromParent.elastomer||state.options.elastomer||'Viton',bare:fromParent.bare===true||state.options.bare===true};
+  }
+  function payload(candidate=state.candidates[state.selectedIndex]){
+    if(!candidate)return null;const opts=parentOptions(),model=candidate.model;
+    return {source:'KeySuite-KV-V5.00.17',family:'KV',product:'KV',generation_code:'KV',keysuite_generation_code:'KV',keysuite_product_group_code:'KV',keysuite_price_group_code:'KV',model,base_model:model,display_model:model,quotation_model:model,series:candidate.series,stages:candidate.stages,connection:candidate.connection,motor_kw:candidate.motor_kw,motor_hp:candidate.motor_hp,shaft_kw:candidate.shaft,shutoff_power_kw:candidate.shutoff_power_kw,efficiency:candidate.eff,npshr:candidate.npsh,speed_rpm:candidate.rpm,pole:2,frequency_hz:state.hz,flow_m3h:state.q,head_m:state.h,max_operating_pressure_bar:candidate.max_operating_pressure_bar,weight_kg:candidate.weight_kg,dimensions:candidate.dimensions,product_mode:state.productMode,keysuite_material:'KV',keysuite_seal:opts.seal,keysuite_elastomer:opts.elastomer,keysuite_bare_shaft:opts.bare,keysuite_supply_mode:opts.bare?'BARE':'COMPLETE',keysuite_dimension_override:candidate.dimensions,export_state:{q:state.q,h:state.h,hz:state.hz,model:candidate.model}};
+  }
+  function chart(title,fit,unit,dutyQ,dutyY){
+    const pts=CORE.sampleFit(fit,80);if(!pts.length)return '';
+    const width=520,height=230,left=48,right=14,top=16,bottom=38,maxX=Math.max(...pts.map(p=>p.x),dutyQ||0),maxY=Math.max(...pts.map(p=>p.y),dutyY||0)*1.08||1;
+    const x=v=>left+(width-left-right)*(v/maxX),y=v=>top+(height-top-bottom)*(1-v/maxY);
+    const path=pts.map((p,i)=>`${i?'L':'M'}${x(p.x).toFixed(1)},${y(p.y).toFixed(1)}`).join(' ');
+    let ticks='';for(let i=0;i<=5;i++){const xv=maxX*i/5,yv=maxY*i/5;ticks+=`<line class="axis" x1="${x(xv)}" y1="${height-bottom}" x2="${x(xv)}" y2="${height-bottom+4}"/><text class="tick" x="${x(xv)}" y="${height-bottom+17}" text-anchor="middle">${number(xv,1)}</text><line class="axis" x1="${left-4}" y1="${y(yv)}" x2="${left}" y2="${y(yv)}"/><text class="tick" x="${left-7}" y="${y(yv)+3}" text-anchor="end">${number(yv,1)}</text>`}
+    const marker=Number.isFinite(dutyQ)&&Number.isFinite(dutyY)?`<circle class="duty" cx="${x(dutyQ)}" cy="${y(dutyY)}" r="5"/>`:'';
+    return `<div class="chart"><h3>${esc(title)}</h3><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(title)}"><line class="axis" x1="${left}" y1="${top}" x2="${left}" y2="${height-bottom}"/><line class="axis" x1="${left}" y1="${height-bottom}" x2="${width-right}" y2="${height-bottom}"/>${ticks}<path class="curve" d="${path}"/>${marker}<text class="axis-label" x="${(left+width-right)/2}" y="${height-6}" text-anchor="middle">Flow (m³/h)</text><text class="axis-label" x="12" y="${top+10}">${esc(unit)}</text></svg></div>`;
+  }
+  function render(){
+    const best=state.candidates[state.selectedIndex];if(!best){$('result').innerHTML='<div class="card notice">No complete KV1 model satisfies this duty point.</div>';return}
+    const q=state.q,requiredHead=state.h,headAtDuty=fitAt(best.headFit,q),eff=fitAt(best.effFit,q),npsh=fitAt(best.npshFit,q),power=fitAt(best.powerFit,q),dims=best.dimensions||{};
+    $('result').innerHTML=`<div class="card"><div class="title-row"><div><h2>${esc(best.model)}</h2><div class="muted">${esc(best.series)} · ${best.stages} stages · ${esc(best.connection)}</div></div><div class="actions route-actions"><button class="btn assembly" id="addAssembly" type="button">Assembly</button><button class="btn quote" id="addQuote" type="button">Quote</button></div></div><div class="kpis" style="margin-top:14px"><div class="kpi"><span>Head at duty</span><b>${number(headAtDuty,1)} m</b></div><div class="kpi"><span>Duty efficiency</span><b>${number(eff,1)}%</b></div><div class="kpi"><span>Shaft power</span><b>${number(power,3)} kW</b></div><div class="kpi"><span>Excel power at Q=0</span><b>${number(best.shutoff_power_kw,3)} kW</b></div><div class="kpi"><span>Selected motor</span><b>${number(best.motor_kw,2)} kW</b></div></div><div class="charts" style="margin-top:14px">${chart('Head Curve',best.headFit,'Head (m)',q,headAtDuty)}${chart('Power Curve',best.powerFit,'Power (kW)',q,power)}${chart('Efficiency Curve',best.effFit,'Efficiency (%)',q,eff)}${chart('NPSHr Curve',best.npshFit,'NPSHr (m)',q,npsh)}</div><div class="specs" style="margin-top:14px"><div class="spec"><span>Motor</span><b>${number(best.motor_hp,2)} HP / ${number(best.motor_kw,2)} kW</b></div><div class="spec"><span>Max operating pressure</span><b>${number(best.max_operating_pressure_bar,1)} bar</b></div><div class="spec"><span>Weight</span><b>${number(best.weight_kg,1)} kg</b></div><div class="spec"><span>Overall height</span><b>${number(dims.H,0)} mm</b></div><div class="spec"><span>B1 / B2</span><b>${number(dims.B1,0)} / ${number(dims.B2,0)} mm</b></div><div class="spec"><span>D1 / D2</span><b>${number(dims.D1,0)} / ${number(dims.D2,0)} mm</b></div><div class="spec"><span>Footprint L × W</span><b>${number(dims.L,0)} × ${number(dims.W,0)} mm</b></div><div class="spec"><span>Speed</span><b>${number(best.rpm,0)} rpm</b></div></div></div><div class="card alternatives"><h2 style="margin-top:0;color:var(--ink)">Suitable KV1 Models</h2><div style="overflow:auto;max-height:420px"><table><thead><tr><th>Model</th><th>Motor</th><th>Head</th><th>Efficiency</th><th>Power</th></tr></thead><tbody>${state.candidates.slice(0,20).map((row,index)=>`<tr class="${index===state.selectedIndex?'active':''}"><td><button class="alt-button" data-alt="${index}">${esc(row.model)}</button></td><td>${number(row.motor_kw,2)} kW</td><td>${number(fitAt(row.headFit,q),1)} m</td><td>${number(fitAt(row.effFit,q),1)}%</td><td>${number(fitAt(row.powerFit,q),3)} kW</td></tr>`).join('')}</tbody></table></div></div>`;
+    document.querySelectorAll('[data-alt]').forEach(button=>button.onclick=()=>{state.selectedIndex=Number(button.dataset.alt);render()});$('addAssembly').onclick=()=>send('assembly');$('addQuote').onclick=()=>send('quotation');
+  }
+  function selectDuty(q=Number($('flow').value),h=Number($('head').value),hz=Number($('frequency').value||50)){
+    const result=CORE.select(DB,q,h,hz);state={...state,q,h,hz,candidates:result.candidates,selectedIndex:0};render();return result.selected;
+  }
+  function loadModel(name,options={}){
+    const model=DB.models.find(row=>String(row.model).toLowerCase()===String(name||'').toLowerCase());if(!model)return null;state.options={...state.options,...options};const curve=DB.curves[model.series],flow=curve.flow.filter(Number.isFinite),q=flow[Math.max(1,Math.floor(flow.length*.55))]||1;const evaluated=CORE.evaluateModel(DB,model,q,0,50);if(!evaluated)return null;const h=Math.max(1,Math.floor(evaluated.predHead*.75));state={...state,q,h,hz:50,candidates:[CORE.evaluateModel(DB,model,q,h,50)],selectedIndex:0,productMode:true};$('flow').value=q;$('head').value=h;render();parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,flowM3h:q,headM:h,valid:true,message:'KV curve loaded.'},'*');return payload();
+  }
+  function send(route){const data=payload();if(!data){alert('Please run a KV selection first.');return}parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route,payload:data},'*')}
+  $('selectPump').onclick=()=>selectDuty();$('printPage').onclick=()=>window.print();
+  window.__KEYSUITE_CURRENT_SELECTION=payload;
+  window.addEventListener('message',event=>{const msg=event.data||{};if(msg.type==='KEYSUITE_PRODUCT_MODEL'){const data=loadModel(msg.model,msg.options||{});if(data&&['add','assembly','quotation'].includes(msg.action))send(msg.action==='add'?'quotation':msg.action);return}if(msg.type==='KEYSUITE_DASHBOARD_SELECT'){const selected=selectDuty(Number(msg.flowM3h),Number(msg.headM),50);parent?.postMessage({type:'KEYSUITE_DASHBOARD_RESULT',requestId:msg.requestId,family:'KV',suitable:!!selected,data:payload()},'*');return}if(msg.type==='KEYSUITE_REQUEST_SELECTION'){const data=payload();parent?.postMessage(data?{type:'KEYSUITE_ADD_SELECTION',payload:data,route:msg.route||'quotation'}:{type:'KEYSUITE_SELECTION_EMPTY'},'*')}});
+  if(productMode){$('controls').style.display='none';const first=DB.models[0];loadModel(first.model)}
+  parent?.postMessage({type:'KEYSUITE_PRODUCT_FRAME_READY',family:'KV'},'*');
+})();
+</script>
+</body>
+</html>

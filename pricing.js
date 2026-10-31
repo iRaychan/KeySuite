@@ -2,8 +2,8 @@
   'use strict';
 
   let secureData={
-    companies:[],users:[],categories:[],products:[],bfiProducts:[],esProducts:[],gwsProducts:[],keyplcProducts:[],manifoldProducts:[],motorProducts:[],couplingProducts:[],
-    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},chcSealAddons:[],crSealAddons:[],
+    companies:[],users:[],categories:[],products:[],kvProducts:[],bfiProducts:[],esProducts:[],gwsProducts:[],keyplcProducts:[],manifoldProducts:[],motorProducts:[],couplingProducts:[],
+    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},CR:{USD:5.8,RMB:.65,MYR:1},KV:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},chcSealAddons:[],crSealAddons:[],
     fuel_price:2,fuel_base_price:2,fuel_efficiency:6.3,return_journey:true,customerPricing:null,customerPricingRows:[]
   };
   let access=null;
@@ -44,7 +44,7 @@
   }
 
   const familyLabel=family=>family==='CHC_G1'?'CHC G1':family==='CHC_G2'?'CHC G2':String(family||'');
-  const PRODUCT_GROUP_LABELS={BASEPLATE:'Baseplate',BFI:'BFI',BGF:'BGF',CHC_G1:'CHC G1',CHC_G2:'CHC G2',COUPLING:'Coupling',CR:'CR',ES:'ES',GWS:'GWS',ISO:'ISO',KEYPLC:'KeyPLC',MANIFOLD:'Manifold',MOTOR:'Motor'};
+  const PRODUCT_GROUP_LABELS={BASEPLATE:'Baseplate',BFI:'BFI',BGF:'BGF',CHC_G1:'CHC G1',CHC_G2:'CHC G2',COUPLING:'Coupling',CR:'CR',KV:'KV',ES:'ES',GWS:'GWS',ISO:'ISO',KEYPLC:'KeyPLC',MANIFOLD:'Manifold',MOTOR:'Motor'};
   function productGroupRegistry(){
     const groups=new Map();
     document.querySelectorAll('[data-category-product]').forEach(button=>{
@@ -60,7 +60,7 @@
     const groups=productGroupRegistry();
     host.innerHTML=groups.map(group=>`<button type="button" class="pricing-family-tab ${group.code===selectedPricingFamily?'active':''}" data-pricing-family="${e(group.code)}" role="tab">${e(group.label)}</button>`).join('');
   }
-  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','BFI','BGF','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
+  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','KV','BFI','BGF','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
   function multipliers(family='CHC_G2'){
     const raw=normalizedFamily(family),code=raw==='CHC'?'CHC_G2':raw;
     const book=secureData.productMultipliers||{};
@@ -242,6 +242,7 @@
     (secureData.products||[]).forEach(product=>add('CHC_G2',product,bookHasPrice(product.pricesByCurrency)));
     // CR imports use database zero as the workbook's blank/unpriced sentinel.
     (secureData.crProducts||[]).forEach(product=>add('CR',product,positiveBook(product.pricesByCurrency)));
+    (secureData.kvProducts||[]).forEach(product=>add('KV',product,positiveBook(product.pricesByCurrency)));
     (secureData.bfiProducts||[]).forEach(product=>add('BFI',product,positiveBook(product.pricesByCurrency)||positiveBook(product.bfinPricesByCurrency)));
     (secureData.esProducts||[]).forEach(product=>add('ES',product,variantHasPrice(product)));
     (secureData.gwsProducts||[]).forEach(product=>add('GWS',product,bookHasPrice(product.pricesByCurrency)));
@@ -479,6 +480,26 @@
     return {model:shown,description:crDescription(shown,found.product,{...options,bareShaft:bare}),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'CR',assemblyLevel:bare?'PUMPSET_COMPONENT':'COMPLETE_PUMPSET',assemblySection:bare?'pump':'pumpset'};
   }
 
+  function kvMaterialDescription(seal='Carbon V Silicon Carbide (Ca SiC)',elastomer='Viton'){
+    return `Stainless Steel / ${chcSealDescription(seal,elastomer)}`;
+  }
+  function kvDescription(model,product={},options={}){
+    const bare=options.bareShaft===true||options.keysuite_bare_shaft===true,hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),pole=Number(options.pole??product.pole??2)||2,efficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||'IE3')||'IE3',voltage=Number(options.motor_voltage||415)||415,phase=String(options.motor_phase||'3Ph'),frequency=Number(options.frequency_hz||50)||50,connection=String(options.connection||product.connection||'-');
+    return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${kvMaterialDescription(options.seal||options.keysuite_seal,options.elastomer||options.keysuite_elastomer)}`].join('\n');
+  }
+  function findKvPrice(model,options={}){
+    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const catalogue=secureData.kvProducts?.length?secureData.kvProducts:(window.KeySuiteKVPriceData?.models||[]),wanted=String(model||'').trim().toLowerCase(),product=catalogue.find(row=>String(row.model||'').trim().toLowerCase()===wanted);if(!product)return null;
+    const rawCalc=calculatePrice(product.pricesByCurrency||{},'KV',cat,'KV',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
+    const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
+    const calc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!calc)return null;
+    return {product,material:'KV',variant:'KV',rarity:calc.rarity,calc,category:cat,customer,family:'KV',sourceExtra:{technical_model:product.model,price_model:product.model,material_description:kvMaterialDescription(options.seal||options.keysuite_seal,options.elastomer||options.keysuite_elastomer),seal_faces:String(options.seal||options.keysuite_seal||'Carbon V Silicon Carbide (Ca SiC)'),seal_elastomer:String(options.elastomer||options.keysuite_elastomer||'Viton'),default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
+  }
+  function buildKvAssemblyItem(model,options={}){
+    const found=findKvPrice(model,{...options,pricingMode:'assembly'});if(!found)return null;const shown=String(model||found.product.model),bare=!!(options.bareShaft||options.keysuite_bare_shaft);
+    return {model:shown,description:kvDescription(shown,found.product,{...options,bareShaft:bare}),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'KV',assemblyLevel:bare?'PUMPSET_COMPONENT':'COMPLETE_PUMPSET',assemblySection:bare?'pump':'pumpset'};
+  }
+
 
   function normalizeBfiPriceIdentity(model,phase=''){
     const raw=String(model||'').trim(),tail=(raw.match(/[TE]+$/i)||[''])[0],suffix=/E/i.test(tail)?'E':(/T/i.test(tail)?'T':'');
@@ -574,6 +595,7 @@
     const pricingMode=normalizePricingMode(mode),customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
     if(family==='CR'){const material=source.material||source.variant||'CR',base=source.technical_model||String(source.price_model||source.model||'').replace(/^CR[SN]\b/i,'CR'),model=material==='CR'?base:base.replace(/^CR\b/i,material);return findCrPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Car / Sic',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
+    if(family==='KV'){const model=source.technical_model||source.price_model||source.model;return findKvPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
     if(family==='ISO')return window.KeySuiteISO?.findPrice(source.product_id,source.material,{...options,customer,category:cat,pricingMode,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='BGF')return findBgfPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
     if(family==='BFI')return findBfiPrice(source.product_id||source.model,source.motor_phase||source.variant||'3Ph',{...options,customer,category:cat,pricingMode,material:source.pump_material||source.material_variant||source.material,motor_hp:Number(source.motor_hp||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class});
@@ -900,5 +922,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();
