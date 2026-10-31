@@ -1,7 +1,7 @@
 {
-  "version": "5.00.21",
-  "baseline": "5.00.20",
-  "upgrade_supported_from": "5.00.20",
+  "version": "5.00.22",
+  "baseline": "5.00.21",
+  "upgrade_supported_from": "5.00.21",
   "new_database_migration_required": false,
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
@@ -13,12 +13,12 @@
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Selection now includes BGF under B.G.Reich",
-    "KV and BGF use the V4.28.72 standard responsive selector layout",
-    "KV and BGF Product curves use the shared standard curve container",
-    "Leaving or closing a KV/BGF curve clears its frame so it cannot cover CHC, CR, BFI or ISO",
-    "BGF 350M is fixed at 2900 rpm and BGF 350E supports 1800 to 3500 rpm",
-    "BGF 400 and BGF 550 remain Quote-only because verified curve data is unavailable",
+    "KV and BGF selector headers reserve natural-width action columns inside the V4.28.72 standard container",
+    "PDF, Assembly and Quote actions remain visible without Safari-specific zoom or scaling",
+    "KV and BGF selector pages remain width-bounded with no horizontal page overflow",
+    "KV and BGF Flow and Head units are selectable with the same options and normalization as CR",
+    "Existing KV and BGF curves, model data, pricing and quotation handoff are preserved",
+    "KV/BGF curve-frame cleanup remains active when switching Selection routes",
     "Frozen quotation PDF layout is unchanged"
   ]
 }
