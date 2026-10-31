@@ -9,13 +9,15 @@
 - `kv-pricelist-v50017.js`
 - `kv-product-v50017.js`
 - `supabase/migrations/20261031143000_v50017_kv_integration.sql`
+- `supabase/migrations/20261031143001_v50017_kv_category_updated_at_hotfix.sql`
+- `supabase/migrations/20261031143002_v50017_kv_material_oring_pricing.sql`
 - `v50017-version-lock.js`
 - `tests/v50017-kv-regression.cjs`
 - `README_UPGRADE_V50017.md`, `UPGRADE_FILE_MANIFEST_V50017.txt`, `SUPABASE_DEPLOYMENT_V50017.md`
 
 ## Integration updates
 
-- `index.html`, `app.js`, `auth.js`, `pricing.js`, `categories.js`, `v3944-categories.js`, `sw.js`
+- `index.html`, `app.js`, `auth.js`, `pricing.js`, `categories.js`, `v3944-categories.js`, `v40001-multibrand.js`, `v40407-role-authority.js`, `sw.js`
 - `manifest.json`, `RELEASE.json`, `VERSION.txt`
 
 Existing CR assets and frozen quotation PDF assets were not modified.

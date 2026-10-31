@@ -606,6 +606,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     /* V4.14.09 CHC generation Price List */
     .chc-price-controls{display:flex;align-items:end;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+    .kv-selector-toolbar{grid-template-columns:1.4fr .8fr 1fr}
+    .kv-product-toolbar{grid-template-columns:1.1fr 1.4fr .8fr 1fr}
+    .kv-addon-table{max-width:980px}
     .chc-generation-setting{min-width:160px}
     .chc-generation-setting select{font-weight:800}
     .chc-generation-readonly{display:inline-flex;align-items:center;gap:6px;margin:4px 0 0 8px;padding:3px 8px;border-radius:999px;background:#eef3f8;color:#475569;font-size:11px;font-weight:800;vertical-align:middle}
@@ -884,9 +887,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     <section id="selectorKv" class="page">
       <div class="page-title-row"><div><h1>Selector · KV</h1><div class="muted">Enter flow and head to select from the 39 complete KV1 models, review the workbook-derived curves, then continue to Assembly or Quote.</div></div></div>
-      <div class="card selector-toolbar">
-        <div><label>Mechanical Seal</label><select id="kvSealFaces" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
-        <div><label>Elastomer</label><select id="kvSealElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
+      <div class="card selector-toolbar kv-selector-toolbar">
+        <div><label>Material</label><select id="kvSealFaces" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
+        <div><label>O-Ring</label><select id="kvSealElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
@@ -935,10 +938,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     <section id="productKv" class="page">
       <div class="page-title-row"><div><h1>Product · KV</h1><div class="muted">B.G.Reich KV vertical multistage pump range. Only complete KV1 models from the approved workbook are shown.</div></div></div>
-      <div class="card product-toolbar">
+      <div class="card product-toolbar kv-product-toolbar">
         <div><label>Model</label><input id="kvProductModelInput" list="kvProductModelOptions" placeholder="Example: KV 1-20"><datalist id="kvProductModelOptions"></datalist></div>
-        <div><label>Mechanical Seal</label><select id="kvProductSeal" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
-        <div><label>Elastomer</label><select id="kvProductElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
+        <div><label>Material</label><select id="kvProductSeal" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
+        <div><label>O-Ring</label><select id="kvProductElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvProductBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="product-layout">
@@ -1726,6 +1729,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV1 Models</h2><div id="kvPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="kvPriceSearch" placeholder="Example: KV 1-20"></div></div>
         <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Motor</th><th>Price</th><th>Rarity</th><th></th></tr></thead><tbody id="kvPriceRows"></tbody></table></div>
+      </div>
+      <div class="card kv-addon-table" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV Material Add-On</h2><div class="muted">Workbook Material options. Ca SiC is the standard material at RM 0.00.</div></div></div>
+        <div class="table-wrap"><table class="pricelist-table seal-price-table"><thead><tr><th>KV Series</th><th>Ca SiC</th><th>SiC SiC Add-On</th><th>TC TC Add-On</th><th></th></tr></thead><tbody id="kvMaterialAddonRows"></tbody></table></div>
+      </div>
+      <div class="card kv-addon-table" style="margin-top:16px">
+        <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV O-Ring Add-On</h2><div class="muted">Workbook O-ring options. Viton is the standard O-ring at RM 0.00.</div></div></div>
+        <div class="table-wrap"><table class="pricelist-table seal-price-table"><thead><tr><th>KV Series</th><th>Viton</th><th>EPDM Add-On</th><th>NBR Add-On</th><th></th></tr></thead><tbody id="kvOringAddonRows"></tbody></table></div>
       </div>
     </section>
 

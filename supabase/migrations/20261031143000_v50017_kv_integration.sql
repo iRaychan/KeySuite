@@ -131,7 +131,7 @@ begin
     'useFinalDiscount',p_use_final_discount,'useFuelCharge',p_use_fuel_charge);
   update public.ks_pricing_categories set
     category_name=coalesce(nullif(trim(p_category_name),''),category_name),
-    product_rules=coalesce(product_rules,'{}'::jsonb)||jsonb_build_object('KV',rule),updated_at=now()
+    product_rules=coalesce(product_rules,'{}'::jsonb)||jsonb_build_object('KV',rule)
   where id::text=p_category_id returning * into result;
   if result.id is null then raise exception 'Pricing category not found'; end if;
   return result;

@@ -6,6 +6,8 @@
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
   "supabase_migration_version": "20261031063308",
+  "supabase_hotfix_version": "20261031064259",
+  "supabase_kv_addon_migration_version": "20261031075208",
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
@@ -13,6 +15,9 @@
     "KV1 selector and product curves for 39 complete workbook models",
     "Workbook-exact KV shutoff power at Q=0",
     "KV category rules, price list, Assembly and quotation pricing",
+    "KV nested under B.G.Reich in Selection and Product navigation",
+    "CHC-style KV selector display geometry",
+    "Workbook Material and O-Ring add-on pricing for Ca SiC, SiC SiC, TC TC, Viton, EPDM and NBR",
     "Incomplete and unavailable KV models remain hidden",
     "Existing CR behaviour and frozen quotation PDF layout preserved"
   ]

@@ -35,7 +35,15 @@ assert.ok(selection.selected.predHead>=50-.01);
 
 // Integrated application surfaces and migration hooks.
 const index=read('index.html'),app=read('app.js'),categories=read('categories.js'),migration=read('supabase/migrations/20261031143000_v50017_kv_integration.sql');
-for(const id of ['selectorKv','selectorKvFrame','productKv','productKvSelectorFrame','kvPriceList','kvPriceRows'])assert.match(index,new RegExp(`id="${id}"`));
+for(const id of ['selectorKv','selectorKvFrame','productKv','productKvSelectorFrame','kvPriceList','kvPriceRows','kvMaterialAddonRows','kvOringAddonRows'])assert.match(index,new RegExp(`id="${id}"`));
+assert.match(index,/<label>Material<\/label><select id="kvProductSeal"/);
+assert.match(index,/<label>O-Ring<\/label><select id="kvProductElastomer"/);
+const multibrand=read('v40001-multibrand.js');
+assert.match(multibrand,/label:'KV',family:'KV',productGroup:'KV',page:'productKv'/);
+assert.match(multibrand,/f==='KV'\?'selectorKv'/);
+const authority=read('v40407-role-authority.js');
+assert.match(authority,/productKv:'KV'/);
+assert.match(authority,/selectorKv:'KV'/);
 for(const script of ['shared-kv/kv-data.js','kv-price-data-v50017.js','kv-pricelist-v50017.js','kv-product-v50017.js'])assert.ok(index.includes(script));
 assert.match(app,/KeySuiteKVProduct\?\.routeSelection/);
 assert.match(categories,/keysuite_save_kv_category_rule_v50017/);
@@ -44,6 +52,18 @@ assert.match(migration,/ks_products_kv/);
 assert.match(migration,/keysuite_save_kv_product_price_v50017/);
 assert.match(migration,/keysuite_save_category_currency_selection_v41511/);
 assert.match(migration,/'KV'/);
+assert.doesNotMatch(migration,/product_rules=[^\n]+updated_at/);
+const categoryHotfix=read('supabase/migrations/20261031143001_v50017_kv_category_updated_at_hotfix.sql');
+assert.match(categoryHotfix,/Only KV is accepted/);
+assert.doesNotMatch(categoryHotfix,/product_rules=[^\n]+updated_at/);
+const addonMigration=read('supabase/migrations/20261031143002_v50017_kv_material_oring_pricing.sql');
+assert.match(addonMigration,/ks_kv_addon_pricing/);
+assert.match(addonMigration,/keysuite_save_kv_addons_v50017/);
+assert.match(addonMigration,/enable row level security/);
+assert.match(addonMigration,/revoke all on public\.ks_kv_addon_pricing from anon/);
+const kvSelector=read('selector-kv/index.html');
+assert.match(kvSelector,/max-width:1480px/);
+assert.match(kvSelector,/grid-template-columns:minmax\(0,1\.55fr\) minmax\(310px,\.85fr\)/);
 const shellSource=read('sw.js'),shellPaths=[...shellSource.matchAll(/'\.\/([^']+)'/g)].map(match=>match[1]).filter(item=>item!=='v42875-version-lock.js');
 shellPaths.push('v50017-version-lock.js');
 assert.deepEqual([...new Set(shellPaths.filter(file=>!fs.existsSync(path.join(root,file))))],[]);
@@ -55,12 +75,17 @@ const category={id:'kv-category',productRules:{KV:{margin:.2,normal:0,rare:0,tra
 const context={console,setTimeout,clearTimeout,window:{addEventListener(){},KEYSUITE_ACCESS:{role:'owner'},KeySuiteComponents:{apply:calc=>calc},KeySuiteApp:{getCustomers:()=>[customer],getPricingCustomer:()=>customer,getSelectedCustomer:()=>customer}},document:{readyState:'loading',addEventListener(){},getElementById(){return element()},querySelectorAll(){return []}},CustomEvent:function(){}};
 vm.createContext(context);vm.runInContext(read('pricing.js'),context);
 const priceProduct={...JSON.parse(JSON.stringify(global.KeySuiteKVPriceData?.models?.[0]||{})),id:'KV:KV 1-20',model:'KV 1-20',motor_kw:.37,motor_hp:.5,connection:'DN25 (G1¼)',pricesByCurrency:{USD:{KV:0},RMB:{KV:1000},MYR:{KV:0}},rarityByCurrency:{RMB:{KV:'many'}}};
-context.window.KeySuitePricing.init({categories:[category],kvProducts:[priceProduct],motorProducts:[],productMultipliers:{KV:{USD:5.8,RMB:.65,MYR:1}},customerPricingRows:[]},{role:'owner'});
+context.window.KeySuitePricing.init({categories:[category],kvProducts:[priceProduct],kvAddonPricing:{series_code:'KV1',material_sicsic:50,material_tctc:90,oring_epdm:20,oring_nbr:30},motorProducts:[],productMultipliers:{KV:{USD:5.8,RMB:.65,MYR:1}},customerPricingRows:[]},{role:'owner'});
 const priced=context.window.KeySuitePricing.findKvPrice('KV 1-20',{customer,category,motor_hp:.5,motor_kw:.37,pole:2,motor_efficiency_class:'IE3'});
 assert.ok(priced);
 assert.equal(priced.calc.sourceCurrency,'RMB');
 assert.equal(priced.calc.finalPrice,820);
 assert.equal(context.window.KeySuitePricing.quoteBlockReason(priced.calc),'');
+const configured=context.window.KeySuitePricing.findKvPrice('KV 1-20',{customer,category,motor_hp:.5,motor_kw:.37,pole:2,motor_efficiency_class:'IE3',seal:'Silicon Carbide V Silicon Carbide (SiC SiC)',elastomer:'EPDM'});
+assert.equal(configured.calc.baseFinalPrice,820);
+assert.equal(configured.calc.kvMaterialAddon,50);
+assert.equal(configured.calc.kvOringAddon,20);
+assert.equal(configured.calc.finalPrice,890);
 assert.match(context.window.KeySuitePricing.kvDescription('KV 1-20',priceProduct,{motor_hp:.5,connection:priceProduct.connection}),/B\.G\.Reich Vertical Multistage Pump/);
 
 // Frozen CR and quotation-PDF assets are byte-identical to V5.00.16.

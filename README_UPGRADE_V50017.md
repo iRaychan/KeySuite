@@ -2,7 +2,7 @@
 
 This overlay upgrades an existing complete V5.00.16 installation to V5.00.17. Copy the contents over the V5.00.16 website root while preserving the included paths, then refresh the site twice so the `keysuite-v50017-20261031` service-worker cache takes control.
 
-The production KeySuite Supabase project was migrated successfully as version `20261031063308`. No Edge Function changed and no Edge Function deployment is required. For another Supabase environment, apply `supabase/migrations/20261031143000_v50017_kv_integration.sql` before using KV Price List or Category management.
+The production KeySuite Supabase project was migrated successfully as version `20261031063308`, followed by category-save compatibility hotfix `20261031064259` and KV Material/O-Ring pricing migration `20261031075208`. No Edge Function changed and no Edge Function deployment is required. For another Supabase environment, apply all three included V5.00.17 migrations before using KV Price List or Category management.
 
 The website remains a GitHub Pages deployment. Per the deployment request, this package does not push or modify GitHub.
 
