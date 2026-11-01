@@ -16,7 +16,7 @@ const priceKey=cur=>`price_${cur.toLowerCase()}`,rarityKey=cur=>`rarity_${cur.to
 function normalize(row){return {brandName:row.brand_name||row.brandName||FALLBACK.find(p=>p.id===row.id)?.brandName||'',id:row.id,model:row.id==='bgf-500'?'BGF 550':row.model,sourceModel:row.source_model||row.sourceModel||row.model,sourceRow:Number(row.source_row||row.sourceRow||0),motorKw:Number(row.motor_kw??row.motorKw??0),motorHp:Number(row.motor_hp??row.motorHp??0),inlet:row.inlet||'',outlet:row.outlet||'',stages:Number(row.stages||0),type:row.drive_type||row.type||'',price_myr:Number(row.price_myr||0),price_usd:Number(row.price_usd||0),price_rmb:Number(row.price_rmb||0),rarity_myr:String(row.rarity_myr||'common'),rarity_usd:String(row.rarity_usd||'common'),rarity_rmb:String(row.rarity_rmb||'common')}}
 function message(text,type='info'){const box=$('bgfPriceListMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
 // Workbook B10:B13 and B17:B20; B9 groups electric models. HP comes from D4:D7.
-function description(p){return `B.G.Reich Close Coupled Pump Model: ${p.model}\n${p.type==='Engine'?`c/w ${p.motorHp}HP 3600rpm Diesel Engine`:`c/w ${p.motorHp}HP 2Pole Motor`}\nSuction x Discharge: ${p.inlet} x ${p.outlet}\nPump Material: CI / BZ / SS / Mech Seal`;}
+function description(p){return `B.G.Reich Close Coupled Pump Model: ${p.model}\n${p.type==='Engine'?`c/w ${p.motorHp}HP 3600rpm Diesel Engine`:`c/w ${p.motorHp}HP 2Pole Motor (415V / 3Ph / 50Hz)`}\nSuction x Discharge: ${p.inlet} x ${p.outlet}\nPump Material: CI / BZ / SS / Mech Seal`;}
 function quote(p,duty={}){
  const error=$('bgfQuoteMessage');
  const fail=text=>{error.textContent=`${p.model}: ${text}`;error.className='auth-message show error';error.setAttribute('role','alert');error.tabIndex=-1;error.scrollIntoView({block:'nearest'});error.focus({preventScroll:true});};
@@ -29,6 +29,14 @@ function quote(p,duty={}){
  if(!row)throw new Error('The quotation item could not be added.');
  error.textContent='';error.className='auth-message';if(typeof showPage==='function')showPage('quotation');else document.querySelector('[data-page="quotation"]')?.click();
  }catch(e){console.error('BGF quotation lookup failed',e);fail('Pricing lookup / system error. '+(e.message||'Try again or contact the administrator.'));}
+}
+function routeSelection(payload,route='quotation'){
+ const p=rows.find(row=>String(row.model).toUpperCase()===String(payload?.model||payload?.base_model||'').toUpperCase());if(!p)return false;
+ const duty={flow:payload.flow_m3h,head:payload.head_m,rpm:payload.speed_rpm,flowUnit:payload.flow_unit||'m3h',headUnit:payload.head_unit||'m'};
+ if(route!=='assembly')return quote(p,duty);
+ const found=window.KeySuitePricing?.findBgfPrice?.(p.id),problem=window.KeySuitePricing?.bgfPriceProblem?.(p.id,found);
+ if(problem){void window.KeySuiteManualPrice.offer({model:p.model,description:description(p),productFamily:'BGF',pumpData:payload,pricingSource:{product_family:'BGF',product_id:p.id}},problem);return false}
+ window.KeySuiteAssembly?.addItem?.({model:p.model,description:description(p),qty:1,unitPrice:Number(found.calc.finalPrice||0),pricingSource:window.KeySuitePricing.sourceSnapshot(found),productFamily:'BGF',pumpData:payload,assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset'});return true;
 }
 function renderProduct(){
  const body=$('bgfProductRows');if(!body)return;body.innerHTML='';
@@ -49,5 +57,5 @@ async function save(product,tr,cur){
  finally{button.disabled=false;button.textContent='Save'}
 }
 function init(data,nextAccess){access=nextAccess||{};const loaded=(data?.bgfProducts||[]).map(normalize),byId=new Map(loaded.map(row=>[row.id,row]));rows=FALLBACK.map(base=>normalize({...base,...(byId.get(base.id)||{})}));$('bgfPriceCurrency')?.addEventListener('change',render);render();if(!loaded.length)message(`BGF database rows are not installed. Apply the V5.00.06 migration. Prices in ${SOURCE} are blank and remain unpriced.`,'info');else message(`Verified against ${SOURCE}. Blank source prices remain 0 and are not quotable.`,'info')}
-window.KeySuiteBGF={version:'5.00.21',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row})),quoteModel:(model,duty={})=>{const row=rows.find(p=>String(p.model).toUpperCase()===String(model||'').toUpperCase());return row?quote(row,duty):false}};
+window.KeySuiteBGF={version:'5.00.26',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row})),routeSelection,quoteModel:(model,duty={})=>{const row=rows.find(p=>String(p.model).toUpperCase()===String(model||'').toUpperCase());return row?quote(row,duty):false}};
 })();

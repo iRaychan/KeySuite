@@ -480,8 +480,9 @@
     return {model:shown,description:crDescription(shown,found.product,{...options,bareShaft:bare}),qty:1,unitPrice:found.calc.finalPrice,pricingSource:sourceSnapshot(found),productFamily:'CR',assemblyLevel:bare?'PUMPSET_COMPONENT':'COMPLETE_PUMPSET',assemblySection:bare?'pump':'pumpset'};
   }
 
-  function kvMaterialDescription(seal='Carbon V Silicon Carbide (Ca SiC)',elastomer='Viton'){
-    return `Stainless Steel / ${chcSealDescription(seal,elastomer)}`;
+  function kvMaterialDescription(material='KV'){
+    const code=String(material||'KV').trim().toUpperCase();
+    return (window.KeySuiteKVV50026?.materials||{})[code]||window.KeySuiteKVV50026?.materials?.KV||'Stainless Steel 304 / Mechanical Seal';
   }
   function kvAddonPrice(seal='Carbon V Silicon Carbide (Ca SiC)',elastomer='Viton'){
     const row=secureData.kvAddonPricing||{},faces=normalizeChcSealFaces(seal),ring=String(elastomer||'Viton').trim().toUpperCase();
@@ -491,7 +492,7 @@
   }
   function kvDescription(model,product={},options={}){
     const bare=options.bareShaft===true||options.keysuite_bare_shaft===true,hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),pole=Number(options.pole??product.pole??2)||2,efficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||'IE3')||'IE3',voltage=Number(options.motor_voltage||415)||415,phase=String(options.motor_phase||'3Ph'),frequency=Number(options.frequency_hz||50)||50,connection=String(options.connection||product.connection||'-');
-    return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${kvMaterialDescription(options.seal||options.keysuite_seal,options.elastomer||options.keysuite_elastomer)}`].join('\n');
+    return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${kvMaterialDescription(options.material||options.keysuite_material||'KV')}`].join('\n');
   }
   function findKvPrice(model,options={}){
     const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
@@ -500,7 +501,8 @@
     const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
     const seal=options.seal||options.keysuite_seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer=options.elastomer||options.keysuite_elastomer||'Viton',addons=motorCalc.fixedPrice?{materialAddon:0,oringAddon:0,total:0}:kvAddonPrice(seal,elastomer),calc={...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),kvMaterialAddon:addons.materialAddon,kvOringAddon:addons.oringAddon,finalPrice:Number(motorCalc.finalPrice||0)+addons.total};
-    return {product,material:'KV',variant:'KV',rarity:calc.rarity,calc,category:cat,customer,family:'KV',sourceExtra:{technical_model:product.model,price_model:product.model,material_description:kvMaterialDescription(seal,elastomer),seal_faces:String(seal),seal_elastomer:String(elastomer),kv_material_addon_myr:addons.materialAddon,kv_oring_addon_myr:addons.oringAddon,base_final_price:calc.baseFinalPrice,default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
+    const material=String(options.material||options.keysuite_material||'KV').toUpperCase();
+    return {product,material,variant:material,rarity:calc.rarity,calc,category:cat,customer,family:'KV',sourceExtra:{technical_model:product.model,price_model:product.model,material_description:kvMaterialDescription(material),seal_faces:String(seal),seal_elastomer:String(elastomer),kv_material_addon_myr:addons.materialAddon,kv_oring_addon_myr:addons.oringAddon,base_final_price:calc.baseFinalPrice,default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:hp,motor_kw:kw,motor_pole:pole,bare_shaft:!!(options.bareShaft||options.keysuite_bare_shaft),package_price_includes_motor:true,...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}:{})}};
   }
   function buildKvAssemblyItem(model,options={}){
     const found=findKvPrice(model,{...options,pricingMode:'assembly'});if(!found)return null;const shown=String(model||found.product.model),bare=!!(options.bareShaft||options.keysuite_bare_shaft);

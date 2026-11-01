@@ -1621,6 +1621,7 @@ window.addEventListener('message',function(event){
  const fromBfi=event.source===$('selectorBfiFrame')?.contentWindow||event.source===$('productBfiSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BFI';
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';
  const fromKv=event.source===$('selectorKvFrame')?.contentWindow||event.source===$('productKvSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='KV';
+ const fromBgf=event.source===$('selectorBgfFrame')?.contentWindow||event.source===$('productBgfSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BGF';
  if(event.data.type==='KEYSUITE_SELECTOR_HEIGHT'&&(fromEs||fromBfi)){const frame=$(fromBfi?'selectorBfiFrame':'selectorEsFrame'),height=Math.max(1200,Math.min(6000,Number(event.data.height)||(fromBfi?1900:2600)));if(frame)frame.style.height=`${Math.ceil(height+8)}px`;return}
  if(event.data.type==='KEYSUITE_SELECTION_CHANGED'){
    if(!fromEs&&!fromBfi)updateConnectionAvailabilityFromSelection(event.data.payload||{});
@@ -1631,6 +1632,7 @@ window.addEventListener('message',function(event){
  const rawPayload=event.data.payload||{};
  const p={...rawPayload};
  const route=event.data.route||pendingSelectionRoute||'quotation';pendingSelectionRoute='quotation';
+ if(fromBgf||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BGF'){window.KeySuiteBGF?.routeSelection?.(p,route);return}
  if(fromKv||String(p.family||p.product||p.productFamily||'').toUpperCase()==='KV'){window.KeySuiteKVProduct?.routeSelection?.(p,route);return}
  if(fromCr||String(p.family||p.product||p.productFamily||'').toUpperCase()==='CR'){window.KeySuiteCRProduct?.routeSelection?.(p,route);return}
  if(fromBfi||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BFI'){window.KeySuiteBFI?.routeSelection?.(p,route);return}

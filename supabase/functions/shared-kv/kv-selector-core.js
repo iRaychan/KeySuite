@@ -1,8 +1,8 @@
-/* KeySuite V5.00.25 — KV selector core. Mirrors the CR hydraulic method and
+/* KeySuite V5.00.26 — KV selector core. Mirrors the CR hydraulic method and
    preserves workbook shut-off power at Q=0. */
 (function (g) {
   'use strict';
-  const VERSION = '5.00.25';
+  const VERSION = '5.00.26';
 
   function solve(A, b) {
     A = A.map(row => row.slice());
@@ -105,8 +105,8 @@
     if (!curve) return null;
     const ratio = Number(hz) / Number(db.base_hz || 50);
     const headFit = makeFit(mixedPoints(curve, model, 'head_per_stage', 'head_per_stage_2', 'head_per_stage_3', ratio, ratio * ratio), 2, true);
-    const effFit = makeFit(mixedPoints(curve, model, 'efficiency', 'efficiency_2', 'efficiency_3', ratio, 1, true), 5);
-    const npshFit = makeFit(cleanPoints(curve.flow, curve.npshr, ratio, ratio * ratio), 3);
+    const effFit = makeFit(mixedPoints(curve, model, 'efficiency', 'efficiency_2', 'efficiency_3', ratio, 1, true), 5, true);
+    const npshFit = makeFit(cleanPoints(curve.flow, curve.npshr, ratio, ratio * ratio), 3, true);
     if (!headFit || !effFit || !npshFit || q < headFit.min || q > headFit.max) return null;
     const predHead = fitValue(headFit, q);
     if (!Number.isFinite(predHead) || predHead <= 0) return null;
@@ -120,7 +120,7 @@
       const eff = Math.max(1, Math.min(100, fitValue(effFit, point.x)));
       return { x: point.x, y: 9.81 * point.x * point.y / 3600 / (eff / 100) };
     });
-    const powerFit = makeFit(powerPoints, 3);
+    const powerFit = makeFit(powerPoints, 3, true);
     const shaft = Math.max(0, fitValue(powerFit, q));
     return {
       ...model,
