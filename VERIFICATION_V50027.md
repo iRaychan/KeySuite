@@ -10,4 +10,6 @@
 - ES MASTER SHA-256: `93230b96c5ba91b6bbb920d6851281183b6ad9dfd4c925206379eb7974284dbf` (unchanged).
 - BSW NPSH: no workbook NPSH is exposed; on-screen NPSH card is removed and PDF chart array contains only Head, Efficiency, and Power.
 - Supabase migration: passed on connected `KeySuite` project; both V5.00.27 migrations are recorded and `ks_products_bsw` contains 178 rows across 12 families (50–600), with RLS enabled.
-- Browser automation could not open a local `file:` URL due to the browser security policy; static, syntax, data, and hydraulic checks were used instead.
+- Startup regression: passed in a real browser using `tests/v50027/version-lock-startup-regression.html`; the timer completed and the version labels remained stable after the MutationObserver was installed.
+- Live deployment comparison: the deployed `index.html`, `auth.js`, `app.js`, `pricing.js`, and BSW script matched the original V5.00.27 build byte-for-byte. The protected startup query itself was unchanged from V5.00.26 except for local BSW rule normalization; it does not query `ks_products_bsw`.
+- The full build and the focused startup regression page were served locally over HTTP. The focused browser test passed; static, syntax, data, hydraulic, live-deployment, and Supabase log checks also passed.

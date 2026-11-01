@@ -2,6 +2,8 @@
 
 Upgrade path: **V5.00.26 → V5.00.27**
 
+Startup hotfix: the V5.00.27 version-lock observer now performs idempotent DOM writes. This removes the MutationObserver microtask loop that could freeze authenticated startup at “Loading protected company and pricing data…”. No BUG 001–010 or BSW behavior was removed.
+
 Engineering masters:
 
 - BGF: `004 - BGF 261030 - V1.0.xlsx`

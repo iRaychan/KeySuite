@@ -23,6 +23,8 @@ v40001-multibrand.js
 v40407-role-authority.js
 v42872-selector-first-open.js
 v50027-version-lock.js
+tests/v50027/version-lock-startup-regression.html
+STARTUP_HOTFIX_V50027.md
 README_FULL_BUILD_V50027.md
 VERIFICATION_V50027.md
 UPGRADE_FILE_MANIFEST_V50027.txt
