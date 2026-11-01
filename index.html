@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.22</title>
-  <script>window.KEYSUITE_VERSION='5.00.22';window.KEYSUITE_BUILD='V5.00.22';</script>
+  <title>KeySuite V5.00.23</title>
+  <script>window.KEYSUITE_VERSION='5.00.23';window.KEYSUITE_BUILD='V5.00.23';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -646,7 +646,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.22</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.23</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -662,7 +662,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.22</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.23</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -688,7 +688,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.22</div>
+    <div class="suite-version">KeySuite V5.00.23</div>
   </aside>
 
   <main>
@@ -887,13 +887,15 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     <section id="selectorKv" class="page">
       <div class="page-title-row"><div><h1>Selector · KV</h1><div class="muted">Enter flow and head to select from the 39 complete KV1 models, review the workbook-derived curves, then continue to Assembly or Quote.</div></div></div>
-      <div class="card selector-toolbar kv-selector-toolbar">
-        <div><label>Material</label><select id="kvSealFaces" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
-        <div><label>O-Ring</label><select id="kvSealElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
+      <div class="card selector-toolbar">
+        <div><label>Material</label><select id="kvPumpMaterial" data-default-value="KV"><option value="KV" selected>KV</option></select></div>
+        <div><label>Mechanical Seal</label><select id="kvSealFaces" data-default-value="Car / Sic"><option value="Car / Sic" selected>Carbon V Silicon Carbide (Ca SiC)</option><option value="Sic / Sic">Silicon Carbide V Silicon Carbide (SiC SiC)</option><option value="TC / TC">Tungsten V Tungsten (TC TC)</option></select></div>
+        <div><label>Elastomer</label><select id="kvSealElastomer" data-default-value="Viton"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
+        <div><label>Connection</label><select id="kvConnectionType" data-default-value="round"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50022&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50022&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50023&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50023&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 
@@ -955,7 +957,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><h2>KV Series</h2><div class="product-series-list"><button class="active" type="button">KV1</button></div></div>
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV1 Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
       </div>
-      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50022" title="KV Product Curve" style="display:none"></iframe>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50023" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -2337,7 +2339,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50004"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50022-version-lock.js?v=50022"></script>
+<script src="v50023-version-lock.js?v=50023"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

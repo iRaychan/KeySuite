@@ -1,7 +1,7 @@
 {
-  "version": "5.00.22",
-  "baseline": "5.00.21",
-  "upgrade_supported_from": "5.00.21",
+  "version": "5.00.23",
+  "baseline": "5.00.22",
+  "upgrade_supported_from": "5.00.22",
   "new_database_migration_required": false,
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
@@ -13,12 +13,12 @@
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "KV and BGF selector headers reserve natural-width action columns inside the V4.28.72 standard container",
-    "PDF, Assembly and Quote actions remain visible without Safari-specific zoom or scaling",
-    "KV and BGF selector pages remain width-bounded with no horizontal page overflow",
-    "KV and BGF Flow and Head units are selectable with the same options and normalization as CR",
-    "Existing KV and BGF curves, model data, pricing and quotation handoff are preserved",
-    "KV/BGF curve-frame cleanup remains active when switching Selection routes",
+    "KV Selection now follows the established CR visual system from the suite toolbar through the selector results",
+    "KV top controls now use Material, Mechanical Seal, Elastomer, Connection and Supply in the same order as CR",
+    "KV Required Duty keeps Flow and Head unit selection in the CR left-panel geometry",
+    "KV result curves use the CR two-column hierarchy, smooth polynomial paths and whole-number axis labels",
+    "KV PDF, Assembly and Quote button colors and dimensions now match CR",
+    "Existing KV model data, selection logic, pricing and quotation handoff are preserved",
     "Frozen quotation PDF layout is unchanged"
   ]
 }
