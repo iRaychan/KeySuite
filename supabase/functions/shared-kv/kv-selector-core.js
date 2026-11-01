@@ -1,8 +1,8 @@
-/* KeySuite V5.00.18 — KV selector core. Mirrors the CR hydraulic method and
+/* KeySuite V5.00.25 — KV selector core. Mirrors the CR hydraulic method and
    preserves workbook shut-off power at Q=0. */
 (function (g) {
   'use strict';
-  const VERSION = '5.00.18';
+  const VERSION = '5.00.25';
 
   function solve(A, b) {
     A = A.map(row => row.slice());
@@ -50,7 +50,7 @@
     return points.sort((a, b) => a.x - b.x);
   }
 
-  function makeFit(points, order) {
+  function makeFit(points, order, polynomialOnly = false) {
     if (!points || points.length < 2) return null;
     const degree = Math.min(order, points.length - 1);
     return {
@@ -59,13 +59,16 @@
       order: degree,
       min: points[0].x,
       max: points[points.length - 1].x,
+      polynomialOnly,
     };
   }
 
   function fitValue(fit, x) {
     if (!fit || !Number.isFinite(Number(x))) return NaN;
-    const exact = fit.pts?.find(point => Math.abs(point.x - Number(x)) < 1e-9);
-    if (exact) return exact.y;
+    if (!fit.polynomialOnly) {
+      const exact = fit.pts?.find(point => Math.abs(point.x - Number(x)) < 1e-9);
+      if (exact) return exact.y;
+    }
     return (fit.c || []).reduce((sum, coefficient, index) => sum + coefficient * Number(x) ** index, 0);
   }
 
@@ -101,7 +104,7 @@
     const curve = db?.curves?.[model.series];
     if (!curve) return null;
     const ratio = Number(hz) / Number(db.base_hz || 50);
-    const headFit = makeFit(mixedPoints(curve, model, 'head_per_stage', 'head_per_stage_2', 'head_per_stage_3', ratio, ratio * ratio), 2);
+    const headFit = makeFit(mixedPoints(curve, model, 'head_per_stage', 'head_per_stage_2', 'head_per_stage_3', ratio, ratio * ratio), 2, true);
     const effFit = makeFit(mixedPoints(curve, model, 'efficiency', 'efficiency_2', 'efficiency_3', ratio, 1, true), 5);
     const npshFit = makeFit(cleanPoints(curve.flow, curve.npshr, ratio, ratio * ratio), 3);
     if (!headFit || !effFit || !npshFit || q < headFit.min || q > headFit.max) return null;

@@ -1,7 +1,7 @@
 {
-  "version": "5.00.24",
-  "baseline": "5.00.23",
-  "upgrade_supported_from": "5.00.23",
+  "version": "5.00.25",
+  "baseline": "5.00.24",
+  "upgrade_supported_from": "5.00.24",
   "new_database_migration_required": false,
   "supabase_migration_deployed": true,
   "supabase_project_ref": "skidqdixnnnuhvarekxp",
@@ -13,10 +13,11 @@
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "KV Selection is now derived from the CR MASTER selector architecture with full UI, control, chart, responsive and workflow parity",
-    "KV retains its own canonical model, curve, power, efficiency, NPSHr, motor, dimension and pricing data",
-    "KV power curves preserve workbook kW at zero flow where available",
-    "Only the 39 complete KV 1 models are exposed; incomplete later KV families remain hidden",
+    "KV Selection now participates in the V4.28.72 standard responsive iframe lifecycle used by CR",
+    "KV retains CR MASTER UI and function parity while preserving KV engineering data and logic",
+    "KV Head rendering always evaluates the fitted second-order polynomial; Power, Efficiency and NPSHr exact-source behavior remains unchanged",
+    "Product > B.G.Reich > KV now clears the shared loading state after the selected model acknowledges and renders",
+    "Only the 39 complete KV 1 models remain exposed; incomplete later KV families remain hidden",
     "CR MASTER and ES MASTER files are unchanged",
     "Frozen quotation PDF layout remains unchanged"
   ]

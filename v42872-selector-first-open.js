@@ -1,4 +1,4 @@
-/* KeySuite V4.28.72 — platform-safe CHC/CR selector first-visible sizing. */
+/* KeySuite V4.28.72 — platform-safe standard selector first-visible sizing. */
 (()=>{
   'use strict';
   if(window.__KEYSUITE_V42872_SELECTOR_FIRST_OPEN__)return;
@@ -8,9 +8,10 @@
   const isMacSafari=/Macintosh/i.test(ua)&&/Safari\//i.test(ua)&&!/(?:Chrome|Chromium|CriOS|Edg|OPR)/i.test(ua);
   const targets={
     selector:{frameId:'selectorFrame',readyEvent:'KEYSUITE_CHC_VIEWPORT_READY'},
-    selectorCr:{frameId:'selectorCrFrame',readyEvent:'KEYSUITE_CR_VIEWPORT_READY'}
+    selectorCr:{frameId:'selectorCrFrame',readyEvent:'KEYSUITE_CR_VIEWPORT_READY',frameKey:'CR'},
+    selectorKv:{frameId:'selectorKvFrame',readyEvent:'KEYSUITE_KV_VIEWPORT_READY',frameKey:'KV'}
   };
-  const sequences={selector:0,selectorCr:0};
+  const sequences={selector:0,selectorCr:0,selectorKv:0};
   const section=page=>document.getElementById(page);
   const frame=page=>document.getElementById(targets[page]?.frameId||'');
   const isActive=page=>section(page)?.classList.contains('active');
@@ -92,14 +93,14 @@
     if(!isMacSafari||!target||!host)return false;
     const width=Math.floor(host.getBoundingClientRect().width||section(page)?.getBoundingClientRect().width||0);
     if(width<320)return false;
-    const next=page==='selector'?generation(target.dataset.ksPendingGeneration||(/selector-g1/i.test(target.getAttribute('src')||'')?'G1':'G2')):'CR';
-    const key=page==='selector'?next:'CR';
+    const next=page==='selector'?generation(target.dataset.ksPendingGeneration||(/selector-g1/i.test(target.getAttribute('src')||'')?'G1':'G2')):(targets[page]?.frameKey||'CR');
+    const key=next;
     if(target.dataset.ksMacSafariVisibleKey===key)return false;
     target.dataset.ksMacSafariVisibleKey=key;
     keepMacFrameLayoutActive(target,{conceal:target.dataset.ksSelectorViewportReady!=='1'||!!target.dataset.ksPendingGeneration});
     target.style.width=width+'px';
     void target.offsetWidth;
-    const raw=page==='selector'?wantedChcUrl(target,next):(target.getAttribute('src')||target.dataset.src||'selector-cr/index.html?v=42872');
+    const raw=page==='selector'?wantedChcUrl(target,next):(target.getAttribute('src')||target.dataset.src||'');
     const wanted=macVisibleUrl(raw,key);
     if(String(target.getAttribute('src')||'')!==wanted){target.dataset.ksMacSafariReloading='1';target.setAttribute('src',wanted)}
     return true;
