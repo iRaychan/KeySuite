@@ -1063,13 +1063,13 @@ function exportPDF(requestedFilename){
  const motorVoltageValue=Number(motorVoltage.value);
  const motorData=findMotorData(best.motor_hp,motorEffClass,motorPhaseCode,motorVoltageValue,enhanced?50:hz);
  const motorPhaseText=motorPhaseCode==="1Ph"?"1 Phase":"3 Phase";
- const dimensionData=keykvDimensionData(best);
+ const dimensionData={weight:best.weight_kg??best.dimensions?.Weight,pumpL:best.dimensions?.L,pumpW:null,height:best.dimensions?.H1};
  const pumpEnvelope=(Number(dimensionData.d1)||0)/2+(Number(dimensionData.d2)||0);
  const pumpsetLength=Math.max(pumpEnvelope,Number(dimensionData.pumpL)||0);
  const pumpsetWidth=Math.max(pumpEnvelope,Number(dimensionData.pumpW)||0);
  const dimensionImage=best.dimension_drawing||window.KeySuiteBSWData?.dimension_drawing||keykvG1DimensionImage(best.series);
- const excelTechnicalRows=Array.isArray(window.KeySuiteBSWData?.technical)?window.KeySuiteBSWData.technical:[];
- const excelDimensionRows=Object.entries(best.dimensions||{}).filter(([,v])=>v!==null&&v!==undefined&&v!=='');
+ const excelTechnicalRows=[];
+ const excelDimensionRows=Object.entries(best.dimensions||{}).filter(([key,v])=>key!=='Weight'&&v!==null&&v!==undefined&&v!=='');
  const dimValue=v=>(v===null||v===undefined||v==="")?"-":`${formatPdfNumber(Number(v),0)} mm`;
 
  const pdfFollow=(document.getElementById('pdfFollowScreen')||{}).checked!==false;
@@ -1208,34 +1208,38 @@ function exportPDF(requestedFilename){
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pump</td></tr>
-   <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
-   <tr class="table-block"><td>Type</td><td>Close Coupled Pump</td><td>Country of Manufacture</td><td>China</td></tr>
-   <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>${best.connection}</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Type</td><td>Submersible</td><td>Country of Manufacture</td><td>China</td></tr>
+    <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>-</td></tr>
    <tr class="table-block"><td>Pump Speed</td><td>${enhanced?'Max 3500 rpm':`${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm`}</td><td>Discharge Size</td><td>${best.connection}</td></tr>
    <tr class="table-block"><td class="material-heading no-bottom">Material: -</td><td class="no-bottom"></td><td>Efficiency</td><td>${formatPdfNumber(requiredEff,1)} %</td></tr>
    <tr class="table-block"><td class="material-label indent">Casing</td><td class="material-value">${keysuiteKvMaterialDisplay().casing}</td><td>Brake HP</td><td>${formatPdfNumber(requiredPower/0.746,1)} HP</td></tr>
-   <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>No. of Stage</td><td>${best.stages} Stages</td></tr>
-   <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">${keysuiteKvMaterialDisplay().shaft}</td><td>NPSHr</td><td>${formatPdfNumber(requiredNpsh,1)} Mtr</td></tr>
-   <tr class="table-block"><td>Shaft Seal</td><td>${keysuiteKvSealDisplay()}</td><td>Max Casing Pressure</td><td>${formatPdfNumber(best.max_pressure_bar,1)} Bar</td></tr>
-   <tr class="table-block table-end"><td>Bearing Type</td><td>Bush</td><td></td><td></td></tr>
+    <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>Impeller Type</td><td>Closed</td></tr>
+    <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">${keysuiteKvMaterialDisplay().shaft}</td><td>Impeller Diameter</td><td>-</td></tr>
+    <tr class="table-block"><td>Shaft Seal</td><td>${keysuiteKvSealDisplay()}</td><td>Max Solid Passage</td><td>-</td></tr>
+    <tr class="table-block table-end"><td>Bearing Type</td><td>Ball</td><td></td><td></td></tr>
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    ${engineDrive?`<tr class="section table-block table-start"><td colspan="4">Engine</td></tr>
    <tr class="table-block"><td>Drive Type</td><td>Diesel Engine</td><td>Model</td><td>BGF 350E</td></tr>
    <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td>Operating Speed</td><td>${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm</td></tr>
    <tr class="table-block table-end"><td>Electrical Supply</td><td>Not applicable</td><td></td><td></td></tr>`:`<tr class="section table-block table-start"><td colspan="4">Motor</td></tr>
-   <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
    <tr class="table-block"><td>Type</td><td>TEFC</td><td>Country of Manufacture</td><td>China</td></tr>
-   <tr class="table-block"><td>Model</td><td>${motorData.available?motorData.model:"Data Not Available"}</td><td>Efficiency</td><td>${motorEffClass}</td></tr>
-   <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td>Motor Speed</td><td>${motorData.available&&motorData.rpm!==null?`${motorData.rpm} rpm`:"-"}</td></tr>
-   <tr class="table-block"><td>Rated Voltage</td><td>415 Volt</td><td>Phase / Frequency</td><td>3 Phase / 50 Hz</td></tr>
-   <tr class="table-block table-end"><td>Protection</td><td>IP 55</td><td>Insulation Class</td><td>Class F</td></tr>`}
+    <tr class="table-block"><td>Model</td><td>${motorData.available?motorData.model:"Data Not Available"}</td><td class="no-bottom field-heading">Efficiency:</td><td class="no-bottom">${motorEffClass}</td></tr>
+    <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">${motorData.available?motorValue(motorData.eff100," %"):"-"}</td></tr>
+    <tr class="table-block"><td>Motor Speed</td><td>${motorData.available&&motorData.rpm!==null?`${motorData.rpm} rpm`:"-"}</td><td class="no-top indent">75%</td><td class="no-top">${motorData.available?motorValue(motorData.eff75," %"):"-"}</td></tr>
+    <tr class="table-block"><td>Rated FL Amp</td><td>${motorData.available?motorValue(motorData.amp," Amp"):"-"}</td><td class="no-bottom field-heading">Power Factor:-</td><td class="no-bottom"></td></tr>
+    <tr class="table-block"><td>Frequency</td><td>50 Hz</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">${motorData.available?motorValue(motorData.pf100):"-"}</td></tr>
+    <tr class="table-block"><td>Rated Voltage</td><td>415 Volt</td><td class="no-top indent">75%</td><td class="no-top">${motorData.available?motorValue(motorData.pf75):"-"}</td></tr>
+    <tr class="table-block"><td>Phase</td><td>3 Phase</td><td>Protection</td><td>IP 68</td></tr>
+    <tr class="table-block table-end"><td>Insulation Class</td><td>Class E</td><td></td><td></td></tr>`}
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pumpset</td></tr>
    <tr class="table-block"><td class="pumpset-open field-heading">Dimension: -</td><td class="pumpset-open dimension-divider"></td><td>Weight</td><td>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kG`}</td></tr>
-   <tr class="table-block"><td class="sub-label pumpset-open-next">Length</td><td class="pumpset-open-next">${formatPdfNumber(pumpsetLength,0)} mm</td><td></td><td></td></tr>
-   <tr class="table-block"><td class="sub-label pumpset-open-next">Width</td><td class="pumpset-open-next">${formatPdfNumber(pumpsetWidth,0)} mm</td><td></td><td></td></tr>
+    <tr class="table-block"><td class="sub-label pumpset-open-next">Length</td><td class="pumpset-open-next">${pumpsetLength?`${formatPdfNumber(pumpsetLength,0)} mm`:"-"}</td><td></td><td></td></tr>
+    <tr class="table-block"><td class="sub-label pumpset-open-next">Width</td><td class="pumpset-open-next">${pumpsetWidth?`${formatPdfNumber(pumpsetWidth,0)} mm`:"-"}</td><td></td><td></td></tr>
    <tr class="table-block table-end"><td class="sub-label pumpset-open-last">Height</td><td class="pumpset-open-last">${dimValue(dimensionData.height)}</td><td></td><td></td></tr>
   </table>
   <div class="tds-footer"><span class="approx">* Approximate dimension &amp; weight</span><span class="notice">B.G.Reich reserves the right to make modifications without notice.</span></div>
@@ -1267,7 +1271,6 @@ __keysuiteLockPdfTitle();
 window.addEventListener('beforeprint',__keysuiteLockPdfTitle);
 window.onload=async()=>{
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  if(__KEYSUITE_EXCEL_TECHNICAL__.length){const table=document.querySelector('.tds-table');if(table)table.innerHTML='<colgroup><col class="label"><col class="value"><col class="label"><col class="value"></colgroup><tr class="section table-block table-start"><td colspan="4">BSW Technical Data · Excel Master</td></tr>'+__KEYSUITE_EXCEL_TECHNICAL__.map((r,i,a)=>'<tr class="table-block '+(i===a.length-1?'table-end':'')+'"><td>'+esc(r[0])+'</td><td colspan="3">'+esc(r[1])+'</td></tr>').join('')}
   if(__KEYSUITE_EXCEL_DIMENSIONS__.length){const grid=document.querySelector('.dimension-grid');if(grid)grid.innerHTML=__KEYSUITE_EXCEL_DIMENSIONS__.map(r=>'<div>'+esc(r[0])+'</div><div>'+esc(r[1])+(typeof r[1]==='number'?' mm':'')+'</div>').join('')}
   const images=[...document.images];
   await Promise.all(images.map(img=>img.complete&&img.naturalWidth>0 ? Promise.resolve() : (typeof img.decode==='function'?img.decode().catch(()=>undefined):new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;}))));
@@ -1839,5 +1842,5 @@ alternatives.innerHTML='';
 
 
 
-<style>#enhancedToggleLabel{display:none!important}</style><script src="../bsw-selector-v50027.js?v=50027-startup2"></script>
+<style>#enhancedToggleLabel{display:none!important}</style><script src="../bsw-selector-v50027.js?v=50028"></script>
 </body></html>

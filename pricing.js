@@ -3,7 +3,7 @@
 
   let secureData={
     companies:[],users:[],categories:[],products:[],kvProducts:[],kvAddonPricing:{series_code:'KV1',material_sicsic:0,material_tctc:0,oring_epdm:0,oring_nbr:0},bfiProducts:[],esProducts:[],gwsProducts:[],keyplcProducts:[],manifoldProducts:[],motorProducts:[],couplingProducts:[],
-    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},CR:{USD:5.8,RMB:.65,MYR:1},KV:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},chcSealAddons:[],crSealAddons:[],
+    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},CR:{USD:5.8,RMB:.65,MYR:1},KV:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},BGF:{USD:5.8,RMB:.65,MYR:1},BSW:{USD:5.8,RMB:.65,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},chcSealAddons:[],crSealAddons:[],
     fuel_price:2,fuel_base_price:2,fuel_efficiency:6.3,return_journey:true,customerPricing:null,customerPricingRows:[]
   };
   let access=null;

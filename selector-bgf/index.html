@@ -1063,13 +1063,15 @@ function exportPDF(requestedFilename){
  const motorVoltageValue=Number(motorVoltage.value);
  const motorData=findMotorData(best.motor_hp,motorEffClass,motorPhaseCode,motorVoltageValue,enhanced?50:hz);
  const motorPhaseText=motorPhaseCode==="1Ph"?"1 Phase":"3 Phase";
- const dimensionData=keykvDimensionData(best);
+ const dimensionData=Object.keys(keykvDimensionData(best)).length?keykvDimensionData(best):(/350E$/i.test(String(best.model||''))?{weight:53,pumpL:600,pumpW:420,height:500}:{weight:34.5,pumpL:412,pumpW:217,height:280});
  const pumpEnvelope=(Number(dimensionData.d1)||0)/2+(Number(dimensionData.d2)||0);
  const pumpsetLength=Math.max(pumpEnvelope,Number(dimensionData.pumpL)||0);
  const pumpsetWidth=Math.max(pumpEnvelope,Number(dimensionData.pumpW)||0);
  const dimensionImage=best.dimension_drawing||keykvG1DimensionImage(best.series);
- const excelTechnicalRows=Array.isArray(best.technical)?best.technical:[];
- const excelDimensionRows=Array.isArray(best.dimension_rows)?best.dimension_rows:[];
+ const excelTechnicalRows=[];
+ const excelDimensionRows=[];
+ const bgfTechnical=Array.isArray(best.technical)?best.technical:[],bgfGet=(label,fallback='-')=>{const row=bgfTechnical.find(entry=>String(entry?.[0]||'').toLowerCase()===String(label).toLowerCase());return row&&row[1]!==null&&row[1]!==undefined&&row[1]!==''?row[1]:fallback};
+ const bgfDimensionMap=Object.fromEntries(Array.isArray(best.dimension_rows)?best.dimension_rows:[]),bgfDimensionLabels=/350E$/i.test(String(best.model||''))?[['L1','L2','W1','W2'],['H1','H2','Weight']]:[['L','L1','L2','L3','W','W1','W2','H','H1','H2'],['H3','m','n','d','e','ØS','DNA','DNM','Weight']],bgfDimensionCells=labels=>labels.map(label=>`<div>${label}</div><div>${bgfDimensionMap[label]??'-'}</div>`).join('');
  const dimValue=v=>(v===null||v===undefined||v==="")?"-":`${formatPdfNumber(Number(v),0)} mm`;
 
  const pdfFollow=(document.getElementById('pdfFollowScreen')||{}).checked!==false;
@@ -1201,7 +1203,7 @@ function exportPDF(requestedFilename){
   <table class="tds-table">
    <colgroup><col class="label"><col class="value"><col class="label"><col class="value"></colgroup>
    <tr class="section table-block table-start"><td colspan="4">Operating Data</td></tr>
-   <tr class="table-block"><td class="label-cell">Application</td><td class="value-cell" colspan="3">-</td></tr>
+    <tr class="table-block"><td class="label-cell">Application</td><td class="value-cell" colspan="3">Hose Reel Pump</td></tr>
    <tr class="table-block"><td class="label-cell">Location</td><td class="value-cell">-</td><td class="label-cell">Capacity</td><td class="value-cell">${reportPumpFlowTextPdf()}</td></tr>
    <tr class="table-block"><td class="label-cell">Fluid</td><td class="value-cell">Water, Clean</td><td class="label-cell">Pressure</td><td class="value-cell">${reportHeadTextPdf()}</td></tr>
    <tr class="table-block"><td class="label-cell">Density</td><td class="value-cell">0.9983 kg/dm³</td><td class="label-cell">Temperature</td><td class="value-cell">20 °C</td></tr>
@@ -1209,28 +1211,39 @@ function exportPDF(requestedFilename){
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pump</td></tr>
-   <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
-   <tr class="table-block"><td>Type</td><td>Close Coupled Pump</td><td>Country of Manufacture</td><td>China</td></tr>
-   <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>${best.connection}</td></tr>
-   <tr class="table-block"><td>Pump Speed</td><td>${enhanced?'Max 3500 rpm':`${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm`}</td><td>Discharge Size</td><td>${best.connection}</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Type</td><td>Twin Impeller Pump</td><td>Country of Manufacture</td><td>China</td></tr>
+    <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>G1½</td></tr>
+    <tr class="table-block"><td>Speed</td><td>2900 rpm</td><td>Discharge Size</td><td>G1¼</td></tr>
    <tr class="table-block"><td class="material-heading no-bottom">Material: -</td><td class="no-bottom"></td><td>Efficiency</td><td>${formatPdfNumber(requiredEff,1)} %</td></tr>
    <tr class="table-block"><td class="material-label indent">Casing</td><td class="material-value">${keysuiteKvMaterialDisplay().casing}</td><td>Brake HP</td><td>${formatPdfNumber(requiredPower/0.746,1)} HP</td></tr>
    <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>No. of Stage</td><td>${best.stages} Stages</td></tr>
-   <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">${keysuiteKvMaterialDisplay().shaft}</td><td>NPSHr</td><td>${formatPdfNumber(requiredNpsh,1)} Mtr</td></tr>
-   <tr class="table-block"><td>Shaft Seal</td><td>${keysuiteKvSealDisplay()}</td><td>Max Casing Pressure</td><td>${formatPdfNumber(best.max_pressure_bar,1)} Bar</td></tr>
-   <tr class="table-block table-end"><td>Bearing Type</td><td>Bush</td><td></td><td></td></tr>
+    <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">Carbon Steel</td><td>NPSHr</td><td>${formatPdfNumber(requiredNpsh,1)} Mtr</td></tr>
+    <tr class="table-block"><td>Shaft Seal</td><td>Mechanical Seal</td><td>Max Casing Pressure</td><td>10 Bar</td></tr>
+    <tr class="table-block table-end"><td>Bearing Type</td><td>Ball</td><td>Max Inlet Pressure</td><td>3.5 Bar</td></tr>
 
    <tr class="section-gap"><td colspan="4"></td></tr>
-   ${engineDrive?`<tr class="section table-block table-start"><td colspan="4">Engine</td></tr>
-   <tr class="table-block"><td>Drive Type</td><td>Diesel Engine</td><td>Model</td><td>BGF 350E</td></tr>
-   <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td>Operating Speed</td><td>${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm</td></tr>
-   <tr class="table-block table-end"><td>Electrical Supply</td><td>Not applicable</td><td></td><td></td></tr>`:`<tr class="section table-block table-start"><td colspan="4">Motor</td></tr>
-   <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
-   <tr class="table-block"><td>Type</td><td>TEFC</td><td>Country of Manufacture</td><td>China</td></tr>
-   <tr class="table-block"><td>Model</td><td>${motorData.available?motorData.model:"Data Not Available"}</td><td>Efficiency</td><td>${motorEffClass}</td></tr>
-   <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td>Motor Speed</td><td>${motorData.available&&motorData.rpm!==null?`${motorData.rpm} rpm`:"-"}</td></tr>
-   <tr class="table-block"><td>Rated Voltage</td><td>415 Volt</td><td>Phase / Frequency</td><td>3 Phase / 50 Hz</td></tr>
-   <tr class="table-block table-end"><td>Protection</td><td>IP 55</td><td>Insulation Class</td><td>Class F</td></tr>`}
+    ${engineDrive?`<tr class="section table-block table-start"><td colspan="4">Engine</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Type</td><td>Air Cooled</td><td>Country of Manufacture</td><td>China</td></tr>
+    <tr class="table-block"><td>Model</td><td>173</td><td>Fuel Consumption</td><td>≤ 280 g/hp.g</td></tr>
+    <tr class="table-block"><td>Displacement</td><td>247 cc</td><td>Fuel Tank Capacity</td><td>2.5 Litres</td></tr>
+    <tr class="table-block"><td>No. of Cylinder</td><td>Single</td><td>Lub. Oil Capacity</td><td>0.75 Litres</td></tr>
+    <tr class="table-block"><td>No. of Stroke</td><td>4</td><td>Starting System</td><td>Recoil / Electric</td></tr>
+    <tr class="table-block"><td>Bore x Stroke</td><td>73 x 59</td><td></td><td></td></tr>
+    <tr class="table-block"><td>Engine Speed</td><td>3600 rpm</td><td></td><td></td></tr>
+    <tr class="table-block"><td>Maximum Output</td><td>5 HP</td><td></td><td></td></tr>
+    <tr class="table-block table-end"><td>Continuous Output</td><td>4.7 HP</td><td></td><td></td></tr>`:`<tr class="section table-block table-start"><td colspan="4">Motor</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Type</td><td>TEFC</td><td>Country of Manufacture</td><td>China</td></tr>
+    <tr class="table-block"><td>Model</td><td>BM3-2</td><td class="no-bottom field-heading">Efficiency: -</td><td class="no-bottom"></td></tr>
+    <tr class="table-block"><td>Rated Power</td><td>3 HP</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">81 %</td></tr>
+    <tr class="table-block"><td>Speed</td><td>2855 rpm</td><td class="no-top indent">75%</td><td class="no-top">- %</td></tr>
+    <tr class="table-block"><td>Rated FL Amp</td><td>4.45 Amp</td><td class="no-bottom field-heading">Power Factor: -</td><td class="no-bottom"></td></tr>
+    <tr class="table-block"><td>Frequency</td><td>50 Hz</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">0.85</td></tr>
+    <tr class="table-block"><td>Rated Voltage</td><td>415 Volt</td><td class="no-top indent">75%</td><td class="no-top">-</td></tr>
+    <tr class="table-block"><td>Phase</td><td>3 Phase</td><td>Protection</td><td>IP 55</td></tr>
+    <tr class="table-block table-end"><td>Insulation Class</td><td>Class F</td><td></td><td></td></tr>`}
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pumpset</td></tr>
@@ -1251,10 +1264,8 @@ function exportPDF(requestedFilename){
   <div class="dimension-title">Dimension</div>
   <div class="dimension-drawing">${dimensionImage?`<img id="dimensionDrawingImage" src="${dimensionImage}" alt="${best.series} dimension drawing">`:``}</div>
   <div class="dimension-info" id="dimensionInfo">
-   <div><div class="dimension-table-title">Table Dimensions</div><div class="dimension-grid">
-    <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1+B2</div><div>${dimValue(dimensionData.height)}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
-   </div><div class="dimension-note">* Approximate dimension &amp; weight</div></div>
-   <div><div class="dimension-weight"><div>Weight</div><div>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kG`}</div></div></div>
+    <div><div class="dimension-table-title">Table Dimensions</div><div class="dimension-grid">${bgfDimensionCells(bgfDimensionLabels[0])}</div><div class="dimension-note">* Approximate dimension &amp; weight</div></div>
+    <div><div class="dimension-table-title">&nbsp;</div><div class="dimension-grid">${bgfDimensionCells(bgfDimensionLabels[1])}</div></div>
   </div>
   </div>
  </section>
@@ -1268,8 +1279,6 @@ __keysuiteLockPdfTitle();
 window.addEventListener('beforeprint',__keysuiteLockPdfTitle);
 window.onload=async()=>{
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  if(__KEYSUITE_EXCEL_TECHNICAL__.length){const table=document.querySelector('.tds-table');if(table)table.innerHTML='<colgroup><col class="label"><col class="value"><col class="label"><col class="value"></colgroup><tr class="section table-block table-start"><td colspan="4">Model-specific Technical Data · Excel Master</td></tr>'+__KEYSUITE_EXCEL_TECHNICAL__.map((r,i,a)=>'<tr class="table-block '+(i===a.length-1?'table-end':'')+'"><td>'+esc(r[0])+'</td><td colspan="3">'+esc(r[1])+'</td></tr>').join('')}
-  if(__KEYSUITE_EXCEL_DIMENSIONS__.length){const grid=document.querySelector('.dimension-grid');if(grid)grid.innerHTML=__KEYSUITE_EXCEL_DIMENSIONS__.map(r=>'<div>'+esc(r[0])+'</div><div>'+esc(r[1])+'</div>').join('')}
   const images=[...document.images];
   await Promise.all(images.map(img=>img.complete&&img.naturalWidth>0 ? Promise.resolve() : (typeof img.decode==='function'?img.decode().catch(()=>undefined):new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;}))));
   if(document.fonts&&document.fonts.ready){try{await document.fonts.ready;}catch(e){}}

@@ -767,6 +767,7 @@
       {label:'KV',family:'KV',productGroup:'KV',page:'productKv'},
       {label:'BFI',family:'BFI',productGroup:'BFI',page:'productBfi'},
       {label:'BGF',family:'BGF',productGroup:'BGF',page:'productBgf'},
+      {label:'BSW',family:'BSW',productGroup:'BSW',page:'productBsw'},
       {label:'End Suction',family:'ES',page:'productEs'},
       {label:'ISO',family:'ISO',page:'productIso'},
       {label:'Motor',family:'MOTOR',page:'productMotor'}
@@ -780,7 +781,7 @@
     try{sessionStorage.setItem('keysuite-v41412-product-chc-generation',code)}catch(_){}
     window.KeySuiteProduct?.setChcGeneration?.(code);
   }
-  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',KV:'productKv',BFI:'productBfi',BGF:'productBgf',ISO:'productIso',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
+  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',KV:'productKv',BFI:'productBfi',BGF:'productBgf',BSW:'productBsw',ISO:'productIso',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
   function brandFamilies(brand){
     const key=String(brand.brand_key||'').toLowerCase(),built=isMasterBrand(brand)?BUILTIN_FAMILIES['b.g.reich']:BUILTIN_FAMILIES[key];
     if(built)return built.map(f=>{
@@ -798,7 +799,7 @@
       out.push({label:brandSeriesFor(brand,group)||productGroupLabel(group),family,productGroup:group,generation:generationForGroup(group),page});
     });
     return out.sort((a,b)=>{
-      const order=g=>({CHC_G1:0,CHC_G2:1,CHC:2,CR:3,KV:4,BFI:5,ES:6,MOTOR:7}[normalizeProductGroup(g)]??9);
+      const order=g=>({CHC_G1:0,CHC_G2:1,CHC:2,CR:3,KV:4,BFI:5,BGF:6,BSW:7,ES:8,MOTOR:9}[normalizeProductGroup(g)]??10);
       return order(a.productGroup)-order(b.productGroup)||String(a.label).localeCompare(String(b.label),undefined,{numeric:true});
     });
   }
@@ -908,6 +909,7 @@
     let kv=submenu.querySelector('button[data-v41222-selector-fallback="KV"]')||submenu.querySelector(':scope > button[data-page="selectorKv"]');
     let bfi=submenu.querySelector('button[data-v41222-selector-fallback="BFI"]')||submenu.querySelector(':scope > button[data-page="selectorBfi"]');
     let bgf=submenu.querySelector('button[data-v41222-selector-fallback="BGF"]')||submenu.querySelector(':scope > button[data-page="selectorBgf"]');
+    let bsw=submenu.querySelector('button[data-v41222-selector-fallback="BSW"]')||submenu.querySelector(':scope > button[data-page="selectorBsw"]');
     let es=submenu.querySelector('button[data-v41222-selector-fallback="ES"]')||submenu.querySelector(':scope > button[data-page="selectorEs"]');
     let iso=submenu.querySelector('button[data-v41222-selector-fallback="ISO"]')||submenu.querySelector(':scope > button[data-page="selectorIso"]');
     const create=(page,family,label)=>{
@@ -934,6 +936,7 @@
     if(!kv)kv=create('selectorKv','KV','KV');
     if(!bfi)bfi=create('selectorBfi','BFI','BFI');
     if(!bgf)bgf=create('selectorBgf','BGF','BGF');
+    if(!bsw)bsw=create('selectorBsw','BSW','BSW');
     if(!es)es=create('selectorEs','ES','ES');
     if(!iso)iso=create('selectorIso','ISO','ISO');
     const master=masterBrand();
@@ -942,9 +945,10 @@
     if(kv){kv.dataset.v41222SelectorFallback='KV';kv.textContent=master?(brandSeriesFor(master,'KV')||'KV'):'KV';}
     if(bfi){bfi.dataset.v41222SelectorFallback='BFI';bfi.textContent=master?(brandSeriesFor(master,'BFI')||'BFI'):'BFI';}
     if(bgf){bgf.dataset.v41222SelectorFallback='BGF';bgf.textContent=master?(brandSeriesFor(master,'BGF')||'BGF'):'BGF';}
+    if(bsw){bsw.dataset.v41222SelectorFallback='BSW';bsw.textContent=master?(brandSeriesFor(master,'BSW')||'BSW'):'BSW';}
     if(es){es.dataset.v41222SelectorFallback='ES';es.textContent=master?(brandSeriesFor(master,'ES')||'ES'):'ES';}
     if(iso){iso.dataset.v41222SelectorFallback='ISO';iso.textContent=master?(brandSeriesFor(master,'ISO')||'ISO'):'ISO';}
-    return {chc,cr,kv,bfi,bgf,es,iso};
+    return {chc,cr,kv,bfi,bgf,bsw,es,iso};
   }
   function openSelectorRoute(page){
     if(window.KeySuiteApp?.showPage){window.KeySuiteApp.showPage(page);return true}
@@ -962,16 +966,16 @@
       tree.classList.add('v41223-selector-brand-tree');
     }
     const showFallback=(visible)=>{
-      [fallback.chc,fallback.cr,fallback.kv,fallback.bfi,fallback.bgf,fallback.es,fallback.iso].forEach(btn=>{if(btn){btn.hidden=!visible;btn.style.display=visible?'block':'none'}});
+      [fallback.chc,fallback.cr,fallback.kv,fallback.bfi,fallback.bgf,fallback.bsw,fallback.es,fallback.iso].forEach(btn=>{if(btn){btn.hidden=!visible;btn.style.display=visible?'block':'none'}});
     };
     const canUse=authority()?.can?.('use_selector')||permission('use_selector')!=='none';
     if(!canUse){tree.innerHTML='';showFallback(false);return}
 
-    const route=(family)=>{const f=String(family||'').toUpperCase();return f==='ISO'?'selectorIso':f==='ES'?'selectorEs':f==='BGF'?'selectorBgf':f==='BFI'?'selectorBfi':f==='KV'?'selectorKv':f==='CR'?'selectorCr':'selector'};
+    const route=(family)=>{const f=String(family||'').toUpperCase();return f==='ISO'?'selectorIso':f==='ES'?'selectorEs':f==='BSW'?'selectorBsw':f==='BGF'?'selectorBgf':f==='BFI'?'selectorBfi':f==='KV'?'selectorKv':f==='CR'?'selectorCr':'selector'};
     const pumpFamilies=(brand)=>brandFamilies(brand)
       .filter(f=>{
         const family=String(f.family||'').toUpperCase();
-        if(!['CHC','CR','KV','BFI','BGF','ES','ISO'].includes(family))return false;
+        if(!['CHC','CR','KV','BFI','BGF','BSW','ES','ISO'].includes(family))return false;
         if(!customerAllowsProduct(brand.id,f.productGroup||f.family,f.family))return false;
         return true;
       })
@@ -1076,7 +1080,7 @@
   function bindSelectionDefaults(){
     const master=()=>masterBrand(),submenu=document.querySelector('.nav-group[data-nav-group="selectorMenu"] .nav-submenu');
     const fallback=selectorFallbackButtons(submenu);
-    [['selector','CHC',fallback.chc],['selectorCr','CR',fallback.cr],['selectorKv','KV',fallback.kv],['selectorBfi','BFI',fallback.bfi],['selectorBgf','BGF',fallback.bgf],['selectorEs','ES',fallback.es],['selectorIso','ISO',fallback.iso]].forEach(([page,family,btn])=>{if(btn&&!btn.dataset.v391Bound){btn.dataset.v391Bound='1';btn.addEventListener('click',()=>{
+    [['selector','CHC',fallback.chc],['selectorCr','CR',fallback.cr],['selectorKv','KV',fallback.kv],['selectorBfi','BFI',fallback.bfi],['selectorBgf','BGF',fallback.bgf],['selectorBsw','BSW',fallback.bsw],['selectorEs','ES',fallback.es],['selectorIso','ISO',fallback.iso]].forEach(([page,family,btn])=>{if(btn&&!btn.dataset.v391Bound){btn.dataset.v391Bound='1';btn.addEventListener('click',()=>{
       if(consumePreservedSelectorBrand(page,family))return;
       clearSelectorPresentationContext(page);
       if(brandSeriesLocked()){const target=resolveAuthorityTarget('',family),b=target?byBrandId(target.brandId):null;if(b)setSelectedBrand(b.id,target.family,page);return}

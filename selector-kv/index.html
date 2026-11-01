@@ -1071,7 +1071,14 @@ function exportPDF(requestedFilename){
  const pumpsetLength=Math.max(pumpEnvelope,Number(dimensionData.pumpL)||0);
  const pumpsetWidth=Math.max(pumpEnvelope,Number(dimensionData.pumpW)||0);
  const dimensionImage=best?.dimensions?.drawing||keykvG1DimensionImage(best.series);
- const excelDimensionRows=Object.entries(best?.dimensions||{}).filter(([k,v])=>k!=='drawing'&&v!==null&&v!==undefined&&v!=='');
+ const excelDimensionRows=[
+  ['B1',dimensionData.b1],
+  ['B2',dimensionData.b2],
+  ['B1 + B2',Number(dimensionData.b1)+Number(dimensionData.b2)],
+  ['D1',dimensionData.d1],
+  ['D2',dimensionData.d2]
+ ].filter(([,v])=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v)));
+ const kvConnections=String(best.connection||'').split(/\s+x\s+/i),kvSuction=String(best.suction_connection||kvConnections[0]||'-'),kvDischarge=String(best.discharge_connection||kvConnections[1]||kvConnections[0]||'-');
  const dimValue=v=>(v===null||v===undefined||v==="")?"-":`${formatPdfNumber(Number(v),0)} mm`;
 
  const pdfFollow=(document.getElementById('pdfFollowScreen')||{}).checked!==false;
@@ -1213,8 +1220,8 @@ function exportPDF(requestedFilename){
    <tr class="section table-block table-start"><td colspan="4">Pump</td></tr>
    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
    <tr class="table-block"><td>Type</td><td>VMS Pump</td><td>Country of Manufacture</td><td>China</td></tr>
-   <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>${best.connection}</td></tr>
-   <tr class="table-block"><td>Pump Speed</td><td>${enhanced?'Max 3500 rpm':`${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm`}</td><td>Discharge Size</td><td>${best.connection}</td></tr>
+    <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>${kvSuction}</td></tr>
+    <tr class="table-block"><td>Pump Speed</td><td>${enhanced?'Max 3500 rpm':`${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm`}</td><td>Discharge Size</td><td>${kvDischarge}</td></tr>
    <tr class="table-block"><td class="material-heading no-bottom">Material: -</td><td class="no-bottom"></td><td>Efficiency</td><td>${formatPdfNumber(requiredEff,1)} %</td></tr>
    <tr class="table-block"><td class="material-label indent">Casing</td><td class="material-value">${keysuiteKvMaterialDisplay().casing}</td><td>Brake HP</td><td>${formatPdfNumber(requiredPower/0.746,1)} HP</td></tr>
    <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>No. of Stage</td><td>${best.stages} Stages</td></tr>
@@ -1255,7 +1262,7 @@ function exportPDF(requestedFilename){
   <div class="dimension-drawing">${dimensionImage?`<img id="dimensionDrawingImage" src="${dimensionImage}" alt="${best.series} dimension drawing">`:``}</div>
   <div class="dimension-info" id="dimensionInfo">
    <div><div class="dimension-table-title">Table Dimensions</div><div class="dimension-grid">
-    <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1+B2</div><div>${dimValue(dimensionData.height)}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
+     <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1 + B2</div><div>${dimValue(Number(dimensionData.b1)+Number(dimensionData.b2))}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
    </div><div class="dimension-note">* Approximate dimension &amp; weight</div></div>
    <div><div class="dimension-weight"><div>Weight</div><div>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kG`}</div></div></div>
   </div>

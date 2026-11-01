@@ -1,19 +1,18 @@
 {
-  "version": "5.00.26",
-  "baseline": "5.00.25",
-  "upgrade_supported_from": "5.00.25",
+  "version": "5.00.28",
+  "baseline": "5.00.27",
+  "upgrade_supported_from": "5.00.27",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "KV Efficiency, Power and NPSHr now use their fitted polynomials continuously without exact-source substitution",
-    "KV descriptions, connection text and KV/KVC/KVN material propagation are corrected",
-    "Product KV now builds compact ascending navigation only from complete verified groups",
-    "BGF now uses the Standard Selector Responsive Layout with CR-style selection functions",
-    "Product BGF selected-model loading now retries through iframe load and ready handshakes",
-    "BGF motor descriptions include 415V / 3Ph / 50Hz and Motor/Engine output is drive-correct",
+    "BUG 001: KV and BSW product series navigation now uses CR-equivalent button sizing, spacing and responsive behaviour",
+    "BUG 002: KV Page 2 separates suction and discharge connections; Page 3 uses the exact B1, B2, B1 + B2, D1 and D2 dimension set",
+    "BUG 003: BGF Page 2 uses the required 5/10/10/4 structured rows and drive-specific Motor/Engine data; Page 3 uses distinct 350M and 350E layouts",
+    "BUG 004: BSW is registered across authority, brand, category, pricing and route registries so BSW-only scopes no longer fall back to Dashboard",
+    "BUG 005: BSW uses the selected model data, three full-area PDF graphs, no fabricated NPSH output and weight units separate from dimensions",
     "CR MASTER and ES MASTER files are unchanged"
   ]
 }
