@@ -1,8 +1,8 @@
-/* KeySuite V5.00.17 — KV selector core. Mirrors the CR hydraulic method and
+/* KeySuite V5.00.18 — KV selector core. Mirrors the CR hydraulic method and
    preserves workbook shut-off power at Q=0. */
 (function (g) {
   'use strict';
-  const VERSION = '5.00.17';
+  const VERSION = '5.00.18';
 
   function solve(A, b) {
     A = A.map(row => row.slice());
@@ -127,6 +127,8 @@
       npsh,
       shaft,
       shutoff_power_kw: zeroPower,
+      max_pressure_bar: model.max_operating_pressure_bar,
+      max_inlet_bar: Number.isFinite(Number(model.max_inlet_bar)) ? Number(model.max_inlet_bar) : null,
       headFit,
       effFit,
       npshFit,
@@ -180,5 +182,5 @@
     return result;
   }
 
-  g.KeySuiteKVCore = Object.freeze({ VERSION, evaluateModel, select, fitValue, sampleFit, bepInfo, compare });
+  g.KeySuiteKVCore = Object.freeze({ VERSION, evaluateModel, select, fitValue, sampleFit, bepInfo, compare, mostSuitableCompare: compare });
 })(globalThis);
