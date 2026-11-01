@@ -1074,7 +1074,7 @@ function exportPDF(requestedFilename){
  const excelDimensionRows=[
   ['B1',dimensionData.b1],
   ['B2',dimensionData.b2],
-  ['B1 + B2',Number(dimensionData.b1)+Number(dimensionData.b2)],
+  ['B1+B2',Number(dimensionData.b1)+Number(dimensionData.b2)],
   ['D1',dimensionData.d1],
   ['D2',dimensionData.d2]
  ].filter(([,v])=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v)));
@@ -1262,7 +1262,7 @@ function exportPDF(requestedFilename){
   <div class="dimension-drawing">${dimensionImage?`<img id="dimensionDrawingImage" src="${dimensionImage}" alt="${best.series} dimension drawing">`:``}</div>
   <div class="dimension-info" id="dimensionInfo">
    <div><div class="dimension-table-title">Table Dimensions</div><div class="dimension-grid">
-     <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1 + B2</div><div>${dimValue(Number(dimensionData.b1)+Number(dimensionData.b2))}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
+     <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1+B2</div><div>${dimValue(Number(dimensionData.b1)+Number(dimensionData.b2))}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
    </div><div class="dimension-note">* Approximate dimension &amp; weight</div></div>
    <div><div class="dimension-weight"><div>Weight</div><div>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kG`}</div></div></div>
   </div>

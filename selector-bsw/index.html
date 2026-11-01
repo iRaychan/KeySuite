@@ -219,6 +219,7 @@ body.product-frame main{display:block;max-width:none;padding:8px}body.product-fr
   <div class="row"><input id="flow" type="number" value="" step="0.1" placeholder=""><select id="fu"><option value="m3h">m³/h</option><option value="lpm">L/min</option><option value="lps">L/s</option><option value="usgpm">US GPM</option><option value="igpm">IGPM</option></select></div>
   <label>Head</label>
   <div class="row"><input id="head" type="number" value="" step="0.1" placeholder=""><select id="hu"><option value="m">m</option><option value="bar">bar</option><option value="ft">ft</option><option value="kpa">kPa</option><option value="psi">psi</option></select></div>
+  <label class="bsw-float-switch"><input id="bswFloatSwitch" type="checkbox"> Float Switch</label>
 
   <details id="dutyPointsSettings" class="settings" open>
     <summary>Multiple Duty Points</summary>
@@ -240,13 +241,13 @@ body.product-frame main{display:block;max-width:none;padding:8px}body.product-fr
   <div id="enhancedInfo" class="enhanced-info" hidden>Enhanced Curve · 60 Hz · motor-power limited</div>
   <input id="hz" type="hidden" value="50">
   <div class="motor-options">
-    <div><label for="motorEff">Motor Efficiency</label><select id="motorEff"><option value="IE5">IE5</option><option value="IE4">IE4</option><option value="IE3" selected>IE3</option><option value="IE2">IE2</option><option value="IE1">IE1</option></select></div>
+    <div><label for="motorEff">Motor Efficiency</label><select id="motorEff"><option value="IE5">IE5</option><option value="IE4">IE4</option><option value="IE3">IE3</option><option value="IE2">IE2</option><option value="IE1" selected>IE1</option></select></div>
     <div><label for="motorPhase">Motor Phase</label><select id="motorPhase"><option value="3Ph" selected>3 Phase</option><option value="1Ph">1 Phase</option></select></div>
   </div>
   <label>Motor Voltage</label>
   <div id="motorVoltageDisplay" class="voltage-display">380–415 V</div>
   <input id="motorVoltage" type="hidden" value="415">
-  <div id="motorDataNote" class="motor-note">IE3 · 3 Phase · 380–415 V</div>
+  <div id="motorDataNote" class="motor-note">IE1 · 3 Phase · 380–415 V</div>
 
   <details class="settings" open>
     <summary>Display Settings</summary>
@@ -338,7 +339,7 @@ const MOTOR_DB=(()=>{
  return {IE:ie1,IE1:ie1,IE2:rows('2Pole IE2'),IE3:rows('2Pole IE3'),IE4:rows('2Pole IE4'),IE5:rows('2Pole IE5')};
 })();
 function motorValue(v,suffix=""){if(v===null||v===undefined||v===""||v==="-")return "-";return `${Number(v).toFixed(Number(v)%1===0?0:2).replace(/\.00$/,"").replace(/(\.\d)0$/,"$1")}${suffix}`;}
-function keysuiteAutoPumpMotorEff(hp,normal='IE3'){motorEff.value='IE3';return 'IE3'}
+function keysuiteAutoPumpMotorEff(hp,normal='IE1'){motorEff.value='IE1';return 'IE1'}
 function findMotorData(hp,effClass,phase,voltage,hz){
  const row=(MOTOR_DB[effClass]||[]).find(r=>Math.abs(Number(r.hp)-Number(hp))<0.011);
  if(!row)return {available:false};
@@ -694,7 +695,11 @@ function keysuiteKvApplyBrandingToReport(html){
  }
  return out;
 }
-function keykvVisibleModelName(model,enhanced=!!selectionState?.enhanced){const base=keykvBaseModelName(model);return keysuiteKvPresentationAlias(enhanced?keykvEnhancedModelName(base):base);}
+function keysuiteBswFloatEnabled(){return !!document.getElementById('bswFloatSwitch')?.checked}
+function keysuiteBswConfiguredModel(model,phase=motorPhase?.value||'3Ph',floatSwitch=keysuiteBswFloatEnabled()){
+ const base=keykvBaseModelName(model);return `${base}${phase==='1Ph'?'M':'T'}${floatSwitch?'A':''}`;
+}
+function keykvVisibleModelName(model){return keysuiteBswConfiguredModel(model);}
 function keykvEnhancedEnabled(){const el=document.getElementById('enhancedMode');return !!(el?el.checked:selectionState?.enhanced)}
 function keykvMixedRawPoint(curve,mix,i){
  const q=Number(curve.flow?.[i]),hf=Number(curve.head_per_stage?.[i]);if(!Number.isFinite(q)||!Number.isFinite(hf))return null;
@@ -738,7 +743,7 @@ function evaluateModel(m,q,h,hz){
  return KEYSUITE_KV_CORE.evaluateModel(DB,m,q,h,hz);
 }
 
-let selectionState={q:0,h:0,hz:50,selectionHz:50,curveHz:50,rawFlow:0,rawHead:0,rawFlowText:'',rawHeadText:'',flowUnit:'m3h',headUnit:'m',models:[],selectedIndex:0,enhanced:false};
+let selectionState={q:0,h:0,hz:50,selectionHz:50,curveHz:50,rawFlow:0,rawHead:0,rawFlowText:'',rawHeadText:'',flowUnit:'m3h',headUnit:'m',motorEffClass:'IE1',motorPhase:'3Ph',motorVoltage:415,floatSwitch:false,models:[],selectedIndex:0,enhanced:false};
 let keykvSummaryCollapsed=true;
 try{sessionStorage.setItem('keykv-summary-collapsed','1');}catch(e){}
 function toggleKeyKVSummary(){keykvSummaryCollapsed=!keykvSummaryCollapsed;try{sessionStorage.setItem('keykv-summary-collapsed',keykvSummaryCollapsed?'1':'0');}catch(e){}renderSelected();}
@@ -1058,18 +1063,18 @@ function exportPDF(requestedFilename){
  const requiredEff=Math.max(1,Math.min(100,fitValue(best.effFit,pumpQ)));
  const requiredPower=enhanced?Math.max(0,fitValue(best.powerFit,pumpQ)):9.81*pumpQ*requiredHead/3600/(requiredEff/100);
  const requiredNpsh=Math.max(0,fitValue(best.npshFit,pumpQ));
- const motorEffClass=keysuiteAutoPumpMotorEff(best.motor_hp,'IE3');
+ const motorEffClass=keysuiteAutoPumpMotorEff(best.motor_hp,'IE1');
  const motorPhaseCode=motorPhase.value;
  const motorVoltageValue=Number(motorVoltage.value);
  const motorData=findMotorData(best.motor_hp,motorEffClass,motorPhaseCode,motorVoltageValue,enhanced?50:hz);
  const motorPhaseText=motorPhaseCode==="1Ph"?"1 Phase":"3 Phase";
- const dimensionData={weight:best.weight_kg??best.dimensions?.Weight,pumpL:best.dimensions?.L,pumpW:null,height:best.dimensions?.H1};
+ const dimensionData={weight:best.weight_kg??best.dimensions?.Weight,pumpL:best.dimensions?.L,pumpW:best.dimensions?.L,height:best.dimensions?.H1};
  const pumpEnvelope=(Number(dimensionData.d1)||0)/2+(Number(dimensionData.d2)||0);
  const pumpsetLength=Math.max(pumpEnvelope,Number(dimensionData.pumpL)||0);
  const pumpsetWidth=Math.max(pumpEnvelope,Number(dimensionData.pumpW)||0);
  const dimensionImage=best.dimension_drawing||window.KeySuiteBSWData?.dimension_drawing||keykvG1DimensionImage(best.series);
  const excelTechnicalRows=[];
- const excelDimensionRows=Object.entries(best.dimensions||{}).filter(([key,v])=>key!=='Weight'&&v!==null&&v!==undefined&&v!=='');
+ const excelDimensionRows=[];
  const dimValue=v=>(v===null||v===undefined||v==="")?"-":`${formatPdfNumber(Number(v),0)} mm`;
 
  const pdfFollow=(document.getElementById('pdfFollowScreen')||{}).checked!==false;
@@ -1208,15 +1213,15 @@ function exportPDF(requestedFilename){
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pump</td></tr>
-    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
     <tr class="table-block"><td>Type</td><td>Submersible</td><td>Country of Manufacture</td><td>China</td></tr>
     <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>-</td></tr>
    <tr class="table-block"><td>Pump Speed</td><td>${enhanced?'Max 3500 rpm':`${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm`}</td><td>Discharge Size</td><td>${best.connection}</td></tr>
    <tr class="table-block"><td class="material-heading no-bottom">Material: -</td><td class="no-bottom"></td><td>Efficiency</td><td>${formatPdfNumber(requiredEff,1)} %</td></tr>
    <tr class="table-block"><td class="material-label indent">Casing</td><td class="material-value">${keysuiteKvMaterialDisplay().casing}</td><td>Brake HP</td><td>${formatPdfNumber(requiredPower/0.746,1)} HP</td></tr>
     <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>Impeller Type</td><td>Closed</td></tr>
-    <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">${keysuiteKvMaterialDisplay().shaft}</td><td>Impeller Diameter</td><td>-</td></tr>
-    <tr class="table-block"><td>Shaft Seal</td><td>${keysuiteKvSealDisplay()}</td><td>Max Solid Passage</td><td>-</td></tr>
+    <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">${keysuiteKvMaterialDisplay().shaft}</td><td></td><td></td></tr>
+    <tr class="table-block"><td>Shaft Seal</td><td>${keysuiteKvSealDisplay()}</td><td></td><td></td></tr>
     <tr class="table-block table-end"><td>Bearing Type</td><td>Ball</td><td></td><td></td></tr>
 
    <tr class="section-gap"><td colspan="4"></td></tr>
@@ -1224,15 +1229,15 @@ function exportPDF(requestedFilename){
    <tr class="table-block"><td>Drive Type</td><td>Diesel Engine</td><td>Model</td><td>BGF 350E</td></tr>
    <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td>Operating Speed</td><td>${Math.round((Number((DB.curves[best.series]||{}).speed_rpm)||2900)*(hz/50))} rpm</td></tr>
    <tr class="table-block table-end"><td>Electrical Supply</td><td>Not applicable</td><td></td><td></td></tr>`:`<tr class="section table-block table-start"><td colspan="4">Motor</td></tr>
-    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
    <tr class="table-block"><td>Type</td><td>TEFC</td><td>Country of Manufacture</td><td>China</td></tr>
     <tr class="table-block"><td>Model</td><td>${motorData.available?motorData.model:"Data Not Available"}</td><td class="no-bottom field-heading">Efficiency:</td><td class="no-bottom">${motorEffClass}</td></tr>
     <tr class="table-block"><td>Rated Power</td><td>${formatHP(best.motor_hp)} / ${formatPdfNumber(best.motor_kw,2)} kW</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">${motorData.available?motorValue(motorData.eff100," %"):"-"}</td></tr>
     <tr class="table-block"><td>Motor Speed</td><td>${motorData.available&&motorData.rpm!==null?`${motorData.rpm} rpm`:"-"}</td><td class="no-top indent">75%</td><td class="no-top">${motorData.available?motorValue(motorData.eff75," %"):"-"}</td></tr>
     <tr class="table-block"><td>Rated FL Amp</td><td>${motorData.available?motorValue(motorData.amp," Amp"):"-"}</td><td class="no-bottom field-heading">Power Factor:-</td><td class="no-bottom"></td></tr>
     <tr class="table-block"><td>Frequency</td><td>50 Hz</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">${motorData.available?motorValue(motorData.pf100):"-"}</td></tr>
-    <tr class="table-block"><td>Rated Voltage</td><td>415 Volt</td><td class="no-top indent">75%</td><td class="no-top">${motorData.available?motorValue(motorData.pf75):"-"}</td></tr>
-    <tr class="table-block"><td>Phase</td><td>3 Phase</td><td>Protection</td><td>IP 68</td></tr>
+    <tr class="table-block"><td>Rated Voltage</td><td>${motorVoltageValue} Volt</td><td class="no-top indent">75%</td><td class="no-top">${motorData.available?motorValue(motorData.pf75):"-"}</td></tr>
+    <tr class="table-block"><td>Phase</td><td>${motorPhaseText}</td><td>Protection</td><td>IP 68</td></tr>
     <tr class="table-block table-end"><td>Insulation Class</td><td>Class E</td><td></td><td></td></tr>`}
 
    <tr class="section-gap"><td colspan="4"></td></tr>
@@ -1255,9 +1260,9 @@ function exportPDF(requestedFilename){
   <div class="dimension-drawing">${dimensionImage?`<img id="dimensionDrawingImage" src="${dimensionImage}" alt="${best.series} dimension drawing">`:``}</div>
   <div class="dimension-info" id="dimensionInfo">
    <div><div class="dimension-table-title">Table Dimensions</div><div class="dimension-grid">
-    <div>B1</div><div>${dimValue(dimensionData.b1)}</div><div>B2</div><div>${dimValue(dimensionData.b2)}</div><div>B1+B2</div><div>${dimValue(dimensionData.height)}</div><div>D1</div><div>${dimValue(dimensionData.d1)}</div><div>D2</div><div>${dimValue(dimensionData.d2)}</div>
+    <div>L</div><div>${dimValue(best.dimensions?.L)}</div><div>H1</div><div>${dimValue(best.dimensions?.H1)}</div><div>H2</div><div>${dimValue(best.dimensions?.H2)}</div><div>ØDNM</div><div>${best.dimensions?.['ØDNM']||'-'}</div>
    </div><div class="dimension-note">* Approximate dimension &amp; weight</div></div>
-   <div><div class="dimension-weight"><div>Weight</div><div>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kG`}</div></div></div>
+   <div><div class="dimension-table-title">&nbsp;</div><div class="dimension-grid"><div>ØD</div><div>${dimValue(best.dimensions?.['ØD'])}</div><div>Øk</div><div>${dimValue(best.dimensions?.['Øk'])}</div><div>n-Øs</div><div>${best.dimensions?.['n-Øs']==null||best.dimensions?.['Øs']==null?'-':`${formatPdfNumber(Number(best.dimensions['n-Øs']),0)} x ${formatPdfNumber(Number(best.dimensions['Øs']),0)} mm`}</div><div>Weight</div><div>${dimensionData.weight==null?"-":`${formatPdfNumber(Number(dimensionData.weight),0)} kg`}</div></div></div>
   </div>
   </div>
  </section>
@@ -1525,8 +1530,8 @@ async function keykvSaveDisplaySettings(){
  const settings=keykvDisplaySnapshot(),updated_at=new Date().toISOString();try{localStorage.setItem('ks_selector_display_kv',JSON.stringify({settings,updated_at}))}catch(_){}
  const c=keykvDisplayClient();if(!c){keykvDisplayStatus('Saved on this device.');return}
  try{const {data}=await c.auth.getUser();const uid=data?.user?.id;if(!uid)throw new Error('No signed-in user');
- const {error}=await c.from('ks_selector_display_settings').upsert({user_id:uid,selector_family:'KV',settings,updated_at},{onConflict:'user_id,selector_family'});if(error)throw error;keykvDisplayStatus('Saved to your KeySuite account.')}
- catch(e){console.warn('KV display settings save:',e);keykvDisplayStatus('Saved on this device. Run V4.12.16 SQL for account sync.')}
+ const {error}=await c.from('ks_selector_display_settings').upsert({user_id:uid,selector_family:'BSW',settings,updated_at},{onConflict:'user_id,selector_family'});if(error)throw error;keykvDisplayStatus('Saved to your KeySuite account.')}
+ catch(e){console.warn('BSW display settings save:',e);keykvDisplayStatus('Saved on this device. Run V4.12.16 SQL for account sync.')}
 }
 async function keykvLoadDisplaySettings(){
  let local=null;try{local=JSON.parse(localStorage.getItem('ks_selector_display_kv')||'null')}catch(_){}
@@ -1561,7 +1566,7 @@ function renderSelected(){
  const requiredPower=enhanced?Math.max(0,fitValue(best.powerFit,q)):9.81*q*h/3600/(requiredEff/100);
  const requiredNpsh=Math.max(0,fitValue(best.npshFit,q));
  const sharedFlowAxis=keykvSharedFlowAxis(best),hc=keykvHeadGraph(best,q,h),op=hc.op,opText=op?`${op.q.toFixed(1)} m³/h @ ${op.head.toFixed(1)} m`:'—';
- const motorClass=(document.getElementById('motorEff')||{}).value||'IE3';
+ const motorClass=(document.getElementById('motorEff')||{}).value||'IE1';
  const selectionHz=Number(selectionState.selectionHz||hz),speedChanged=!enhanced&&Math.abs(selectionHz-hz)>0.01;
  const outside=hasPrimaryDuty&&(q<best.headFit.min||q>best.headFit.max);
  const powerOver=!enhanced&&Number.isFinite(requiredPower)&&requiredPower>Number(best.motor_kw)+1e-6;
@@ -1695,19 +1700,20 @@ function run(){
  }
  all.forEach(x=>x._keysuiteDutyFlow=q);
  all.sort(keykvMostSuitableCompare);
- selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:motorEff.value,motorPhase:motorPhase.value,motorVoltage:+motorVoltage.value,models:all,selectedIndex:0,enhanced,primaryDutyCleared:false};
+ selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:'IE1',motorPhase:motorPhase.value,motorVoltage:+motorVoltage.value,floatSwitch:keysuiteBswFloatEnabled(),models:all,selectedIndex:0,enhanced,primaryDutyCleared:false};
  renderAlternatives();
  renderSelected();
 }
 function keykvHandleMotorOptionChange(){
  updateMotorVoltageRange();
- selectionState={...selectionState,motorEffClass:motorEff.value,motorPhase:motorPhase.value,motorVoltage:+motorVoltage.value};
+ selectionState={...selectionState,motorEffClass:'IE1',motorPhase:motorPhase.value,motorVoltage:+motorVoltage.value,floatSwitch:keysuiteBswFloatEnabled()};
  const productMode=new URLSearchParams(location.search).get('product')==='1';
  if(productMode&&selectionState.models.length){renderSelected();return;}
  run();
 }
 motorPhase.addEventListener("change",keykvHandleMotorOptionChange);
 motorEff.addEventListener("change",keykvHandleMotorOptionChange);
+document.getElementById('bswFloatSwitch')?.addEventListener('change',keykvHandleMotorOptionChange);
 updateMotorVoltageRange();
 // V4.11.00 Telegram uses the real manual Selector with a preloaded D1.
 (function keykvAutoCurveRequest(){
@@ -1754,7 +1760,7 @@ alternatives.innerHTML='';
  }
  function syncControlsFromState(){
   try{flow.value=(selectionState.rawFlowText!==undefined&&selectionState.rawFlowText!==''?selectionState.rawFlowText:(selectionState.rawFlow??selectionState.q??''));head.value=(selectionState.rawHeadText!==undefined&&selectionState.rawHeadText!==''?selectionState.rawHeadText:(selectionState.rawHead??selectionState.h??''));fu.value=selectionState.flowUnit||'m3h';hu.value=selectionState.headUnit||'m';
-   motorEff.value=selectionState.motorEffClass||'IE3';motorPhase.value=selectionState.motorPhase||'3Ph';updateMotorVoltageRange();
+   motorEff.value='IE1';motorPhase.value=selectionState.motorPhase||'3Ph';const floatControl=document.getElementById('bswFloatSwitch');if(floatControl)floatControl.checked=selectionState.floatSwitch===true;updateMotorVoltageRange();
    const enhanced=!!selectionState.enhanced;if(enhancedMode)enhancedMode.checked=enhanced;updateEnhancedModeUI();
    const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=hz.toFixed(1);hzHidden.value=String(hz);selectionState.curveHz=hz;selectionState.hz=hz;
   }catch(e){}
@@ -1769,9 +1775,11 @@ alternatives.innerHTML='';
   const enhanced=opts.enhanced===true||new URLSearchParams(location.search).get('enhanced')==='1';
   let evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50);if(!evaluated){q=(Number(curve.flow?.[0]||0)+Number(curve.flow?.[curve.flow.length-1]||1))/2;evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50)}if(!evaluated)return null;
   const h=Math.max(1,Math.floor(Number(evaluated.predHead)||0)),selectedEval=(enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,50))||evaluated,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:50;
-  selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow:Math.round(q),rawHead:Math.round(h),rawFlowText:String(Math.round(q)),rawHeadText:String(Math.round(h)),flowUnit:'m3h',headUnit:'m',motorEffClass:'IE3',motorPhase:'3Ph',motorVoltage:415,models:[selectedEval],selectedIndex:0,productMode:true,enhanced};
-  window.keysuiteExportPayload={quotation_model:model.model,keysuite_material:opts.material||'SS304 (Cast Iron Connection)',keysuite_seal:opts.seal||'Car/Cer',keysuite_elastomer:opts.elastomer||'Viton',keysuite_connection_type:opts.connection||'round',keysuite_bare_shaft:!!opts.bare,product_mode:true};
-  syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,display_model:keykvVisibleModelName(model.model,enhanced),flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
+  const productPhase=opts.phase==='1Ph'?'1Ph':'3Ph',productFloat=opts.floatSwitch===true;
+  selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow:Math.round(q),rawHead:Math.round(h),rawFlowText:String(Math.round(q)),rawHeadText:String(Math.round(h)),flowUnit:'m3h',headUnit:'m',motorEffClass:'IE1',motorPhase:productPhase,motorVoltage:productPhase==='1Ph'?240:415,floatSwitch:productFloat,models:[selectedEval],selectedIndex:0,productMode:true,enhanced};
+  const configuredModel=keysuiteBswConfiguredModel(model.model,productPhase,productFloat);
+  window.keysuiteExportPayload={quotation_model:configuredModel,display_model:configuredModel,base_model:model.model,keysuite_material:'CI / CI / 45C / Mech Seal',keysuite_seal:'Mech Seal',keysuite_bare_shaft:false,product_mode:true};
+  syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:model.model,display_model:keykvVisibleModelName(model.model),flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
  }
  function applyProductDuty(flowM3h,headM,meta={}){
   const modelName=String(productModelName||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||'');
@@ -1781,8 +1789,8 @@ alternatives.innerHTML='';
   const evaluated=enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,hz);
   const rawFlow=meta.rawFlow!=null?Number(meta.rawFlow):q,rawHead=meta.rawHead!=null?Number(meta.rawHead):h,rawFlowText=meta.rawFlowText!=null?String(meta.rawFlowText):String(rawFlow),rawHeadText=meta.rawHeadText!=null?String(meta.rawHeadText):String(rawHead);
   const flowUnit=meta.flowUnit||'m3h',headUnit=meta.headUnit||'m';
-  if(!evaluated){selectionState={...selectionState,q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,productMode:true,enhanced};syncControlsFromState();out.innerHTML=`<div class="warning">${model.model} cannot be evaluated at ${q.toFixed(1)} m³/h${enhanced?' on the Enhanced Curve':''}. The flow is outside this model's curve range.</div>`;alternatives.innerHTML='';window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,flowM3h:q,headM:h,valid:false,message:'Flow is outside this KV model curve range.'},'*');return null}
-  productModelName=model.model;selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:motorEff.value||'IE3',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),models:[evaluated],selectedIndex:0,productMode:true,enhanced};syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,display_model:keykvVisibleModelName(model.model,enhanced),flowM3h:q,headM:h,enhanced,valid:true,message:evaluated.margin>=0?'Duty point updated.':'Duty point is above the pump curve; curve retained for reference.'},'*');return payload;
+  if(!evaluated){selectionState={...selectionState,q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,productMode:true,enhanced};syncControlsFromState();out.innerHTML=`<div class="warning">${model.model} cannot be evaluated at ${q.toFixed(1)} m³/h. The flow is outside this model's curve range.</div>`;alternatives.innerHTML='';window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:model.model,flowM3h:q,headM:h,valid:false,message:'Flow is outside this BSW model curve range.'},'*');return null}
+  productModelName=model.model;selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:'IE1',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),floatSwitch:keysuiteBswFloatEnabled(),models:[evaluated],selectedIndex:0,productMode:true,enhanced};syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:model.model,display_model:keykvVisibleModelName(model.model),flowM3h:q,headM:h,enhanced,valid:true,message:evaluated.margin>=0?'Duty point updated.':'Duty point is above the pump curve; curve retained for reference.'},'*');return payload;
  }
  function applyProductDutyFromInputs(){
   const rawFlowText=String(flowInput.value??'').trim(),rawHeadText=String(headInput.value??'').trim(),rawFlow=Number(rawFlowText),rawHead=Number(rawHeadText),flowUnit=flowUnitInput.value,headUnit=headUnitInput.value;
@@ -1803,13 +1811,14 @@ alternatives.innerHTML='';
  function currentSelection(){
   try{
    if(!selectionState?.models?.length)return null;
-   const base=selectionState.models[selectionState.selectedIndex||0];const b=keykvCurrentDisplayModel()||base;const ks=liveOptions(),enhanced=!!selectionState.enhanced;
+   const base=selectionState.models[selectionState.selectedIndex||0];const b=keykvCurrentDisplayModel()||base;const enhanced=!!selectionState.enhanced;
    const displayRpm=enhanced?KEYSUITE_ENHANCED_MAX_RPM:b.rpm,displayHz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);
-   return {source:'KeySuite-BGF-V5.00.26',family:'BGF',generation_code:'BGF',keysuite_generation_code:'BGF',keysuite_product_group_code:'BGF',keysuite_price_group_code:'BGF',model:b.model,base_model:b.model,display_model:keykvVisibleModelName(b.model,enhanced),series:b.series,stages:b.stages,connection:b.connection,motor_kw:b.motor_kw,motor_hp:b.motor_hp,shaft_kw:b.shaft,shutoff_power_kw:b.shutoff_power_kw,efficiency:b.eff,npshr:b.npsh,speed_rpm:displayRpm,pole:enhanced?2:keykvPoleFromRpm(b.rpm),frequency_hz:displayHz,operating_speed_rpm:enhanced?Number(b.operatingRpm||0):b.rpm,operating_frequency_hz:enhanced?Number(b.operatingHz||0):displayHz,max_speed_rpm:enhanced?KEYSUITE_ENHANCED_MAX_RPM:undefined,max_frequency_hz:enhanced?KEYSUITE_ENHANCED_MAX_HZ:undefined,enhanced,enhanced_curve:enhanced,flow_m3h:selectionState.q,head_m:selectionState.h,raw_flow:selectionState.rawFlow,raw_head:selectionState.rawHead,raw_flow_text:selectionState.rawFlowText,raw_head_text:selectionState.rawHeadText,flow_unit:selectionState.flowUnit,head_unit:selectionState.headUnit,max_operating_pressure_bar:b.max_operating_pressure_bar,weight_kg:b.weight_kg,dimensions:b.dimensions,keysuite_dimension_override:b.dimensions,product_mode:!!selectionState.productMode,keysuite_material:ks.keysuite_material,keysuite_seal:ks.keysuite_seal,keysuite_elastomer:ks.keysuite_elastomer,keysuite_connection_type:ks.keysuite_connection_type,keysuite_bare_shaft:ks.keysuite_bare_shaft,keysuite_supply_mode:ks.keysuite_bare_shaft?'BARE':'COMPLETE',export_state:{...selectionState,enhanced,motorEffClass:motorEff.value,motorPhase:motorPhase.value,motorVoltage:Number(motorVoltage.value),models:[base],selectedIndex:0}};
-  }catch(e){console.warn('KeySuite KV payload error',e);return null}
+   const configured=keysuiteBswConfiguredModel(b.model,motorPhase.value,keysuiteBswFloatEnabled());
+   return {source:'KeySuite-BSW-V5.00.29',product:'BSW',family:'BSW',generation_code:'BSW',keysuite_generation_code:'BSW',keysuite_product_group_code:'BSW',keysuite_price_group_code:'BSW',model:configured,quotation_model:configured,display_model:configured,keysuite_display_model:configured,base_model:b.model,series:b.series,stages:b.stages,connection:b.connection,motor_kw:b.motor_kw,motor_hp:b.motor_hp,motor_efficiency_class:'IE1',default_motor_efficiency_class:'IE1',motor_phase:motorPhase.value,motor_voltage:Number(motorVoltage.value),float_switch:keysuiteBswFloatEnabled(),shaft_kw:b.shaft,shutoff_power_kw:b.shutoff_power_kw,efficiency:b.eff,npshr:b.npsh,speed_rpm:displayRpm,pole:keykvPoleFromRpm(b.rpm),frequency_hz:displayHz,flow_m3h:selectionState.q,head_m:selectionState.h,raw_flow:selectionState.rawFlow,raw_head:selectionState.rawHead,raw_flow_text:selectionState.rawFlowText,raw_head_text:selectionState.rawHeadText,flow_unit:selectionState.flowUnit,head_unit:selectionState.headUnit,weight_kg:b.weight_kg,dimensions:b.dimensions,keysuite_dimension_override:b.dimensions,product_mode:!!selectionState.productMode,keysuite_material:'CI / CI / 45C / Mech Seal',keysuite_seal:'Mech Seal',keysuite_bare_shaft:false,keysuite_supply_mode:'COMPLETE',export_state:{...selectionState,enhanced,motorEffClass:'IE1',motorPhase:motorPhase.value,motorVoltage:Number(motorVoltage.value),floatSwitch:keysuiteBswFloatEnabled(),models:[base],selectedIndex:0}};
+  }catch(e){console.warn('KeySuite BSW payload error',e);return null}
  }
  window.__KEYSUITE_CURRENT_SELECTION=currentSelection;
- function send(route){const data=currentSelection();if(!data){alert('Please run a KV selection first.');return}if(window.parent&&window.parent!==window){window.parent.postMessage({type:'KEYSUITE_ADD_SELECTION',route,payload:data},'*');return}alert('Open KeyKV inside KeySuite to continue.')}
+ function send(route){const data=currentSelection();if(!data){alert('Please run a BSW selection first.');return}if(window.parent&&window.parent!==window){window.parent.postMessage({type:'KEYSUITE_ADD_SELECTION',route,payload:data},'*');return}alert('Open BSW inside KeySuite to continue.')}
  document.getElementById('keysuiteAddToAssembly')?.addEventListener('click',()=>send('assembly'));
  document.getElementById('keysuiteAddToQuotation')?.addEventListener('click',()=>send('quotation'));
  document.getElementById('keysuitePdf')?.addEventListener('click',()=>exportPDF());
@@ -1828,7 +1837,7 @@ alternatives.innerHTML='';
   if(msg.type==='KEYSUITE_PRODUCT_DUTY'){if(productFrame)applyProductDuty(msg.flowM3h,msg.headM,{flowUnit:'m3h',headUnit:'m'});return;}
   if(msg.type==='KEYSUITE_PRODUCT_ACTION'){if(!productFrame)return;if(msg.action==='export')setTimeout(()=>exportPDF(),60);else if(msg.action==='assembly')send('assembly');else if(msg.action==='quotation')send('quotation');return;}
   if(msg.type==='KEYSUITE_PRODUCT_MODEL'){
-   const payload=prepareProductModel(msg.model,msg.options||{});if(!payload){window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:String(msg.options?.display_model||msg.model||''),valid:false,message:'Product curve unavailable.'},'*');return}
+   const payload=prepareProductModel(msg.model,msg.options||{});if(!payload){window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:String(msg.options?.display_model||msg.model||''),valid:false,message:'Product curve unavailable.'},'*');return}
    if(['add','assembly'].includes(msg.action))window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload},'*');
    else if(msg.action==='export')setTimeout(()=>exportPDF(),120);return;
   }
@@ -1842,5 +1851,5 @@ alternatives.innerHTML='';
 
 
 
-<style>#enhancedToggleLabel{display:none!important}</style><script src="../bsw-selector-v50027.js?v=50028"></script>
+<style>#enhancedToggleLabel{display:none!important}</style><script src="../bsw-selector-v50027.js?v=50029"></script>
 </body></html>

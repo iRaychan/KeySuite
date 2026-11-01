@@ -1,18 +1,20 @@
 {
-  "version": "5.00.28",
-  "baseline": "5.00.27",
-  "upgrade_supported_from": "5.00.27",
+  "version": "5.00.29",
+  "baseline": "5.00.28",
+  "upgrade_supported_from": "5.00.28",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "BUG 001: KV and BSW product series navigation now uses CR-equivalent button sizing, spacing and responsive behaviour",
-    "BUG 002: KV Page 2 separates suction and discharge connections; Page 3 uses the exact B1, B2, B1 + B2, D1 and D2 dimension set",
-    "BUG 003: BGF Page 2 uses the required 5/10/10/4 structured rows and drive-specific Motor/Engine data; Page 3 uses distinct 350M and 350E layouts",
-    "BUG 004: BSW is registered across authority, brand, category, pricing and route registries so BSW-only scopes no longer fall back to Dashboard",
-    "BUG 005: BSW uses the selected model data, three full-area PDF graphs, no fabricated NPSH output and weight units separate from dimensions",
+    "BUG 001: KV Page 3 displays B1+B2 on one row, matching the CHC master format",
+    "BUG 002: quotation data-sheet exports now resolve KV and all supported families through their own selector while retaining the shared CHC filename generator",
+    "BUG 003: BGF 350M and 350E Page 2 show Brass impellers, 2 Stages, and Malaysia as Pump/Motor/Engine origin",
+    "BUG 004: BSW uses IE1 as the default motor efficiency in Selector, Product, payload, Assembly, Quote, and PDF paths",
+    "BUG 005: BSW Page 2 and Page 3 origins, pumpset dimensions, removed fields, exact two-column dimension table, and weight units are corrected",
+    "BUG 006: BSW Product actions remain right-aligned with Curve/Assembly/Quote or aligned Assembly/Quote positions when no curve exists",
+    "BUG 007: BSW Phase and Float Switch configuration generates T, TA, M, and MA suffixes and persists them through Selection, Product, Assembly, Quote, and PDF",
     "CR MASTER and ES MASTER files are unchanged"
   ]
 }

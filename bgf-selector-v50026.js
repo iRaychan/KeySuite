@@ -36,7 +36,7 @@
   const baseVisibleModel=keykvVisibleModelName;
   keykvVisibleModelName=function(model){return String(model||baseVisibleModel(model,false)||'').trim()};
   keysuiteKvPresentationAlias=function(value){return String(value??'').replace(/^KV\b/i,'BGF')};
-  keysuiteKvMaterialDisplay=function(){return {casing:'Cast Iron',impeller:'Bronze',shaft:'Stainless Steel'}};
+  keysuiteKvMaterialDisplay=function(){return {casing:'Cast Iron',impeller:'Brass',shaft:'Stainless Steel'}};
   keysuiteKvSealDisplay=function(){return 'Mechanical Seal'};
 
   const baseRenderSelected=renderSelected;

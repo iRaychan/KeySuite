@@ -1211,20 +1211,20 @@ function exportPDF(requestedFilename){
 
    <tr class="section-gap"><td colspan="4"></td></tr>
    <tr class="section table-block table-start"><td colspan="4">Pump</td></tr>
-    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
     <tr class="table-block"><td>Type</td><td>Twin Impeller Pump</td><td>Country of Manufacture</td><td>China</td></tr>
     <tr class="table-block"><td>Model</td><td class="model-value">${pdfDisplayModel}</td><td>Suction Size</td><td>G1½</td></tr>
     <tr class="table-block"><td>Speed</td><td>2900 rpm</td><td>Discharge Size</td><td>G1¼</td></tr>
    <tr class="table-block"><td class="material-heading no-bottom">Material: -</td><td class="no-bottom"></td><td>Efficiency</td><td>${formatPdfNumber(requiredEff,1)} %</td></tr>
    <tr class="table-block"><td class="material-label indent">Casing</td><td class="material-value">${keysuiteKvMaterialDisplay().casing}</td><td>Brake HP</td><td>${formatPdfNumber(requiredPower/0.746,1)} HP</td></tr>
-   <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>No. of Stage</td><td>${best.stages} Stages</td></tr>
+   <tr class="table-block"><td class="material-label indent">Impeller</td><td class="material-value">${keysuiteKvMaterialDisplay().impeller}</td><td>No. of Stage</td><td>2 Stages</td></tr>
     <tr class="table-block"><td class="material-last indent">Shaft</td><td class="material-last">Carbon Steel</td><td>NPSHr</td><td>${formatPdfNumber(requiredNpsh,1)} Mtr</td></tr>
     <tr class="table-block"><td>Shaft Seal</td><td>Mechanical Seal</td><td>Max Casing Pressure</td><td>10 Bar</td></tr>
     <tr class="table-block table-end"><td>Bearing Type</td><td>Ball</td><td>Max Inlet Pressure</td><td>3.5 Bar</td></tr>
 
    <tr class="section-gap"><td colspan="4"></td></tr>
     ${engineDrive?`<tr class="section table-block table-start"><td colspan="4">Engine</td></tr>
-    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
     <tr class="table-block"><td>Type</td><td>Air Cooled</td><td>Country of Manufacture</td><td>China</td></tr>
     <tr class="table-block"><td>Model</td><td>173</td><td>Fuel Consumption</td><td>≤ 280 g/hp.g</td></tr>
     <tr class="table-block"><td>Displacement</td><td>247 cc</td><td>Fuel Tank Capacity</td><td>2.5 Litres</td></tr>
@@ -1234,7 +1234,7 @@ function exportPDF(requestedFilename){
     <tr class="table-block"><td>Engine Speed</td><td>3600 rpm</td><td></td><td></td></tr>
     <tr class="table-block"><td>Maximum Output</td><td>5 HP</td><td></td><td></td></tr>
     <tr class="table-block table-end"><td>Continuous Output</td><td>4.7 HP</td><td></td><td></td></tr>`:`<tr class="section table-block table-start"><td colspan="4">Motor</td></tr>
-    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Australia</td></tr>
+    <tr class="table-block"><td>Brand</td><td>B.G.Reich</td><td>Country of Origin</td><td>Malaysia</td></tr>
     <tr class="table-block"><td>Type</td><td>TEFC</td><td>Country of Manufacture</td><td>China</td></tr>
     <tr class="table-block"><td>Model</td><td>BM3-2</td><td class="no-bottom field-heading">Efficiency: -</td><td class="no-bottom"></td></tr>
     <tr class="table-block"><td>Rated Power</td><td>3 HP</td><td class="no-top no-bottom indent">100%</td><td class="no-top no-bottom">81 %</td></tr>
@@ -1849,5 +1849,5 @@ alternatives.innerHTML='';
 
 
 
-<style>#enhancedToggleLabel{display:none!important}</style><script src="../bgf-selector-v50026.js?v=50027-startup2"></script>
+<style>#enhancedToggleLabel{display:none!important}</style><script src="../bgf-selector-v50026.js?v=50029"></script>
 </body></html>

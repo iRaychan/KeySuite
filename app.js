@@ -1240,9 +1240,10 @@ function exportPumpDataSheet(row,filename){
  if(!raw){alert('Pump data is unavailable for this item. Please select the pump again and add it to the quotation.');return}
  let pumpData;
  try{pumpData=JSON.parse(raw)}catch(e){alert('Unable to read the saved pump data.');return}
- const isEs=String(pumpData?.product||pumpData?.pumpData?.type||'').toUpperCase()==='ES'||/^KEYSELECTOR-ES/i.test(String(pumpData?.source||''));
- const frame=$(isEs?'selectorEsFrame':'selectorFrame');
- if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert(`${isEs?'ES':'CHC'} pump selector is not ready.`);return}
+ const family=String(pumpData?.family||pumpData?.product||pumpData?.pumpData?.type||'').toUpperCase(),source=String(pumpData?.source||'').toUpperCase();
+ const resolved=/KEYSELECTOR-ES/.test(source)||family==='ES'?'ES':family||(/KEYSUITE-KV/.test(source)?'KV':/KEYSUITE-CR/.test(source)?'CR':'CHC');
+ const frameId={ES:'selectorEsFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame',BFI:'selectorBfiFrame'}[resolved]||'selectorFrame',frame=$(frameId);
+ if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert(`${resolved} pump selector is not ready.`);return}
  frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:pumpData,filename:safePdfName(filename)},'*');
 }
 
@@ -1622,16 +1623,18 @@ window.addEventListener('message',function(event){
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';
  const fromKv=event.source===$('selectorKvFrame')?.contentWindow||event.source===$('productKvSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='KV';
  const fromBgf=event.source===$('selectorBgfFrame')?.contentWindow||event.source===$('productBgfSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BGF';
+ const fromBsw=event.source===$('selectorBswFrame')?.contentWindow||event.source===$('productBswSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BSW';
  if(event.data.type==='KEYSUITE_SELECTOR_HEIGHT'&&(fromEs||fromBfi)){const frame=$(fromBfi?'selectorBfiFrame':'selectorEsFrame'),height=Math.max(1200,Math.min(6000,Number(event.data.height)||(fromBfi?1900:2600)));if(frame)frame.style.height=`${Math.ceil(height+8)}px`;return}
  if(event.data.type==='KEYSUITE_SELECTION_CHANGED'){
    if(!fromEs&&!fromBfi)updateConnectionAvailabilityFromSelection(event.data.payload||{});
    return;
  }
- if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromKv?'KV':fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
+ if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromBsw?'BSW':fromKv?'KV':fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
  if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const rawPayload=event.data.payload||{};
  const p={...rawPayload};
  const route=event.data.route||pendingSelectionRoute||'quotation';pendingSelectionRoute='quotation';
+ if(fromBsw||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BSW'){window.KeySuiteBSW?.routeSelection?.(p,route);return}
  if(fromBgf||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BGF'){window.KeySuiteBGF?.routeSelection?.(p,route);return}
  if(fromKv||String(p.family||p.product||p.productFamily||'').toUpperCase()==='KV'){window.KeySuiteKVProduct?.routeSelection?.(p,route);return}
  if(fromCr||String(p.family||p.product||p.productFamily||'').toUpperCase()==='CR'){window.KeySuiteCRProduct?.routeSelection?.(p,route);return}

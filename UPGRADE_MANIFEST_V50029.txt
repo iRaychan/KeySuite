@@ -1,0 +1,19 @@
+KeySuite V5.00.29 upgrade from V5.00.28
+
+CHANGELOG_V50029.md
+README_UPGRADE_V50029.md
+RELEASE.json
+UPGRADE_MANIFEST_V50029.txt
+VERIFICATION_V50029.md
+VERSION.txt
+app.js
+bgf-selector-v50026.js
+bsw-selector-v50027.js
+bsw-v50027.js
+index.html
+manifest.json
+selector-bgf/index.html
+selector-bsw/index.html
+selector-kv/index.html
+sw.js
+v50029-version-lock.js
