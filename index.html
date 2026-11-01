@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.26</title>
-  <script>window.KEYSUITE_VERSION='5.00.26';window.KEYSUITE_BUILD='V5.00.26';</script>
+  <title>KeySuite V5.00.27</title>
+  <script>window.KEYSUITE_VERSION='5.00.27';window.KEYSUITE_BUILD='V5.00.27';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -638,15 +638,15 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </style>
 
   <style id="v42853-selection-scale">
-    #selectorEs,#selectorCr,#selectorKv,#selectorBgf,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
-    #selectorCrFrame,#selectorKvFrame,#selectorBgfFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
+    #selectorEs,#selectorCr,#selectorKv,#selectorBgf,#selectorBsw,#selectorIso{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+    #selectorCrFrame,#selectorKvFrame,#selectorBgfFrame,#selectorBswFrame,#selectorIsoFrame{display:block;width:100%;max-width:100%;min-width:0}
     .card.selection-curve-shell{width:100%;min-width:0;padding:0!important;margin-bottom:0!important;border:1px solid var(--line)!important;border-radius:12px!important;background:#fff!important;box-shadow:var(--shadow)!important;overflow:hidden!important}
   </style>
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.26</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.27</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -662,17 +662,17 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.26</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.27</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
       <div class="nav-group" data-nav-group="selectorMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="selectorMenu"><span>Selection</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorKv">KV</button><button data-page="selectorBfi">BFI</button><button data-page="selectorBgf">BGF</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
+        <div class="nav-submenu"><button data-page="selector" data-generation="G2">CHC C6</button><button data-page="selectorCr">CR</button><button data-page="selectorKv">KV</button><button data-page="selectorBfi">BFI</button><button data-page="selectorBgf">BGF</button><button data-page="selectorBsw">BSW</button><button data-page="selectorEs">ES</button><button data-page="selectorIso">ISO</button></div>
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productKv">KV</button><button data-page="productBgf">BGF</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productIso">ISO</button><button data-page="productMotor">Motor</button></div></details></div></div>
+        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productKv">KV</button><button data-page="productBgf">BGF</button><button data-page="productBsw">BSW</button><button data-page="productBfi">BFI</button><button data-page="productEs">End Suction</button><button data-page="productIso">ISO</button><button data-page="productMotor">Motor</button></div></details></div></div>
       </div>
       <button data-page="keyLab">KeyLab</button>
       <button data-page="quotation">Quotation</button>
@@ -688,7 +688,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.26</div>
+    <div class="suite-version">KeySuite V5.00.27</div>
   </aside>
 
   <main>
@@ -895,15 +895,19 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50026&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50026&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 
     <section id="selectorBgf" class="page">
       <div class="page-title-row"><div><h1>Selector · BGF</h1><div class="muted">Select BGF 350M at its fixed motor speed or BGF 350E at a variable engine speed using verified workbook curve data.</div></div></div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorBgfFrame" src="selector-bgf/index.html?v=50026&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" data-src="selector-bgf/index.html?v=50026&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" title="KeySelector BGF Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorBgfFrame" src="selector-bgf/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" data-src="selector-bgf/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BGF" title="KeySelector BGF Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
+    </section>
+    <section id="selectorBsw" class="page">
+      <div class="page-title-row"><div><h1>Selector · BSW</h1><div class="muted">Submersible pumps · only workbook-complete hydraulic curves are selectable; BSW has no NPSH.</div></div></div>
+      <div class="selector-shell"><iframe id="selectorBswFrame" src="selector-bsw/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BSW" data-src="selector-bsw/index.html?v=50027&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=BSW" title="KeySelector BSW Series" style="width:100%;height:1900px;border:0;display:block"></iframe></div>
     </section>
 
     <section id="selectorBfi" class="page">
@@ -932,7 +936,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="page-title-row"><div><h1>Product · CR</h1><div class="muted">B.G.Reich CR vertical multistage pump range. Search by series or model, then open the curve or route the configured pump to Assembly / Quote.</div></div></div>
       <div class="card product-toolbar">
         <div><label>Model</label><input id="crProductModelInput" list="crProductModelOptions" placeholder="Example: CR 32-4"><datalist id="crProductModelOptions"></datalist></div>
-        <div><label>Material</label><select id="crProductMaterial" data-default-value="CR"><option value="CR" selected>CR</option><option value="CRS">CRS</option><option value="CRN">CRN</option></select></div>
+        <div><label>Material</label><select id="crProductMaterial" data-default-value="CR"><option value="CR" selected>SS304 (Cast Iron Connection)</option><option value="CRS">SS304</option><option value="CRN">SS316</option></select></div>
         <div><label>Mechanical Seal</label><select id="crProductSeal" data-default-value="Car / Sic"><option value="Car / Sic" selected>Carbon V Silicon Carbide (Ca SiC)</option><option value="Sic / Sic">Silicon Carbide V Silicon Carbide (SiC SiC)</option><option value="TC / TC">Tungsten V Tungsten (TC TC)</option></select></div>
         <div><label>Elastomer</label><select id="crProductElastomer" data-default-value="Viton"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
         <div><label>Connection</label><select id="crProductConnection" data-default-value="round"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
@@ -949,7 +953,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="page-title-row"><div><h1>Product · KV</h1><div class="muted">B.G.Reich KV vertical multistage pump range. Only complete KV1 models from the approved workbook are shown.</div></div></div>
       <div class="card product-toolbar kv-product-toolbar">
         <div><label>Model</label><input id="kvProductModelInput" list="kvProductModelOptions" placeholder="Example: KV 1-20"><datalist id="kvProductModelOptions"></datalist></div>
-        <div><label>Material</label><select id="kvProductMaterial" data-default-value="KV"><option value="KV" selected>KV</option><option value="KVC">KVC</option><option value="KVN">KVN</option></select></div>
+        <div><label>Material</label><select id="kvProductMaterial" data-default-value="KV"><option value="KVC">SS304 (Cast Iron Connection)</option><option value="KV" selected>SS304</option><option value="KVN">SS316</option></select></div>
         <div><label>Mechanical Seal</label><select id="kvProductSeal" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
         <div><label>O-Ring</label><select id="kvProductElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvProductBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
@@ -958,7 +962,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><h2>KV Series</h2><div id="kvProductSeriesList" class="product-series-list"></div></div>
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="kvProductSeriesTitle" style="margin:0">KV Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
       </div>
-      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50026" title="KV Product Curve" style="display:none"></iframe>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50027" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -1428,6 +1432,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                   <button class="category-product-button" type="button" data-category-product="KV">KV</button>
                   <button class="category-product-button" type="button" data-category-product="BFI">BFI</button>
                   <button class="category-product-button" type="button" data-category-product="BGF">BGF</button>
+                  <button class="category-product-button" type="button" data-category-product="BSW">BSW</button>
                   <button class="category-product-button" type="button" data-category-product="ES">ES</button><button class="category-product-button" type="button" data-category-product="ISO">ISO</button>
                   <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
                   <button class="category-product-button" type="button" data-category-product="KEYPLC">KeyPLC</button>
@@ -1542,6 +1547,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="bgfPriceList">
           <span class="module-icon">BGF</span><h2>BGF</h2><p>Maintain BGF 350M, BGF 350E, BGF 400 and BGF 500 source prices from the supplied BGF reference.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="bswPriceList"><span class="module-icon">BSW</span><h2>BSW</h2><p>Maintain the BSW V1.1 submersible pump catalogue and source-price status.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="isoPriceList"><span class="module-icon">ISO</span><h2>ISO End Suction</h2><p>Maintain independent ISO source prices by material, currency and rarity.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="esPriceList">
           <span class="module-icon">ES</span><h2>End Suction</h2><p>Maintain B.G.Reich ES source prices by material construction.</p><span class="module-order">OPEN PRICE LIST</span>
@@ -1774,7 +1780,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     <section id="productBgf" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · BGF</h1><div class="muted">Close-coupled pumps · Performance curves appear only where workbook data is available</div></div></div>
       <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Drive</th><th>Suction × Discharge</th><th></th></tr></thead><tbody id="bgfProductRows"></tbody></table></div><p id="bgfQuoteMessage" role="status"></p></div>
-      <iframe id="productBgfSelectorFrame" src="about:blank" data-src="selector-bgf/index.html?product=1&amp;v=50026" title="BGF Product Curve" style="display:none"></iframe>
+      <iframe id="productBgfSelectorFrame" src="about:blank" data-src="selector-bgf/index.html?product=1&amp;v=50027" title="BGF Product Curve" style="display:none"></iframe>
     </section>
     <section id="bgfPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
@@ -1785,6 +1791,17 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="pricelist-note" style="margin-bottom:12px">The supplied workbook contains no positive price values. Blank source prices remain 0 and unavailable for quotation until an Owner enters and saves them.</div>
         <div class="table-wrap" style="max-height:680px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Drive</th><th>Suction × Discharge</th><th>Stages</th><th>Source Price</th><th>Rarity</th><th></th></tr></thead><tbody id="bgfPriceRows"></tbody></table></div>
       </div>
+    </section>
+
+    <section id="productBsw" class="page">
+      <div class="page-title-row"><div><h1>B.G.Reich · BSW</h1><div class="muted">BSW V1.1 catalogue · families BSW 50 through BSW 600</div></div></div>
+      <div class="product-layout"><div class="card"><h2>BSW Series</h2><div id="bswProductSeriesList" class="product-series-list"></div></div><div class="card"><div class="page-title-row"><div><h2 id="bswProductSeriesTitle">BSW Models</h2><div id="bswProductCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="bswProductSearch" placeholder="Example: BSW 50F"></div></div><div id="bswProductGrid" class="product-model-grid"></div><p id="bswProductMessage" role="status"></p></div></div>
+      <iframe id="productBswSelectorFrame" src="about:blank" data-src="selector-bsw/index.html?product=1&amp;v=50027" title="BSW Product Curve" style="display:none"></iframe>
+    </section>
+    <section id="bswPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>BSW Price List</h1><div class="muted">Source: 004 - BSW 261101 - V1.1.xlsx · workbook zeros remain unpriced.</div></div></div>
+      <div id="bswPriceListMessage" class="auth-message"></div><div class="card"><div class="page-title-row"><div><h2>BSW Models</h2><div id="bswPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="bswPriceSearch" placeholder="Example: BSW 100"></div></div><div class="table-wrap" style="max-height:680px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Family</th><th>Power</th><th>Speed</th><th>Connection</th><th>Source status</th></tr></thead><tbody id="bswPriceRows"></tbody></table></div></div>
     </section>
 
 
@@ -1961,6 +1978,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="CR">CR</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BFI">BFI</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BGF">BGF</button>
+            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BSW">BSW</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="COUPLING">Coupling</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="ES">ES</button>
             <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="GWS">GWS</button>
@@ -2212,12 +2230,12 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
-<script src="supabase/functions/shared-kv/kv-data.js?v=50018"></script>
+<script src="supabase/functions/shared-kv/kv-data.js?v=50027"></script><script src="bsw-data-v50027.js?v=50027"></script>
 <script src="kv-fixes-v50026.js?v=50026"></script>
 <script src="kv-price-data-v50017.js?v=50018"></script>
 <script src="pdf-optimization.js?v=42821"></script>
 <script src="app.js?v=50018"></script>
-<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50016"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50027"></script><script src="iso-family-labels-v50027.js?v=50027"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
@@ -2235,6 +2253,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-curve-v50021.js?v=50026"></script>
 <script src="bgf-v50006.js?v=50026"></script>
+<script src="bsw-v50027.js?v=50027"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=50013"></script>
 <script src="motor.js?v=409"></script>
@@ -2340,8 +2359,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 })();
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
+<script src="kv-product-families-v50027.js?v=50027"></script>
 <script src="v41200-bootstrap.js?v=42922"></script>
-<script src="v50026-version-lock.js?v=50026"></script>
+<script src="v50027-version-lock.js?v=50027"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2357,8 +2377,8 @@ document.addEventListener('click',event=>{
 <script id="v42317-product-action-navigation">
 (()=>{
   'use strict';
-  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorKv,#selectorBfi,#selectorBgf,#productChc,#productCr,#productKv,#productBfi,#productBgf';
-  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorKvFrame','selectorBfiFrame','selectorBgfFrame','productSelectorFrame','productCrSelectorFrame','productKvSelectorFrame','productBfiSelectorFrame','productBgfSelectorFrame'];
+  const ACTION_SECTION_SELECTOR='#selector,#selectorCr,#selectorKv,#selectorBfi,#selectorBgf,#selectorBsw,#productChc,#productCr,#productKv,#productBfi,#productBgf,#productBsw';
+  const FRAME_IDS=['selectorFrame','selectorCrFrame','selectorKvFrame','selectorBfiFrame','selectorBgfFrame','selectorBswFrame','productSelectorFrame','productCrSelectorFrame','productKvSelectorFrame','productBfiSelectorFrame','productBgfSelectorFrame','productBswSelectorFrame'];
   let navigationTimer=0;
 
   function actionOfButton(button){

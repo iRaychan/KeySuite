@@ -177,6 +177,7 @@ html.macos-safari .curve-grid{grid-template-columns:minmax(0,1.55fr) minmax(0,1f
 @media(max-width:1050px){html.macos-safari main{grid-template-columns:320px minmax(0,1fr)}html.macos-safari .curve-grid{grid-template-columns:1fr}}
 @media(max-width:850px){html.macos-safari main{grid-template-columns:1fr}}
 
+.impeller-editor{margin:0 0 14px;border:1px solid #cfe0eb;border-radius:12px;background:#f8fbfd;overflow:hidden}.impeller-editor-summary{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;cursor:pointer;list-style:none}.impeller-editor-summary::-webkit-details-marker{display:none}.impeller-editor-title{font-size:14px;font-weight:900;color:#173d55}.impeller-editor-chevron{display:inline-block;margin-right:7px;transition:transform .15s}.impeller-editor[open] .impeller-editor-chevron{transform:rotate(90deg)}.impeller-editor-sub{font-size:11px;color:#667d8c;margin-top:3px}.impeller-editor-badge{font-size:11px;font-weight:800;color:#075d91;background:#e8f3fa;border:1px solid #b9d7e8;border-radius:999px;padding:5px 9px;white-space:nowrap}.impeller-editor-body{padding:0 14px 13px;border-top:1px solid #e0eaf0}.impeller-editor-grid{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:9px;padding-top:11px}.impeller-editor-field label{font-size:10px;text-transform:uppercase}.impeller-editor-field select{width:100%;height:36px}.impeller-editor-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.impeller-editor-meta>div{background:#fff;border:1px solid #dce8ef;border-radius:8px;padding:8px 9px}.impeller-editor-meta span{display:block;font-size:10px;color:#718593}.impeller-editor-meta b{font-size:12px;color:#173d55}.impeller-editor-note{font-size:10.5px;color:#6d808c;margin-top:8px}@media(max-width:850px){.impeller-editor-grid,.impeller-editor-meta{grid-template-columns:1fr}}
 </style>
 
 <meta name="theme-color" content="#14497a">
@@ -972,7 +973,7 @@ function keysuiteKvMaterialDisplay(){
  try{if(window.parent&&window.parent!==window){const productMode=!!o.product_mode||new URLSearchParams(location.search).get('product')==='1',control=window.parent.document.getElementById(productMode?'kvProductMaterial':'kvPumpMaterial');if(control?.value)raw=control.value}}catch(_){}
  const code=raw.toUpperCase();
  if(code==='KVN')return {casing:'Stainless Steel 316',impeller:'Stainless Steel 316',shaft:'Stainless Steel 316'};
- if(code==='KVC')return {casing:'SS304 (Cast Iron Connection)',impeller:'Stainless Steel 304',shaft:'Stainless Steel 304'};
+ if(code==='KVC')return {casing:'SS (CI Connection)',impeller:'Stainless Steel',shaft:'Stainless Steel'};
  return {casing:'Stainless Steel 304',impeller:'Stainless Steel 304',shaft:'Stainless Steel 304'};
 }
 function keysuiteKvSealDisplay(){
@@ -1069,7 +1070,8 @@ function exportPDF(requestedFilename){
  const pumpEnvelope=(Number(dimensionData.d1)||0)/2+(Number(dimensionData.d2)||0);
  const pumpsetLength=Math.max(pumpEnvelope,Number(dimensionData.pumpL)||0);
  const pumpsetWidth=Math.max(pumpEnvelope,Number(dimensionData.pumpW)||0);
- const dimensionImage=keykvG1DimensionImage(best.series);
+ const dimensionImage=best?.dimensions?.drawing||keykvG1DimensionImage(best.series);
+ const excelDimensionRows=Object.entries(best?.dimensions||{}).filter(([k,v])=>k!=='drawing'&&v!==null&&v!==undefined&&v!=='');
  const dimValue=v=>(v===null||v===undefined||v==="")?"-":`${formatPdfNumber(Number(v),0)} mm`;
 
  const pdfFollow=(document.getElementById('pdfFollowScreen')||{}).checked!==false;
@@ -1262,10 +1264,13 @@ function exportPDF(requestedFilename){
  <script src="../pdf-optimization.js?v=42510"><\/script>
  <script>
 const __KEYSUITE_LOCKED_PDF_TITLE__=${JSON.stringify(pdfFileTitle)};
+const __KEYSUITE_EXCEL_DIMENSIONS__=${JSON.stringify(excelDimensionRows)};
 function __keysuiteLockPdfTitle(){try{document.title=__KEYSUITE_LOCKED_PDF_TITLE__;}catch(_){}}
 __keysuiteLockPdfTitle();
 window.addEventListener('beforeprint',__keysuiteLockPdfTitle);
 window.onload=async()=>{
+  const escDimension=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(__KEYSUITE_EXCEL_DIMENSIONS__.length){const grid=document.querySelector('.dimension-grid');if(grid)grid.innerHTML=__KEYSUITE_EXCEL_DIMENSIONS__.map(r=>'<div>'+escDimension(r[0])+'</div><div>'+escDimension(r[1])+(typeof r[1]==='number'?' mm':'')+'</div>').join('')}
   const images=[...document.images];
   await Promise.all(images.map(img=>img.complete&&img.naturalWidth>0 ? Promise.resolve() : (typeof img.decode==='function'?img.decode().catch(()=>undefined):new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;}))));
   if(document.fonts&&document.fonts.ready){try{await document.fonts.ready;}catch(e){}}
@@ -1833,7 +1838,5 @@ alternatives.innerHTML='';
  });
 })();
 </script>
-
-
-
+<script src="../kv-impeller-config-v50027.js?v=50027"></script>
 </body></html>

@@ -171,7 +171,7 @@
   function pumpDataOfRow(row){try{return JSON.parse(row?.dataset?.pumpData||'{}')}catch(_){return {}}}
   function sourceFamily(source,row=null){return String(source?.product_family||source?.family||source?.productFamily||row?.dataset?.productFamily||'').toUpperCase()}
   function inferFamilyFromPage(page=''){
-    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorEs:'ES',selectorIso:'ISO'};
+    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productBsw:'BSW',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorBsw:'BSW',selectorEs:'ES',selectorIso:'ISO'};
     return map[page]||'';
   }
   function inferSeries(model,source={}){

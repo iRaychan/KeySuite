@@ -44,7 +44,7 @@
   }
 
   const familyLabel=family=>family==='CHC_G1'?'CHC G1':family==='CHC_G2'?'CHC G2':String(family||'');
-  const PRODUCT_GROUP_LABELS={BASEPLATE:'Baseplate',BFI:'BFI',BGF:'BGF',CHC_G1:'CHC G1',CHC_G2:'CHC G2',COUPLING:'Coupling',CR:'CR',KV:'KV',ES:'ES',GWS:'GWS',ISO:'ISO',KEYPLC:'KeyPLC',MANIFOLD:'Manifold',MOTOR:'Motor'};
+  const PRODUCT_GROUP_LABELS={BASEPLATE:'Baseplate',BFI:'BFI',BGF:'BGF',BSW:'BSW',CHC_G1:'CHC G1',CHC_G2:'CHC G2',COUPLING:'Coupling',CR:'CR',KV:'KV',ES:'ES',GWS:'GWS',ISO:'ISO',KEYPLC:'KeyPLC',MANIFOLD:'Manifold',MOTOR:'Motor'};
   function productGroupRegistry(){
     const groups=new Map();
     document.querySelectorAll('[data-category-product]').forEach(button=>{
@@ -60,7 +60,7 @@
     const groups=productGroupRegistry();
     host.innerHTML=groups.map(group=>`<button type="button" class="pricing-family-tab ${group.code===selectedPricingFamily?'active':''}" data-pricing-family="${e(group.code)}" role="tab">${e(group.label)}</button>`).join('');
   }
-  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','KV','BFI','BGF','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
+  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','KV','BFI','BGF','BSW','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
   function multipliers(family='CHC_G2'){
     const raw=normalizedFamily(family),code=raw==='CHC'?'CHC_G2':raw;
     const book=secureData.productMultipliers||{};

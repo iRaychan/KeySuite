@@ -9,9 +9,11 @@
   const targets={
     selector:{frameId:'selectorFrame',readyEvent:'KEYSUITE_CHC_VIEWPORT_READY'},
     selectorCr:{frameId:'selectorCrFrame',readyEvent:'KEYSUITE_CR_VIEWPORT_READY',frameKey:'CR'},
-    selectorKv:{frameId:'selectorKvFrame',readyEvent:'KEYSUITE_KV_VIEWPORT_READY',frameKey:'KV'}
+    selectorKv:{frameId:'selectorKvFrame',readyEvent:'KEYSUITE_KV_VIEWPORT_READY',frameKey:'KV'},
+    selectorBgf:{frameId:'selectorBgfFrame',readyEvent:'KEYSUITE_KV_VIEWPORT_READY',frameKey:'BGF'},
+    selectorBsw:{frameId:'selectorBswFrame',readyEvent:'KEYSUITE_KV_VIEWPORT_READY',frameKey:'BSW'}
   };
-  const sequences={selector:0,selectorCr:0,selectorKv:0};
+  const sequences={selector:0,selectorCr:0,selectorKv:0,selectorBgf:0,selectorBsw:0};
   const section=page=>document.getElementById(page);
   const frame=page=>document.getElementById(targets[page]?.frameId||'');
   const isActive=page=>section(page)?.classList.contains('active');
