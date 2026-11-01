@@ -5,8 +5,14 @@
   <div class="auth-brand">KeySuite <small>old</small></div>
   <div class="brand">KeySuite <small>old</small></div>
   <div class="suite-version">old</div>
+  <select id="kvProductMaterial"><option value="KV" selected>KV</option></select>
+  <div id="kvProductSeriesList"><button data-kv-series="KV 1">KV 1</button></div>
+  <div id="kvProductModelGrid"><h3>KV 1-20</h3></div>
+  <div id="isoProductSeriesList"><button class="active" data-iso-series="32">32</button></div>
+  <h2 id="isoProductSeriesTitle">ISO Models</h2>
   <output id="status">WAITING</output>
   <script>
+    window.KeySuiteKVData = { available_families: ['KV 1', 'KV 600'] };
     setTimeout(() => {
       const expected = ['V5.00.27', 'Full Suite V5.00.27', 'KeySuite V5.00.27'];
       const actual = [
@@ -14,11 +20,18 @@
         document.querySelector('.brand small').textContent,
         document.querySelector('.suite-version').textContent
       ];
-      const passed = actual.every((value, index) => value === expected[index]);
-      document.getElementById('status').textContent = passed ? 'PASS: timer fired and version text is stable' : `FAIL: ${actual.join(' | ')}`;
+      const observerValues = [
+        document.querySelector('#kvProductModelGrid h3').textContent,
+        document.querySelector('#isoProductSeriesList [data-iso-series]').textContent,
+        document.getElementById('isoProductSeriesTitle').textContent
+      ];
+      const passed = actual.every((value, index) => value === expected[index]) && observerValues.join('|') === 'KV 1-20|ES 32|ES 32 Models';
+      document.getElementById('status').textContent = passed ? 'PASS: startup timer fired and all observer-driven labels are stable' : `FAIL: ${actual.concat(observerValues).join(' | ')}`;
       document.body.dataset.testResult = passed ? 'pass' : 'fail';
     }, 250);
   </script>
-  <script src="../../v50027-version-lock.js?v=50027-hotfix1"></script>
+  <script src="../../iso-family-labels-v50027.js?v=50027-startup2"></script>
+  <script src="../../kv-product-families-v50027.js?v=50027-startup2"></script>
+  <script src="../../v50027-version-lock.js?v=50027-startup2"></script>
 </body>
 </html>

@@ -10,6 +10,8 @@
 - ES MASTER SHA-256: `93230b96c5ba91b6bbb920d6851281183b6ad9dfd4c925206379eb7974284dbf` (unchanged).
 - BSW NPSH: no workbook NPSH is exposed; on-screen NPSH card is removed and PDF chart array contains only Head, Efficiency, and Power.
 - Supabase migration: passed on connected `KeySuite` project; both V5.00.27 migrations are recorded and `ks_products_bsw` contains 178 rows across 12 families (50–600), with RLS enabled.
-- Startup regression: passed in a real browser using `tests/v50027/version-lock-startup-regression.html`; the timer completed and the version labels remained stable after the MutationObserver was installed.
+- Startup regression: passed in a real browser using `tests/v50027/version-lock-startup-regression.html`; the timer completed, all three observer-driven label sets stabilized, and the incomplete KV family was added exactly once.
+- Full application bootstrap: passed over local HTTP; the application reached the protected Sign-in boundary and remained responsive after an extended check. Newly introduced BGF/BSW selector adapter scope errors were removed. Remaining unauthenticated warnings are known database fallbacks and are not V5.00.27 startup regressions.
 - Live deployment comparison: the deployed `index.html`, `auth.js`, `app.js`, `pricing.js`, and BSW script matched the original V5.00.27 build byte-for-byte. The protected startup query itself was unchanged from V5.00.26 except for local BSW rule normalization; it does not query `ks_products_bsw`.
+- Supabase prerequisite audit: `ks_products_bsw` exists with 178 rows, two RLS policies, authenticated SELECT access, and BSW support in the category-currency RPC. No additional migration or Edge Function deployment is required.
 - The full build and the focused startup regression page were served locally over HTTP. The focused browser test passed; static, syntax, data, hydraulic, live-deployment, and Supabase log checks also passed.

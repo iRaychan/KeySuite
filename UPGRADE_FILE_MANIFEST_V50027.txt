@@ -2,6 +2,7 @@ assets/v50027/**
 app.js
 auth.js
 bgf-data-v50027.js
+bgf-selector-v50026.js
 bsw-data-v50027.js
 bsw-selector-v50027.js
 bsw-v50027.js

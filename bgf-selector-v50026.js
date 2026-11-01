@@ -61,12 +61,12 @@
   }
   run=runBgf;go.onclick=runBgf;
 
-  const baseCurrentSelection=currentSelection;
-  currentSelection=function(){
+  const baseCurrentSelection=window.__KEYSUITE_CURRENT_SELECTION;
+  const bgfCurrentSelection=function(){
     const payload=baseCurrentSelection();if(!payload)return null;
     const engine=/E$/i.test(String(payload.model||'')),rpm=engine?Math.max(1800,Math.min(3500,Number($('bgfEngineRpm')?.value)||payload.speed_rpm||2900)):2900;
     return {...payload,source:'KeySuite-BGF-V5.00.26',family:'BGF',product:'BGF',generation_code:'BGF',keysuite_generation_code:'BGF',keysuite_product_group_code:'BGF',keysuite_price_group_code:'BGF',drive_type:engine?'Engine':'Motor',speed_rpm:rpm,operating_speed_rpm:rpm,frequency_hz:engine?null:50,motor_voltage:engine?null:415,motor_phase:engine?null:'3Ph',keysuite_material:'CI / BZ / SS / Mechanical Seal',keysuite_seal:'Mechanical Seal',keysuite_elastomer:'',keysuite_connection_type:'fixed',keysuite_bare_shaft:false,keysuite_supply_mode:'COMPLETE'};
   };
-  window.__KEYSUITE_CURRENT_SELECTION=currentSelection;
+  window.__KEYSUITE_CURRENT_SELECTION=bgfCurrentSelection;
   parent.postMessage({type:'KEYSUITE_PRODUCT_FRAME_READY',family:'BGF'},'*');
 })();
