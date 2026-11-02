@@ -1573,7 +1573,7 @@ function esSelectionCapacity(p={}){
 }
 function esSelectionDescription(found,p={}){
  const seal=String(p.keysuite_seal||'Carbon Ceramic (Ca Ce)'),elastomer=String(p.keysuite_elastomer||'Viton');
- const base=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||p.keysuite_material,{seal,elastomer,bareShaft:selectionBareMode(p,false)})||String(p.description||'').trim();
+ const base=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||p.keysuite_material,{seal,elastomer,bareShaft:selectionBareMode(p,false),impellerMm:p.impeller_mm??p.pumpData?.impellerMm,trimmed:p.impeller_trimmed===true})||String(p.description||'').trim();
  const capacity=esSelectionCapacity(p);return [capacity?capacityLine(capacity):'',base].filter(Boolean).join('\n');
 }
 let esCompleteQuoteRouterPromise=null;
@@ -1600,12 +1600,12 @@ async function routeEsSelection(p={},route='quotation'){
  const pricingMode=(target==='assembly'||!bare)?'assembly':'quotation';
  const found=window.KeySuitePricing?.findEsPrice?.(id,material,{pricingMode,seal:p.keysuite_seal,elastomer:p.keysuite_elastomer});
  if(!found||window.KeySuitePricing.quoteBlockReason(found.calc)){
-   const description=window.KeySuitePricing.esDescription({model:p.quotation_model||p.model},material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare});
+   const description=window.KeySuitePricing.esDescription({model:p.quotation_model||p.model},material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true});
    const capacity=esSelectionCapacity(p);
    void window.KeySuiteManualPrice.offer({model:p.quotation_model||p.model,description:[capacity?capacityLine(capacity):'',description,!bare?`Motor: ${p.motor_hp||'-'}HP ${p.pole||2}Pole ${p.motor_efficiency_class||'IE3'}`:''].filter(Boolean).join('\n'),pumpData:p,productFamily:'ES',pricingSource:bare?{product_family:'ES',product_id:id,material,variant:material,seal_material:p.keysuite_seal,elastomer:p.keysuite_elastomer}:{}},window.KeySuitePricing.quoteBlockReason(found?.calc));return;
  }
  const capacity=esSelectionCapacity(p),pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
- const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare})||String(p.description||'');
+ const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
  const pumpDescription=String(pricedDescription||'').trim();
  const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource,pumpData:p,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
  if(target==='assembly'){await window.KeySuiteAssembly?.addItem?.(pumpItem,{type:'pumpset',section:'pump',replacePumpset:true});return}

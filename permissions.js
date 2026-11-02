@@ -8,6 +8,7 @@
     admin:{key_dashboard:'none',keyai_access:'none',keyai_openai_control:'none',keyai_sender_assign:'none',manage_roles:'none',customer_settings:'none',company_pricing:'none',manage_categories:'none',manage_price_list:'none',change_fuel_price:'none',use_quick_selection:'full',use_selector:'full',use_product:'full',choose_brand_series:'full',view_customers:'all',edit_customers:'all',customer_assignment:'full',create_quotations:'full',view_quotations:'all',delete_quotation_history:'none',own_profile:'full'},
     owner:{key_dashboard:'full',keyai_access:'full',keyai_openai_control:'full',keyai_sender_assign:'full',manage_roles:'full',customer_settings:'full',company_pricing:'full',manage_categories:'full',manage_price_list:'full',change_fuel_price:'full',use_quick_selection:'full',use_selector:'full',use_product:'full',choose_brand_series:'full',view_customers:'all',edit_customers:'all',customer_assignment:'full',create_quotations:'full',view_quotations:'all',delete_quotation_history:'full',own_profile:'full'}
   };
+  Object.keys(DEFAULTS).forEach(role=>{DEFAULTS[role].view_costing_breakdown=role==='owner'?'full':'none'});
   let matrix=structuredClone(DEFAULTS),roles=[...BASE_ROLES];
   const normalize=value=>String(value||'none').trim().toLowerCase();
   const validRole=value=>normalize(value).replace(/\s+/g,'_').replace(/[^a-z0-9_-]/g,'').slice(0,40);

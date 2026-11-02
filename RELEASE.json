@@ -1,18 +1,18 @@
 {
-  "version": "5.00.30",
-  "baseline": "5.00.29",
-  "upgrade_supported_from": "5.00.29",
-  "new_database_migration_required": false,
-  "supabase_deployment_required": false,
+  "version": "5.00.31",
+  "baseline": "5.00.30",
+  "upgrade_supported_from": "5.00.30",
+  "new_database_migration_required": true,
+  "supabase_deployment_required": true,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "BUG 001: BGF Quote buttons remain in the same far-right column, with or without an actual Curve action",
-    "BUG 002: BGF Product curves now complete the shared frame-ready flow and reveal actual BGF 350M and BGF 350E curve data",
-    "BUG 003: BSW Product curves now complete the shared frame-ready flow and configured M/T/MA/TA models map to their base engineering curve model",
-    "BUG 004: the BSW Float Switch checkbox and label are aligned on one horizontal row below Head",
-    "BUG 005: PDF filenames retain sequential Item numbering, Clear Customer resets that counter, and the internal PDF model heading excludes the Item filename prefix",
-    "CR MASTER and ES MASTER files are unchanged"
+    "BSW Product Curve frame readiness repaired",
+    "KV/KVC/KVN independent price books added without overwriting existing KV prices",
+    "Duplicate customer Brand/Series price-preference entries suppressed by canonical key",
+    "ES trimmed impeller diameter is carried into descriptions and snapshots",
+    "Permission-gated read-only Costing Audit added",
+    "KV 261102 V1.3 imported: 171 complete KV1-KV5 models; incomplete rows excluded"
   ]
 }

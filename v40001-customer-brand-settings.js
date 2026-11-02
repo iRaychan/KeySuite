@@ -157,7 +157,8 @@
     return out;
   }
   function allPriceEntries(){
-    return rawPriceEntries().filter(e=>isOwnerAccount()||accountAllows(e.brand.id,e.family));
+    const seen=new Set();
+    return rawPriceEntries().filter(e=>{if(seen.has(e.key))return false;seen.add(e.key);return isOwnerAccount()||accountAllows(e.brand.id,e.family)});
   }
   function visiblePriceBrands(){
     const allowed=new Set(allPriceEntries().map(e=>String(e.brand.id)));

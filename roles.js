@@ -19,6 +19,7 @@
   };
   const LEVEL_LABELS={none:'No',view:'View',own:'Own',assigned:'Assigned',all:'All',full:'Full'};
   const PERMISSION_ROWS=[
+    {key:'view_costing_breakdown',label:'View Costing Breakdown',options:['none','full']},
     {key:'key_dashboard',label:'Key button / Key Dashboard',options:['none','full'],className:'permission-key-row'},
     {key:'keyai_access',label:'KeyBot access',options:['none','full']},
     {key:'keyai_openai_control',label:'KeyBot OpenAI ON / OFF',options:['none','full']},
