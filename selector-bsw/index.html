@@ -16,6 +16,7 @@ header h1{margin:0 0 5px;font-size:27px}header p{margin:0;opacity:.9}
 main{max-width:1220px;margin:20px auto;padding:0 15px;display:grid;grid-template-columns:330px 1fr;gap:17px}
 .card{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 5px 18px rgba(20,54,79,.06)}
 label{font-weight:700;display:block;margin:13px 0 6px}
+.bsw-float-switch{display:flex;align-items:center;gap:8px;margin:13px 0 6px}.bsw-float-switch input{width:auto;min-width:0;margin:0;padding:0;flex:0 0 auto}
 .row{display:grid;grid-template-columns:1fr 92px;gap:8px}
 input,select,button{width:100%;padding:10px;border:1px solid #bbc9d4;border-radius:8px;font-size:15px}
 button{margin-top:17px;background:var(--blue);color:#fff;border:0;font-weight:800;cursor:pointer}
@@ -1765,8 +1766,12 @@ alternatives.innerHTML='';
    const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=hz.toFixed(1);hzHidden.value=String(hz);selectionState.curveHz=hz;selectionState.hz=hz;
   }catch(e){}
  }
+ function keysuiteBswEngineeringModelName(modelName){
+  const raw=String(modelName||'').trim(),exact=DB.models.find(m=>String(m.model).toLowerCase()===raw.toLowerCase());
+  return exact?.model||raw.replace(/(-\d+H?)(?:TA|MA|T|M)$/i,'$1');
+ }
  function prepareProductModel(modelName,opts={}){
-  const model=DB.models.find(m=>String(m.model).toLowerCase()===String(modelName||'').toLowerCase());if(!model)return null;
+  const engineeringModel=keysuiteBswEngineeringModelName(modelName),model=DB.models.find(m=>String(m.model).toLowerCase()===engineeringModel.toLowerCase());if(!model)return null;
   productModelName=model.model;
   const curve=DB.curves[model.series];if(!curve)return null;
   let idx=0,max=-Infinity;(curve.efficiency||[]).forEach((v,i)=>{if(Number(v)>max){max=Number(v);idx=i}});
@@ -1782,7 +1787,7 @@ alternatives.innerHTML='';
   syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:model.model,display_model:keykvVisibleModelName(model.model),flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
  }
  function applyProductDuty(flowM3h,headM,meta={}){
-  const modelName=String(productModelName||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||'');
+  const modelName=keysuiteBswEngineeringModelName(productModelName||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||'');
   const model=DB.models.find(m=>String(m.model).toLowerCase()===modelName.toLowerCase());
   const q=Number(flowM3h),h=Number(headM),enhanced=meta.enhanced!==undefined?!!meta.enhanced:!!enhancedMode?.checked,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Math.max(.1,Math.min(50,Number(meta.hz||hzHidden?.value||selectionState.curveHz||selectionState.hz||50)));
   if(!model||!(q>0&&h>0))return null;

@@ -1,5 +1,5 @@
-/* KeySuite V5.00.29 Service Worker. */
-const CACHE='keysuite-v50029-20261101';
+/* KeySuite V5.00.30 Service Worker. */
+const CACHE='keysuite-v50030-20261102';
 const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50001"></script>';
 const SHELL=[
  './iso-products-v50011.js','./iso-v50011.js','./component-prices-v50011.js','./manual-price-v50011.js','./selector-iso/index.html','./selector-iso/iso-data.js','./selector-iso/es-core.js','./selector-iso/motor-data.js','./selector-iso/favicon.svg','./selector-iso/bgreich-logo.png','./keyhq/avatar/assets/keyhq-hybrid.glb',
@@ -11,7 +11,7 @@ const SHELL=[
 ];
 SHELL.push('./bgf-curve-v50021.js','./selector-bgf/index.html','./bgf-data-v50026.js','./bgf-selector-v50026.js','./kv-fixes-v50026.js');
 SHELL.push('./selector-bsw/index.html','./bsw-data-v50027.js','./selector-bsw-data-v50027.js','./bsw-selector-v50027.js','./bsw-v50027.js');
-SHELL[SHELL.indexOf('./v42875-version-lock.js')]='./v50029-version-lock.js';
+SHELL[SHELL.indexOf('./v42875-version-lock.js')]='./v50030-version-lock.js';
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>undefined)))});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('keysuite-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
 function stripRuntime(html){return String(html||'').replace(/<script[^>]+src=["'][^"']*v\d+-bootstrap\.js[^"']*["'][^>]*><\/script>/gi,'')}

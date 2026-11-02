@@ -1235,6 +1235,11 @@ window.KeySuitePumpPdfNames={
  context:pumpPdfCounterContext,
  reset:resetPumpPdfItemCounter
 };
+function pumpPdfInternalModelHeading(pump={}){
+ const clean=value=>String(value||'').trim().replace(/^Item\s+\d+\s*-\s*/i,'').replace(/\s+c\/?w\b.*$/i,'').replace(/\s+-\s+[0-9.]+\s*(?:m3|m³)[^@]*@.*$/i,'').trim();
+ const candidates=[pump.keysuite_display_model,pump.display_model,pump.quotation_model,pump.model,pump.base_model,pump.pumpData?.model];
+ return candidates.map(clean).find(Boolean)||'Pump Model';
+}
 function exportPumpDataSheet(row,filename){
  const raw=row.dataset.pumpData;
  if(!raw){alert('Pump data is unavailable for this item. Please select the pump again and add it to the quotation.');return}
@@ -1244,7 +1249,8 @@ function exportPumpDataSheet(row,filename){
  const resolved=/KEYSELECTOR-ES/.test(source)||family==='ES'?'ES':family||(/KEYSUITE-KV/.test(source)?'KV':/KEYSUITE-CR/.test(source)?'CR':'CHC');
  const frameId={ES:'selectorEsFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame',BFI:'selectorBfiFrame'}[resolved]||'selectorFrame',frame=$(frameId);
  if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert(`${resolved} pump selector is not ready.`);return}
- frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:pumpData,filename:safePdfName(filename)},'*');
+ const internalModel=pumpPdfInternalModelHeading(pumpData),exportPayload={...pumpData,keysuite_pdf_model_heading:internalModel,keysuite_display_model:internalModel,display_model:internalModel,quotation_model:internalModel};
+ frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:exportPayload,filename:safePdfName(filename)},'*');
 }
 
 function refreshItemExportButtons(){

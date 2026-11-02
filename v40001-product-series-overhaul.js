@@ -23,7 +23,7 @@
   const brands=()=>((api()?.state?.brands)||[]).filter(Boolean);
   const byId=id=>brands().find(b=>String(b.id)===String(id))||null;
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
-  const frameFor=f=>{const fam=String(f).toUpperCase();return $(fam==='BGF'?'productBgfSelectorFrame':fam==='KV'?'productKvSelectorFrame':fam==='ISO'?'productIsoSelectorFrame':fam==='ES'?'productEsSelectorFrame':fam==='BFI'?'productBfiSelectorFrame':fam==='CR'?'productCrSelectorFrame':'productSelectorFrame')};
+  const frameFor=f=>{const fam=String(f).toUpperCase();return $(fam==='BSW'?'productBswSelectorFrame':fam==='BGF'?'productBgfSelectorFrame':fam==='KV'?'productKvSelectorFrame':fam==='ISO'?'productIsoSelectorFrame':fam==='ES'?'productEsSelectorFrame':fam==='BFI'?'productBfiSelectorFrame':fam==='CR'?'productCrSelectorFrame':'productSelectorFrame')};
   const productDialog=()=>$('productCurveDialog');
 
   let inlineOpen=false;
@@ -35,7 +35,7 @@
   let selectionIsoHome=null;
   let currentFamily='CHC';
   let lastScrollY=0;
-  const lastDuty={CHC:null,CR:null,KV:null,BGF:null,BFI:null,ES:null,ISO:null};
+  const lastDuty={CHC:null,CR:null,KV:null,BGF:null,BSW:null,BFI:null,ES:null,ISO:null};
   let nativeShowModal=null;
   let nativeClose=null;
   const visibleTextMaster=new WeakMap();
@@ -48,7 +48,8 @@
     document.querySelectorAll('.suite-version').forEach(n=>n.textContent='KeySuite V'+VERSION);
   }
   function activeFamily(){
-    const bgf=frameFor('BGF'),kv=frameFor('KV'),iso=frameFor('ISO'),es=frameFor('ES'),bfi=frameFor('BFI'),cr=frameFor('CR'),chc=frameFor('CHC');
+    const bsw=frameFor('BSW'),bgf=frameFor('BGF'),kv=frameFor('KV'),iso=frameFor('ISO'),es=frameFor('ES'),bfi=frameFor('BFI'),cr=frameFor('CR'),chc=frameFor('CHC');
+    if(bsw&&(bsw.style.display==='block'||bsw.getAttribute('data-active')==='1'))return 'BSW';
     if(bgf&&(bgf.style.display==='block'||bgf.getAttribute('data-active')==='1'))return 'BGF';
     if(kv&&(kv.style.display==='block'||kv.getAttribute('data-active')==='1'))return 'KV';
     if(iso&&(iso.style.display==='block'||iso.getAttribute('data-active')==='1'))return 'ISO';
@@ -189,7 +190,7 @@
       #productCurveDialog[data-ks-selection-es-inline="1"] #ks39445DialogReturn,#productCurveDialog[data-ks-selection-bfi-inline="1"] #ks39445DialogReturn,#productCurveDialog[data-ks-selection-iso-inline="1"] #ks39445DialogReturn{display:none!important}
       #productCurveDialog.ks3963-inline #closeProductCurve{margin-left:0!important;min-width:88px}
       #productCurveDialog.ks3963-inline #productCurveHost{position:relative;width:100%;min-width:0;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;overflow:visible!important}
-      #productCurveDialog.ks3963-inline #productSelectorFrame,#productCurveDialog.ks3963-inline #productCrSelectorFrame,#productCurveDialog.ks3963-inline #productKvSelectorFrame,#productCurveDialog.ks3963-inline #productBgfSelectorFrame,#productCurveDialog.ks3963-inline #productBfiSelectorFrame,#productCurveDialog.ks3963-inline #productEsSelectorFrame,#productCurveDialog.ks3963-inline #productIsoSelectorFrame,#productCurveDialog.ks3963-inline #selectorEsFrame,#productCurveDialog.ks3963-inline #selectorBfiFrame,#productCurveDialog.ks3963-inline #selectorIsoFrame{display:block;width:100%!important;max-width:100%!important;min-width:0!important;min-height:1080px;border:0!important;overflow:hidden!important;transition:opacity .08s linear;box-sizing:border-box}
+      #productCurveDialog.ks3963-inline #productSelectorFrame,#productCurveDialog.ks3963-inline #productCrSelectorFrame,#productCurveDialog.ks3963-inline #productKvSelectorFrame,#productCurveDialog.ks3963-inline #productBgfSelectorFrame,#productCurveDialog.ks3963-inline #productBswSelectorFrame,#productCurveDialog.ks3963-inline #productBfiSelectorFrame,#productCurveDialog.ks3963-inline #productEsSelectorFrame,#productCurveDialog.ks3963-inline #productIsoSelectorFrame,#productCurveDialog.ks3963-inline #selectorEsFrame,#productCurveDialog.ks3963-inline #selectorBfiFrame,#productCurveDialog.ks3963-inline #selectorIsoFrame{display:block;width:100%!important;max-width:100%!important;min-width:0!important;min-height:1080px;border:0!important;overflow:hidden!important;transition:opacity .08s linear;box-sizing:border-box}
       #productCurveDialog.ks3963-inline #productCurveHost[data-ks3963-loading="1"]:before{content:'Loading selected model…';position:absolute;inset:0;z-index:2;display:flex;align-items:flex-start;justify-content:center;padding-top:56px;background:#fff;color:#687b89;font-size:13px;font-weight:700}
     `;document.head.appendChild(st);
   }
@@ -214,7 +215,7 @@
     currentFamily=activeFamily();const dlg=productDialog(),main=mainHost(),fr=frameFor(currentFamily);if(!dlg||!main||!fr)return false;
     lastScrollY=window.scrollY||0;if(dlg.parentNode!==main)main.appendChild(dlg);
     inlineOpen=true;main.classList.add('ks3963-product-curve-open');dlg.classList.add('ks3963-inline');dlg.setAttribute('open','');dlg.dataset.ks3963Inline='1';setBackLabel(true);fr.style.display='block';hideFrame(fr);
-    ['CHC','CR','KV','BGF','BFI','ES','ISO'].forEach(f=>{const other=frameFor(f);if(other&&f!==currentFamily){other.style.display='none';other.dataset.active='0'}});fr.dataset.active='1';
+    ['CHC','CR','KV','BGF','BSW','BFI','ES','ISO'].forEach(f=>{const other=frameFor(f);if(other&&f!==currentFamily){other.style.display='none';other.dataset.active='0'}});fr.dataset.active='1';
     setTimeout(()=>{resizeFrame(fr);markVersion();window.scrollTo({top:0,behavior:'auto'})},0);return true;
   }
   function closeInline(force=false){
@@ -236,7 +237,7 @@
       try{dlg.returnValue=''}catch(_){}
     }
     const host=$('productCurveHost');if(host)delete host.dataset.ks3963Loading;
-    ['CHC','CR','KV','BGF','BFI','ES','ISO'].forEach(f=>{const fr=frameFor(f);if(fr){fr.style.opacity='1';fr.style.visibility='visible';fr.style.display='none';fr.dataset.active='0'}});
+    ['CHC','CR','KV','BGF','BSW','BFI','ES','ISO'].forEach(f=>{const fr=frameFor(f);if(fr){fr.style.opacity='1';fr.style.visibility='visible';fr.style.display='none';fr.dataset.active='0'}});
     const floatingBack=document.getElementById('ks39445DialogReturn');if(floatingBack)floatingBack.hidden=true;
     setBackLabel(false);
     try{window.KeySuiteModelReturn?.syncUniversalButton?.()}catch(_){}
@@ -247,7 +248,7 @@
     markVersion();return true;
   }
   function forceCloseInline(){return closeInline(true)}
-  window.addEventListener('KEYSUITE_PAGE_CHANGED',()=>{['KV','BGF'].forEach(f=>{const frame=frameFor(f);if(frame){frame.style.display='none';frame.style.visibility='hidden';frame.style.opacity='0';frame.dataset.active='0'}})});
+  window.addEventListener('KEYSUITE_PAGE_CHANGED',()=>{['KV','BGF','BSW'].forEach(f=>{const frame=frameFor(f);if(frame){frame.style.display='none';frame.style.visibility='hidden';frame.style.opacity='0';frame.dataset.active='0'}})});
   function installDialogBridge(){
     const dlg=productDialog();if(!dlg||dlg.dataset.ks3963Bridge==='1')return !!dlg;
     dlg.dataset.ks3963Bridge='1';nativeShowModal=HTMLDialogElement.prototype.showModal.bind(dlg);nativeClose=HTMLDialogElement.prototype.close.bind(dlg);
@@ -337,8 +338,8 @@
     const s=snapshot(f,frame);doc.body.classList.remove('ks3963-product-chc','ks3963-product-es');doc.body.classList.add(f==='ES'||f==='ISO'?'ks3963-product-es':'ks3963-product-chc');ensureFrameStyle(doc,f);
     const id=idsFor(f),go=doc.getElementById(id.go);if(go){go.textContent='Plot';go.title='Plot Required Duty on this selected model'}
     const reportTitle=$('productCurveTitle');if(reportTitle)reportTitle.textContent=`Product Curve · ${s.displayModel||s.masterModel||s.sellingSeries||f}`;
-    if(f==='CHC'||f==='CR'||f==='BFI'){
-      const mainSeries=s.mainSellingSeries||s.brandSeries||s.sellingSeries||(f==='BFI'?'BFI':f==='CR'?'CR':'CHC');
+    if(f==='CHC'||f==='CR'||f==='KV'||f==='BGF'||f==='BSW'||f==='BFI'){
+      const mainSeries=s.mainSellingSeries||s.brandSeries||s.sellingSeries||(f==='BFI'?'BFI':f==='CR'?'CR':f);
       if(f==='CHC')normalizeChcMaterialOptions(doc);normalizeChcSeriesHeader(doc,mainSeries);
       const model=doc.querySelector('.selection-model');if(model&&s.displayModel)model.textContent=s.displayModel;
       const sub=doc.querySelector('.selection-sub');if(sub){const raw=sub.dataset.ks42205MasterText||sub.textContent||'';if(!sub.dataset.ks42205MasterText)sub.dataset.ks42205MasterText=raw;sub.textContent=aliasText(raw,s)}
@@ -349,12 +350,12 @@
     }
     const walker=doc.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT),nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
     nodes.forEach(node=>{const p=node.parentElement;if(!p||['SCRIPT','STYLE','TEXTAREA','OPTION'].includes(p.tagName))return;if(!visibleTextMaster.has(node))visibleTextMaster.set(node,node.nodeValue||'');const raw=visibleTextMaster.get(node)||'';const next=aliasText(raw,s);if(node.nodeValue!==next)node.nodeValue=next});
-    if(f==='CHC'||f==='CR'||f==='BFI'){const mainSeries=s.mainSellingSeries||s.brandSeries||s.sellingSeries||(f==='BFI'?'BFI':f==='CR'?'CR':'CHC');normalizeChcSeriesHeader(doc,mainSeries);const hdr=doc.querySelector('header h1');if(hdr)hdr.textContent=`${mainSeries} Series`;const model=doc.querySelector('.selection-model');if(model&&s.displayModel)model.textContent=s.displayModel}
+    if(f==='CHC'||f==='CR'||f==='KV'||f==='BGF'||f==='BSW'||f==='BFI'){const mainSeries=s.mainSellingSeries||s.brandSeries||s.sellingSeries||(f==='BFI'?'BFI':f==='CR'?'CR':f);normalizeChcSeriesHeader(doc,mainSeries);const hdr=doc.querySelector('header h1');if(hdr)hdr.textContent=`${mainSeries} Series`;const model=doc.querySelector('.selection-model');if(model&&s.displayModel)model.textContent=s.displayModel}
     doc.querySelectorAll('td,span,div,p').forEach(el=>{if(el.children.length)return;const t=String(el.textContent||'');if(/\b1\s+Stages\b/i.test(t))el.textContent=t.replace(/\b1\s+Stages\b/gi,'1 Stage')});
     if(s.logo)doc.querySelectorAll('img.brand-logo,header img,.top .brand img').forEach(img=>{img.src=s.logo;img.alt=s.name||'Brand'});
     try{const payload=frame.contentWindow.keysuiteExportPayload||{};frame.contentWindow.keysuiteExportPayload={...payload,keysuite_brand_name:s.name,keysuite_brand_logo:s.logo,keysuite_selling_series:s.sellingSeries,keysuite_master_series:s.masterSeries,keysuite_display_model:s.displayModel,keysuite_master_model:s.masterModel,keysuite_material:s.material}}catch(_){}
     if(!lastDuty[f]){
-      if(f==='CHC'||f==='CR'||f==='BFI')doc.querySelectorAll('.kpi').forEach(k=>{const label=norm(k.querySelector('span')?.textContent);if(/^Required Duty$/i.test(label)||/^Operating Point$/i.test(label)){const b=k.querySelector('b');if(b)b.textContent='—';const spans=k.querySelectorAll('span');if(spans[1])spans[1].textContent='Enter Flow + Head and Plot'}});
+      if(f==='CHC'||f==='CR'||f==='KV'||f==='BGF'||f==='BSW'||f==='BFI')doc.querySelectorAll('.kpi').forEach(k=>{const label=norm(k.querySelector('span')?.textContent);if(/^Required Duty$/i.test(label)||/^Operating Point$/i.test(label)){const b=k.querySelector('b');if(b)b.textContent='—';const spans=k.querySelectorAll('span');if(spans[1])spans[1].textContent='Enter Flow + Head and Plot'}});
       else doc.querySelectorAll('#summary .kpi').forEach(k=>{const label=norm(k.querySelector('span')?.textContent);if(/^D1 duty$/i.test(label)){const b=k.querySelector('b');if(b)b.textContent='—';const sm=k.querySelector('small');if(sm)sm.textContent='Enter Flow + Head and Plot'}});
     }
     if(!doc.__KEYSUITE_V3964_DUTY_BOUND){doc.__KEYSUITE_V3964_DUTY_BOUND=true;doc.addEventListener('click',e=>{if(e.target?.closest?.('#'+idsFor(f).go))captureDuty(doc,f);setTimeout(()=>{applyScreenIdentity(f,frame);resizeFrame(frame)},0)},true);doc.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target?.matches?.('#flow,#head'))captureDuty(doc,f)},true);doc.addEventListener('change',()=>setTimeout(()=>{applyScreenIdentity(f,frame);resizeFrame(frame)},0),true)}
@@ -564,7 +565,7 @@
     setTimeout(()=>{applyScreenIdentity(f,fr);revealFrame(fr);resizeFrame(fr);markVersion()},100);
   }
   function onMessage(event){
-    const frames=['CHC','CR','KV','BFI','ES','ISO'].map(f=>[f,frameFor(f)]),hit=frames.find(([,fr])=>fr&&event.source===fr.contentWindow);if(!hit)return;const [f]=hit,m=event.data||{};if(m.type==='KEYSUITE_PRODUCT_FRAME_READY'){if(inlineOpen&&f===currentFamily)hideFrame(frameFor(f));setTimeout(()=>{if(inlineOpen&&f===currentFamily)finalizeFrame({freshModel:false});else installPdfHooks(frameFor(f),f)},0);return}if(m.type==='KEYSUITE_PRODUCT_CURVE_STATE'){currentFamily=f;const fresh=/^Curve loaded\./i.test(String(m.message||''));setTimeout(()=>finalizeFrame({freshModel:fresh}),0)}
+    const frames=['CHC','CR','KV','BGF','BSW','BFI','ES','ISO'].map(f=>[f,frameFor(f)]),hit=frames.find(([,fr])=>fr&&event.source===fr.contentWindow);if(!hit)return;const [f]=hit,m=event.data||{};if(m.type==='KEYSUITE_PRODUCT_FRAME_READY'){if(inlineOpen&&f===currentFamily)hideFrame(frameFor(f));setTimeout(()=>{if(inlineOpen&&f===currentFamily)finalizeFrame({freshModel:false});else installPdfHooks(frameFor(f),f)},0);return}if(m.type==='KEYSUITE_PRODUCT_CURVE_STATE'){currentFamily=f;const fresh=/^Curve loaded\./i.test(String(m.message||''));setTimeout(()=>finalizeFrame({freshModel:fresh}),0)}
   }
   function bind(){
     window.addEventListener('message',onMessage,true);window.addEventListener('resize',()=>{if(selectionIsoOpen)resizeFrame($('selectorIsoFrame'));else if(selectionEsOpen)resizeFrame($('selectorEsFrame'));else if(selectionBfiOpen)resizeFrame($('selectorBfiFrame'));else if(inlineOpen)resizeFrame(activeFrame())},{passive:true});window.addEventListener('pageshow',()=>setTimeout(()=>{markVersion();scanGenericSelectorFrames();syncSelectionProductPanels()},0));window.addEventListener('KEYSUITE_PAGE_CHANGED',()=>{if(inlineOpen)closeInline(true);['CHC','CR','BFI','ES','ISO'].forEach(f=>{const frame=frameFor(f);if(frame)frame.style.display='none'});setTimeout(syncSelectionProductPanels,0)});window.addEventListener('KEYSUITE_BRANDS_READY',()=>setTimeout(()=>{markVersion();if(inlineOpen)finalizeFrame();else if(selectionIsoOpen)prepareSelectionIsoFrame();else if(selectionEsOpen)prepareSelectionEsFrame();else if(selectionBfiOpen)prepareSelectionBfiFrame();syncSelectionProductPanels()},0));window.addEventListener('KEYSUITE_V393_BRAND_CONTEXT_CHANGED',()=>setTimeout(()=>{markVersion();if(inlineOpen)finalizeFrame();else if(selectionIsoOpen)prepareSelectionIsoFrame();else if(selectionEsOpen)prepareSelectionEsFrame();else if(selectionBfiOpen)prepareSelectionBfiFrame();syncSelectionProductPanels()},0));

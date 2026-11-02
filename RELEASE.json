@@ -1,20 +1,18 @@
 {
-  "version": "5.00.29",
-  "baseline": "5.00.28",
-  "upgrade_supported_from": "5.00.28",
+  "version": "5.00.30",
+  "baseline": "5.00.29",
+  "upgrade_supported_from": "5.00.29",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "BUG 001: KV Page 3 displays B1+B2 on one row, matching the CHC master format",
-    "BUG 002: quotation data-sheet exports now resolve KV and all supported families through their own selector while retaining the shared CHC filename generator",
-    "BUG 003: BGF 350M and 350E Page 2 show Brass impellers, 2 Stages, and Malaysia as Pump/Motor/Engine origin",
-    "BUG 004: BSW uses IE1 as the default motor efficiency in Selector, Product, payload, Assembly, Quote, and PDF paths",
-    "BUG 005: BSW Page 2 and Page 3 origins, pumpset dimensions, removed fields, exact two-column dimension table, and weight units are corrected",
-    "BUG 006: BSW Product actions remain right-aligned with Curve/Assembly/Quote or aligned Assembly/Quote positions when no curve exists",
-    "BUG 007: BSW Phase and Float Switch configuration generates T, TA, M, and MA suffixes and persists them through Selection, Product, Assembly, Quote, and PDF",
+    "BUG 001: BGF Quote buttons remain in the same far-right column, with or without an actual Curve action",
+    "BUG 002: BGF Product curves now complete the shared frame-ready flow and reveal actual BGF 350M and BGF 350E curve data",
+    "BUG 003: BSW Product curves now complete the shared frame-ready flow and configured M/T/MA/TA models map to their base engineering curve model",
+    "BUG 004: the BSW Float Switch checkbox and label are aligned on one horizontal row below Head",
+    "BUG 005: PDF filenames retain sequential Item numbering, Clear Customer resets that counter, and the internal PDF model heading excludes the Item filename prefix",
     "CR MASTER and ES MASTER files are unchanged"
   ]
 }
