@@ -1,4 +1,6 @@
-# KeySuite V5.00.06
+# KeySuite V5.00.33
+
+Current release: see [change log and test results](CHANGELOG_AND_TESTS_V5.00.33.md) and [deployment instructions](DEPLOYMENT_V5.00.33.md). Authenticated staging acceptance remains required as detailed in the report. Earlier notes below are historical references.
 
 Built from the user-supplied V5.00.05 FULL CLEAN package. See [release notes](CHANGELOG_V50006.md), [deployment / upgrade instructions](README_UPGRADE_V50006.md), and [change/test report](CHANGE_TEST_REPORT_V50006.md). V5.00.06 adds the approved BGF Price List models, exposes the existing authenticated Messenger beside Important Note on every page, and auto-expands quotation descriptions while preserving all other V5.00.05 behavior. Earlier documentation below is retained as historical reference.
 

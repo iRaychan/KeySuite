@@ -1047,6 +1047,7 @@ function exportPDF(requestedFilename){
  if(!resolvedFilename&&window.parent&&window.parent!==window){try{const api=window.parent.KeySuitePumpPdfNames,payload=pdfPayload;if(api&&typeof api.nextFromPayload==='function'&&payload)resolvedFilename=api.nextFromPayload(payload)}catch(_){}}
  const pdfFileTitleRaw=String(resolvedFilename||pdfDisplayModel||best.model||'Pump Model').trim();
  const pdfFileTitle=/\.pdf$/i.test(pdfFileTitleRaw)?pdfFileTitleRaw:(pdfFileTitleRaw+'.pdf');
+ const pdfMetadataTitle=String(window.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.pdfMetadataTitle||((d=>String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))(new Date())+' - '+pdfDisplayModel));
  window.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;try{window.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT={...(window.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT||{}),displayModel:pdfDisplayModel,pdfFileTitle};}catch(_){}
  const {q,h}=selectionState;
  const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:keykvCurveHz(),pumpQ=q;
@@ -1096,7 +1097,7 @@ function exportPDF(requestedFilename){
 
  const keySuiteMacSafariPdfFix=/Macintosh/.test(navigator.userAgent)&&/Safari/.test(navigator.userAgent)&&!/Chrome|Chromium|KviOS|Edg|OPR|Firefox|FxiOS/.test(navigator.userAgent)?'@page{size:210mm 297mm;margin:0}@media print{html,body{width:210mm!important;min-width:210mm!important;max-width:210mm!important;margin:0!important;padding:0!important}body{min-height:296mm!important}.report,.tech-page,.dimension-page{width:210mm!important;max-width:210mm!important;height:296mm!important;min-height:296mm!important;margin:0!important;padding:8mm!important;overflow:hidden!important}.pdf-iso{right:calc(8mm + 2px)!important;bottom:9mm!important}}':'';
  const report=`<!doctype html>
- <html><head><meta charset="utf-8"><title>${pdfFileTitle}</title>
+ <html><head><meta charset="utf-8"><title>${pdfMetadataTitle}</title>
  <style>
  @page{size:210mm 297mm;margin:8mm}
  *{box-sizing:border-box}
@@ -1271,7 +1272,7 @@ function exportPDF(requestedFilename){
  </section>
  <script src="../pdf-optimization.js?v=42510"><\/script>
  <script>
-const __KEYSUITE_LOCKED_PDF_TITLE__=${JSON.stringify(pdfFileTitle)};
+const __KEYSUITE_LOCKED_PDF_TITLE__=${JSON.stringify(pdfMetadataTitle)};
 const __KEYSUITE_EXCEL_TECHNICAL__=${JSON.stringify(excelTechnicalRows)};
 const __KEYSUITE_EXCEL_DIMENSIONS__=${JSON.stringify(excelDimensionRows)};
 function __keysuiteLockPdfTitle(){try{document.title=__KEYSUITE_LOCKED_PDF_TITLE__;}catch(_){}}
@@ -1333,9 +1334,9 @@ window.onload=async()=>{
    printWindow.document.write(keysuiteKvApplyBrandingToReport(report));
    printWindow.document.close();
    try{
-     printWindow.document.title=pdfFileTitle;
+     printWindow.document.title=pdfMetadataTitle;
      printWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;
-     setTimeout(()=>{try{printWindow.document.title=pdfFileTitle;}catch(_){}},50);
+     setTimeout(()=>{try{printWindow.document.title=pdfMetadataTitle;}catch(_){}},50);
    }catch(_){}
  }catch(error){
    try{printWindow.close();}catch(_){}
@@ -1829,8 +1830,8 @@ alternatives.innerHTML='';
    const quick=msg.quickSelection===true,rawFlow=quick&&Number.isFinite(Number(msg.rawFlow))?Number(msg.rawFlow):Number(msg.flowM3h||0),rawHead=quick&&Number.isFinite(Number(msg.rawHead))?Number(msg.rawHead):Number(msg.headM||0),rawFlowText=quick&&msg.rawFlowText!=null?String(msg.rawFlowText):String(rawFlow),rawHeadText=quick&&msg.rawHeadText!=null?String(msg.rawHeadText):String(rawHead);
    flowInput.value=rawFlowText;headInput.value=rawHeadText;flowUnitInput.value=quick&&msg.flowUnit?msg.flowUnit:'m3h';headUnitInput.value=quick&&msg.headUnit?msg.headUnit:'m';
    if(enhancedMode)enhancedMode.checked=enhanced;updateEnhancedModeUI();speedUnit.value='hz';speedInput.value=enhanced?String(KEYSUITE_ENHANCED_MAX_HZ):'50';if(enhanced)hzHidden.value=String(KEYSUITE_ENHANCED_MAX_HZ);else updateSpeedConversion();run();if(selectionState?.models?.length){selectionState.quickSelection=quick;renderSelected();}
-   if(msg.type==='KEYSUITE_DASHBOARD_OPEN_MODEL'){let opened=false;if(msg.model){const wanted=String(msg.model).toLowerCase();let idx=selectionState.models.findIndex(x=>String(x.model).toLowerCase()===wanted);if(idx<0){const wm=DB.models.find(x=>String(x.model).toLowerCase()===wanted),alt=wm&&keykvAlternativeMaxCandidate(wm);if(alt){selectionState.models.push(alt);idx=selectionState.models.length-1}}if(idx>=0){selectionState.selectedIndex=idx;renderAlternatives();renderSelected();opened=true;}}window.parent?.postMessage({type:'KEYSUITE_DASHBOARD_MODEL_OPENED',requestId:msg.requestId,family:'KV',model:String(msg.model||''),opened},'*');}
-   if(msg.type==='KEYSUITE_DASHBOARD_SELECT'){const data=currentSelection();if(data)data.alternatives=keykvDashboardAlternatives();window.parent?.postMessage({type:'KEYSUITE_DASHBOARD_RESULT',requestId:msg.requestId,family:'KV',suitable:!!data,data},'*');}return;
+   if(msg.type==='KEYSUITE_DASHBOARD_OPEN_MODEL'){let opened=false;if(msg.model){const wanted=String(msg.model).toLowerCase();let idx=selectionState.models.findIndex(x=>String(x.model).toLowerCase()===wanted);if(idx<0){const wm=DB.models.find(x=>String(x.model).toLowerCase()===wanted),alt=wm&&keykvAlternativeMaxCandidate(wm);if(alt){selectionState.models.push(alt);idx=selectionState.models.length-1}}if(idx>=0){selectionState.selectedIndex=idx;renderAlternatives();renderSelected();opened=true;}}window.parent?.postMessage({type:'KEYSUITE_DASHBOARD_MODEL_OPENED',requestId:msg.requestId,family:'BGF',model:String(msg.model||''),opened},'*');}
+   if(msg.type==='KEYSUITE_DASHBOARD_SELECT'){const data=currentSelection();if(data)data.alternatives=keykvDashboardAlternatives();window.parent?.postMessage({type:'KEYSUITE_DASHBOARD_RESULT',requestId:msg.requestId,family:'BGF',suitable:!!data,data},'*');}return;
   }
   if(msg.type==='KEYSUITE_PRODUCT_DUTY'){if(productFrame)applyProductDuty(msg.flowM3h,msg.headM,{flowUnit:'m3h',headUnit:'m'});return;}
   if(msg.type==='KEYSUITE_PRODUCT_ACTION'){if(!productFrame)return;if(msg.action==='export')setTimeout(()=>exportPDF(),60);else if(msg.action==='assembly')send('assembly');else if(msg.action==='quotation')send('quotation');return;}

@@ -1,0 +1,10 @@
+.product-model-actions{display:grid!important;grid-template-columns:repeat(4,100px)!important;gap:8px!important}
+.product-model-actions button{width:100px!important;min-width:0!important;grid-row:1!important}
+.product-model-actions .keysuite-cost-button{grid-column:1!important}
+.product-model-actions button[data-product-view],.product-model-actions button[data-product-g1-view],.product-model-actions button[data-es-curve],.product-model-actions button[data-bsw-curve]{grid-column:2!important}
+.product-model-actions .action-assembly{grid-column:3!important}
+.product-model-actions .action-quote{grid-column:4!important}
+.cost-audit-table thead th{text-align:center!important}
+.ks-unified-actions{display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;width:auto!important;border:0!important}
+.ks-unified-actions>button{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100px!important;height:42px!important;min-height:42px!important;padding:0 12px!important;border-radius:8px!important;margin:0!important;font-size:14px!important;flex:0 0 100px!important}
+.keysuite-cost-button{background:#db2777!important;color:white!important;border:1px solid #db2777!important}

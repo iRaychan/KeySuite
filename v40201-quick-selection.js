@@ -21,9 +21,9 @@ const accountAllows=(brandId,family,productGroup='')=>{
   return a?.isBrandSeriesAllowed?.(brandId,productGroup||family)===true;
 };
 const DEFAULT_CHC_MATERIAL='SS304 (Cast Iron Connection)';
-const FAMILIES=['CHC','CR','KV','BFI','ES','ISO'];
+const FAMILIES=['CHC','CR','KV','BFI','BGF','BSW','ES','ISO'];
 const normalizeGroup=v=>upper(v).replace(/\s+/g,'_');
-const hydraulicFamily=v=>{const g=normalizeGroup(v);return g==='CHC'||g==='CHC_G1'||g==='CHC_G2'?'CHC':g==='CR'?'CR':g==='KV'?'KV':g==='BFI'?'BFI':g==='ES'?'ES':g==='ISO'?'ISO':''};
+const hydraulicFamily=v=>{const g=normalizeGroup(v);return g==='CHC'||g==='CHC_G1'||g==='CHC_G2'?'CHC':g==='CR'?'CR':g==='KV'?'KV':g==='BFI'?'BFI':g==='ES'?'ES':g==='ISO'?'ISO':['BGF','BSW'].includes(g)?g:''};
 const state={requestId:0,pending:null,results:{},responded:{},savedKeys:new Set(),prefLoaded:false,queue:[],currentEntry:null,currentFamily:null,familyTimer:null,preferenceLoading:false,customerPriceLoading:false,customerPriceError:'',customerPriceErrorCid:'',enhancedCHC:false,enhancedKeys:new Set(),includeColdItems:false};
 const isKeylargo=b=>norm(b?.brand_key).toLowerCase()==='keylargo';
 const isMaster=b=>String(b?.brand_type||'').toLowerCase()==='master'||norm(b?.brand_key).toLowerCase()==='b.g.reich'||norm(b?.brand_name).toLowerCase()==='b.g.reich';
@@ -31,7 +31,7 @@ const brands=()=>{const rows=((api()?.state?.brands)||[]).filter(b=>b&&b.active!
 const visibleBrands=()=>{
   const all=brands();
   if(!accountScopeReady())return [];
-  return all.filter(b=>['CHC_G1','CHC_G2','CR','KV','BFI','ES','ISO','MOTOR'].some(group=>accountAllows(b.id,hydraulicFamily(group)||group,group)));
+  return all.filter(b=>['CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSW','ES','ISO','MOTOR'].some(group=>accountAllows(b.id,hydraulicFamily(group)||group,group)));
 };
 const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
 const masterSeries=()=> 'CHC';
@@ -46,6 +46,7 @@ function brandSeriesFor(brand,family,productGroup=''){const group=normalizeGroup
 function visibleSeriesLabel(entry,peers=[]){const label=brandSeriesFor(entry?.brand,entry?.family,entry?.productGroup),sameBrandChc=(Array.isArray(peers)?peers:[]).filter(x=>String(x?.brand?.id)===String(entry?.brand?.id)&&x?.family==='CHC');return entry?.family==='CHC'&&sameBrandChc.length===1?label.replace(/\s+C(?:4|6)$/i,'').trim():label}
 const keyOf=(brandId,family)=>`${brandId}|${upper(family)}`;
 function entries(){
+  if(window.KeySuiteHydraulicRegistry)return brands().flatMap(b=>window.KeySuiteHydraulicRegistry.forBrand(b).map(r=>({brand:b,family:r.family,productGroup:r.group,key:keyOf(b.id,r.group)}))).filter(e=>accountScopeReady()&&accountAllows(e.brand.id,e.family,e.productGroup));
   const out=[];
   brands().forEach(b=>{
     if(isMaster(b)){
@@ -54,7 +55,7 @@ function entries(){
       out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
       out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
       out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
-      out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+      ['BGF','BSW','ES'].forEach(f=>out.push({brand:b,family:f,productGroup:f,key:keyOf(b.id,f)}));
       out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
       return;
     }
@@ -65,7 +66,7 @@ function entries(){
     if(groups.includes('CR'))out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
     if(groups.includes('KV'))out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
     if(groups.includes('BFI'))out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
-    if(groups.includes('ES'))out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+    ['BGF','BSW','ES'].filter(f=>groups.includes(f)).forEach(f=>out.push({brand:b,family:f,productGroup:f,key:keyOf(b.id,f)}));
     if(groups.includes('ISO'))out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
   });
   if(!accountScopeReady())return [];
@@ -354,14 +355,15 @@ const enhancedEligible=value=>{const fam=upper(typeof value==='string'?value:val
 const entryFamily=value=>upper(typeof value==='string'?value:value?.family);
 const chcGeneration=value=>normalizeGroup(typeof value==='string'?'':value?.productGroup)==='CHC_G1'?'G1':'G2';
 const entryKey=value=>typeof value==='string'?upper(value):String(value?.key||entryFamily(value));
-function frame(value){const f=entryFamily(value);return $(f==='CHC'?'selectorFrame':f==='BFI'?'selectorBfiFrame':'selectorEsFrame')}
+function frame(value){const f=entryFamily(value);return $({CHC:'selectorFrame',BFI:'selectorBfiFrame',ES:'selectorEsFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',ISO:'selectorIsoFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame'}[f])}
 function expectedFrameSrc(value,x=frame(value)){
   const family=entryFamily(value);
+  if(!['CHC','BFI','ES'].includes(family))return x?.dataset?.src||x?.getAttribute('src');
   if(family==='CHC')return chcGeneration(value)==='G1'?(x?.dataset?.g1Src||'selector-g1/index.html?v=42102'):(x?.dataset?.g2Src||x?.dataset?.src||'selector/index.html?v=42102');
   if(family==='BFI')return x?.dataset?.src||'selector-bfi/index.html?v=42302';
   return x?.dataset?.src||'selector-es/index.html';
 }
-function ensureFrameState(value){const x=frame(value);if(!x)return {frame:null,changed:false};const src=expectedFrameSrc(value,x),current=String(x.getAttribute('src')||'');const expectedPath=entryFamily(value)==='CHC'?(chcGeneration(value)==='G1'?'selector-g1/index.html':'selector/index.html'):entryFamily(value)==='BFI'?'selector-bfi/index.html':'selector-es/index.html';const changed=!current.includes(expectedPath);if(changed)x.setAttribute('src',src);return {frame:x,changed}}
+function ensureFrameState(value){const x=frame(value);if(!x)return {frame:null,changed:false};const src=expectedFrameSrc(value,x),current=String(x.getAttribute('src')||'');const expectedPath=!['CHC','BFI','ES'].includes(entryFamily(value))?'selector-'+entryFamily(value).toLowerCase()+'/index.html':entryFamily(value)==='CHC'?(chcGeneration(value)==='G1'?'selector-g1/index.html':'selector/index.html'):entryFamily(value)==='BFI'?'selector-bfi/index.html':'selector-es/index.html';const changed=!current.includes(expectedPath);if(changed)x.setAttribute('src',src);return {frame:x,changed}}
 function ensureFrame(value){return ensureFrameState(value).frame}
 function frameReady(x){try{return !!x?.contentWindow&&x.contentDocument?.readyState==='complete'}catch(_){return false}}
 function waitFrameReady(value,requestId){return new Promise(resolve=>{const prepared=ensureFrameState(value),x=prepared.frame;if(!x){resolve(false);return}if(!prepared.changed&&frameReady(x)){resolve(true);return}let done=false;const finish=v=>{if(done)return;done=true;x.removeEventListener('load',onload);clearTimeout(timer);resolve(v)};const onload=()=>finish(state.pending?.requestId===requestId);x.addEventListener('load',onload,{once:true});const timer=setTimeout(()=>finish(frameReady(x)&&state.pending?.requestId===requestId),4500)})}
@@ -393,7 +395,7 @@ function pinFrameContext(fr,ctx){
   return false;
 }
 async function openCurve(e,data){
-  const req=state.pending;if(!req||!data)return;const page=e.family==='ES'?'selectorEs':e.family==='BFI'?'selectorBfi':'selector',family=upper(e.family),wantedModel=String(data.model||'');
+  const req=state.pending;if(!req||!data)return;const page=e.family==='CHC'?'selector':({ES:'selectorEs',BFI:'selectorBfi',CR:'selectorCr',KV:'selectorKv',BGF:'selectorBgf',BSW:'selectorBsw',ISO:'selectorIso'}[e.family]),family=upper(e.family),wantedModel=String(data.model||'');
   try{api()?.setSelectedBrand?.(e.brand.id,e.family,page,e.productGroup||e.family)}catch(_){}
   if(e.family==='CHC'){window.KeySuiteCHCSelection?.setGeneration?.(chcGeneration(e));const mat=$('pumpMaterial');if(mat){mat.value=DEFAULT_CHC_MATERIAL;mat.dispatchEvent(new Event('change',{bubbles:true}))}}
   const ctx=presentationContext(e,data);

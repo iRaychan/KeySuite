@@ -1,7 +1,7 @@
 {
-  "version": "5.00.32",
-  "baseline": "5.00.31",
-  "upgrade_supported_from": "5.00.31",
+  "version": "5.00.33",
+  "baseline": "5.00.32",
+  "upgrade_supported_from": "5.00.32",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
@@ -9,11 +9,11 @@
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
     "Pump PDF metadata title uses YYMMDD - Pump Model while downloaded filenames remain unchanged",
-    "Quotation model formatting preserves hyphens and suffixes",
+    "Existing model formatting and KeyLab rounding retained",
     "KV and ISO share the B.G.Reich series registry used by dashboard and customer preferences",
     "ES selection and Product Curve routes use the active registered ES dataset",
     "Product and curve action controls use one compact horizontal row",
     "Product, Selection and System use the shared read-only costing audit and pricing engine",
-    "KeyLab final selling prices round upward to RM50"
+    "Bare-shaft pricing removes included motor source cost before pump pricing"
   ]
 }

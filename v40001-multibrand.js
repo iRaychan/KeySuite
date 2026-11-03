@@ -421,7 +421,7 @@
     return {...result,final:result.final+addon,unrounded:result.unrounded+addon};
   }
   function calculateBaseWithBrandMargin(source,brandMargin){
-    const base=num(source?.base_myr,NaN);if(!(base>0))return null;
+    const base=num(source?.base_myr,NaN)+num(source?.motor_source_adjustment,0);if(!(base>0))return null;
     const safe=v=>{v=num(v,0);return v>=0&&v<1?v:0};
     const rarity=String(source?.rarity||'many').toLowerCase();
     if(rarity==='fixed'||source?.fixed_price===true){const final=num(source?.calculated_price,base);return {withTransport:final,afterBrand:final,unrounded:final,final}}
@@ -434,7 +434,7 @@
     const afterSet=source?.include_set_discount===false?afterCommission:afterCommission/(1-safe(source?.set_discount));
     const beforeFuel=source?.include_final_discount===false?afterSet:afterSet/(1-safe(source?.final_discount));
     const fuel=source?.include_fuel_charge===false?0:num(source?.fuel_charge,0),unrounded=beforeFuel+fuel;
-    const baseResult={withTransport,afterBrand,unrounded,final:roundUp10(unrounded)};
+    const baseResult={withTransport,afterBrand,afterCommission,afterSetDiscount:afterSet,beforeFuel,fuelCharge:fuel,unrounded,final:roundUp10(unrounded)};
     const motorReplacement=source?.motor_replacement;
     if(!motorReplacement||motorReplacement.bareShaft)return baseResult;
     const includedSource=motorReplacement.includedMotorPricingSource||motorReplacement.included_motor_pricing_source;
