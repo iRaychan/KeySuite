@@ -425,16 +425,20 @@
     const safe=v=>{v=num(v,0);return v>=0&&v<1?v:0};
     const rarity=String(source?.rarity||'many').toLowerCase();
     if(rarity==='fixed'||source?.fixed_price===true){const final=num(source?.calculated_price,base);return {withTransport:final,afterBrand:final,unrounded:final,final}}
-    let value=base/(1-safe(source?.margin));
-    if(rarity==='common'||rarity==='rare')value=value/(1-safe(source?.normal));
-    if(rarity==='rare')value=value/(1-safe(source?.rare));
-    const withTransport=value+num(source?.transport,0);
-    const afterBrand=brandMargin>0&&brandMargin<1?withTransport/(1-brandMargin):withTransport;
-    const afterCommission=source?.include_commission===false?afterBrand:afterBrand/(1-safe(source?.commission));
+    // V5.00.34 Phase 05: Brand Margin uses KeySuite's established gross-margin
+    // recovery semantics, but it belongs immediately after converted source MYR.
+    // Fixed Trimming and Transport therefore remain outside its calculation base.
+    const afterBrand=brandMargin>0&&brandMargin<1?base/(1-brandMargin):base;
+    const marginPrice=afterBrand/(1-safe(source?.margin));
+    const afterNormal=(rarity==='common'||rarity==='rare')?marginPrice/(1-safe(source?.normal)):marginPrice;
+    const afterRare=rarity==='rare'?afterNormal/(1-safe(source?.rare)):afterNormal;
+    const withTrimming=afterRare+num(source?.trimming,0);
+    const withTransport=withTrimming+num(source?.transport,0);
+    const afterCommission=source?.include_commission===false?withTransport:withTransport/(1-safe(source?.commission));
     const afterSet=source?.include_set_discount===false?afterCommission:afterCommission/(1-safe(source?.set_discount));
     const beforeFuel=source?.include_final_discount===false?afterSet:afterSet/(1-safe(source?.final_discount));
     const fuel=source?.include_fuel_charge===false?0:num(source?.fuel_charge,0),unrounded=beforeFuel+fuel;
-    const baseResult={withTransport,afterBrand,afterCommission,afterSetDiscount:afterSet,beforeFuel,fuelCharge:fuel,unrounded,final:roundUp10(unrounded)};
+    const baseResult={adjustedBase:base,afterBrand,marginPrice,afterNormal,afterRare,withTrimming,withTransport,afterCommission,afterSetDiscount:afterSet,beforeFuel,fuelCharge:fuel,unrounded,final:roundUp10(unrounded)};
     const motorReplacement=source?.motor_replacement;
     if(!motorReplacement||motorReplacement.bareShaft)return baseResult;
     const includedSource=motorReplacement.includedMotorPricingSource||motorReplacement.included_motor_pricing_source;
@@ -457,8 +461,8 @@
     try{
       const adjusted=calculateWithBrandMargin(source,margin);
       if(adjusted){
-        price.value=adjusted.final.toFixed(2);source.brand_margin=margin;source.after_transport_price=adjusted.withTransport;source.after_brand_margin_price=adjusted.afterBrand;source.unrounded_price=adjusted.unrounded;source.calculated_price=adjusted.final;row.dataset.pricingSource=JSON.stringify(source);
-        if(margin>0){row.dataset.v391MarginApplied=String(margin);row.title=`${byBrandId(bid)?.brand_name||'Brand'} Margin ${(margin*100).toFixed(1)}% applied after Transport.`;}else{delete row.dataset.v391MarginApplied;if(/Margin .*applied/.test(row.title||''))row.title='';}
+        price.value=adjusted.final.toFixed(2);source.brand_margin=margin;source.adjusted_base_myr=adjusted.adjustedBase;source.after_brand_margin_price=adjusted.afterBrand;source.margin_price=adjusted.marginPrice;source.after_normal=adjusted.afterNormal;source.after_rare=adjusted.afterRare;source.with_trimming=adjusted.withTrimming;source.with_transport=adjusted.withTransport;source.after_commission=adjusted.afterCommission;source.after_set_discount=adjusted.afterSetDiscount;source.before_fuel=adjusted.beforeFuel;source.unrounded_price=adjusted.unrounded;source.calculated_price=adjusted.final;row.dataset.pricingSource=JSON.stringify(source);
+        if(margin>0){row.dataset.v391MarginApplied=String(margin);row.title=`${byBrandId(bid)?.brand_name||'Brand'} Margin ${(margin*100).toFixed(1)}% applied after Converted MYR.`;}else{delete row.dataset.v391MarginApplied;if(/Margin .*applied/.test(row.title||''))row.title='';}
       }
       const keepSource=row.dataset.pricingSource||'';price.dispatchEvent(new Event('input',{bubbles:true}));if(keepSource)row.dataset.pricingSource=keepSource;
     }finally{state.applyingMargin=false;}
@@ -473,7 +477,7 @@
     if(state.pricingWrapped||!window.KeySuitePricing)return; state.pricingWrapped=true;
     const originalInit=window.KeySuitePricing.init?.bind(window.KeySuitePricing),originalSync=window.KeySuitePricing.syncPriceListSettings?.bind(window.KeySuitePricing),originalRefresh=window.KeySuitePricing.refreshQuotePrices?.bind(window.KeySuitePricing);
     const originalFormula=window.KeySuitePricing.formula?.bind(window.KeySuitePricing);
-    if(originalFormula)window.KeySuitePricing.formula=(...args)=>{const text=String(originalFormula(...args)||'');return text.includes('Brand Margin')?text:text.replace(/(\+\s*Transport)/i,'$1 → ÷ (1 − Brand Margin)');};
+    if(originalFormula)window.KeySuitePricing.formula=(...args)=>{const text=String(originalFormula(...args)||'');return text.includes('Brand Margin')?text:text.replace(/(=\s*[^→]+)(\s*→)/,'$1 → ÷ (1 − Brand Margin)$2');};
     if(originalInit)window.KeySuitePricing.init=(data={},access)=>{
       let next=data||{}; if(next.productMultipliers){state.baseMultipliers=clone(next.productMultipliers);state.effectiveMultipliers=buildEffectiveMultipliers();next={...next,productMultipliers:clone(state.effectiveMultipliers)};}
       next={...next,fuel_price:state.general.fuelPrice,fuel_base_price:state.general.fuelBasePrice}; const r=originalInit(next,access); setTimeout(()=>{applyEffectiveRates();applyAllRows({resetBase:true});hideOldFuel();},0);return r;

@@ -123,6 +123,28 @@
     }).filter(Boolean);
   }
 
+  // Costing Audit must be able to show catalogue costs without a customer.
+  // This deliberately stops at converted MYR: customer/category rules are not
+  // guessed, and no zero selling price is substituted.
+  function sourceCostOnly(family,id,preferredVariant='',options={}){
+    const requested=normalizedFamily(family),code=requested==='CHC'&&String(options.generation_code||options.generation||'G2').toUpperCase()==='G1'?'CHC_G1':requested,wanted=String(id||'').trim().toLowerCase();
+    const pools={CHC_G1:secureData.chcG1Products,CHC_G2:secureData.products,CHC:secureData.products,CR:secureData.crProducts,KV:secureData.kvProducts,BFI:secureData.bfiProducts,BGF:secureData.bgfProducts,BSW:secureData.bswProducts,ES:secureData.esProducts,ISO:secureData.isoProducts,GWS:secureData.gwsProducts,KEYPLC:secureData.keyplcProducts,MANIFOLD:secureData.manifoldProducts,MOTOR:secureData.motorProducts,COUPLING:secureData.couplingProducts};
+    const catalogue=pools[code]||[],product=catalogue.find(row=>[row?.id,row?.model,row?.base_model].some(value=>String(value||'').trim().toLowerCase()===wanted));
+    if(!product)return null;
+    let book=product.pricesByCurrency||{},rarityBook=product.rarityByCurrency||{},variant=String(preferredVariant||options.material||options.keysuite_material||'').trim();
+    if(code==='ES'||code==='KEYPLC'||code==='MANIFOLD')book=esPriceBook(product);
+    if(code==='BFI'&&/316|BFIN/i.test(String(options.material||variant)))book=product.bfinPricesByCurrency||book;
+    if(!Object.keys(book.USD||{}).length&&!Object.keys(book.RMB||{}).length&&!Object.keys(book.MYR||{}).length){
+      const key=variant||String(product.material||product.variant||code);book={USD:{[key]:product.price_usd??product.priceUsd},RMB:{[key]:product.price_rmb??product.priceRmb},MYR:{[key]:product.price_myr??product.priceMyr}};variant=key;
+    }
+    const variants=[...new Set(['USD','RMB','MYR'].flatMap(currency=>Object.keys(book[currency]||{})))];
+    if(!variant||!variants.some(value=>normMaterial(value)===normMaterial(variant)))variant=variants.find(value=>['USD','RMB','MYR'].some(currency=>Number(book[currency]?.[value])>0))||variants[0]||'';
+    const matched=variants.find(value=>normMaterial(value)===normMaterial(variant))||variant,candidates=currencyCandidates(book,rarityBook,matched,code);
+    if(!candidates.length)return {family:code,variant:matched,availableCandidates:[],candidates:[],pricingContextMissing:true,finalPrice:null};
+    const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null);
+    return {family:code,variant:matched,rarity:chosen.rarity,availableCandidates:candidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,adjustedBase:chosen.baseMyr,motorSourceAdjustment:0,pricingContextMissing:true,finalPrice:null};
+  }
+
   function calculatePrice(priceBook,variant,cat=category(),family='CHC',options={}){
     // V4.20.01: a Price List row marked Fixed is customer/category independent.
     // Detect Fixed BEFORE applying Category currency filters. This makes the same
@@ -939,5 +961,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,sourceCostOnly,repriceSource,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();

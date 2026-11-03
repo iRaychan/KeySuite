@@ -1,7 +1,7 @@
 {
-  "version": "5.00.33",
-  "baseline": "5.00.32",
-  "upgrade_supported_from": "5.00.32",
+  "version": "5.00.34",
+  "baseline": "5.00.33",
+  "upgrade_supported_from": "5.00.33",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
@@ -15,5 +15,9 @@
     "Product and curve action controls use one compact horizontal row",
     "Product, Selection and System use the shared read-only costing audit and pricing engine",
     "Bare-shaft pricing removes included motor source cost before pump pricing"
+    ,"Brand Margin is applied immediately after adjusted Converted MYR using the existing gross-margin recovery semantics"
+    ,"ES and ISO fixed Trimming remains in the pricing path and is displayed without capping"
+    ,"Product Costing Audit shows catalogue source costs without a selected customer"
+    ,"Costing Audit shows adjustments, running totals and the applicable reconciliation route"
   ]
 }

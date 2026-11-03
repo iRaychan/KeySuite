@@ -1,0 +1,36 @@
+KeySuite V5.00.34 FULL BUILD — Release Verification
+Date: 2026-11-04 (Asia/Kuala_Lumpur)
+
+BASELINE
+- Reconstructed V5.00.33 from the supplied KeySuite_V5.00.32_FULL_BUILD.zip plus KeySuite_V5.00.33_UPGRADE_FROM_V5.00.32.zip.
+- The official V5.00.33 upgrade manifest declared no removed files.
+- No production data, customer record, quotation, manual override, Supabase configuration, or synced project reference was edited.
+
+PHASE 05 RESULTS
+- PASS Bug 001: Brand Margin uses existing gross-margin recovery semantics and runs after adjusted Converted MYR, before Margin.
+- PASS Bug 001: fixed ES/ISO Trimming (including RM19,950 fixture) is retained through the final price and is never capped or hidden.
+- PASS Bug 002: Product Costing Audit browser fixture displays USD/MYR source prices and Converted MYR with no selected customer/category; no zero price is substituted.
+- PASS Bug 003: audit rows expose adjustment and running total for Assembly and Individual; reconciliation identifies the applicable route and preserves manual overrides.
+
+AUTOMATED CHECKS PASSED
+- JavaScript syntax: pricing.js, costing-audit-v50032.js, v40001-multibrand.js, v50034-version-lock.js, sw.js.
+- RELEASE.json parse and VERSION.txt = 5.00.34.
+- V4.28.58 CR pricing regression.
+- V4.28.59 assembly/system pricing regression.
+- V5.00.10 shared pricing regression.
+- V5.00.11 component/ISO pricing regressions.
+- V5.00.12 ES/ISO trimming and snapshot regression.
+- V5.00.31 KV/costing-permission regression.
+- V5.00.33 motor source-deduction and snapshot repricing regression.
+- V5.00.34 Phase 05 focused calculation fixture.
+- V5.00.34 headless-Chrome Product Costing Audit without customer fixture.
+- Stale V5.00.33 labels, cache key, Brand Margin-after-Transport text, and old version-lock reference absent from active V5.00.34 runtime files.
+
+HISTORICAL TEST NOTES
+- Some inherited tests are intentionally pinned to old release versions, catalogue counts, hashes, or pre-KV registries. They remain packaged as historical material and are not V5.00.34 release gates.
+- Authenticated production-account writes and exhaustive Safari acceptance were not performed. Staging acceptance remains required before production promotion.
+
+DEPLOYMENT
+- Frontend full-build upload only.
+- Service-worker cache: keysuite-v50034-20261104.
+- No SQL migration or Edge Function deployment required.

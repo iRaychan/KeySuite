@@ -1,0 +1,25 @@
+{
+  "from": "V5.00.33",
+  "to": "V5.00.34",
+  "base_archive_sha256": "dc9e48fd8b90a6409f6d0a53dd437180e797f04327a868cb2ac13d5de2c85bb0",
+  "full_archive_sha256": "fc1dc22a8e122cf7b6eab2aa98fbf0c624bafda7653cef26cf9ab3392e55bb70",
+  "removed_files": [],
+  "files": {
+    "BUILD_VERIFICATION_V50034.txt": "c915a9a29ad526c448fd47b780761f3b4f753ad5ca4ac1c8c669c84a35c7c743",
+    "CHANGELOG_AND_TESTS_V5.00.34.md": "e55a410b238ce3d7ff69edfc86fc6857c0caad584bbe6743a2b179437360151e",
+    "DEPLOYMENT_V5.00.34.md": "5ca4c1a3dec53a9a3cdcdd8ee40ef7e7e04022b2349fce2b8367f624b54730a6",
+    "README.md": "fff3660a56ae98cd84118e7daf5e4453b0ab224a3a3b1cf830db2ed66d28d84c",
+    "README_UPGRADE_V50033.md": "780aead22ae7c6a65d15ffb0ee07612bdd763b7fb0fd8b0eb9866fd2d66e19cc",
+    "RELEASE.json": "ff87c2e0ef9e4a535dc1c4166cdf11011e3592b97e3121fc92cef01e2675d919",
+    "UPGRADE_MANIFEST_V50033.json": "1270931343746e509bd5ff098d1a2c6060f2bfa3985374c7bf3f21bce8d470aa",
+    "VERSION.txt": "9916e949caa16b8a00b9a90a97701940f916c9c5ec6f5054321d714e48f74e35",
+    "costing-audit-v50032.js": "e6e4237cc5223c5341cb1c1dc414a069c56446081aaba9fcaf954f48d315bd5f",
+    "index.html": "954e458c8bb8ee3d9ee28cbf52160f105d23bf9cc2455837b62c066e982f5396",
+    "pricing.js": "8199e30537c322d2e9db8e3dcb8580042a6b2330920f91d3d465f0c41dbe039c",
+    "sw.js": "157966188d09a67a43d5523cd8f805bfd80278019fdc42b29086d6b9514429df",
+    "tests/v50034-phase05.cjs": "05bc7a2a8df35ac95f9d45e966c9040d78b6414bb91afbc7d90dae5cdf064af2",
+    "tests/v50034-product-no-customer-browser.cjs": "8be5f78517673b09231af2e333a6180c5657ac00e52a160a77a1711d6fc174b4",
+    "v40001-multibrand.js": "ade387830c7bf2d04ed365fac3479b8a50a57cd882c0a434de8cf0f275cc7a65",
+    "v50034-version-lock.js": "e5b16cca04d15fd4c24850bc51d7fe5d282895107e14e6ab89f808854e4d81d4"
+  }
+}
