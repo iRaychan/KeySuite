@@ -21,9 +21,9 @@ const accountAllows=(brandId,family,productGroup='')=>{
   return a?.isBrandSeriesAllowed?.(brandId,productGroup||family)===true;
 };
 const DEFAULT_CHC_MATERIAL='SS304 (Cast Iron Connection)';
-const FAMILIES=['CHC','CR','BFI','ES'];
+const FAMILIES=['CHC','CR','KV','BFI','ES','ISO'];
 const normalizeGroup=v=>upper(v).replace(/\s+/g,'_');
-const hydraulicFamily=v=>{const g=normalizeGroup(v);return g==='CHC'||g==='CHC_G1'||g==='CHC_G2'?'CHC':g==='CR'?'CR':g==='BFI'?'BFI':g==='ES'?'ES':''};
+const hydraulicFamily=v=>{const g=normalizeGroup(v);return g==='CHC'||g==='CHC_G1'||g==='CHC_G2'?'CHC':g==='CR'?'CR':g==='KV'?'KV':g==='BFI'?'BFI':g==='ES'?'ES':g==='ISO'?'ISO':''};
 const state={requestId:0,pending:null,results:{},responded:{},savedKeys:new Set(),prefLoaded:false,queue:[],currentEntry:null,currentFamily:null,familyTimer:null,preferenceLoading:false,customerPriceLoading:false,customerPriceError:'',customerPriceErrorCid:'',enhancedCHC:false,enhancedKeys:new Set(),includeColdItems:false};
 const isKeylargo=b=>norm(b?.brand_key).toLowerCase()==='keylargo';
 const isMaster=b=>String(b?.brand_type||'').toLowerCase()==='master'||norm(b?.brand_key).toLowerCase()==='b.g.reich'||norm(b?.brand_name).toLowerCase()==='b.g.reich';
@@ -31,7 +31,7 @@ const brands=()=>{const rows=((api()?.state?.brands)||[]).filter(b=>b&&b.active!
 const visibleBrands=()=>{
   const all=brands();
   if(!accountScopeReady())return [];
-  return all.filter(b=>['CHC_G1','CHC_G2','CR','BFI','ES','MOTOR'].some(group=>accountAllows(b.id,hydraulicFamily(group)||group,group)));
+  return all.filter(b=>['CHC_G1','CHC_G2','CR','KV','BFI','ES','ISO','MOTOR'].some(group=>accountAllows(b.id,hydraulicFamily(group)||group,group)));
 };
 const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
 const masterSeries=()=> 'CHC';
@@ -52,8 +52,10 @@ function entries(){
       out.push({brand:b,family:'CHC',productGroup:'CHC_G1',key:keyOf(b.id,'CHC_G1')});
       out.push({brand:b,family:'CHC',productGroup:'CHC_G2',key:keyOf(b.id,'CHC_G2')});
       out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
+      out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
       out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
       out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+      out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
       return;
     }
     const groups=mappings().filter(m=>String(m.brand_id)===String(b.id)).map(m=>normalizeGroup(m.master_family));
@@ -61,8 +63,10 @@ function entries(){
     if(groups.includes('CHC_G1'))out.push({brand:b,family:'CHC',productGroup:'CHC_G1',key:keyOf(b.id,'CHC_G1')});
     if(groups.includes('CHC_G2')||groups.includes('CHC'))out.push({brand:b,family:'CHC',productGroup:'CHC_G2',key:keyOf(b.id,'CHC_G2')});
     if(groups.includes('CR'))out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
+    if(groups.includes('KV'))out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
     if(groups.includes('BFI'))out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
     if(groups.includes('ES'))out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
+    if(groups.includes('ISO'))out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
   });
   if(!accountScopeReady())return [];
   return out.filter(e=>accountAllows(e.brand.id,e.family,e.productGroup||e.family));

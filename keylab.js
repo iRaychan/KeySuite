@@ -50,6 +50,7 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const money = value => `RM ${Number(value || 0).toLocaleString('en-MY', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
   const round10 = value => Math.ceil((Number(value) || 0) / 10) * 10;
+  const round50 = value => Math.ceil((Number(value) || 0) / 50) * 50;
   const number = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
   const deepCopy = value => JSON.parse(JSON.stringify(value));
 
@@ -175,8 +176,10 @@
     const validInputs=kw>0 && normalizedFlow>0 && normalizedFlow<=850 && normalizedPressure>0 && normalizedPressure<25 && !!inletPriceBucket;
     const base=Object.values(items).reduce((sum,v)=>sum+number(v),0);
     const margin=Math.min(.95,Math.max(0,number(config.clientMargin[client],config.clientMargin.Other)));
-    const final=validInputs?round10(base/(1-margin)):null;
-    return {grade,kw,flowValue,flowUnit,normalizedFlow,flowMeter,pressureValue,pressureUnit,normalizedPressure,pressureSensor,inlet,inletPriceBucket,accreditation,customer,client,items,base,margin,final,validInputs};
+    const unrounded=validInputs?base/(1-margin):null;
+    const final=validInputs?round50(unrounded):null;
+    const roundingAdjustment=validInputs?final-unrounded:null;
+    return {grade,kw,flowValue,flowUnit,normalizedFlow,flowMeter,pressureValue,pressureUnit,normalizedPressure,pressureSensor,inlet,inletPriceBucket,accreditation,customer,client,items,base,margin,unrounded,roundingAdjustment,final,validInputs};
   }
 
   function recalc(){
@@ -202,8 +205,10 @@
       <div class="keylab-summary-row"><span>SAMM Accredited · ${esc(result.accreditation)}</span><b>${money(result.items.accreditation)}</b></div>
       <div class="keylab-summary-row total"><span>Base Test Cost</span><b>${money(result.base)}</b></div>
       <div class="keylab-summary-row"><span>Customer Classification · ${esc(result.customer&&String(result.customer?.classification||'').trim()?result.client:'Not selected → Other')} (${(result.margin*100).toFixed(0)}%)</span><b>÷ ${(1-result.margin).toFixed(2)}</b></div>
+      <div class="keylab-summary-row"><span>Unrounded Price</span><b>${result.unrounded===null?'—':money(result.unrounded)}</b></div>
+      <div class="keylab-summary-row"><span>Round Up to RM 50</span><b>${result.roundingAdjustment===null?'—':`+ ${money(result.roundingAdjustment)}`}</b></div>
       <div class="keylab-summary-row grand ${result.final===null?'pending':''}"><span>KeyLab Price</span><b>${result.final===null?'—':money(result.final)}</b></div>`;
-    if($('keyLabFormulaNote')) $('keyLabFormulaNote').textContent=`Final = Base ÷ (1 − ${(result.margin*100).toFixed(0)}%) · round up to nearest RM10.${result.customer?'':' No customer/classification selected, so Other rate is used.'}`;
+    if($('keyLabFormulaNote')) $('keyLabFormulaNote').textContent=`Final = Base ÷ (1 − ${(result.margin*100).toFixed(0)}%) · round up to nearest RM50.${result.customer?'':' No customer/classification selected, so Other rate is used.'}`;
     return result;
   }
 

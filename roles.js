@@ -54,9 +54,11 @@
     const group=normalizeProductGroup(value);
     if(group==='CHC'||group==='CHC_G1'||group==='CHC_G2')return 'CHC';
     if(group==='CR')return 'CR';
+    if(group==='KV')return 'KV';
     if(group==='BFI')return 'BFI';
     if(group==='BGF')return 'BGF';
     if(group==='ES')return 'ES';
+    if(group==='ISO')return 'ISO';
     if(group==='MOTOR')return 'MOTOR';
     return '';
   };

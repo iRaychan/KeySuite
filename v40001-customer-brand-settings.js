@@ -52,8 +52,8 @@
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
   const isMaster=b=>!!b&&(low(b.brand_type)==='master'||low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich');
   const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
-  const HYDRAULIC_FAMILIES=['CHC','CR','BFI','ES','ISO'];
-  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','BFI','BGF','ES','ISO','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
+  const HYDRAULIC_FAMILIES=['CHC','CR','KV','BFI','ES','ISO'];
+  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','KV','BFI','BGF','ES','ISO','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
   const priceGroups=()=>{const found=new Set(PRICE_GROUPS);document.querySelectorAll('[data-category-product]').forEach(button=>found.add(normalizeGroup(button.dataset.categoryProduct)));(window.KEYSUITE_SECURE_DATA?.categories||[]).forEach(category=>Object.keys(category?.productRules||{}).forEach(group=>found.add(normalizeGroup(group))));found.delete('GENERAL');found.delete('KEYLAB');return [...found].filter(Boolean)};
   const FAMILIES=HYDRAULIC_FAMILIES;
   const normalizeGroup=v=>String(v??'').trim().toUpperCase().replace(/\s+/g,'_');
@@ -61,6 +61,7 @@
     const g=normalizeGroup(v);
     if(g==='CHC'||g==='CHC_G1'||g==='CHC_G2')return 'CHC';
     if(g==='CR')return 'CR';
+    if(g==='KV')return 'KV';
     if(g==='BFI')return 'BFI';
     if(g==='ES')return 'ES';
     return '';
@@ -92,6 +93,7 @@
         out.push({brand:b,family:'CHC',productGroup:'CHC_G1',key:keyOf(b.id,'CHC_G1')});
         out.push({brand:b,family:'CHC',productGroup:'CHC_G2',key:keyOf(b.id,'CHC')});
         out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
+        out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
         out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
         out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
         out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
@@ -102,6 +104,7 @@
       if(groups.includes('CHC_G1'))out.push({brand:b,family:'CHC',productGroup:'CHC_G1',key:keyOf(b.id,'CHC_G1')});
       if(groups.includes('CHC_G2')||groups.includes('CHC'))out.push({brand:b,family:'CHC',productGroup:'CHC_G2',key:keyOf(b.id,'CHC')});
       if(groups.includes('CR'))out.push({brand:b,family:'CR',productGroup:'CR',key:keyOf(b.id,'CR')});
+      if(groups.includes('KV'))out.push({brand:b,family:'KV',productGroup:'KV',key:keyOf(b.id,'KV')});
       if(groups.includes('BFI'))out.push({brand:b,family:'BFI',productGroup:'BFI',key:keyOf(b.id,'BFI')});
       if(groups.includes('ES'))out.push({brand:b,family:'ES',productGroup:'ES',key:keyOf(b.id,'ES')});
       if(groups.includes('ISO'))out.push({brand:b,family:'ISO',productGroup:'ISO',key:keyOf(b.id,'ISO')});
@@ -122,6 +125,7 @@
         out.push({brand:b,priceGroup:'CHC_G1',family:'CHC',selectionKey:keyOf(b.id,'CHC_G1'),key:priceKeyOf(b.id,'CHC_G1')});
         out.push({brand:b,priceGroup:'CHC_G2',family:'CHC',selectionKey:keyOf(b.id,'CHC'),key:priceKeyOf(b.id,'CHC_G2')});
         out.push({brand:b,priceGroup:'CR',family:'CR',selectionKey:keyOf(b.id,'CR'),key:priceKeyOf(b.id,'CR')});
+        out.push({brand:b,priceGroup:'KV',family:'KV',selectionKey:keyOf(b.id,'KV'),key:priceKeyOf(b.id,'KV')});
         out.push({brand:b,priceGroup:'BFI',family:'BFI',selectionKey:keyOf(b.id,'BFI'),key:priceKeyOf(b.id,'BFI')});
         out.push({brand:b,priceGroup:'BGF',family:'BGF',selectionKey:'',key:priceKeyOf(b.id,'BGF')});
         out.push({brand:b,priceGroup:'ES',family:'ES',selectionKey:keyOf(b.id,'ES'),key:priceKeyOf(b.id,'ES')});
@@ -137,8 +141,8 @@
       groups.forEach(g=>out.push({
         brand:b,
         priceGroup:g,
-        family:g==='ES'?'ES':g==='ISO'?'ISO':g==='BGF'?'BGF':g==='BFI'?'BFI':g==='CR'?'CR':g==='MOTOR'?'MOTOR':'CHC',
-        selectionKey:g==='CHC_G1'?keyOf(b.id,'CHC_G1'):g==='CHC_G2'?keyOf(b.id,'CHC'):g==='CR'?keyOf(b.id,'CR'):g==='BFI'?keyOf(b.id,'BFI'):g==='ES'?keyOf(b.id,'ES'):g==='ISO'?keyOf(b.id,'ISO'):'',
+        family:g==='ES'?'ES':g==='ISO'?'ISO':g==='BGF'?'BGF':g==='BFI'?'BFI':g==='KV'?'KV':g==='CR'?'CR':g==='MOTOR'?'MOTOR':'CHC',
+        selectionKey:g==='CHC_G1'?keyOf(b.id,'CHC_G1'):g==='CHC_G2'?keyOf(b.id,'CHC'):g==='CR'?keyOf(b.id,'CR'):g==='KV'?keyOf(b.id,'KV'):g==='BFI'?keyOf(b.id,'BFI'):g==='ES'?keyOf(b.id,'ES'):g==='ISO'?keyOf(b.id,'ISO'):'',
         key:priceKeyOf(b.id,g),
         label:g==='MOTOR'?'Motor':''
       }));
@@ -165,7 +169,7 @@
     return priceBrands().filter(b=>allowed.has(String(b.id)));
   }
   function priceGroupLabel(group){
-    return ({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',BFI:'BFI',BGF:'BGF',ES:'End Suction',ISO:'ISO',MOTOR:'Motor',BASEPLATE:'Baseplate',COUPLING:'Coupling',KEYPLC:'KeyPLC Panel',MANIFOLD:'Manifold',GWS:'GWS Tank'})[normalizedPriceGroup(group)]||String(group||'').replace(/_/g,' ');
+    return ({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',KV:'KV',BFI:'BFI',BGF:'BGF',ES:'End Suction',ISO:'ISO',MOTOR:'Motor',BASEPLATE:'Baseplate',COUPLING:'Coupling',KEYPLC:'KeyPLC Panel',MANIFOLD:'Manifold',GWS:'GWS Tank'})[normalizedPriceGroup(group)]||String(group||'').replace(/_/g,' ');
   }
   function priceEntrySeriesLabel(entry){
     if(entry.label)return String(entry.label);
@@ -627,10 +631,10 @@
   }
   function isSelectionAllowed(brandId,priceGroup,cid=currentPreferenceCustomerId()){
     const group=normalizedPriceGroup(priceGroup);
-    if(!['CHC_G1','CHC_G2','CR','BFI','ES','ISO'].includes(group))return false;
+    if(!['CHC_G1','CHC_G2','CR','KV','BFI','ES','ISO'].includes(group))return false;
     if(isPriceAllowed(brandId,group,cid)!==true)return false;
     const pref=cache.get(String(cid));if(!pref)return false;
-    const selectionKey=group==='CHC_G1'?keyOf(brandId,'CHC_G1'):group==='CHC_G2'?keyOf(brandId,'CHC'):group==='CR'?keyOf(brandId,'CR'):group==='BFI'?keyOf(brandId,'BFI'):group==='ISO'?keyOf(brandId,'ISO'):keyOf(brandId,'ES');
+    const selectionKey=group==='CHC_G1'?keyOf(brandId,'CHC_G1'):group==='CHC_G2'?keyOf(brandId,'CHC'):group==='CR'?keyOf(brandId,'CR'):group==='KV'?keyOf(brandId,'KV'):group==='BFI'?keyOf(brandId,'BFI'):group==='ISO'?keyOf(brandId,'ISO'):keyOf(brandId,'ES');
     return new Set(pref.keys||[]).has(selectionKey);
   }
   function isTeskMeteringEnabled(cid=currentPreferenceCustomerId()){
@@ -651,6 +655,7 @@
     const family=String(source.product_family||source.family||pump.keysuite_product_family||row?.dataset?.v391Family||'').toUpperCase();
     if(!group){
       if(family==='BFI')group='BFI';
+      else if(family==='KV')group='KV';
       else if(family==='ES')group='ES';
       else if(family==='ISO')group='ISO';
       else if(family==='BGF')group='BGF';

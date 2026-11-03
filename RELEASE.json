@@ -1,18 +1,19 @@
 {
-  "version": "5.00.31",
-  "baseline": "5.00.30",
-  "upgrade_supported_from": "5.00.30",
-  "new_database_migration_required": true,
-  "supabase_deployment_required": true,
+  "version": "5.00.32",
+  "baseline": "5.00.31",
+  "upgrade_supported_from": "5.00.31",
+  "new_database_migration_required": false,
+  "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "BSW Product Curve frame readiness repaired",
-    "KV/KVC/KVN independent price books added without overwriting existing KV prices",
-    "Duplicate customer Brand/Series price-preference entries suppressed by canonical key",
-    "ES trimmed impeller diameter is carried into descriptions and snapshots",
-    "Permission-gated read-only Costing Audit added",
-    "KV 261102 V1.3 imported: 171 complete KV1-KV5 models; incomplete rows excluded"
+    "Pump PDF metadata title uses YYMMDD - Pump Model while downloaded filenames remain unchanged",
+    "Quotation model formatting preserves hyphens and suffixes",
+    "KV and ISO share the B.G.Reich series registry used by dashboard and customer preferences",
+    "ES selection and Product Curve routes use the active registered ES dataset",
+    "Product and curve action controls use one compact horizontal row",
+    "Product, Selection and System use the shared read-only costing audit and pricing engine",
+    "KeyLab final selling prices round upward to RM50"
   ]
 }

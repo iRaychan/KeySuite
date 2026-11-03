@@ -276,7 +276,7 @@
         applySelectorLogo(sourceWin.document,ctx);
         selectorLogo=String(ctx?.logo||'').trim() ? displayedSelectorLogo(sourceWin.document) : '';
       }
-      if (doc?.title){const lockedTitle=String(sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.pdfFileTitle||sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||'').trim();doc.title=lockedTitle||modelAlias(doc.title,ctx);}
+      if (doc?.title){const lockedTitle=String(sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.pdfMetadataTitle||sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.pdfFileTitle||sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||'').trim();doc.title=lockedTitle||modelAlias(doc.title,ctx);}
       applyReportImages(doc,ctx,selectorLogo);
       applyProductMaterial(doc,sourceWin,ctx);
       replaceReportText(doc,ctx);

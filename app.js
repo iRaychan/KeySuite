@@ -1232,6 +1232,7 @@ function quotePumpPdfFilename(row,itemNumber){
 window.KeySuitePumpPdfNames={
  nextFromPayload:pump=>pumpPdfFilenameFromPayload(pump,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  nextFromRow:row=>quotePumpPdfFilename(row,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
+ metadataTitleFromPump:(pump,now=new Date())=>pumpPdfMetadataTitle(pump,now),
  context:pumpPdfCounterContext,
  reset:resetPumpPdfItemCounter
 };
@@ -1239,6 +1240,11 @@ function pumpPdfInternalModelHeading(pump={}){
  const clean=value=>String(value||'').trim().replace(/^Item\s+\d+\s*-\s*/i,'').replace(/\s+c\/?w\b.*$/i,'').replace(/\s+-\s+[0-9.]+\s*(?:m3|m³)[^@]*@.*$/i,'').trim();
  const candidates=[pump.keysuite_display_model,pump.display_model,pump.quotation_model,pump.model,pump.base_model,pump.pumpData?.model];
  return candidates.map(clean).find(Boolean)||'Pump Model';
+}
+function pumpPdfMetadataTitle(pump={},now=new Date()){
+ const date=now instanceof Date&&!Number.isNaN(now.getTime())?now:new Date();
+ const stamp=String(date.getFullYear()).slice(-2)+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0');
+ return `${stamp} - ${pumpPdfInternalModelHeading(pump)}`;
 }
 function exportPumpDataSheet(row,filename){
  const raw=row.dataset.pumpData;
@@ -1249,8 +1255,8 @@ function exportPumpDataSheet(row,filename){
  const resolved=/KEYSELECTOR-ES/.test(source)||family==='ES'?'ES':family||(/KEYSUITE-KV/.test(source)?'KV':/KEYSUITE-CR/.test(source)?'CR':'CHC');
  const frameId={ES:'selectorEsFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame',BFI:'selectorBfiFrame'}[resolved]||'selectorFrame',frame=$(frameId);
  if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert(`${resolved} pump selector is not ready.`);return}
- const internalModel=pumpPdfInternalModelHeading(pumpData),exportPayload={...pumpData,keysuite_pdf_model_heading:internalModel,keysuite_display_model:internalModel,display_model:internalModel,quotation_model:internalModel};
- frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:exportPayload,filename:safePdfName(filename)},'*');
+ const internalModel=pumpPdfInternalModelHeading(pumpData),metadataTitle=pumpPdfMetadataTitle(pumpData),exportPayload={...pumpData,keysuite_pdf_model_heading:internalModel,keysuite_display_model:internalModel,display_model:internalModel,quotation_model:internalModel,keysuite_pdf_metadata_title:metadataTitle,pdf_metadata_title:metadataTitle};
+ frame.contentWindow.postMessage({type:'KEYSUITE_EXPORT_DATASHEET',payload:exportPayload,filename:safePdfName(filename),metadataTitle},'*');
 }
 
 function refreshItemExportButtons(){

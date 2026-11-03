@@ -408,6 +408,10 @@
       nextPump.keysuite_master_series=masterSeries;nextPump.keysuite_selling_series=sellingSeries;nextPump.quotation_model=shownModel;
       row.dataset.pumpData=JSON.stringify(nextPump);
     }
+    // Keep the quotation description's pump model identical to the displayed model.
+    // Earlier alias passes independently rewrote the description and could collapse
+    // significant punctuation (for example VMS 2-22 became VMS 222).
+    shownDesc=shownDesc.replace(/(Vertical\s+Multistage\s+Pump\s+Model:\s*)[^\n\r]+/i,`$1${shownModel}`);
     if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==shownModel)modelInput.value=shownModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==shownDesc)descInput.value=shownDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);
   }
   function calculateWithBrandMargin(source,brandMargin){
