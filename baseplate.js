@@ -339,5 +339,5 @@
   function decoratePumpsetResult(result){if(!result?.available)return result;try{result.baseplateCost=calculateForPumpset(result)}catch(_){}return result}
   document.addEventListener('KEYSUITE_MOTOR_BASEPLATE_RESULT',event=>{const result=event?.detail?.result;if(result?.available){decoratePumpsetResult(result);window.KEYSUITE_LAST_ES_BASEPLATE_COST=result.baseplateCost;populateCalculator(result,{force:true});renderCalculatorState()}});
   document.addEventListener('KEYSUITE_V40205_READY',()=>{if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation()}});
-  window.KeySuiteBaseplate={init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,getSettings:()=>clone(settings),defaults:()=>clone(DEFAULTS)};
+  window.KeySuiteBaseplate={getProductConfiguration:productBaseplateConfiguration,init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,getSettings:()=>clone(settings),defaults:()=>clone(DEFAULTS)};
 })();

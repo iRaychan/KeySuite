@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.35</title>
-  <script>window.KEYSUITE_VERSION='5.00.35';window.KEYSUITE_BUILD='V5.00.35';</script>
+  <title>KeySuite V5.00.36</title>
+  <script>window.KEYSUITE_VERSION='5.00.35';window.KEYSUITE_BUILD='V5.00.36';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -652,7 +652,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.35</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.36</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -668,7 +668,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.35</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.36</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -694,7 +694,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.35</div>
+    <div class="suite-version">KeySuite V5.00.36</div>
   </aside>
 
   <main>
@@ -791,7 +791,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
             <div class="page-title-row" style="margin-bottom:12px">
               <h2 id="detailCompany">Customer Details</h2>
               <div class="actions" style="margin:0">
-                <button class="btn secondary" id="collapseCustomerDetails" type="button" title="Collapse customer information">▲</button>
+                <button class="btn secondary" id="collapseCustomerDetails" type="button" title="Collapse customer information">▲</button><button class="btn secondary" id="customerRemarksButton" type="button">Remarks</button>
                 <button class="btn secondary" id="editDetailCustomer">Edit</button>
               </div>
             </div>
@@ -2375,7 +2375,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="v41200-bootstrap.js?v=42922"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50033">
-<script src="v50035-version-lock.js?v=50035"></script>
+<script src="v50036-version-lock.js?v=50035"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2464,5 +2464,5 @@ document.addEventListener('click',event=>{
 </script>
 
 <script src="costing-audit-v50032.js?v=50035"></script>
-</body>
+<script src="bsw-variants-v50036.js"></script><script src="bsw-pricing-v50036.js"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js"></script></body>
 </html>

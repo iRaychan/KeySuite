@@ -1,17 +1,18 @@
 {
-  "version": "5.00.35",
-  "baseline": "5.00.34",
-  "upgrade_supported_from": "5.00.34",
-  "new_database_migration_required": false,
-  "supabase_deployment_required": false,
+  "version": "5.00.36",
+  "baseline": "5.00.35",
+  "upgrade_supported_from": "5.00.35",
+  "new_database_migration_required": true,
+  "supabase_deployment_required": true,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Bug 001: Product Cost uses active customer and family-specific product controls",
-    "Bug 002: Product Curve frame visibility/readiness and stale acknowledgement handling",
-    "Bug 003: independent CHC/CHCS/CHCN source variants and component pricelist sub-trails",
-    "Bug 003: retain real saved quotation comparisons without manufacturing a saved Selection price",
-    "Bug 004: independent download filename and embedded PDF title, counter commit after generation and Dashboard X reset"
+    "Bug 001: model-first audit family routing, explicit customer configuration diagnostics",
+    "Bug 002: ISO owner catalogue/model/material source lookup",
+    "Bug 003: 178 BSW models, 378 valid variants, four editable price/rarity groups and Supabase persistence",
+    "Bug 004: Cost actions for Motor, Baseplate, Coupling, Manifold and family lookups",
+    "Bug 005: reuse CHC product configuration controls above the curve",
+    "Improvement 006: customer-specific immutable remark history with customer RLS"
   ]
 }

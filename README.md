@@ -1,3 +1,5 @@
+Current release: V5.00.36. Read CHANGELOG_AND_TESTS_V5.00.36.md and DEPLOYMENT_V5.00.36.md. Two new migrations are supplied and have NOT been applied.
+
 # KeySuite V5.00.35
 
 Current release: see [change log and test results](CHANGELOG_AND_TESTS_V5.00.35.md) and [deployment instructions](DEPLOYMENT_V5.00.35.md). Authenticated staging acceptance remains required as detailed in the report. Earlier notes below are historical references.

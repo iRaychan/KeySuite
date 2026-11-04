@@ -270,5 +270,5 @@
   }
   function init(data,userAccess){secureData={...secureData,...(data||{})};(secureData.manifoldProducts||[]).forEach(product=>{ensureHeaderVariants(product);ensureAccessoryVariants(product);normalizeStrainerVariants(product)});access=userAccess||access;headerMaterial=String(localStorage.getItem('ks_manifold_header_material')||'GI').toUpperCase()==='SS'?'SS':'GI';loadGlobalOptions();bind();syncOptionControls();renderProduct();renderPriceList()}
   function pageShown(id){if(id==='productManifold')renderProduct();if(id==='manifoldPriceList')renderPriceList()}
-  window.KeySuiteManifold={init,pageShown,renderProduct,renderPriceList,findConfiguredPrice,buildConfiguredItem,connectionForShutoffHead,connectionLabel,automaticAccessoryCode,automaticAccessoryConnection,strainerCode,strainerConnectionFor,description,headerSizes,getGlobalOptions,setGlobalOptions,normalizeOptions};
+  window.KeySuiteManifold={getProductConfiguration:selectedConfig,init,pageShown,renderProduct,renderPriceList,findConfiguredPrice,buildConfiguredItem,connectionForShutoffHead,connectionLabel,automaticAccessoryCode,automaticAccessoryConnection,strainerCode,strainerConnectionFor,description,headerSizes,getGlobalOptions,setGlobalOptions,normalizeOptions};
 })();

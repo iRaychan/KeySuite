@@ -983,7 +983,7 @@ function showCustomerDetail(id){
  const c=customers().find(x=>x.id===id);if(!c)return;
  viewedCustomerId=id;
  $('customerEmpty').style.display='none';$('customerEditorCard').style.display='none';$('customerDetail').style.display='block';
- $('detailCompany').textContent=c.company;
+ $('detailCompany').textContent=c.company;$('customerRemarksButton').onclick=()=>window.KeySuiteCustomerRemarks.open(c.id,c.company);
  $('detailClassification').textContent=c.classification||'Other';$('detailOwner').textContent=customerOwnerName(c.assignedUserEmail);
  $('detailAddress').textContent=c.address||'-';$('detailPhone').textContent=formatMYPhone(c.companyPhone)||'-';$('detailDistance').textContent=`${Number(c.distanceKm||0).toLocaleString('en-MY',{maximumFractionDigits:1})} km`;
  $('detailTerms').textContent=formatCustomerTerms(c);$('detailTin').textContent=c.tinNumber||'-';$('detailBrn').textContent=c.brnNumber||'-';
