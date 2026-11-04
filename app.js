@@ -1152,7 +1152,7 @@ function pumpPdfCounterContext(){
  const customerId=String($('qCustomer')?.value||quotationPricingCustomerId||selectedQuotationCustomer()?.id||'').trim();
  const customerName=String($('qPrintedCompany')?.value||selectedQuotationCustomer()?.company||'').trim().toLowerCase();
  const quoteNo=String($('quoteNo')?.value||'').trim().toUpperCase();
- return `${customerId}|${customerName}|${quoteNo}`;
+ return customerId;
 }
 function resetPumpPdfItemCounter(){
  try{localStorage.removeItem('keysuite_pump_pdf_counter_v40606')}catch(_){}
@@ -1162,9 +1162,7 @@ function nextPumpPdfItemNumber(){
  let state={context:'',count:0};
  try{state=JSON.parse(localStorage.getItem(key)||'{}')||state}catch(_){}
  if(String(state.context||'')!==context)state={context,count:0};
- state.count=Math.max(0,Number(state.count)||0)+1;state.context=context;
- try{localStorage.setItem(key,JSON.stringify(state))}catch(_){}
- return state.count;
+ return Math.max(0,Number(state.count)||0)+1;
 }
 function pumpPayloadCoupling(pump={}){
  let coupling=pump?.export_state?.couplingType||pump?.coupling_type||'';
@@ -1211,7 +1209,7 @@ function pumpPdfFilenameFromPayload(pump={},itemNumber=1){
  let dutyFlow=Number(pump.required_total_flow_m3h??pump.required_flow_m3h??pump.flow_m3h??pump.pumpData?.flowM3h),dutyHead=Number(pump.required_head_m??pump.head_m??pump.pumpData?.headM),originalDuty=pumpPdfOriginalDuty(pump);
  const numbered=Number(itemNumber)>0,no=String(Math.max(1,Number(itemNumber)||1)).padStart(2,'0'),motor=motorBits.length?` cw ${motorBits.join(' ')}`:'',duty=originalDuty?` - ${originalDuty}`:(dutyFlow>0&&dutyHead>0)?` - ${capacityNumber(dutyFlow,2)}m3／hr @ ${capacityNumber(dutyHead,2)} Mtr`:'';
  // B4.06.13: without a selected customer, use only pump model + duty capacity and do not consume Item numbering.
- return safePdfName(numbered?`Item ${no} - ${model}${motor}${duty}`:`${model}${duty}`);
+ return safePdfName(numbered?`Item ${no} - ${model}${duty}`:`${model}${duty}`);
 }
 function quotePumpPdfFilename(row,itemNumber){
  let pump={};try{pump=JSON.parse(row?.dataset?.pumpData||'{}')}catch(_){}
@@ -1227,12 +1225,13 @@ function quotePumpPdfFilename(row,itemNumber){
  if(!(dutyHead>0))dutyHead=Number(pump.required_head_m??pump.head_m??pump.pumpData?.headM);
  const numbered=Number(itemNumber)>0,no=String(Math.max(1,Number(itemNumber)||1)).padStart(2,'0'),motor=motorBits.length?` cw ${motorBits.join(' ')}`:'',duty=originalDuty?` - ${originalDuty}`:(dutyFlow>0&&dutyHead>0)?` - ${capacityNumber(dutyFlow,2)}m3／hr @ ${capacityNumber(dutyHead,2)} Mtr`:'';
  // B4.06.13: without a selected customer, use only pump model + duty capacity and do not consume Item numbering.
- return safePdfName(numbered?`Item ${no} - ${model}${motor}${duty}`:`${model}${duty}`);
+ return safePdfName(numbered?`Item ${no} - ${model}${duty}`:`${model}${duty}`);
 }
 window.KeySuitePumpPdfNames={
  nextFromPayload:pump=>pumpPdfFilenameFromPayload(pump,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  nextFromRow:row=>quotePumpPdfFilename(row,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  metadataTitleFromPump:(pump,now=new Date())=>pumpPdfMetadataTitle(pump,now),
+ commit:filename=>{if(!pumpPdfHasSelectedCustomer())return;const number=Number(String(filename||'').match(/^Item\s+(\d+)/i)?.[1]);if(!number)return;const context=pumpPdfCounterContext(),key='keysuite_pump_pdf_counter_v40606';let previous={};try{previous=JSON.parse(localStorage.getItem(key)||'{}')}catch(_){}const count=previous.context===context?Math.max(Number(previous.count)||0,number):number;localStorage.setItem(key,JSON.stringify({context,count}));},
  context:pumpPdfCounterContext,
  reset:resetPumpPdfItemCounter
 };
@@ -1244,7 +1243,7 @@ function pumpPdfInternalModelHeading(pump={}){
 function pumpPdfMetadataTitle(pump={},now=new Date()){
  const date=now instanceof Date&&!Number.isNaN(now.getTime())?now:new Date();
  const stamp=String(date.getFullYear()).slice(-2)+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0');
- return `${stamp} - ${pumpPdfInternalModelHeading(pump)}`;
+ return `${stamp} - ${pumpPdfFilenameFromPayload(pump,0).replace(/\.pdf$/i,'')}`;
 }
 function exportPumpDataSheet(row,filename){
  const raw=row.dataset.pumpData;
@@ -1730,7 +1729,7 @@ window.addEventListener('message',function(event){
    `Suction & Discharge: ${suctionDischarge}`,
    `Material: ${materialLine}`
  ].filter(Boolean);
- const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
+ const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
  if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){void window.KeySuiteManualPrice.offer({model:itemModel,description:lines.join('\n'),pumpData:p,productFamily:'CHC'},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;}
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;

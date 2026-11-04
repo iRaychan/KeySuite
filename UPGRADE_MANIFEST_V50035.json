@@ -1,0 +1,33 @@
+{
+  "from": "V5.00.34",
+  "to": "V5.00.35",
+  "base_archive_sha256": "fc1dc22a8e122cf7b6eab2aa98fbf0c624bafda7653cef26cf9ab3392e55bb70",
+  "full_archive_sha256": "c212ea1c3db25c72e2eeafc7bd663e26eea8ef666d4199fb170ffd1ae9c438a5",
+  "removed_files": [],
+  "files": {
+    "CHANGELOG_AND_TESTS_V5.00.35.md": "d6ccc1cd2e6fa5cf17091684ccf11baba7c1b4acf552e4075b9e71ce5a169655",
+    "DEPLOYMENT_V5.00.35.md": "e963dd1b941ea0a3cff5c886fac65490ca3b05a1b848c9f353f62251becfef50",
+    "README.md": "3b4cce2f016718eb0d34afc99a22e53443bb8d90003449d12d5444ff02d1813f",
+    "RELEASE.json": "ea42704d2703108454bf94d8628ccdd0705362a478fc754fdb0f7c51ea2b09ec",
+    "VERSION.txt": "019c8229291f51c90c002990b3785b130dcd6230306018739ef81e8ea4dbc706",
+    "app.js": "c1e5ca42b9ca72b67379fe7592b8947b8112bff43c3a3198add707f904f840b8",
+    "component-prices-v50011.js": "6ad3ae4160ff6d2793b906be0ff6f7e73ac4f36885104c263cce9f04e990b3bf",
+    "costing-audit-v50032.js": "79cd3f88b9aedeff9711a964ee634d8b1d68ae7a40ff593b440765f3805eb869",
+    "index.html": "a8fd095f53cae7ef2f8c2b8908846b5c66021cf870837703fffca1680c61f158",
+    "pricing.js": "8440e6e209d0a1e160fbe081a937a991c8dd07857691db3c7f1352be06b2b6cb",
+    "pump-pdf-download-v50035.js": "16dce80fa12afaeb06ef59cab12005fec11744c8f4afa0e1c9b9ea1cb2015040",
+    "sw.js": "a583ae588d290ec02552dc76abf2471f03ab675de7eb55a5edb607c9f4bf8946",
+    "tests/v50035-browser.cjs": "f909fe150b4731270d3527048b936b7cd1f78cc87792ae6d56cbcf23bf7f3dca",
+    "tests/v50035-results/es-report-2.png": "6dbb5b813b53a83ca9b488823c6148c28f567281cf20934785c059f712911f99",
+    "tests/v50035-results/es-report-3.png": "25b782896e91fe66ec9178ae51527a925a9744afe535580271c01a24b007f2cb",
+    "tests/v50035-results/es-report-page1.png": "5142d6fbb2ab868fad998cf6f4388ee6bde5729cf0370ecca9ea471e8cf83601",
+    "tests/v50035-results/es-report.pdf": "a3463138336adf1862812226676f855825618804b974e2e1fd315f9a4de29465",
+    "v394411-product-curve.js": "3c371cb95da14c743eec75c986cb8d204a5bb7ba1f7f6e0f6c28ed6c228dbc9d",
+    "v40001-multibrand.js": "7442b8d30bf20a62f9493ae19748b490b360f6d271ea0c1ff8024788a615f720",
+    "v40001-product-series-overhaul.js": "0c7934012482e19350d751f2aefbc776d6caeefd792bd4c1767317b9ca1bfa17",
+    "v40001-selector-brand.js": "af322238e9180d31ce16730f1cd98b15d7cc15b8a628702094e8393b329129fb",
+    "v50035-version-lock.js": "b1ae768aebcedae6f01d713ada1b1a92c554fa5413be77470f616379d5e81948",
+    "vendor/html2canvas-1.4.1.min.js": "e87e550794322e574a1fda0c1549a3c70dae5a93d9113417a429016838eab8cb",
+    "vendor/jspdf-2.5.2.umd.min.js": "85ba2cc3ff858a20fa49fe6e457bec863ea40b55a9f3725e58a940e62f6f61a4"
+  }
+}

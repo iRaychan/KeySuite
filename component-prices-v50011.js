@@ -19,11 +19,11 @@
      if(!/\bGP\b/i.test(options.material||'')){if(!seal)return {error:`No ${family} price table for selected seal.`};requests.push(['seal',String(size),seal]);}
      requests.push(['oring',String(size),elastomer]);
    }else{const size=group(model);if(!size)return {error:`No ${family} O-ring group for ${model}.`};requests.push(['oring',size,elastomer]);}
-   let total=0;const missing=[];
-   for(const [kind,size,material] of requests){const value=price(family,kind,size,material);if(value===null)missing.push(`${family} ${size.replace('_','–')} ${material} ${kind==='oring'?'O-ring':'seal'}`);else total+=value;}
-   return missing.length?{error:`Component price not entered: ${missing.join(', ')}.`,total:null}:{total};
+   let total=0;const missing=[],details=[];
+   for(const [kind,size,material] of requests){const value=price(family,kind,size,material);details.push({pricelist:'Component Pricelist',family,kind,size,material,currency:'MYR',sourcePrice:value,multiplier:1,baseMyr:value,adjustment:value});if(value===null)missing.push(`${family} ${size.replace('_','–')} ${material} ${kind==='oring'?'O-ring':'seal'}`);else total+=value;}
+   return missing.length?{error:`Component price not entered: ${missing.join(', ')}.`,total:null,details}:{total,details};
  }
- function apply(calc,family,model,options={}){if(!calc||calc.fixedPrice)return calc;const result=additions(family,model,options),base=Number(calc.componentBasePrice??calc.finalPrice??0);return {...calc,componentBasePrice:base,componentAddon:result.total,componentPricingError:result.error||'',finalPrice:result.error?base:base+result.total};}
+ function apply(calc,family,model,options={}){if(!calc||calc.fixedPrice)return calc;const result=additions(family,model,options),base=Number(calc.componentBasePrice??calc.finalPrice??0);return {...calc,componentBasePrice:base,componentAddon:result.total,componentDetails:result.details||[],componentPricingError:result.error||'',finalPrice:result.error?base:base+result.total};}
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function render(){for(const family of ['CHC','CR','ES','ISO']){const parent=document.getElementById(`${family.toLowerCase()}PriceList`);if(!parent)continue;let box=parent.querySelector('.component-price-editor');if(!box){box=document.createElement('div');box.className='card component-price-editor';parent.appendChild(box);}
    const owner=String(window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner',groupList=family==='CR'?[...groups,'320']:groups,sizeLabels={1_5:'1–5',8_20:'8–20',32_90:'32–90',120_200:'120–200',320:'320',24:'24',32:'32',45:'45',55:'55'};

@@ -292,7 +292,7 @@
     // This prevents later navigation/material/brand events from reverting TESK/OEM output.
     try{
       const locked=sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT;
-      if(locked&&typeof locked==='object')return {...locked,pdfMetadataTitle:new Date().getFullYear().toString().slice(-2)+String(new Date().getMonth()+1).padStart(2,'0')+String(new Date().getDate()).padStart(2,'0')+' - '+String(locked.displayModel||locked.masterModel||'Pump'),pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||locked.pdfFileTitle||'')};
+      if(locked&&typeof locked==='object')return {...locked,pdfMetadataTitle:window.KeySuitePumpPdfNames?.metadataTitleFromPump?.(sourceWin?.__KEYSUITE_CURRENT_SELECTION?.()||{model:locked.displayModel||locked.masterModel})||locked.pdfMetadataTitle,pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||locked.pdfFileTitle||'')};
     }catch(_){}
     const family=String(sourceWin?.__KEYSUITE_V39445_FAMILY||'CHC').toUpperCase();
     const ctx=context(family,sourceWin);
@@ -357,6 +357,7 @@
   }
   function transformReportHtml(html,sourceWin=null){
     if(typeof html!=='string'||!html)return html;
+    html=window.KeySuitePumpPdfDownload?.inject?.(html,sourceWin)||html;
     const snapshot=reportContextSnapshot(sourceWin);
     let out=html;
     // Native-source correction: Page 2 must say 1 Stage, otherwise n Stages.
