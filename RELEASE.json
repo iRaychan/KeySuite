@@ -1,18 +1,13 @@
 {
-  "version": "5.00.37",
-  "baseline": "5.00.36",
-  "upgrade_supported_from": "5.00.36",
-  "new_database_migration_required": true,
-  "supabase_deployment_required": true,
+  "version": "5.00.38",
+  "baseline": "5.00.37",
+  "upgrade_supported_from": "5.00.37",
+  "new_database_migration_required": false,
+  "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Old Bug 001: validated customer pricing category context",
-    "Old Bug 003: atomic BSW model save and horizontal variant layout",
-    "Old Bug 005: CHC/CR/KV configuration panels",
-    "Old Bug 010: exact manual reference occupancy and highest existing automatic running number",
-    "Improvement 002: Date/Rev labels and full-width Project",
-    "Improvement 003: flowing date/reference header above item table"
+    "Quotation PDF page 1: inline Date and Rev labels with one space before and after each colon"
   ]
 }

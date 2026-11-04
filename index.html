@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.37</title>
-  <script>window.KEYSUITE_VERSION='5.00.37';window.KEYSUITE_BUILD='V5.00.37';</script>
+  <title>KeySuite V5.00.38</title>
+  <script>window.KEYSUITE_VERSION='5.00.38';window.KEYSUITE_BUILD='V5.00.38';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -99,7 +99,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   .print-company-email{text-decoration:underline;color:#0645ad}
   .print-customer-address{position:absolute;top:39mm;left:13.8mm;width:100mm;line-height:1.42}
   .print-customer-address>div,.print-date,.print-meta>div,.print-terms>div{display:grid;grid-template-columns:15mm 5mm 1fr;min-height:5mm}
-  .print-date{margin-top:5.5mm;grid-template-columns:22mm 3mm 1fr}.print-date>span{white-space:nowrap}
+  .print-date{display:block;margin-top:5.5mm;white-space:nowrap}.print-date>span{white-space:nowrap}
   .print-revision-date{margin-top:0!important}
   .print-page h1{position:absolute;top:89mm;left:13.8mm;width:180.2mm;text-align:center;text-decoration:underline;text-decoration-thickness:1.1px;text-underline-offset:2px;font-size:23pt;margin:0;font-weight:700}
   .print-meta{position:absolute;top:107mm;left:13.8mm;width:180.2mm;line-height:1.35}
@@ -652,7 +652,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.37</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.38</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -668,7 +668,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.37</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.38</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -694,7 +694,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.37</div>
+    <div class="suite-version">KeySuite V5.00.38</div>
   </aside>
 
   <main>
@@ -2196,8 +2196,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div id="pTemplatePhone">Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
         <div id="pTemplateFax">Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
         <div id="pTemplateEmail">email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
-        <div class="print-date"><span>Date</span><b>:</b><strong id="pDate"></strong></div>
-        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span><b>:</b><strong id="pRevisionDate"></strong></div>
+        <div class="print-date"><span>Date</span> <b>:</b> <strong id="pDate"></strong></div>
+        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span> <b>:</b> <strong id="pRevisionDate"></strong></div>
       </div>
     </div>
     <h1 id="pDocTitle">Quotation</h1>
