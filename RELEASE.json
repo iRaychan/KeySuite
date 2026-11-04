@@ -1,18 +1,18 @@
 {
-  "version": "5.00.36",
-  "baseline": "5.00.35",
-  "upgrade_supported_from": "5.00.35",
+  "version": "5.00.37",
+  "baseline": "5.00.36",
+  "upgrade_supported_from": "5.00.36",
   "new_database_migration_required": true,
   "supabase_deployment_required": true,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Bug 001: model-first audit family routing, explicit customer configuration diagnostics",
-    "Bug 002: ISO owner catalogue/model/material source lookup",
-    "Bug 003: 178 BSW models, 378 valid variants, four editable price/rarity groups and Supabase persistence",
-    "Bug 004: Cost actions for Motor, Baseplate, Coupling, Manifold and family lookups",
-    "Bug 005: reuse CHC product configuration controls above the curve",
-    "Improvement 006: customer-specific immutable remark history with customer RLS"
+    "Old Bug 001: validated customer pricing category context",
+    "Old Bug 003: atomic BSW model save and horizontal variant layout",
+    "Old Bug 005: CHC/CR/KV configuration panels",
+    "Old Bug 010: exact manual reference occupancy and highest existing automatic running number",
+    "Improvement 002: Date/Rev labels and full-width Project",
+    "Improvement 003: flowing date/reference header above item table"
   ]
 }

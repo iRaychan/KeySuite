@@ -238,7 +238,7 @@
         return {id:c.id,name:c.category_name,productRules:{CHC:normalizeRule(rules.CHC,chcFallback),CHC_G1:normalizeRule(rules.CHC_G1,otherFallback),CHC_G2:normalizeRule(rules.CHC_G2||rules.CHC,chcFallback),CR:normalizeRule(rules.CR,otherFallback),KV:normalizeRule(rules.KV,otherFallback),BFI:normalizeRule(rules.BFI,otherFallback),BGF:normalizeRule(rules.BGF,otherFallback),BSW:normalizeRule(rules.BSW,otherFallback),ISO:normalizeRule(rules.ISO,otherFallback),ES:normalizeRule(rules.ES,otherFallback),GWS:normalizeRule(rules.GWS,otherFallback),KEYPLC:normalizeRule(rules.KEYPLC,otherFallback),MANIFOLD:normalizeRule(rules.MANIFOLD,otherFallback),MOTOR:normalizeRule(rules.MOTOR,otherFallback),COUPLING:normalizeRule(rules.COUPLING,otherFallback),BASEPLATE:normalizeRule(rules.BASEPLATE,otherFallback)},margins:{CHC:chcFallback.margin,CHC_G2:chcFallback.margin},factors:{CHC:chcFallback.margin,CHC_G2:chcFallback.margin},transport:chcFallback.transport};
       }),
       products:(products.data||[]).map(p=>({
-        id:p.id,category:p.product_category,model:p.model,source_row:p.source_row,
+        id:p.id,productCategory:p.product_category,model:p.model,source_row:p.source_row,
         pricesByCurrency:{
           USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},
           RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},
@@ -251,7 +251,7 @@
         }
       })),
       chcG1Products:(chcG1Products.data||[]).map(p=>({
-        id:p.id,generation:'G1',category:p.product_category||'CHC C4',model:p.model,source_row:p.source_row,
+        id:p.id,generation:'G1',productCategory:p.product_category||'CHC C4',model:p.model,source_row:p.source_row,
         pricesByCurrency:{
           USD:{CHC:p.chc_usd===null?null:Number(p.chc_usd),CHCS:p.chcs_usd===null?null:Number(p.chcs_usd),CHCN:p.chcn_usd===null?null:Number(p.chcn_usd)},
           RMB:{CHC:p.chc_rmb===null?null:Number(p.chc_rmb),CHCS:p.chcs_rmb===null?null:Number(p.chcs_rmb),CHCN:p.chcn_rmb===null?null:Number(p.chcn_rmb)},

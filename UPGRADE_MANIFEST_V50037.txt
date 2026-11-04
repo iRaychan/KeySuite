@@ -1,0 +1,16 @@
+index.html
+product-audit-v50036.js
+auth.js
+DEPLOYMENT_V50037.md
+iso-v50011.js
+bsw-pricing-v50036.js
+supabase/migrations/20261104230000_v50037_quotation_number_occupancy.sql
+v50037-version-lock.js
+RELEASE.json
+CHANGELOG_V50037.md
+quotation-references.js
+kv-product-v50017.js
+VERSION.txt
+app.js
+sw.js
+pricing.js

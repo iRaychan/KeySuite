@@ -404,8 +404,9 @@ function cacheSecureQuotes(rows){
 function isMissingRpc(error,name){const text=String(error?.message||error||'').toLowerCase();return text.includes(String(name||'').toLowerCase())&&(text.includes('not found')||text.includes('does not exist')||text.includes('schema cache'))}
 async function rpcSaveQuotation(client,payload){
  const companyId=currentCompanyId();
- let result=await client.rpc('keysuite_save_quotation_v50004',{p_company_id:companyId,p_quotation:payload});
- if(result.error&&isMissingRpc(result.error,'keysuite_save_quotation_v50004')){
+ let result=await client.rpc('keysuite_save_quotation_v50037',{p_company_id:companyId,p_quotation:payload});
+ if(result.error&&isMissingRpc(result.error,'keysuite_save_quotation_v50037'))throw new Error('V5.00.37 quotation database setup is required before saving.');
+ if(false){
   result=await client.rpc('keysuite_save_quotation_v42920',{p_company_id:companyId,p_quotation:payload});
  }
  if(result.error&&isMissingRpc(result.error,'keysuite_save_quotation_v42920')){
@@ -434,11 +435,7 @@ async function saveQuoteRemote(q,{quiet=false}={}){
   catch(error){if(attempt===0&&retryable(error))continue;throw error}
  }
  let response=Array.isArray(result.data)?result.data[0]:result.data,numberAdjustedFrom=firstQuoteText(response?.number_adjusted_from,response?.numberAdjustedFrom);
- if(response?.status==='conflict'){
-  if(payload.revisionOf||quoteRevisionNumberFromNo(payload.no))throw new Error('Revision number conflict. Refresh history and retry; a normal number will not be used.');
-  numberAdjustedFrom=payload.no;payload={...payload,no:response.next_reference};result=await rpcSaveQuotation(client,payload);if(result.error)throw result.error;response=Array.isArray(result.data)?result.data[0]:result.data;
-  if(response?.status==='conflict'){const error=new Error('Quotation number has already been used.');error.code='quotation_number_conflict';error.attemptedReference=numberAdjustedFrom;error.nextReference=response.next_reference||'';throw error}
- }
+ if(response?.status==='conflict')throw new Error('Quotation reference '+payload.no+' is already used. Choose an unused reference.');
  const savedPayload=response?.status==='saved'?(response.saved||payload):(response||payload),savedNo=canonicalQuotationNumber(savedPayload?.no)||canonicalQuotationNumber(payload.no);
  let saved={...normalizeRemoteQuote(savedPayload),id:payload.id,no:savedNo,saveOperation:response?.operation||'',numberAdjustedFrom};
  // Re-read secure history after a save so remoteStorageId is taken from the actual database row,
@@ -1882,6 +1879,8 @@ function buildPrintQuotation(){
  document.querySelectorAll('#pItemPages .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo){img.onerror=null;img.src=KEYLARGO_LOGO_DATA}});
  const saved=currentQuote(),templateSnapshot=(isQuotationSealed()&&saved?.quotationTemplateSnapshot)?saved.quotationTemplateSnapshot:window.KeySuiteTemplates?.getSelectedSnapshot?.();
  window.KeySuiteTemplates?.applyToPrint?.(templateSnapshot,{quoteNo,customer:printedCompany,date:shownDate});
+ const cover=document.querySelector('.print-cover'),meta=cover?.querySelector('.print-meta');
+ if(meta){const mm=96/25.4,ctx=document.createElement('canvas').getContext('2d');ctx.font='11pt Calibri, Arial, Helvetica, sans-serif';let lines=0;for(const paragraph of String($('pProject').textContent||'').split('\n')){let line='';lines++;for(const word of paragraph.split(/\s+/)){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>147.2*mm){lines++;line=word}else line=next}}const extra=Math.max(0,lines-1)*5.24*mm;for(const [selector,top] of [['.print-dear',136],['.print-intro',147],['.print-terms',158],['.print-closing',194]]){const node=cover.querySelector(selector);if(node)node.style.top=(top*mm+extra)+'px'}}
 }
 function exportAllQuotationAndCurves(){
  if(!ensureSealedForPdf())return;

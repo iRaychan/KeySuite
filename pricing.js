@@ -36,6 +36,16 @@
   function quotationCustomer(){return window.KeySuiteApp?.getPricingCustomer?.()||window.KeySuiteApp?.getSelectedCustomer?.()||null}
   function selectedCustomer(){return quotationCustomer()||company()}
   function categoryForCustomer(customer){return secureData.categories.find(x=>x.id===customer?.pricingCategoryId)||null}
+  function pricingCategory(options={},customer=selectedCustomer()){
+    const supplied=options?.category;
+    // Product catalogue rows historically used `category` for labels such as
+    // "CHC C6". Only accept a real pricing-category object here; otherwise
+    // resolve the customer's assigned category. This prevents a product label
+    // from shadowing the pricing rules and stopping a valid calculation.
+    return supplied&&typeof supplied==='object'&&supplied.id&&supplied.productRules
+      ?supplied
+      :categoryForCustomer(customer);
+  }
   function context(options={}){
     const customer=options.customer||selectedCustomer();
     const efficiency=Number(options.fuelEfficiency??secureData.fuel_efficiency??6.3);
@@ -407,7 +417,7 @@
     if(!calc)return calc;
     const bareShaft=options.bareShaft===true||options.keysuite_bare_shaft===true;
     const selected=String(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultEfficiency).toUpperCase(),included=String(defaultEfficiency||'IE3').toUpperCase();if(!bareShaft&&selected===included){const product=exactPricedMotor({hp:options.motor_hp??options.motorHp,kw:options.motor_kw??options.motorKw,pole:options.pole||2,efficiency:included}),candidates=product?currencyCandidates(motorProductPriceBook(product),motorProductRarityBook(product),'MOTOR','MOTOR'):[];return {...calc,motorDetails:{included:true,efficiency:included,hp:options.motor_hp??options.motorHp,kw:options.motor_kw??options.motorKw,pole:options.pole||2,model:product?.model||'',id:product?.id||'',candidates,adjustment:0,missing:!product}};}
-    const hp=Number(options.motor_hp??options.motorHp),kw=Number(options.motor_kw??options.motorKw),pole=Number(options.pole||2)||2,customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if((!(hp>0)&&!(kw>0))||!customer||!cat)return null;
+    const hp=Number(options.motor_hp??options.motorHp),kw=Number(options.motor_kw??options.motorKw),pole=Number(options.pole||2)||2,customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if((!(hp>0)&&!(kw>0))||!customer||!cat)return null;
     // Each applicable pump list price already includes its series-standard
     // motor. A bare shaft removes that motor's raw Price List cost. Any actual
     // IE substitution removes the included raw cost, then adds the selected
@@ -443,7 +453,7 @@
   function pumpDefaultMotorEfficiency(hp,normal){const value=Number(hp||0);return value>0&&value<=0.75+1e-9?'IE1':String(normal||'IE3').toUpperCase()}
 
   function findPrice(model,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer)return null;
     const generation=String(options.generation_code||options.generation||'G2').toUpperCase()==='G1'?'G1':'G2';
     const text=String(model||'').trim();const requested=String(options.material||options.keysuite_material||'');let material=/CHCN|SS\s*316/i.test(requested)?'CHCN':/CHCS/i.test(requested)||(/SS\s*304/i.test(requested)&&!/Cast Iron|\bCI\b/i.test(requested))?'CHCS':'CHC',base=text;if(/^CHCS\b/i.test(text)){material='CHCS';base=text.replace(/^CHCS\b/i,'CHC')}else if(/^CHCN\b/i.test(text)){material='CHCN';base=text.replace(/^CHCN\b/i,'CHC')}
     const catalogue=generation==='G1'?(secureData.chcG1Products||[]):(secureData.products||[]);
@@ -496,7 +506,7 @@
     return Number(row?.prices?.[crSealGroup(model)]||0);
   }
   function findCrPrice(model,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const requestedMaterial=String(options.material||options.keysuite_material||'').toUpperCase(),identity=crModelIdentity(['CRS','CRN'].includes(requestedMaterial)?String(model).replace(/^CR[SN]?\b/i,requestedMaterial):model),catalogue=(secureData.crProducts?.length?secureData.crProducts:(window.KeySuiteCRPriceData?.models||[]));
     const lookup=[identity.base,crLegacyPriceModel(identity.base)].map(value=>String(value).toLowerCase()),product=catalogue.find(row=>lookup.includes(String(row.model||'').toLowerCase()));if(!product)return null;
     const rawCalc=calculatePrice(product.pricesByCurrency||{},identity.material,cat,'CR',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
@@ -525,7 +535,7 @@
     return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${kvMaterialDescription(options.material||options.keysuite_material||'KV')}`].join('\n');
   }
   function findKvPrice(model,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const catalogue=secureData.kvProducts?.length?secureData.kvProducts:(window.KeySuiteKVPriceData?.models||[]),wanted=String(model||'').trim().toLowerCase(),product=catalogue.find(row=>String(row.model||'').trim().toLowerCase()===wanted);if(!product)return null;
     const material=String(options.material||options.keysuite_material||'KV').toUpperCase(),variant=['KVC','KV','KVN'].includes(material)?material:'KV';
     const rawCalc=calculatePrice(product.pricesByCurrency||{},variant,cat,'KV',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
@@ -548,7 +558,7 @@
     return {raw,base,suffix,material,phase:requested==='1Ph'?'1Ph':'3Ph'};
   }
   function bfiPriceStatus(model,phase='3Ph',options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer),identity=normalizeBfiPriceIdentity(model,phase);
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer),identity=normalizeBfiPriceIdentity(model,phase);
     if(/316|BFIN/i.test(String(options.material||options.keysuite_material||options.material_variant||'')))identity.material='SS316';
     if(!customer)return {ok:false,reason:'NO_CUSTOMER',identity};
     if(!cat)return {ok:false,reason:'NO_CATEGORY',identity,customer};
@@ -598,7 +608,7 @@
     return quoteBlockReason(found.calc);
   }
   function findBgfPrice(model,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);
     const product=(window.KeySuiteBGF?.models?.()||secureData.bgfProducts||[]).find(p=>[p.id,p.model].some(v=>String(v).toLowerCase()===String(model).toLowerCase()));
     if(!product||!customer)return null;
     const book={},rarity={};for(const c of ['USD','RMB','MYR']){book[c]={BGF:Number(product['price_'+c.toLowerCase()]||0)};rarity[c]={BGF:product['rarity_'+c.toLowerCase()]||'common'};}
@@ -606,13 +616,13 @@
     return calc?{product,material:'BGF',variant:'BGF',calc,category:cat,customer,family:'BGF'}:null;
   }
   function findGwsPrice(model,pressure,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer)return null;
     const wanted=String(model||'').toLowerCase(),product=(secureData.gwsProducts||[]).find(p=>String(p.id).toLowerCase()===wanted||String(p.model).toLowerCase()===wanted);if(!product)return null;
     const calc=calculatePrice(product.pricesByCurrency||{},'SKU',cat,'GWS',{...options,customer,rarityBook:product.rarityByCurrency||{}});return calc?{product,material:'SKU',variant:'SKU',rarity:calc.rarity,calc,category:cat,customer,family:'GWS'}:null;
   }
 
   function findAutoGwsTank(sizeLitres,minimumPressureBar=0,options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const size=Number(sizeLitres),minimum=Math.max(0,Number(minimumPressureBar)||0);
     const candidates=(secureData.gwsProducts||[]).filter(product=>Number(product.sizeLitres||0)===size&&Number(product.pressureBar||0)>minimum+1e-9).sort((a,b)=>Number(a.pressureBar||0)-Number(b.pressureBar||0)||String(a.seriesCode||'').localeCompare(String(b.seriesCode||'')));
     for(const product of candidates){const found=findGwsPrice(product.id,null,{...options,customer,category:cat});if(found)return found}
@@ -620,7 +630,7 @@
   }
 
   function findBaseplatePrice(configuration={},options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const config={...(configuration||{})},raw=window.KeySuiteBaseplate?.calculateCost?.(config);if(!raw?.available||!(Number(raw.total)>0))return null;
     const calc=calculateManual(Number(raw.total),'MYR','many',cat,'BASEPLATE',{...options,customer,pricingMode:options.pricingMode||'quotation'});if(!calc)return null;
     const frame=config.frame??config.baseplateFrame??'',label=frame!==''?`ES Baseplate Frame ${frame}`:'ES Baseplate';
@@ -693,7 +703,7 @@
   }
 
   function priceAssemblyForQuotation(items=[],options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return {error:'Select a quotation customer with a Pricing Category first.',total:0,items:[]};
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return {error:'Select a quotation customer with a Pricing Category first.',total:0,items:[]};
     const priced=[],components=[],leaves=flattenAssemblyItems(items);
     const displayedComponentTotal=leaves.reduce((sum,item)=>sum+Math.max(0,Number(item?.qty||0))*Math.max(0,Number(item?.unitPrice||0)),0);
     for(const item of leaves){
@@ -718,7 +728,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   }
 
   function priceAssemblyForDisplay(items=[],options={}){
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return {error:'Select a customer with a Pricing Category first.',total:0,items:[]};
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return {error:'Select a customer with a Pricing Category first.',total:0,items:[]};
     const priced=[],components=[],leaves=flattenAssemblyItems(items),displayedComponentTotal=leaves.reduce((sum,item)=>sum+Math.max(0,Number(item?.qty||0))*Math.max(0,Number(item?.unitPrice||0)),0);
     for(const item of leaves){
       const source=typeof item?.pricingSource==='string'?(()=>{try{return JSON.parse(item.pricingSource)}catch(_){return {}}})():item?.pricingSource||{};
@@ -853,13 +863,13 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
 
   function findEsPrice(id,material=null,options={}){
     const product=(secureData.esProducts||[]).find(x=>x.id===id);if(!product)return null;
-    const cat=options.category||categoryForCustomer(options.customer||selectedCustomer());if(!cat)return null;
+    const customer=options.customer||selectedCustomer(),cat=pricingCategory(options,customer);if(!cat)return null;
     const variants=product.variants||[];
     const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
     if(!variant)return null;
     const dims=window.ES_SELECTOR_DB?.pumps?.find(p=>p.model===esModelName(product.model))?.dimensions||product.dimensions||{};
     const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material,shaft_mm:dims.shaft_mm});
-    return calc?{product,variant,material:variant.material,calc,category:cat,customer:options.customer||selectedCustomer(),family:'ES',sourceExtra:{seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
+    return calc?{product,variant,material:variant.material,calc,category:cat,customer,family:'ES',sourceExtra:{seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
   }
 
   const ES_DEFAULT_SEAL='Carbon Ceramic (Ca Ce)';
@@ -936,7 +946,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
 
   function findKeyplcPrice(id,pumpQty=1,options={}){
     const product=(secureData.keyplcProducts||[]).find(x=>String(x.id)===String(id)||String(x.model).toLowerCase()===String(id||'').toLowerCase());if(!product)return null;
-    const customer=options.customer||quotationCustomer(),cat=options.category||categoryForCustomer(customer);if(!customer||!cat)return null;
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const qty=Math.max(1,Math.min(6,Number(pumpQty)||1)),variant=`P${qty}`,enclosure=normalizePanelType(options.enclosure);
     const baseCalc=calculatePrice(keyplcPriceBook(product),variant,cat,'KEYPLC',{...options,customer,rarity:product.rarity||'common'});if(!baseCalc)return null;
     const enclosureSurcharge=enclosure==='sheltered'?1000:0;

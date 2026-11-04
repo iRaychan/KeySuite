@@ -29,8 +29,8 @@
     if(supabase){
       // Supabase is authoritative. Browser-only history must never advance the
       // company sequence or make two accounts preview different numbers.
-      let result=await supabase.rpc('keysuite_preview_quotation_reference_v50004',{p_requested_at:now.toISOString()});
-      if(result.error&&String(result.error?.message||'').toLowerCase().includes('keysuite_preview_quotation_reference_v50004')){
+      let result=await supabase.rpc('keysuite_preview_quotation_reference_v50037',{p_requested_at:now.toISOString()});
+      if(false){
         result=await supabase.rpc('keysuite_preview_quotation_reference_v42910',{p_requested_at:now.toISOString(),p_minimum_last_number:0});
       }
       if(!result.error){const preview=row(result.data);if(preview.quotation_reference)return preview.quotation_reference}
