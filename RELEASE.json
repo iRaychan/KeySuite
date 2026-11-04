@@ -1,13 +1,13 @@
 {
-  "version": "5.00.38",
-  "baseline": "5.00.37",
-  "upgrade_supported_from": "5.00.37",
+  "version": "5.00.39",
+  "baseline": "5.00.38",
+  "upgrade_supported_from": "5.00.38",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Quotation PDF page 1: inline Date and Rev labels with one space before and after each colon"
+    "Quotation PDF page 1: compact shared Date/Rev label column aligns colons and date values"
   ]
 }
