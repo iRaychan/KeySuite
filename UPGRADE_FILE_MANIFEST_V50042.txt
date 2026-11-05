@@ -1,0 +1,15 @@
+CHANGELOG_V50042.md
+README_UPGRADE_V50042.md
+RELEASE.json
+SHA256SUMS_V50042.txt
+TEST_REPORT_V50042.md
+UPGRADE_FILE_MANIFEST_V50042.txt
+VERSION.txt
+index.html
+kv-product-v50017.js
+selector-kv/index.html
+sw.js
+tests/v50042-bug03-regression.cjs
+v40001-product-series-overhaul.js
+v41200-bootstrap.js
+v50037-version-lock.js

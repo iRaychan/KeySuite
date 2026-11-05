@@ -1,15 +1,15 @@
 {
-  "version": "5.00.41",
-  "baseline": "5.00.40",
-  "upgrade_supported_from": "5.00.40",
-  "new_database_migration_required": true,
-  "supabase_data_seed_required": true,
+  "version": "5.00.42",
+  "baseline": "5.00.41",
+  "upgrade_supported_from": "5.00.41",
+  "new_database_migration_required": false,
+  "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Remove legacy Category hold-to-delete",
-    "Restore native Product curve printing and update Product PDF names",
-    "Import KV V1.4 engineering data and add 45 KV models"
+    "Fix Product KV Curve stale model identity",
+    "Prioritize the freshly confirmed selector model before cached presentation identity",
+    "Reject late KV Curve responses from older model requests"
   ]
 }

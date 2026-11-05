@@ -326,7 +326,7 @@ body.product-frame main{display:block;max-width:none;padding:8px}body.product-fr
   <section class="card" id="alternativesCard"><div id="alternatives" class="alternatives-panel"></div></section>
 </div>
 </main>
-<script src="../supabase/functions/shared-kv/kv-data.js?v=50041"></script>
+<script src="../supabase/functions/shared-kv/kv-data.js?v=50042"></script>
 <script src="../kv-fixes-v50026.js?v=50026"></script>
 <script src="../supabase/functions/shared-kv/kv-selector-core.js?v=50026"></script>
 <script src="../v40205-motor-baseplate-data.js?v=42605"></script>
@@ -1752,7 +1752,7 @@ alternatives.innerHTML='';
 (function(){
  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{try{if(new URL(r.scope).pathname.includes('/selector/'))r.unregister()}catch(e){}})).catch(()=>{})}
  const productFrame=new URLSearchParams(location.search).get('product')==='1';
- let productModelName='';
+ let productModelName='',productRequestId='';
  if(productFrame){setTimeout(()=>window.parent?.postMessage({type:'KEYSUITE_PRODUCT_FRAME_READY'},'*'),0)}
  function liveOptions(){
   const o=window.keysuiteExportPayload||{};let p={};
@@ -1766,9 +1766,9 @@ alternatives.innerHTML='';
    const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=hz.toFixed(1);hzHidden.value=String(hz);selectionState.curveHz=hz;selectionState.hz=hz;
   }catch(e){}
  }
- function prepareProductModel(modelName,opts={}){
+ function prepareProductModel(modelName,opts={},requestId=''){
   const model=DB.models.find(m=>String(m.model).toLowerCase()===String(modelName||'').toLowerCase());if(!model)return null;
-  productModelName=model.model;
+  productModelName=model.model;productRequestId=String(requestId||'');
   const curve=DB.curves[model.series];if(!curve)return null;
   let idx=0,max=-Infinity;(curve.efficiency||[]).forEach((v,i)=>{if(Number(v)>max){max=Number(v);idx=i}});
   const seriesFlow=Number((String(model.model).match(/^KV\s+(\d+)/i)||[])[1]||0);
@@ -1777,8 +1777,8 @@ alternatives.innerHTML='';
   let evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50);if(!evaluated){q=(Number(curve.flow?.[0]||0)+Number(curve.flow?.[curve.flow.length-1]||1))/2;evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50)}if(!evaluated)return null;
   const h=Math.max(1,Math.floor(Number(evaluated.predHead)||0)),selectedEval=(enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,50))||evaluated,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:50;
   selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow:Math.round(q),rawHead:Math.round(h),rawFlowText:String(Math.round(q)),rawHeadText:String(Math.round(h)),flowUnit:'m3h',headUnit:'m',motorEffClass:'IE3',motorPhase:'3Ph',motorVoltage:415,models:[selectedEval],selectedIndex:0,productMode:true,enhanced};
-  window.keysuiteExportPayload={quotation_model:model.model,keysuite_material:opts.material||'SS304 (Cast Iron Connection)',keysuite_seal:opts.seal||'Car/Cer',keysuite_elastomer:opts.elastomer||'Viton',keysuite_connection_type:opts.connection||'round',keysuite_bare_shaft:!!opts.bare,product_mode:true};
-  syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,display_model:keykvVisibleModelName(model.model,enhanced),flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
+  const displayModel=keykvVisibleModelName(model.model,enhanced);window.keysuiteExportPayload={model:model.model,base_model:model.model,display_model:displayModel,quotation_model:displayModel,keysuite_material:opts.material||'SS304 (Cast Iron Connection)',keysuite_seal:opts.seal||'Car/Cer',keysuite_elastomer:opts.elastomer||'Viton',keysuite_connection_type:opts.connection||'round',keysuite_bare_shaft:!!opts.bare,product_mode:true};
+  syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',requestId:productRequestId,model:model.model,display_model:displayModel,flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
  }
  function applyProductDuty(flowM3h,headM,meta={}){
   const modelName=String(productModelName||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||'');
@@ -1788,8 +1788,8 @@ alternatives.innerHTML='';
   const evaluated=enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,hz);
   const rawFlow=meta.rawFlow!=null?Number(meta.rawFlow):q,rawHead=meta.rawHead!=null?Number(meta.rawHead):h,rawFlowText=meta.rawFlowText!=null?String(meta.rawFlowText):String(rawFlow),rawHeadText=meta.rawHeadText!=null?String(meta.rawHeadText):String(rawHead);
   const flowUnit=meta.flowUnit||'m3h',headUnit=meta.headUnit||'m';
-  if(!evaluated){selectionState={...selectionState,q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,productMode:true,enhanced};syncControlsFromState();out.innerHTML=`<div class="warning">${model.model} cannot be evaluated at ${q.toFixed(1)} m³/h${enhanced?' on the Enhanced Curve':''}. The flow is outside this model's curve range.</div>`;alternatives.innerHTML='';window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,flowM3h:q,headM:h,valid:false,message:'Flow is outside this KV model curve range.'},'*');return null}
-  productModelName=model.model;selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:motorEff.value||'IE3',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),models:[evaluated],selectedIndex:0,productMode:true,enhanced};syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:model.model,display_model:keykvVisibleModelName(model.model,enhanced),flowM3h:q,headM:h,enhanced,valid:true,message:evaluated.margin>=0?'Duty point updated.':'Duty point is above the pump curve; curve retained for reference.'},'*');return payload;
+  if(!evaluated){selectionState={...selectionState,q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,productMode:true,enhanced};syncControlsFromState();out.innerHTML=`<div class="warning">${model.model} cannot be evaluated at ${q.toFixed(1)} m³/h${enhanced?' on the Enhanced Curve':''}. The flow is outside this model's curve range.</div>`;alternatives.innerHTML='';window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',requestId:productRequestId,model:model.model,flowM3h:q,headM:h,valid:false,message:'Flow is outside this KV model curve range.'},'*');return null}
+  productModelName=model.model;selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,motorEffClass:motorEff.value||'IE3',motorPhase:motorPhase.value||'3Ph',motorVoltage:Number(motorVoltage.value||415),models:[evaluated],selectedIndex:0,productMode:true,enhanced};syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',requestId:productRequestId,model:model.model,display_model:keykvVisibleModelName(model.model,enhanced),flowM3h:q,headM:h,enhanced,valid:true,message:evaluated.margin>=0?'Duty point updated.':'Duty point is above the pump curve; curve retained for reference.'},'*');return payload;
  }
  function applyProductDutyFromInputs(){
   const rawFlowText=String(flowInput.value??'').trim(),rawHeadText=String(headInput.value??'').trim(),rawFlow=Number(rawFlowText),rawHead=Number(rawHeadText),flowUnit=flowUnitInput.value,headUnit=headUnitInput.value;
@@ -1835,7 +1835,7 @@ alternatives.innerHTML='';
   if(msg.type==='KEYSUITE_PRODUCT_DUTY'){if(productFrame)applyProductDuty(msg.flowM3h,msg.headM,{flowUnit:'m3h',headUnit:'m'});return;}
   if(msg.type==='KEYSUITE_PRODUCT_ACTION'){if(!productFrame)return;if(msg.action==='export')setTimeout(()=>exportPDF(),60);else if(msg.action==='assembly')send('assembly');else if(msg.action==='quotation')send('quotation');return;}
   if(msg.type==='KEYSUITE_PRODUCT_MODEL'){
-   const payload=prepareProductModel(msg.model,msg.options||{});if(!payload){window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',model:String(msg.options?.display_model||msg.model||''),valid:false,message:'Product curve unavailable.'},'*');return}
+   const payload=prepareProductModel(msg.model,msg.options||{},msg.requestId);if(!payload){window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'KV',requestId:String(msg.requestId||''),model:String(msg.options?.display_model||msg.model||''),valid:false,message:'Product curve unavailable.'},'*');return}
    if(['add','assembly'].includes(msg.action))window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload},'*');
    else if(msg.action==='export')setTimeout(()=>exportPDF(),120);return;
   }
@@ -1846,5 +1846,5 @@ alternatives.innerHTML='';
  });
 })();
 </script>
-<script src="../kv-impeller-config-v50027.js?v=50041"></script>
+<script src="../kv-impeller-config-v50027.js?v=50042"></script>
 </body></html>
