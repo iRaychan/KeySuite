@@ -1,0 +1,91 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Bug 04 navigation regression</title>
+<div id="appView" class="app"><main>
+  <section id="dashboard" class="page"></section>
+  <section id="productFixture" class="page active">
+    <input id="model"><select id="material"><option>SS304</option><option>SS316</option></select>
+    <input id="bareShaft" type="checkbox">
+  </section>
+  <section id="selector" class="page"></section>
+  <dialog id="productCurveDialog">
+    <button id="closeProductCurve">Close</button>
+    <div id="productCurveHost"></div>
+  </dialog>
+</main></div>
+<pre id="results">PENDING</pre>
+<script src="../v39445-model-return.js"></script>
+<script src="../v40001-product-series-overhaul.js"></script>
+<script>
+const byId = id => document.getElementById(id);
+const dlg = byId('productCurveDialog');
+const product = byId('productFixture');
+const back = () => byId('ks40413PageReturn');
+const historyKey = 'keysuite-v40413-page-history';
+const visited = [];
+window.KeySuiteApp = {showPage(id) {
+  visited.push(id);
+  document.querySelector('.page.active').classList.remove('active');
+  byId(id).classList.add('active');
+}};
+byId('closeProductCurve').addEventListener('click', () => dlg.close());
+document.addEventListener('DOMContentLoaded', () => {
+  const results = [];
+  const check = (ok, label) => { if (!ok) throw new Error(label); };
+  try {
+    sessionStorage.setItem(historyKey, '["dashboard"]');
+    for (const [family, id, model, header] of [
+      ['KV','productKvSelectorFrame','KV 4-50',false],
+      ['KV','productKvSelectorFrame','KV 4-50',true],
+      ['KV','productKvSelectorFrame','KV 10-90',false],
+      ['CR','productCrSelectorFrame','CR fixture',false],
+      ['ES','productEsSelectorFrame','ES fixture',false],
+      ['ISO','productIsoSelectorFrame','ISO fixture',false],
+      ['CHC','productSelectorFrame','CHC fixture',false],
+      ['BFI','productBfiSelectorFrame','BFI fixture',false],
+      ['BGF','productBgfSelectorFrame','BGF fixture',false],
+      ['BSW','productBswSelectorFrame','BSW fixture',false],
+    ]) {
+      const frame = document.createElement('iframe');
+      frame.id = id;
+      frame.style.display = 'block';
+      byId('productCurveHost').append(frame);
+      product.dataset.brand = 'B.G.Reich';
+      product.dataset.group = family === 'KV' ? model.split('-')[0] : family;
+      byId('model').value = model;
+      byId('material').value = 'SS316';
+      byId('bareShaft').checked = true;
+      dlg.showModal();
+      if (family !== 'KV') KeySuiteModelReturn.showForDialog(dlg);
+      KeySuiteModelReturn.syncUniversalButton();
+      check(dlg.dataset.ks3963Inline === '1' && frame.dataset.active === '1', 'Product bridge did not open ' + family);
+      const dialogBack = byId('ks39445DialogReturn');
+      check(back().hidden !== dialogBack.hidden, 'Expected one floating Back for ' + family);
+      (header ? byId('closeProductCurve') : back().hidden ? dialogBack : back()).click();
+      check(!dlg.open && product.matches('.active') && getComputedStyle(product).display !== 'none', 'Product not restored for ' + model);
+      check(visited.length === 0 && sessionStorage.getItem(historyKey) === '["dashboard"]', 'Product return touched page history');
+      check(product.dataset.brand === 'B.G.Reich' && product.dataset.group === (family === 'KV' ? model.split('-')[0] : family) &&
+        byId('model').value === model && byId('material').value === 'SS316' && byId('bareShaft').checked, 'Product state changed for ' + model);
+      results.push('PASS ' + model + (header ? ' header Back' : ' floating Back'));
+      frame.remove();
+    }
+    product.classList.remove('active');
+    byId('selector').classList.add('active');
+    dlg.dataset.ksSelectionEsInline = '1';
+    dlg.setAttribute('open','');
+    KeySuiteModelReturn.syncUniversalButton();
+    check(back().hidden, 'Selection inline visibility changed');
+    dlg.removeAttribute('open');
+    delete dlg.dataset.ksSelectionEsInline;
+    KeySuiteModelReturn.syncUniversalButton();
+    back().click();
+    check(visited.join() === 'dashboard', 'Selection page history Back changed');
+    results.push('PASS Selection inline exclusion and page-history Back');
+    byId('results').dataset.status = 'pass';
+  } catch (error) {
+    results.push('FAIL ' + error.stack);
+    byId('results').dataset.status = 'fail';
+  }
+  byId('results').textContent = results.join('\n');
+});
+</script>

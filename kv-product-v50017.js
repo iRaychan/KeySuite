@@ -1,4 +1,4 @@
-/* KeySuite V5.00.42 — KV Product catalogue and Safari-safe standard selector bridge (compatibility filename retained). */
+/* KeySuite V5.00.43 — KV Product catalogue and Safari-safe standard selector bridge (compatibility filename retained). */
 (()=>{'use strict';
   const $=id=>document.getElementById(id),esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])),db=()=>window.KeySuiteKVData||{models:[],curves:{}};
   let frameReady=false,queued=null,selectedSeries='',curveRequestSequence=0,activeCurveRequest=null;
@@ -34,6 +34,6 @@
   window.addEventListener('message',event=>{const frame=$('productKvSelectorFrame'),message=event.data||{};if(event.source!==frame?.contentWindow)return;if(message.type==='KEYSUITE_PRODUCT_FRAME_READY'){frameReady=true;if(queued){const next=queued;queued=null;frame.contentWindow.postMessage(next,'*')}}});
   document.addEventListener('input',event=>{if(event.target?.id==='kvProductModelInput')render()});document.addEventListener('change',event=>{if(['kvProductMaterial','kvProductSeal','kvProductElastomer','kvProductBareShaft'].includes(event.target?.id)){render();const frame=$('productKvSelectorFrame');if(frameReady&&frame?.closest('#productCurveHost'))post(String($('productCurveTitle')?.textContent||''),'view')}});
   window.addEventListener('KEYSUITE_PAGE_CHANGED',event=>{if(event.detail?.page!=='productKv')cleanupCurve()});
-  window.KeySuiteKVProduct={version:'5.00.42',render,pageShown:id=>{if(id==='productKv')render();else cleanupCurve()},payloadFor,routeSelection,cleanupCurve,clearPinnedModelIdentity,activeCurveRequest:()=>activeCurveRequest?{...activeCurveRequest}:null};
+  window.KeySuiteKVProduct={version:'5.00.43',render,pageShown:id=>{if(id==='productKv')render();else cleanupCurve()},payloadFor,routeSelection,cleanupCurve,clearPinnedModelIdentity,activeCurveRequest:()=>activeCurveRequest?{...activeCurveRequest}:null};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render,{once:true});else render();
 })();

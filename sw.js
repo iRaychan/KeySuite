@@ -1,6 +1,6 @@
-/* KeySuite V5.00.36 Service Worker. */
-const CACHE='keysuite-v50042-20261105';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50001"></script>';
+/* KeySuite V5.00.43 Service Worker. */
+const CACHE='keysuite-v50043-20261105';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50043"></script>';
 const SHELL=[
  './bsw-variants-v50036.js','./bsw-pricing-v50036.js','./customer-remarks-v50036.js','./product-audit-v50036.js','./v50037-version-lock.js',
  './iso-products-v50011.js','./iso-v50011.js','./component-prices-v50011.js','./manual-price-v50011.js','./selector-iso/index.html','./selector-iso/iso-data.js','./selector-iso/es-core.js','./selector-iso/motor-data.js','./selector-iso/favicon.svg','./selector-iso/bgreich-logo.png','./keyhq/avatar/assets/keyhq-hybrid.glb',

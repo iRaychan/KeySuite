@@ -45,6 +45,6 @@ const unchanged={
   'selector-iso/index.html':'af374025a0899c8d4f0799d88d9073e605fff8aab1c561eb8e1530d9d52ecbc2'
 };
 for(const [file,expected] of Object.entries(unchanged))check(hash(file)===expected,`${file} changed outside Bug 03 scope`);
-check(release.version==='5.00.42','release version must be 5.00.42');
+check(release.version==='5.00.42'||release.version==='5.00.43','unexpected Bug 03 regression build version');
 check(release.new_database_migration_required===false&&release.supabase_data_seed_required===false,'Bug 03 must not require Supabase changes');
 console.log('V5.00.42 Bug 03 regression checks passed.');

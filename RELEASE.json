@@ -1,15 +1,13 @@
 {
-  "version": "5.00.42",
-  "baseline": "5.00.41",
-  "upgrade_supported_from": "5.00.41",
+  "version": "5.00.43",
+  "baseline": "5.00.42",
+  "upgrade_supported_from": "5.00.42",
   "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Fix Product KV Curve stale model identity",
-    "Prioritize the freshly confirmed selector model before cached presentation identity",
-    "Reject late KV Curve responses from older model requests"
+    "Bug 04: Floating Go Back closes an inline Product Curve through the existing dialog return path"
   ]
 }
