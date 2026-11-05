@@ -1348,6 +1348,51 @@ function refreshNewQuotationReference(){
  if(quoteHasItems()&&current&&current!==automatic)return;
  assignNewQuotationReference();
 }
+function quotationAdjustments() {
+ return {
+  sstPercent: $('quoteSst').value === '' ? null : Number($('quoteSst').value),
+  discountMode: $('quoteDiscountMode').value,
+  discountValue: $('quoteDiscount').value === '' ? null : Number($('quoteDiscount').value)
+ };
+}
+function loadQuotationAdjustments(adjustments = {}) {
+ adjustments = adjustments || {};
+ $('quoteSst').value = adjustments.sstPercent ?? '';
+ $('quoteDiscountMode').value = adjustments.discountMode === 'RM' ? 'RM' : '%';
+ $('quoteDiscount').value = adjustments.discountValue ?? '';
+}
+function quotationTotals(itemSum, adjustments) {
+ const round = value => Math.round((value + Math.abs(value) * Number.EPSILON) * 100) / 100;
+ const subtotal = Number.isFinite(itemSum) ? round(itemSum) : 0;
+ const {sstPercent, discountMode, discountValue} = adjustments;
+ const discountLimit = discountMode === 'RM' ? Math.max(0, subtotal) : 100;
+ const inRange = (value, limit) => value === null || (Number.isFinite(value) && value >= 0 && value <= limit);
+ const sstValid = inRange(sstPercent, 100);
+ const discountValid = inRange(discountValue, discountLimit);
+ const sst = sstValid ? round(subtotal * ((sstPercent ?? 0) / 100)) : 0;
+ const discount = discountValid ? round(discountMode === 'RM' ? (discountValue ?? 0) : subtotal * ((discountValue ?? 0) / 100)) : 0;
+ return {subtotal, sst, discount, sstValid, discountValid, discountLimit, total: round(subtotal + sst - discount)};
+}
+function renderQuotationTotals(itemSum) {
+ const totals = quotationTotals(itemSum, quotationAdjustments());
+ const sstInput = $('quoteSst'), discountInput = $('quoteDiscount');
+ discountInput.max = totals.discountLimit;
+ const sstInvalid = !totals.sstValid || sstInput.validity.badInput;
+ const discountInvalid = !totals.discountValid || discountInput.validity.badInput;
+ sstInput.setAttribute('aria-invalid', String(sstInvalid));
+ discountInput.setAttribute('aria-invalid', String(discountInvalid));
+ const error = $('quoteAdjustmentError');
+ error.hidden = !sstInvalid && !discountInvalid;
+ error.textContent = sstInvalid ? 'Enter an SST percentage from 0 to 100.' : discountInvalid ? `Enter a discount from 0 to ${totals.discountLimit}${$('quoteDiscountMode').value === '%' ? '%' : ' RM'}.` : '';
+ $('quoteSubtotal').textContent = money(totals.subtotal);
+ $('quoteSstAmount').textContent = sstInvalid ? '—' : '+ ' + money(totals.sst);
+ $('quoteDiscountAmount').textContent = discountInvalid ? '—' : '− ' + money(totals.discount);
+ $('quoteTotal').textContent = error.hidden ? money(totals.total) : '—';
+ return totals.total;
+}
+for (const id of ['quoteSst', 'quoteDiscountMode', 'quoteDiscount']) {
+ $(id).addEventListener('input', () => calcTotal());
+}
 function calcTotal(){
  let total=0,complete=0,warning=0,error=0;
  const rows=[...document.querySelectorAll('.quote-item')];
@@ -1366,7 +1411,7 @@ function calcTotal(){
   r.classList.add(`status-${status}`);const indicator=r.querySelector('.item-status-indicator');if(indicator){indicator.dataset.tooltip=tooltip;indicator.setAttribute('aria-label',tooltip.replace(/\n/g,' — '));}
   total+=itemTotal;
  });
- $('quoteTotal').textContent=money(total);
+ total=renderQuotationTotals(total);
  if($('itemCount'))$('itemCount').textContent=`(${rows.length})`;if($('completeCount'))$('completeCount').textContent=complete;if($('warningCount'))$('warningCount').textContent=warning;if($('errorCount'))$('errorCount').textContent=error;
  setTimeout(updateQuotePageIndicators,0);updateQuotationCustomerLock();return total
 }
@@ -1385,6 +1430,11 @@ async function saveQuote(options={}){
  let quotationNo='';try{quotationNo=validateQuoteNoForSave(options)}catch(error){if(!options.silent)alert(error.message||error);return false}
  const items=getQuoteItems();if(!items.length){if(!options.silent)alert('At least one item is required.');return false}
  const invalid=items.find(x=>!x.model||Number(x.qty)<=0);if(invalid){if(!options.silent)alert('Every quotation item requires a Model / Item and valid Quantity. Unit Price may remain blank while the quotation is a draft.');return false}
+ const total=calcTotal();
+ if (!$('quoteAdjustmentError').hidden || !Number.isFinite(total) || total < 0) {
+  alert($('quoteAdjustmentError').textContent || 'The quotation total must be a valid, nonnegative amount.');
+  return false;
+ }
  const pricingCustomer=selectedQuotationCustomer(),existing=currentQuote();
  const lockedCustomerId=$('qCustomer').value;
  const lockedPricingCustomerId=quotationPricingCustomerId||pricingCustomer?.id||$('qCustomer').value;
@@ -1396,7 +1446,7 @@ async function saveQuote(options={}){
   revisionOf:quotationRevisionOf||existing?.revisionOf||'',revisionRootId:quotationRevisionRootId||existing?.revisionRootId||'',revisionNumber:Number(quotationRevisionNumber||existing?.revisionNumber||0),audit:quotationAudit||existing?.audit||[],
   quotationTemplateId:window.KeySuiteTemplates?.getSelectedId?.()||existing?.quotationTemplateId||'',quotationTemplateSnapshot:window.KeySuiteTemplates?.getSelectedSnapshot?.()||existing?.quotationTemplateSnapshot||null,
   assemblySessionId:quotationSessionId,preparedBy:$('preparedBy').value,preparedByDesignation:$('preparedByDesignation').value,signatoryName:window.ksSignatoryName||currentProfile().signatory_name||'',signatureImage:window.ksSignatureImage||currentProfile().signature_image||'',items,
-  project:$('project').value,project2:'',customerReference:$('customerReference').value,delivery:$('delivery').value,delivery2:$('delivery2').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,total:calcTotal(),
+  project:$('project').value,project2:'',customerReference:$('customerReference').value,delivery:$('delivery').value,delivery2:$('delivery2').value,validity:$('validity').value,priceBasis:$('priceBasis').value,payment:$('payment').value,remarks:$('remarks').value,adjustments:quotationAdjustments(),total,
   createdByEmail:existing?.createdByEmail||currentEmail(),createdByName:existing?.createdByName||currentProfile().display_name||currentEmail(),updatedByEmail:currentEmail(),createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()
  };
  retainQuotationDraft(q);
@@ -1438,6 +1488,7 @@ function loadQuote(id){
  $('preparedBy').value=q.preparedBy||currentProfile().display_name||'';$('preparedByDesignation').value=q.preparedByDesignation||currentProfile().designation||'';window.ksSignatoryName=q.signatoryName||currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=q.signatureImage||currentProfile().signature_image||'';
  $('project').value=[q.project,q.project2].filter(Boolean).join(' ').trim();$('project2').value='';syncProjectFields('quotation');$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value=q.delivery2||'';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';
  window.KeySuiteTemplates?.loadSelection?.(q.quotationTemplateId||'',q.quotationTemplateSnapshot||null,(q.status||'')==='sealed');
+ loadQuotationAdjustments(q.adjustments);
  const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,description:q.description||''}];setQuoteItems(items);showPage('quotation');setQuoteCustomerCollapsed(true);window.KeySuitePricing?.selectCustomer?.(quotationPricingCustomerId,false);syncStartCustomer(quotationPricingCustomerId);updateQuotationStateUi()
 }
 function deleteQuote(id){if(!canDeleteQuotationHistory()){alert('Your role is not allowed to delete quotation history.');return}if(!confirm('Delete this quotation?'))return;const target=quotes().find(x=>String(x.id)===String(id)),targetNo=canonicalQuotationNumber(target?.no);purgeDeletedQuoteCaches(id,targetNo);deleteQuoteRemote(id,{quote:target,no:targetNo}).catch(error=>{console.error(error);alert(`Quotation could not be deleted from secure history: ${error.message||error}`);loadSecureQuotes()});refreshAll()}
@@ -1446,6 +1497,7 @@ function newQuote(){
  editingQuoteId=null;quotationStatus='new';quotationRevisionOf='';quotationRevisionRootId='';quotationRevisionNumber=0;quotationAudit=[];quotationPricingCustomerId='';quotationPricingCustomerSnapshot=null;
  $('preparedBy').value=currentProfile().display_name||currentAccess().display_name||'';$('preparedByDesignation').value=currentProfile().designation||'';window.ksSignatoryName=currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=currentProfile().signature_image||'';
  quotationReferenceAllocated=false;lockedQuotePrefix=assignedQuotationPrefix();quoteNumberSuffix='';setQuoteNoValue('');$('qDate').value=new Date().toISOString().slice(0,10);assignNewQuotationReference();$('qRevisionDate').value='';$('showRevision').checked=false;$('qDocumentType').value='Quotation';$('project').value='';$('project2').value='';syncProjectFields('quotation');$('customerReference').value='';$('delivery').value='Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value='';$('validity').value='14 days';$('priceBasis').value='Ex - K.L. only, nett in Ringgit Malaysia.';$('remarks').value='';
+ loadQuotationAdjustments();
  setQuoteItems([{}]);$('qCustomer').value='';$('qContact').innerHTML='<option value="">Select contact person</option>';$('qContactInfo').textContent='-';$('payment').value='Cash before delivery';if($('qPrintedCompany'))$('qPrintedCompany').value='';if($('qPrintedContact'))$('qPrintedContact').value='';
  calcTotal();updateCustomerSummary();setQuoteCustomerCollapsed(true);window.KeySuitePricing?.selectCustomer?.('',false);syncStartCustomer('');applyQuotationTemplateDefaults(window.KeySuiteTemplates?.getSelectedSnapshot?.(),true);updateQuotationStateUi();
 }
@@ -1766,7 +1818,8 @@ function estimatePrintItemHeight(item){
 }
 function paginatePrintItems(prepared){
  const normalLimit=177; // usable item height before the lower print margin
- const summaryReserve=26; // one blank row + subtotal/SST/three separator lines/total
+ const adjustments = quotationAdjustments();
+ const summaryReserve = adjustments.sstPercent !== null && adjustments.discountValue !== null ? 32 : 26;
  const lastLimit=normalLimit-summaryReserve;
  const pages=[];let current=[],used=0;
  prepared.forEach(entry=>{
@@ -1809,12 +1862,20 @@ function updateQuotePageIndicators(){
  });
 }
 function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
+ const adjustments = quotationAdjustments();
+ const totals = quotationTotals(subtotal, adjustments);
+ const showDiscount = adjustments.discountValue !== null && totals.discountValid;
+ const showSst = adjustments.sstPercent !== null || !showDiscount;
+ const row = (label, amount) => `<tr class="print-summary-entry"><td colspan="5"><div class="summary-row"><span>${label}</span><strong>${amount}</strong></div></td></tr>`;
+ const sstRow = showSst ? row(`${adjustments.sstPercent ?? 0}% SST`, (totals.sst > 0 ? '+ ' : '') + printAmount(totals.sst)) : '';
+ const discountLabel = adjustments.discountMode === 'RM' ? 'Discount (RM)' : `${adjustments.discountValue}% Discount`;
+ const discountRow = showDiscount ? row(discountLabel, (totals.discount > 0 ? '− ' : '') + printAmount(totals.discount)) : '';
  const summary=showSummary?`<tr class="print-summary-spacer"><td colspan="5"></td></tr>
    <tr class="print-summary-line"><td colspan="5"><div class="print-summary-rule"></div></td></tr>
-   <tr class="print-summary-entry"><td colspan="5"><div class="summary-row"><span>Sub-total</span><strong>${printAmount(subtotal)}</strong></div></td></tr>
-   <tr class="print-summary-entry"><td colspan="5"><div class="summary-row"><span>0% SST</span><strong>0.00</strong></div></td></tr>
+   <tr class="print-summary-entry"><td colspan="5"><div class="summary-row"><span>Sub-total</span><strong>${printAmount(totals.subtotal)}</strong></div></td></tr>
+   ${sstRow}${discountRow}
    <tr class="print-summary-line"><td colspan="5"><div class="print-summary-rule"></div></td></tr>
-   <tr class="print-summary-entry grand"><td colspan="5"><div class="summary-row"><span>Total</span><strong>${printAmount(subtotal)}</strong></div></td></tr>
+   <tr class="print-summary-entry grand"><td colspan="5"><div class="summary-row"><span>Total</span><strong>${printAmount(totals.total)}</strong></div></td></tr>
    <tr class="print-summary-line bottom-full"><td colspan="5"><div class="print-summary-rule"></div></td></tr>`:'';
  return `<section class="print-page print-items-page">
    <div class="print-items-logo-wrap"><img class="print-items-logo" src="${KEYLARGO_LOGO_DATA}" alt="Quotation Logo"></div>

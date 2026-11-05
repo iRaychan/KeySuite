@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  let access=null,selectedId='',selectedProduct='CHC_G2',editing=false,listEditing=false,bound=false;
+  let access=null,selectedId='',selectedProduct='CHC_G2',editing=false,bound=false;
   const CATEGORY_SORT_KEY='keysuite-v40401n02-category-sort';
   const PRODUCT_SORT_KEY='keysuite-v40401n02-category-product-sort';
   let categorySort=(()=>{try{const x=JSON.parse(localStorage.getItem(CATEGORY_SORT_KEY)||'{}');return {dir:x.dir==='desc'?'desc':'asc'}}catch(_){return {dir:'asc'}}})();
@@ -149,10 +149,9 @@
   function newCategory(){if(!isOwner()){message('Your role has view-only Category access.','error');return}selectedProduct='CHC_G2';fill(null);setEditable(true);message('New category ready. Values start at 0.00 and customer-factor Use choices start unticked.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
   function renderRows(){
     const body=byId('categoryRows');if(!body)return;const rows=sortedRows(categories());
-    body.closest('.card')?.classList.toggle('category-list-unlocked',listEditing);
     if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
     const head=body.closest('table')?.querySelector('thead tr');if(head)head.innerHTML='<th></th>';
-    body.innerHTML=rows.map(category=>{const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><div class="category-row-layout"><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button><button class="btn danger category-delete-button" type="button" data-category-archive="${esc(category.id)}" data-category-name="${esc(name)}">Delete</button></div></td></tr>`}).join('');
+    body.innerHTML=rows.map(category=>{const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><div class="category-row-layout"><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></div></td></tr>`}).join('');
   }
   function mapRows(rows){
     return (rows||[]).map(c=>{
@@ -206,22 +205,6 @@
   }
   function cancel(){if(selectedId){const category=currentCategory();if(category)openCategory(category,false)}else{const first=categories()[0];if(first)openCategory(first,false);else newCategory()}}
   function unlockCategoryEditor(){if(!isOwner()||!selectedId)return;setEditable(true);message('Category fields and Use choices unlocked. Edit them, then press Save Category or Cancel.','info');byId('categoryNameInput')?.focus();byId('categoryNameInput')?.select()}
-  function setListEditing(on){listEditing=!!on;const button=byId('editCategoryList');if(button)button.textContent=listEditing?'Done':'Edit';renderRows()}
-  async function archiveCategory(id,name){
-    if(!listEditing||!isOwner())return;
-    if(!confirm(`Archive pricing category “${name}”?\n\nHistorical quotations and pricing snapshots will be preserved.`))return;
-    const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}
-    try{
-      const {data,error}=await client.rpc('keysuite_archive_pricing_category_v50015',{p_category_id:String(id)});if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data||{};if(result.archived===false)throw new Error(result.reason||'This category is still required and cannot be archived.');
-      if(String(selectedId)===String(id)){selectedId='';editing=false}await reload();setListEditing(false);render();message(`Category “${name}” was archived. Historical quotations remain unchanged.`,'info');
-    }catch(error){message(String(error?.message||error||'Category could not be archived.'),'error')}
-  }
-  function bindListEditLongHold(target){
-    let timer=null,progress=null,start=0;const idle='Edit',stop=(restore=true)=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');if(restore&&!listEditing)target.textContent=idle};
-    const update=()=>{const elapsed=Math.max(0,Date.now()-start),remaining=Math.max(1,5-Math.floor(elapsed/1000));target.textContent=String(remaining)};
-    target.textContent=idle;target.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();if(listEditing||!isOwner())return;start=Date.now();target.classList.add('holding');update();progress=setInterval(update,100);timer=setTimeout(()=>{stop(false);setListEditing(true)},5000)});['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>stop(true)));target.addEventListener('click',event=>{event.preventDefault();if(listEditing)setListEditing(false)});target.addEventListener('contextmenu',event=>event.preventDefault());
-  }
   function bindEditLongHold(target,callback){
     let timer=null,progress=null,start=0;const idle='Hold 3s to Edit';
     const stop=(restore=true)=>{if(timer)clearTimeout(timer);if(progress)clearInterval(progress);timer=progress=null;target.classList.remove('holding');if(restore&&target.style.display!=='none')target.textContent=idle};
@@ -235,8 +218,7 @@
     byId('categorySortDirection')?.addEventListener('click',()=>{categorySort.dir='asc';saveCategorySort();syncCategorySortUi();renderRows()});
     byId('categoryProductSortDirection')?.addEventListener('click',()=>{productSort.dir=productSort.dir==='asc'?'desc':'asc';saveProductSort();applyProductSort()});
     const editButton=byId('editCategoryRule');if(editButton)bindEditLongHold(editButton,unlockCategoryEditor);
-    const listEditButton=byId('editCategoryList');if(listEditButton)bindListEditLongHold(listEditButton);
-    byId('categoryRows')?.addEventListener('click',event=>{const archive=event.target.closest('[data-category-archive]');if(archive){archiveCategory(archive.dataset.categoryArchive,archive.dataset.categoryName);return}const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
+    byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
     document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(editing?`${selectedProduct} pricing rule loaded. Fields and Use choices are unlocked.`:`${selectedProduct} pricing rule loaded. Hold the Edit button for 3 seconds to make changes.`,'info')}));
     ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTrimmingInput','categoryTransportInput','categoryUseCommission','categoryUseSetDiscount','categoryUseFinalDiscount','categoryUseFuelCharge'].forEach(id=>{byId(id)?.addEventListener('input',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())});byId(id)?.addEventListener('change',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())})});
     ['USD','RMB','MYR'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula();const input=document.querySelector(`[data-row-category="${CSS.escape(selectedId)}"][data-row-currency="${code}"]`);if(input)input.checked=byId(`categoryCurrency${code}`).checked}));

@@ -1,13 +1,14 @@
 {
-  "version": "5.00.39",
-  "baseline": "5.00.38",
-  "upgrade_supported_from": "5.00.38",
+  "version": "5.00.40",
+  "baseline": "5.00.39",
+  "upgrade_supported_from": "5.00.39",
   "new_database_migration_required": false,
   "supabase_deployment_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Quotation PDF page 1: compact shared Date/Rev label column aligns colons and date values"
+    "Remove Category list edit and delete controls",
+    "Add quotation SST and percentage or RM discounts to the editor, saved quotations and PDF"
   ]
 }
