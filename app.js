@@ -1224,7 +1224,21 @@ function quotePumpPdfFilename(row,itemNumber){
  // B4.06.13: without a selected customer, use only pump model + duty capacity and do not consume Item numbering.
  return safePdfName(numbered?`Item ${no} - ${model}${duty}`:`${model}${duty}`);
 }
+function productCurvePdfFilename(pump = {}, now = new Date()) {
+ const model = pumpPdfModelIdentity(pump.keysuite_display_model || pump.display_model || pump.quotation_model || pump.model, pump);
+ const date = localCalendarDate(now).slice(2).replace(/-/g, '');
+ const state = pump.export_state || {};
+ const rawFlow = pump.raw_flow_text ?? pump.rawFlowText ?? state.rawFlowText ?? pump.raw_flow ?? state.rawFlow;
+ const rawHead = pump.raw_head_text ?? pump.rawHeadText ?? state.rawHeadText ?? pump.raw_head ?? state.rawHead;
+ const flow = Number(pump.required_flow_m3h ?? pump.flow_m3h ?? pump.flowM3h);
+ const head = Number(pump.required_head_m ?? pump.head_m ?? pump.headM);
+ // The full-width slash preserves the printed unit in filenames on all platforms.
+ const duty = Number(rawFlow) > 0 && Number(rawHead) > 0 && flow > 0 && head > 0
+  ? ` - ${capacityNumber(flow, 2)} m3／hr @ ${capacityNumber(head, 2)} Mtr` : '';
+ return safePdfName(`${date} - ${model}${duty}`) + '.pdf';
+}
 window.KeySuitePumpPdfNames={
+ productFromPayload:productCurvePdfFilename,
  nextFromPayload:pump=>pumpPdfFilenameFromPayload(pump,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  nextFromRow:row=>quotePumpPdfFilename(row,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  metadataTitleFromPump:(pump,now=new Date())=>pumpPdfMetadataTitle(pump,now),

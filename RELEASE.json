@@ -1,14 +1,15 @@
 {
-  "version": "5.00.40",
-  "baseline": "5.00.39",
-  "upgrade_supported_from": "5.00.39",
-  "new_database_migration_required": false,
-  "supabase_deployment_required": false,
+  "version": "5.00.41",
+  "baseline": "5.00.40",
+  "upgrade_supported_from": "5.00.40",
+  "new_database_migration_required": true,
+  "supabase_data_seed_required": true,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Remove Category list edit and delete controls",
-    "Add quotation SST and percentage or RM discounts to the editor, saved quotations and PDF"
+    "Remove legacy Category hold-to-delete",
+    "Restore native Product curve printing and update Product PDF names",
+    "Import KV V1.4 engineering data and add 45 KV models"
   ]
 }

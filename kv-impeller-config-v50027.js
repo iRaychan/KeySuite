@@ -22,6 +22,5 @@
     wrap.querySelectorAll('[data-kv-impeller]').forEach(select=>select.addEventListener('change',()=>{normalize(m,select.dataset.kvImpeller,select.value);renderSelected()}));
   }
   const baseRender=window.renderSelected;window.renderSelected=function(){baseRender.apply(this,arguments);mount()};
-  const baseCurrent=window.currentSelection;window.currentSelection=function(){const p=baseCurrent.apply(this,arguments),m=selectionState?.models?.[selectionState.selectedIndex||0];if(!p||!m)return p;const c=cfgFor(m);return {...p,impeller_full:c.full,impeller_small:c.small,impeller_mini:c.mini,total_impellers:c.original,export_state:{...(p.export_state||{}),models:[m]}}};
-  window.__KEYSUITE_CURRENT_SELECTION=window.currentSelection;
+  const baseCurrent=window.__KEYSUITE_CURRENT_SELECTION;window.__KEYSUITE_CURRENT_SELECTION=function(){const p=baseCurrent.apply(this,arguments),m=selectionState?.models?.[selectionState.selectedIndex||0];if(!p||!m)return p;const c=cfgFor(m);return {...p,impeller_full:c.full,impeller_small:c.small,impeller_mini:c.mini,total_impellers:c.original,export_state:{...(p.export_state||{}),models:[m]}}};
 })();

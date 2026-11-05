@@ -357,7 +357,12 @@
   }
   function transformReportHtml(html,sourceWin=null){
     if(typeof html!=='string'||!html)return html;
-    html=window.KeySuitePumpPdfDownload?.inject?.(html,sourceWin)||html;
+    let product = false;
+    try {
+      product = /^product/i.test(sourceWin?.frameElement?.id || '') ||
+        new URLSearchParams(sourceWin?.location?.search).get('product') === '1';
+    } catch (_) {}
+    if (!product) html=window.KeySuitePumpPdfDownload?.inject?.(html,sourceWin)||html;
     const snapshot=reportContextSnapshot(sourceWin);
     let out=html;
     // Native-source correction: Page 2 must say 1 Stage, otherwise n Stages.
@@ -371,7 +376,14 @@
       const pending='<style id="ksV40001PdfBrandPendingStyle">body{visibility:hidden!important}</style>';
       out=out.replace(/<head\b[^>]*>/i,tag=>tag+pending);
     }
-    const script=reportIdentityScript(snapshot)+reportReadinessScript();
+    let productTitle = '';
+    if (product) {
+      const payload = sourceWin?.__KEYSUITE_CURRENT_SELECTION?.() || sourceWin?.keysuiteExportPayload || {model:snapshot.displayModel};
+      productTitle = window.KeySuitePumpPdfNames?.productFromPayload?.(payload) || snapshot.pdfFileTitle;
+    }
+    const filenameScript = productTitle ? `<script>(()=>{const title=${JSON.stringify(productTitle.replace(/\.pdf$/i,'')).replace(/</g,'\\u003c')};const setTitle=()=>{document.title=title};setTitle();window.addEventListener('beforeprint',setTitle)})();<\/script>` : '';
+    let script=reportIdentityScript(snapshot)+reportReadinessScript()+filenameScript;
+    if (product) script = script.replaceAll('<\\/script>', '</script>');
     const idx=out.toLowerCase().lastIndexOf('</body>');
     return idx>=0?out.slice(0,idx)+script+out.slice(idx):out+script;
   }

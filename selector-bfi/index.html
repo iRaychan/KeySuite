@@ -1122,7 +1122,7 @@ function exportPDF(requestedFilename){
    window.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.displayModel||keychcVisibleModelName(best.model,enhanced)||best.model||'Pump Model'
  ).trim();
  let resolvedFilename=requestedFilename;
- if(!resolvedFilename&&window.parent&&window.parent!==window){try{const api=window.parent.KeySuitePumpPdfNames,payload=pdfPayload;if(api&&typeof api.nextFromPayload==='function'&&payload)resolvedFilename=api.nextFromPayload(payload)}catch(_){}}
+ if(!resolvedFilename&&window.parent&&window.parent!==window){try{const api=window.parent.KeySuitePumpPdfNames,payload=pdfPayload;if(api&&typeof api.nextFromPayload==='function'&&payload)resolvedFilename=((new URLSearchParams(location.search).get('product')==='1'||/^product/i.test(window.frameElement?.id||''))?api.productFromPayload(payload):api.nextFromPayload(payload))}catch(_){}}
  const pdfFileTitleRaw=String(resolvedFilename||pdfDisplayModel||best.model||'Pump Model').trim();
  const pdfFileTitle=/\.pdf$/i.test(pdfFileTitleRaw)?pdfFileTitleRaw:(pdfFileTitleRaw+'.pdf');
  const pdfMetadataTitle=String(window.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT?.pdfMetadataTitle||((d=>String(d.getFullYear()).slice(-2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))(new Date())+' - '+pdfDisplayModel));
