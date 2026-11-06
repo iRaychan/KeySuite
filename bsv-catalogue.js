@@ -1,16 +1,14 @@
 (() => {
   'use strict';
   const models = [
-    { name: 'BSV 32G05', kw: 0.75, hp: 1, discharge: 'G1¼' },
-    { name: 'BSV 65G20', kw: 1.1, hp: 1.5, discharge: 'G2½' },
-    { name: 'BSV 80G10', kw: 1.1, hp: 1.5, discharge: 'G3' },
-    { name: 'BSV 100G30', kw: 1.5, hp: 2, discharge: 'G4' },
+    { name: 'BSV 32G05', kw: 0.37, hp: 0.5, discharge: 'G1¼' },
+    { name: 'BSV 65G20', kw: 1.5, hp: 2, discharge: 'G2½' },
+    { name: 'BSV 80G10', kw: 0.75, hp: 1, discharge: 'G3' },
+    { name: 'BSV 100G30', kw: 1.5, hp: 3, discharge: 'G4' },
   ];
   const variants = ['MA', 'T'];
-  // Explicit motor examples in the V5.00.44 brief, scoped to their exact variants.
-  const exampleHp = { 'BSV 80G10|T': 1, 'BSV 65G20|MA': 2 };
-  // Workbook descriptions disagree with their base rows for these configurations.
-  const disputed = new Set(['BSV 32G05|MA', 'BSV 100G30|T']);
+  const poles = 2;
+  const rpm = 2900;
   const key = (model, variant) => model + '|' + variant;
   const table = 'ks_bsv_variant_prices_v50043';
   const prices = new Map();
@@ -24,23 +22,23 @@
     const row = models.find(m => m.name === model);
     if (!row || !variants.includes(variant)) return null;
     const ma = variant === 'MA';
-    const name = model + '-2' + variant;
-    const hp = exampleHp[key(model, variant)] ?? row.hp;
+    const name = model + '-' + poles + variant;
+    const hp = row.hp;
     const description = [
       'B.G.Reich Submersible Pump Model: ' + name,
-      `c/w ${hp}HP 2Pole Motor (${ma ? '240V / 1Ph' : '415V / 3Ph'} / 50Hz)`,
+      `c/w ${hp}HP ${poles}Pole Motor (${ma ? '240V / 1Ph' : '415V / 3Ph'} / 50Hz)`,
       'Discharge: ' + row.discharge,
       'Pump Material: CI / CI / 45C / Mech Seal',
       ...(ma ? ['c/w Float switch'] : []),
     ].join('\n');
-    return { name, hp, description, disputed: disputed.has(key(model, variant)) };
+    return { name, hp, catalogueKw: row.kw, discharge: row.discharge, poles, rpm, description };
   };
   function findPrice(model, variant, options = {}) {
     const config = configuration(model, variant);
     const row = loaded && prices.get(key(model, variant));
     const customer = options.customer || window.KeySuiteApp?.getPricingCustomer?.();
     const category = options.category || window.KEYSUITE_SECURE_DATA?.categories?.find(c => c.id === customer?.pricingCategoryId);
-    if (!config || config.disputed || !row || !customer || !category) return null;
+    if (!config || !row || !customer || !category) return null;
     const book = Object.fromEntries(['USD', 'RMB', 'MYR'].map(c => [c, { [variant]: row['price_' + c.toLowerCase()] }]));
     const calc = window.KeySuitePricing.calculatePrice(book, variant, category, 'BSV', { ...options, customer, rarity: row.rarity });
     return calc ? { product: { id: model, model: config.name }, material: variant, variant, family: 'BSV', customer, category, calc, sourceExtra: { technical_model: model } } : null;
@@ -110,11 +108,16 @@
   }
   function action(model, variant, mode) {
     const config = configuration(model, variant);
+    if (!config || window.KeySuitePermissions?.can?.(mode === 'cost' ? 'view_costing_breakdown' : 'create_quotations') !== true) return;
     const pricing = window.KeySuitePricing;
+    if (!loaded) return alert('BSV prices are unavailable. Reopen the BSV product page to reload them.');
+    const customer = window.KeySuiteApp?.getPricingCustomer?.();
+    const category = window.KEYSUITE_SECURE_DATA?.categories?.find(c => c.id === customer?.pricingCategoryId);
+    if (!customer || !category) return alert('Select a customer with a pricing category first.');
     const found = findPrice(model, variant, { pricingMode: mode === 'assembly' ? 'assembly' : 'quotation' });
-    if (!found) return alert('Select a customer with a pricing category and save a price for this BSV variant first.');
+    if (!found) return alert(`No price is available for ${config.name}. Check its BSV price list and the category’s enabled currencies.`);
     const blocked = pricing.quoteBlockReason(found.calc);
-    if (blocked && mode !== 'cost') return alert(blocked);
+    if (blocked && mode !== 'cost') return alert(`${config.name}: ${blocked}`);
     const item = { model: config.name, description: config.description, qty: 1, unitPrice: found.calc.finalPrice, pricingSource: pricing.sourceSnapshot(found), productFamily: 'BSV', assemblyLevel: 'COMPLETE_PUMPSET', assemblySection: 'pumpset' };
     if (mode === 'cost') return window.KeySuiteCostingAudit?.open(item, config.name + ' Costing Audit');
     if (mode === 'assembly') return window.KeySuiteAssembly?.addItem(item);
@@ -134,11 +137,12 @@
     get('bsvProductCount').textContent = `${rows.length} of ${models.length} workbook models`;
     grid.innerHTML = rows.map(m => {
       const config = configuration(m.name, variant);
-      const disabled = config.disputed ? 'disabled title="Conflicting workbook specifications"' : '';
-      return `<div class="product-model-row"><div><h3>${config.name}</h3><div class="muted">${m.kw} kW · ${config.disputed ? 'Motor/discharge pending confirmation' : config.hp + ' HP · ' + m.discharge}</div></div><div class="product-model-actions">${showCost ? `<button class="btn keysuite-cost-button product-action-button" data-action="cost" ${disabled}>Cost</button>` : '<span></span>'}<button class="btn secondary product-action-button" disabled title="BSV curve data was not supplied">Curve</button>${showQuote ? `<button class="btn action-assembly product-action-button" data-action="assembly" ${disabled}>Assembly</button><button class="btn action-quote product-action-button" data-action="quotation" ${disabled}>Quote</button>` : ''}</div></div>`;
+      return `<div class="product-model-row"><div><h3>${config.name}</h3><div class="muted">${config.catalogueKw} kW (catalogue) · ${config.hp} HP · ${config.poles} Pole · ${config.rpm} rpm · Discharge: ${config.discharge}</div></div><div class="product-model-actions">
+        ${showCost ? '<button class="btn keysuite-cost-button product-action-button" data-action="cost">Cost</button>' : ''}
+        ${showQuote ? '<button class="btn action-assembly product-action-button" data-action="assembly">Assembly</button><button class="btn action-quote product-action-button" data-action="quotation">Quote</button>' : ''}
+      </div></div>`;
     }).join('') || '<div class="product-empty">No matching BSV model.</div>';
     [...grid.children].forEach((node, i) => node.querySelectorAll('[data-action]').forEach(button => button.onclick = () => action(rows[i].name, variant, button.dataset.action)));
-    get('bsvProductMessage').textContent = 'BSV curve data was not supplied.';
   }
   window.KeySuiteBSV = { configuration, findPrice, renderPrices };
   document.addEventListener('DOMContentLoaded', () => {
