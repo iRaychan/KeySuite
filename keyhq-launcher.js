@@ -3,10 +3,10 @@
   if(window.__KEYSUITE_KEYHQ_LAUNCHER__)return;
   window.__KEYSUITE_KEYHQ_LAUNCHER__=true;
 
-  const REFRESH_MS=20000;
   const social=new window.KeyHQSocial();
   const avatarProfiles=new window.KeyHQAvatarProfiles(snapshot=>{if(!snapshot.userId&&!snapshot.companyId)contextRequest++;const frame=document.getElementById('keyhqFrame');if(frame?.contentWindow&&document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))frame.contentWindow.postMessage(!snapshot.userId&&!snapshot.companyId?{type:'KEYHQ_SESSION_CLEARED'}:{type:'KEYHQ_AVATAR_PROFILES',profiles:snapshot},location.origin)});
-  let refreshTimer=0,contextRequest=0,latestContext={};
+  let contextRequest=0,latestContext={},contextPromise=null,messengerPromise=null,directoryPromise=null,contextLoaded=false;
+  const sessionCache={company:'',people:null,profiles:null,scopes:null,floorConfig:null};
   const demoEvents=[
     {id:'demo-1',sender:'Demo · Acme Engineering',message:'Need 2 duty + 1 standby booster pumps, 180 m³/hr at 48 m head.',status:'demo',createdAt:'',isDemo:true},
     {id:'demo-2',sender:'Demo · KL Contractor',message:'Please recommend a transfer pump for a 12-storey building.',status:'demo',createdAt:'',isDemo:true},
@@ -103,13 +103,35 @@
     try{const loaded=await store.load();const rows=store.getQuotes?.()||loaded||[];return {quotations:(Array.isArray(rows)?rows:[]).map(quotationSummary).filter(row=>row.id&&row.reference),mode:store.getMode?.()||'unknown',error:store.getError?.()||''}}catch(error){return {quotations:[],mode:'error',error:String(error?.message||error)}}
   }
 
+  function resetSessionCache(companyId){if(sessionCache.company===companyId)return;sessionCache.company=companyId;sessionCache.people=null;sessionCache.profiles=null;sessionCache.scopes=null;sessionCache.floorConfig=null;messengerPromise=null;directoryPromise=null;contextLoaded=false;latestContext={}}
+  async function loadCachedDirectory(client,companyId){
+    if(sessionCache.people&&sessionCache.profiles&&sessionCache.scopes)return {peopleResult:sessionCache.people,profiles:sessionCache.profiles,scopes:sessionCache.scopes};
+    if(directoryPromise)return directoryPromise;
+    directoryPromise=(async()=>{const [peopleResult,userResult,profileResult,scopeResult]=await Promise.all([
+        sessionCache.people||loadPeople(client,companyId),client?.auth.getUser(),
+        client?.rpc('keysuite_keyhq_avatar_directory_v42925',{p_company_id:companyId}),client?.rpc('keysuite_list_user_selection_scopes_v41706')
+      ]);
+      const userId=userResult?.data?.user?.id||'',profiles={companyId,userId,rows:profileResult?.error?[]:(profileResult?.data||[]),state:profileResult?.error?'unavailable':'ready',error:profileResult?.error?String(profileResult.error.message||profileResult.error):''};
+      sessionCache.people=peopleResult;sessionCache.profiles=profiles;sessionCache.scopes=scopeResult?.error?[]:(scopeResult?.data||[]);return {peopleResult,profiles,scopes:sessionCache.scopes};
+    })().finally(()=>{directoryPromise=null});return directoryPromise;
+  }
+  async function messengerContext(){
+    const access=window.KEYSUITE_ACCESS||{},profile=window.KEYSUITE_PROFILE||{},companyId=String(access.company_id||profile.company_id||''),client=window.KeySuiteAuth?.getClient?.();
+    if(!client||!companyId)return {name:profile.display_name||access.display_name||'KeySuite User',email:profile.email||access.email||'',role:access.role||'user',companyId,people:[],avatarProfiles:{companyId,userId:'',rows:[],state:'unavailable'},social:social.data};
+    resetSessionCache(companyId+':'+String(profile.email||access.email||'').toLowerCase());await social.connect(client,companyId);const {peopleResult,profiles,scopes}=await loadCachedDirectory(client,companyId),byEmail=new Map(scopes.map(r=>[String(r.email).toLowerCase(),r.selection_scope]));
+    for(const person of peopleResult.people){const scope=byEmail.get(person.email);if(scope&&Array.isArray(scope.keys))person.visitor=!scope.keys.some(k=>String(k).split('|')[0].toUpperCase()==='KEYLARGO')}
+    social.directory=profiles.rows.map(r=>({...r,name:peopleResult.people.find(p=>p.email===r.email)?.name}));
+    return {name:profile.display_name||access.display_name||profile.email||access.email||'KeySuite User',email:profile.email||access.email||'',role:access.role||'user',companyId,userId:profiles.userId,people:peopleResult.people,avatarProfiles:profiles,social:social.data};
+  }
+
   async function keyhqContext(){
     const access=window.KEYSUITE_ACCESS||{},profile=window.KEYSUITE_PROFILE||{},companyId=String(access.company_id||profile.company_id||'');
     const context={name:profile.display_name||access.display_name||profile.email||access.email||'Keylargo User',email:profile.email||access.email||'',role:access.role||'user',companyId,canProjector:canProjector(),canConfigure:canConfigure(),canConfigurePeople:canConfigurePeople(),canAccessOwnerRoom:role()==='owner',eventMode:canProjector()?'demo':'locked',events:canProjector()?demoEvents:[],floorConfig:[],people:[],peopleMode:'unavailable',peopleError:'',quotations:[],quotationMode:'unavailable',quotationError:'',refreshedAt:new Date().toISOString(),agents:{}};
-    const client=window.KeySuiteAuth?.getClient?.();
-    const [floorConfig,peopleResult,quotationResult]=await Promise.all([loadFloorConfig(client,companyId),loadPeople(client,companyId),loadQuotations()]);
-    await avatarProfiles.connect(client,companyId);const profiles=await avatarProfiles.refresh();context.avatarProfiles=profiles;context.userId=profiles.userId;social.directory=profiles.rows.map(r=>({...r,name:peopleResult.people.find(p=>p.email===r.email)?.name}));await social.connect(client,companyId);context.social=social.data;if(social.data.state==='ready'){const online=new Set(social.data.presence.map(p=>p.user_id));for(const person of peopleResult.people){const row=profiles.rows.find(r=>String(r.email).toLowerCase()===person.email);person.presence=online.has(row?.user_id)?'online':'offline';}}
-    try{const scoped=await client?.rpc('keysuite_list_user_selection_scopes_v41706');if(scoped&&!scoped.error){const byEmail=new Map((scoped.data||[]).map(r=>[String(r.email).toLowerCase(),r.selection_scope]));for(const person of peopleResult.people){const scope=byEmail.get(person.email);if(scope&&Array.isArray(scope.keys))person.visitor=!scope.keys.some(k=>String(k).split('|')[0].toUpperCase()==='KEYLARGO');}}}catch(error){console.warn('KeyHQ visitor assignments unavailable',error.message);}
+    const client=window.KeySuiteAuth?.getClient?.();resetSessionCache(companyId+':'+String(profile.email||access.email||'').toLowerCase());
+    const directoryPromise=loadCachedDirectory(client,companyId),floorPromise=sessionCache.floorConfig?Promise.resolve(sessionCache.floorConfig):loadFloorConfig(client,companyId),quotationPromise=loadQuotations();
+    const [{peopleResult,profiles:cachedProfiles,scopes},floorConfig,quotationResult]=await Promise.all([directoryPromise,floorPromise,quotationPromise]);sessionCache.floorConfig=floorConfig;
+    await avatarProfiles.connect(client,companyId);const profiles=avatarProfiles.snapshot().userId?avatarProfiles.snapshot():cachedProfiles;context.avatarProfiles=profiles;context.userId=profiles.userId;social.directory=profiles.rows.map(r=>({...r,name:peopleResult.people.find(p=>p.email===r.email)?.name}));await social.connect(client,companyId);context.social=social.data;if(social.data.state==='ready'){const online=new Set(social.data.presence.map(p=>p.user_id));for(const person of peopleResult.people){const row=profiles.rows.find(r=>String(r.email).toLowerCase()===person.email);person.presence=online.has(row?.user_id)?'online':'offline';}}
+    const byEmail=new Map(scopes.map(r=>[String(r.email).toLowerCase(),r.selection_scope]));for(const person of peopleResult.people){const scope=byEmail.get(person.email);if(scope&&Array.isArray(scope.keys))person.visitor=!scope.keys.some(k=>String(k).split('|')[0].toUpperCase()==='KEYLARGO')}
     context.floorConfig=floorConfig;context.people=peopleResult.people;context.peopleMode=peopleResult.mode;context.peopleError=peopleResult.error;context.quotations=quotationResult.quotations;context.quotationMode=quotationResult.mode;context.quotationError=quotationResult.error;
     if(!client||!context.canProjector){context.agents=agentSignals(context);return context}
     try{
@@ -122,13 +144,14 @@
     context.agents=agentSignals(context);return context;
   }
 
-  async function getContext(){latestContext=await keyhqContext();return latestContext}
-  async function sendContext(){const request=++contextRequest,frame=document.getElementById('keyhqFrame');if(!frame?.contentWindow)return;const context=await getContext();if(request!==contextRequest)return;frame.contentWindow.postMessage({type:'KEYHQ_CONTEXT',context},location.origin);if(social.frameReady&&social.pendingConversation){social.emit('KEYHQ_OPEN_CONVERSATION',{recipient:social.pendingConversation});social.pendingConversation=null;}}
+  async function getMessengerContext(){if(messengerPromise)return messengerPromise;messengerPromise=messengerContext().catch(error=>{messengerPromise=null;throw error});return messengerPromise}
+  async function getContext(force=false){if(contextPromise)return contextPromise;if(contextLoaded&&!force&&latestContext.companyId)return latestContext;contextPromise=keyhqContext().then(context=>{latestContext=context;contextLoaded=true;return context}).finally(()=>{contextPromise=null});return contextPromise}
+  async function sendContext(force=false){const request=++contextRequest,frame=document.getElementById('keyhqFrame');if(!frame?.contentWindow||!document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open')||document.hidden)return;const context=await getContext(force);if(request!==contextRequest)return;frame.contentWindow.postMessage({type:'KEYHQ_CONTEXT',context},location.origin);if(social.frameReady&&social.pendingConversation){social.emit('KEYHQ_OPEN_CONVERSATION',{recipient:social.pendingConversation});social.pendingConversation=null;}}
   async function saveFloorConfig(floors){
     const frame=document.getElementById('keyhqFrame'),companyId=String(window.KEYSUITE_ACCESS?.company_id||'');
     if(!canConfigure())return frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:false,error:'Only an Owner or Admin can configure KeyHQ floors.'},location.origin);
     const client=window.KeySuiteAuth?.getClient?.();if(!client||!companyId)return frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:false,error:'The secure KeySuite connection is unavailable.'},location.origin);
-    try{const result=await client.rpc('keysuite_save_keyhq_config_v42921',{p_company_id:companyId,p_floors:Array.isArray(floors)?floors:[]});if(result.error)throw result.error;frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:true,floors:Array.isArray(floors)?floors:[]},location.origin)}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
+    try{const result=await client.rpc('keysuite_save_keyhq_config_v42921',{p_company_id:companyId,p_floors:Array.isArray(floors)?floors:[]});if(result.error)throw result.error;sessionCache.floorConfig=Array.isArray(floors)?floors:[];frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:true,floors:sessionCache.floorConfig},location.origin)}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_CONFIG_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
   }
 
   async function savePeople(people){
@@ -136,13 +159,13 @@
     if(!canConfigurePeople())return frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:false,error:'Only an enabled Owner can configure KeyOffice desks and avatars.'},location.origin);
     const client=window.KeySuiteAuth?.getClient?.();if(!client||!companyId)return frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:false,error:'The secure KeySuite connection is unavailable.'},location.origin);
     const payload=(Array.isArray(people)?people:[]).map(person=>({email:String(person.email||'').toLowerCase(),desk_no:Number(person.deskNo),avatar_gender:person.gender,avatar_accent:person.accent}));
-    try{let result=await client.rpc('keysuite_save_keyhq_people_v42923',{p_company_id:companyId,p_people:payload});if(result.error)result=await client.rpc('keysuite_save_keyhq_people_v42922_v04',{p_company_id:companyId,p_people:payload});if(result.error)result=await client.rpc('keysuite_save_keyhq_people_v42922',{p_company_id:companyId,p_people:payload});if(result.error)throw result.error;frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:true},location.origin);sendContext()}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
+    try{let result=await client.rpc('keysuite_save_keyhq_people_v42923',{p_company_id:companyId,p_people:payload});if(result.error)result=await client.rpc('keysuite_save_keyhq_people_v42922_v04',{p_company_id:companyId,p_people:payload});if(result.error)result=await client.rpc('keysuite_save_keyhq_people_v42922',{p_company_id:companyId,p_people:payload});if(result.error)throw result.error;sessionCache.people=null;sessionCache.profiles=null;sessionCache.scopes=null;messengerPromise=null;directoryPromise=null;contextLoaded=false;frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:true},location.origin);sendContext(true)}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_PEOPLE_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
   }
 
   async function saveAvatar(avatar){
     const frame=document.getElementById('keyhqFrame'),companyId=String(window.KEYSUITE_ACCESS?.company_id||'');
     const client=window.KeySuiteAuth?.getClient?.();if(!client||!companyId)return frame?.contentWindow?.postMessage({type:'KEYHQ_AVATAR_RESULT',ok:false,error:'The secure KeySuite connection is unavailable.'},location.origin);
-    try{await avatarProfiles.connect(client,companyId);const result=await avatarProfiles.save(avatar||{});frame?.contentWindow?.postMessage({type:'KEYHQ_AVATAR_RESULT',ok:true,appearance:result.appearance},location.origin)}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_AVATAR_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
+    try{await avatarProfiles.connect(client,companyId);const result=await avatarProfiles.save(avatar||{});sessionCache.profiles=null;messengerPromise=null;directoryPromise=null;contextLoaded=false;frame?.contentWindow?.postMessage({type:'KEYHQ_AVATAR_RESULT',ok:true,appearance:result.appearance},location.origin)}catch(error){frame?.contentWindow?.postMessage({type:'KEYHQ_AVATAR_RESULT',ok:false,error:String(error?.message||error)},location.origin)}
   }
 
   async function setPresence(state='online'){
@@ -157,14 +180,16 @@
     window.KeySuiteQuotationStore?.openHistoryPdfModal?.(id);
   }
 
-  function startRefresh(){clearInterval(refreshTimer);refreshTimer=window.setInterval(()=>{if(document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))sendContext()},REFRESH_MS)}
-  function stopRefresh(){clearInterval(refreshTimer);refreshTimer=0;contextRequest++;avatarProfiles.disconnect()}
-  function open(){const node=overlay(),frame=node.querySelector('#keyhqFrame');if(!frame.getAttribute('src'))frame.src='keyhq/index.html?embedded=1&v=keyhq010';node.classList.add('keyhq-open');frame.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:true},location.origin);document.body.classList.add('keyhq-active');document.getElementById('keyhqNavButton')?.classList.add('active');setPresence('online').finally(()=>sendContext());startRefresh()}
-  function close(){document.getElementById('keyhqFrame')?.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:false},location.origin);document.getElementById('keyhqOverlay')?.classList.remove('keyhq-open');document.body.classList.remove('keyhq-active');document.getElementById('keyhqNavButton')?.classList.remove('active');stopRefresh()}
-  function boot(){installStyles();document.getElementById('keyhqNavButton')?.addEventListener('click',open);window.addEventListener('message',event=>{const frame=document.getElementById('keyhqFrame');if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;if(event.data?.type==='KEYHQ_CLOSE')close();if(event.data?.type==='KEYHQ_READY')social.frameReady=true;if(event.data?.type==='KEYHQ_READY'||event.data?.type==='KEYHQ_REFRESH')sendContext();if(event.data?.type==='KEYHQ_SAVE_CONFIG')saveFloorConfig(event.data.floors);if(event.data?.type==='KEYHQ_SAVE_PEOPLE')savePeople(event.data.people);if(event.data?.type==='KEYHQ_SAVE_AVATAR')saveAvatar(event.data.avatar);if(event.data?.type==='KEYHQ_SOCIAL')social.handle(event.data);if(event.data?.type==='KEYHQ_OPEN_PDF')openQuotationPdf(event.data.id)});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open'))close()})}
+  function isOpen(){return document.getElementById('keyhqOverlay')?.classList.contains('keyhq-open')}
+  function suspendCampus(){contextRequest++;social.setCampusActive(false);avatarProfiles.disconnect()}
+  function resumeCampus(reconcile=false){if(!isOpen()||document.hidden)return;social.setCampusActive(true);sendContext(reconcile)}
+  function open(){const node=overlay(),frame=node.querySelector('#keyhqFrame');if(!frame.getAttribute('src'))frame.src='keyhq/index.html?embedded=1&v=keyhq010';node.classList.add('keyhq-open');frame.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:!document.hidden},location.origin);document.body.classList.add('keyhq-active');document.getElementById('keyhqNavButton')?.classList.add('active');contextLoaded=false;setPresence('online').finally(()=>resumeCampus(false))}
+  function close(){document.getElementById('keyhqFrame')?.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:false},location.origin);document.getElementById('keyhqOverlay')?.classList.remove('keyhq-open');document.body.classList.remove('keyhq-active');document.getElementById('keyhqNavButton')?.classList.remove('active');suspendCampus()}
+  function visibilityChanged(){const frame=document.getElementById('keyhqFrame');if(!isOpen())return;if(document.hidden){frame?.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:false},location.origin);suspendCampus()}else{frame?.contentWindow?.postMessage({type:'KEYHQ_VISIBILITY',visible:true},location.origin);resumeCampus(true)}}
+  function connectBackground(){const client=window.KeySuiteAuth?.getClient?.(),company=String(window.KEYSUITE_ACCESS?.company_id||'');if(client&&company)social.connect(client,company);else if(social.user)social.disconnect()}
+  function boot(){installStyles();document.getElementById('keyhqNavButton')?.addEventListener('click',open);window.addEventListener('KEYSUITE_AUTH_CONTEXT_READY',connectBackground);document.addEventListener('visibilitychange',visibilityChanged);window.addEventListener('message',event=>{const frame=document.getElementById('keyhqFrame');if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;if(event.data?.type==='KEYHQ_CLOSE')close();if(event.data?.type==='KEYHQ_READY'){social.frameReady=true;sendContext(false)}if(event.data?.type==='KEYHQ_REFRESH')sendContext(true);if(event.data?.type==='KEYHQ_SAVE_CONFIG')saveFloorConfig(event.data.floors);if(event.data?.type==='KEYHQ_SAVE_PEOPLE')savePeople(event.data.people);if(event.data?.type==='KEYHQ_SAVE_AVATAR')saveAvatar(event.data.avatar);if(event.data?.type==='KEYHQ_SOCIAL')social.handle(event.data);if(event.data?.type==='KEYHQ_OPEN_PDF')openQuotationPdf(event.data.id)});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&isOpen())close()});connectBackground()}
 
-  setInterval(()=>{const client=window.KeySuiteAuth?.getClient?.(),company=String(window.KEYSUITE_ACCESS?.company_id||'');if(client&&company)social.connect(client,company);else if(social.user)social.disconnect()},20000);
-  window.addEventListener('pagehide',()=>{social.heartbeat(true);social.disconnect()});
-  window.KeySuiteKeyHQ={open,close,refresh:sendContext,setPresence,getContext,getCachedContext:()=>latestContext,social};
+  window.addEventListener('pagehide',()=>{suspendCampus();social.disconnect()});
+  window.KeySuiteKeyHQ={open,close,refresh:()=>sendContext(true),setPresence,getContext,getMessengerContext,getCachedContext:()=>latestContext,social};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

@@ -58,7 +58,7 @@ if(launcher?.social&&button&&count){
 
   async function refreshContext(force=false){
     button.disabled=true;
-    try{const cached=launcher.getCachedContext?.()||{};context=!force&&cached.userId?cached:await launcher.getContext();chat.update(launcher.social.data);updateButton(launcher.social.data)}
+    try{const cached=launcher.getCachedContext?.()||{};context=!force&&cached.userId?cached:await launcher.getMessengerContext();chat.update(launcher.social.data);updateButton(launcher.social.data)}
     catch(error){toast('Messenger could not connect. '+String(error?.message||error))}
     finally{button.disabled=false}
   }
