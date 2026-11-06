@@ -2,6 +2,7 @@
   'use strict';
 
   let access=null,selectedId='',selectedProduct='CHC_G2',editing=false,bound=false;
+  let loadedRule='';
   const CATEGORY_SORT_KEY='keysuite-v40401n02-category-sort';
   const PRODUCT_SORT_KEY='keysuite-v40401n02-category-product-sort';
   let categorySort=(()=>{try{const x=JSON.parse(localStorage.getItem(CATEGORY_SORT_KEY)||'{}');return {dir:x.dir==='desc'?'desc':'asc'}}catch(_){return {dir:'asc'}}})();
@@ -139,6 +140,7 @@
     fillCompanyFactorValues();
     byId('categoryProductHeading').textContent=`${productLabel(selectedProduct)} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${productLabel(selectedProduct)} Margin`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
+    loadedRule=ruleInputSnapshot();
     refreshZeroMarginIndicators(category);setRuleFieldsEditable(editing);showCurrencySummary();updateFormula();renderRows();
   }
   function fill(category=null){
@@ -171,13 +173,33 @@
     const trimming=Number(byId('categoryTrimmingInput')?.value||0),transport=Number(byId('categoryTransportInput')?.value||0);if(validate&&(!Number.isFinite(trimming)||trimming<0))throw new Error('Trimming must be RM0.00 or more.');if(validate&&(!Number.isFinite(transport)||transport<0))throw new Error('Transport must be RM0.00 or more.');
     return {margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),normal:percentValue('categoryNormalInput','Normal',validate),rare:percentValue('categoryRareInput','Rare',validate),trimming:Number.isFinite(trimming)?trimming:0,transport:Number.isFinite(transport)?transport:0,useCommission:!!byId('categoryUseCommission')?.checked,useSetDiscount:!!byId('categoryUseSetDiscount')?.checked,useFinalDiscount:!!byId('categoryUseFinalDiscount')?.checked,useFuelCharge:!!byId('categoryUseFuelCharge')?.checked,currencies:selectedCurrenciesFromUi()};
   }
+  function ruleInputSnapshot(){
+    const fields=['MarginInput','NormalInput','RareInput','TrimmingInput','TransportInput','UseCommission','UseSetDiscount','UseFinalDiscount','UseFuelCharge','CurrencyUSD','CurrencyRMB','CurrencyMYR'];
+    return JSON.stringify(fields.map(field=>{
+      const input=byId('category'+field);
+      return input?.type==='checkbox'?input.checked:input?.value;
+    }));
+  }
   async function save(event){
     event.preventDefault();if(!editing)return;if(!isOwner()){message('Your role is not allowed to edit pricing categories.','error');return}
     const name=byId('categoryNameInput').value.trim();if(!name){message('Category Name is required.','error');return}
-    let rule;try{rule=readRule(true)}catch(error){message(error.message,'error');return}
+    const category=currentCategory();
+    const metadataOnly=!!category&&ruleInputSnapshot()===loadedRule;
+    let rule;try{if(!metadataOnly)rule=readRule(true)}catch(error){message(error.message,'error');return}
     const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}
     const button=byId('saveCategoryRule'),original=button.textContent;button.disabled=true;button.textContent='Saving…';message('');
     try{
+      if(metadataOnly){
+        let saved=category;
+        if(name!==category.name){
+          const {error}=await client.rpc('keysuite_rename_pricing_category',{p_category_id:category.id,p_category_name:name});
+          if(error)throw error;
+          saved=(await reload()).find(item=>item.id===category.id);
+          if(!saved)throw new Error('Saved category could not be reloaded.');
+        }
+        openCategory(saved,false);message(`Category “${name}” saved.`,'info');
+        return;
+      }
       const params={p_category_id:selectedId||null,p_category_name:name,p_product_code:selectedProduct,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       let rpc,args;
       if(['ES','ISO'].includes(selectedProduct)){if(!selectedId)throw new Error(`Create a category first, then configure ${selectedProduct}.`);rpc='keysuite_save_category_v50012';args={p_category_id:selectedId,p_product_code:selectedProduct,p_rule:rule};
@@ -199,7 +221,7 @@
       let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').ilike('category_name',name).limit(1);if(lookup.error)throw lookup.error;targetId=String(lookup.data?.[0]?.id||'')}
       if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Currency.');
       const currencySave=['BGF','ISO'].includes(selectedProduct)?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
-      const rows=await reload(),saved=(rows||categories()).find(item=>item.name.toLowerCase()===name.toLowerCase());openCategory(saved||rows[0],false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Currency selected.`,'info');
+      const rows=await reload(),saved=rows.find(item=>item.id===targetId);openCategory(saved,false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Currency selected.`,'info');
     }catch(error){console.error(error);message(String(error?.message||error||'Pricing Category could not be saved.'),'error')}
     finally{button.disabled=false;button.textContent=original}
   }
