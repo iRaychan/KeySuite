@@ -14,6 +14,16 @@
   const canView=()=>permissionLevel('manage_categories')!=='none';
   const isOwner=()=>permissionLevel('manage_categories')==='full';
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
+  const productFamilies=()=>[...new Map([...document.querySelectorAll('#categoryForm [data-category-product]')]
+    .map(button=>[button.dataset.categoryProduct,{code:button.dataset.categoryProduct,label:button.textContent.trim()}])).values()];
+  const isSubmersible=code=>code==='BSV'||code==='BSW';
+  const hasTrimming=code=>['ES','ISO'].includes(code)||isSubmersible(code);
+  async function saveSubmersible(client,id,code,rule,name=null){
+    const {error}=await client.rpc('keysuite_save_submersible_category_v50045',{
+      p_category_id:id,p_product_code:code,p_rule:rule,p_new_name:name
+    });
+    if(error)throw error;
+  }
 
   const defaultRule=()=>({margin:.38,normal:0,rare:0,trimming:0,transport:30,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true,currencies:[]});
   const newCategoryRule=()=>({margin:0,normal:0,rare:0,trimming:0,transport:0,useCommission:false,useSetDiscount:false,useFinalDiscount:false,useFuelCharge:false,currencies:[]});
@@ -134,7 +144,7 @@
   }
   function fillRule(category){
     const rule=category?ruleFor(category,selectedProduct):newCategoryRule();
-    byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTrimmingInput').value=num(rule.trimming,2).replace(/,/g,'');byId('categoryLock_trimming').hidden=!['ES','ISO'].includes(selectedProduct);byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
+    byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTrimmingInput').value=num(rule.trimming,2).replace(/,/g,'');byId('categoryLock_trimming').hidden=!hasTrimming(selectedProduct);byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
     byId('categoryUseCommission').checked=rule.useCommission;byId('categoryUseSetDiscount').checked=rule.useSetDiscount;byId('categoryUseFinalDiscount').checked=rule.useFinalDiscount;byId('categoryUseFuelCharge').checked=rule.useFuelCharge;
     ['USD','RMB','MYR'].forEach(code=>{const input=byId(`categoryCurrency${code}`);if(input)input.checked=(rule.currencies||[]).includes(code)});
     fillCompanyFactorValues();
@@ -200,6 +210,14 @@
         openCategory(saved,false);message(`Category “${name}” saved.`,'info');
         return;
       }
+      if(isSubmersible(selectedProduct)){
+        if(!category)throw new Error('Create a category first, then configure '+selectedProduct+'.');
+        await saveSubmersible(client,category.id,selectedProduct,rule,name===category.name?null:name);
+        const saved=(await reload()).find(item=>item.id===category.id);
+        if(!saved)throw new Error('Saved category could not be reloaded.');
+        openCategory(saved,false);message(`${selectedProduct} pricing rule for “${name}” saved.`,'info');
+        return;
+      }
       const params={p_category_id:selectedId||null,p_category_name:name,p_product_code:selectedProduct,p_margin:rule.margin,p_normal:rule.normal,p_rare:rule.rare,p_transport:rule.transport,p_use_commission:rule.useCommission,p_use_set_discount:rule.useSetDiscount,p_use_final_discount:rule.useFinalDiscount,p_use_fuel_charge:rule.useFuelCharge};
       let rpc,args;
       if(['ES','ISO'].includes(selectedProduct)){if(!selectedId)throw new Error(`Create a category first, then configure ${selectedProduct}.`);rpc='keysuite_save_category_v50012';args={p_category_id:selectedId,p_product_code:selectedProduct,p_rule:rule};
@@ -253,5 +271,5 @@
   }
   function init(data,userAccess){access=userAccess||access;bind();window.addEventListener('keysuite-customer-pricing-changed',()=>{fillCompanyFactorValues();updateFormula()});render()}
   function pageShown(id){if(id==='categoryManagement')render()}
-  window.KeySuiteCategories={init,pageShown,reload,render,sortedRows};
+  window.KeySuiteCategories={init,pageShown,reload,render,sortedRows,productFamilies,ruleFor,isSubmersible,hasTrimming,saveSubmersible};
 })();
