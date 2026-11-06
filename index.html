@@ -1445,6 +1445,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                   <button class="category-product-button" type="button" data-category-product="KV">KV</button>
                   <button class="category-product-button" type="button" data-category-product="BFI">BFI</button>
                   <button class="category-product-button" type="button" data-category-product="BGF">BGF</button>
+                  <button class="category-product-button" type="button" data-category-product="BSV">BSV</button>
                   <button class="category-product-button" type="button" data-category-product="BSW">BSW</button>
                   <button class="category-product-button" type="button" data-category-product="ES">ES</button><button class="category-product-button" type="button" data-category-product="ISO">ISO</button>
                   <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
@@ -1560,6 +1561,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" data-go="bgfPriceList">
           <span class="module-icon">BGF</span><h2>BGF</h2><p>Maintain BGF 350M, BGF 350E, BGF 400 and BGF 500 source prices from the supplied BGF reference.</p><span class="module-order">OPEN PRICE LIST</span>
         </button>
+        <button type="button" class="key-module-card" data-go="bsvPriceList"><span class="module-icon">BSV</span><h2>BSV</h2><p>Review BSV models and variant price status.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="bswPriceList"><span class="module-icon">BSW</span><h2>BSW</h2><p>Maintain the BSW V1.1 submersible pump catalogue and source-price status.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="isoPriceList"><span class="module-icon">ISO</span><h2>ISO End Suction</h2><p>Maintain independent ISO source prices by material, currency and rarity.</p><span class="module-order">OPEN PRICE LIST</span></button>
         <button type="button" class="key-module-card" data-go="esPriceList">
@@ -1806,6 +1808,28 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       </div>
     </section>
 
+    <section id="productBsv" class="page">
+      <div class="page-title-row"><div><h1>B.G.Reich · BSV</h1><div class="muted">BSV V1.0 submersible pump catalogue</div></div></div>
+      <div class="card product-toolbar bsw-product-toolbar">
+        <div><label for="bsvModel">Model</label><select id="bsvModel"></select></div>
+        <div><label for="bsvVariant">Variant reference</label><select id="bsvVariant"></select></div>
+      </div>
+      <div class="product-layout">
+        <div class="card"><h2>BSV Series</h2><p>Four workbook models</p></div>
+        <div class="card"><h2>BSV specifications</h2><div id="bsvSpecs" class="product-model-grid"></div>
+          <p id="bsvVariantNote" role="status"></p>
+          <p>Duty points and curves are unavailable. Cost, Assembly and Quote require approved variant specifications and prices.</p>
+        </div>
+      </div>
+    </section>
+    <section id="bsvPriceList" class="page">
+      <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
+      <div class="page-title-row"><div><h1>BSV Price List</h1><div class="muted">Workbook zeros are unpriced. BSV price storage is pending.</div></div></div>
+      <div class="card table-wrap"><table class="pricelist-table">
+        <thead><tr><th>Model</th><th>T</th><th>M</th><th>MA</th><th>Save</th></tr></thead>
+        <tbody id="bsvPriceRows"></tbody>
+      </table></div>
+    </section>
     <section id="productBsw" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · BSW</h1><div class="muted">BSW V1.1 catalogue · families BSW 50 through BSW 600</div></div></div>
       <div class="card product-toolbar bsw-product-toolbar">
@@ -2338,10 +2362,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="keylab.js?v=41406"></script>
 <script src="auth.js?v=50037"></script>
 <script src="keyhq/avatar-sync.js?v=42925"></script>
-<script src="keyhq-coordinator.js?v=50043"></script>
-<script src="keyhq-social.js?v=50043"></script>
-<script src="keyhq-launcher.js?v=50043"></script>
-<script type="module" src="keyhq-messenger.js?v=50043"></script>
+<script src="keyhq-social.js?v=50001"></script>
+<script src="keyhq-launcher.js?v=50001"></script>
+<script type="module" src="keyhq-messenger.js?v=50006"></script>
 <script src="v388-dashboard-keycore.js?v=42821"></script>
 <script src="universe.js?v=42872"></script>
 <script src="v41223-selection-recovery.js?v=41300"></script>
@@ -2472,5 +2495,5 @@ document.addEventListener('click',event=>{
 </script>
 
 <script src="costing-audit-v50032.js?v=50035"></script>
-<script src="bsw-variants-v50036.js"></script><script src="bsw-pricing-v50036.js?v=50037"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
+<script src="bsv-catalogue.js"></script><script src="bsw-variants-v50036.js"></script><script src="bsw-pricing-v50036.js?v=50037"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>

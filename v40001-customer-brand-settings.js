@@ -53,7 +53,7 @@
   const isMaster=b=>!!b&&(low(b.brand_type)==='master'||low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich');
   const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
   const HYDRAULIC_FAMILIES=['CHC','CR','KV','BFI','BGF','BSW','ES','ISO'];
-  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSW','ES','ISO','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
+  const PRICE_GROUPS=['CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSV','BSW','ES','ISO','MOTOR','BASEPLATE','COUPLING','KEYPLC','MANIFOLD','GWS'];
   const priceGroups=()=>{const found=new Set(PRICE_GROUPS);document.querySelectorAll('[data-category-product]').forEach(button=>found.add(normalizeGroup(button.dataset.categoryProduct)));(window.KEYSUITE_SECURE_DATA?.categories||[]).forEach(category=>Object.keys(category?.productRules||{}).forEach(group=>found.add(normalizeGroup(group))));found.delete('GENERAL');found.delete('KEYLAB');return [...found].filter(Boolean)};
   const FAMILIES=HYDRAULIC_FAMILIES;
   const normalizeGroup=v=>String(v??'').trim().toUpperCase().replace(/\s+/g,'_');
@@ -128,6 +128,7 @@
         out.push({brand:b,priceGroup:'CR',family:'CR',selectionKey:keyOf(b.id,'CR'),key:priceKeyOf(b.id,'CR')});
         out.push({brand:b,priceGroup:'KV',family:'KV',selectionKey:keyOf(b.id,'KV'),key:priceKeyOf(b.id,'KV')});
         out.push({brand:b,priceGroup:'BFI',family:'BFI',selectionKey:keyOf(b.id,'BFI'),key:priceKeyOf(b.id,'BFI')});
+        out.push({brand:b,priceGroup:'BSV',family:'BSV',selectionKey:'',key:priceKeyOf(b.id,'BSV')});
         out.push({brand:b,priceGroup:'BSW',family:'BSW',selectionKey:keyOf(b.id,'BSW'),key:priceKeyOf(b.id,'BSW')});
         out.push({brand:b,priceGroup:'BGF',family:'BGF',selectionKey:keyOf(b.id,'BGF'),key:priceKeyOf(b.id,'BGF')});
         out.push({brand:b,priceGroup:'ES',family:'ES',selectionKey:keyOf(b.id,'ES'),key:priceKeyOf(b.id,'ES')});

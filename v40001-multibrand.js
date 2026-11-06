@@ -171,7 +171,7 @@
   function pumpDataOfRow(row){try{return JSON.parse(row?.dataset?.pumpData||'{}')}catch(_){return {}}}
   function sourceFamily(source,row=null){return String(source?.product_family||source?.family||source?.productFamily||row?.dataset?.productFamily||'').toUpperCase()}
   function inferFamilyFromPage(page=''){
-    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productBsw:'BSW',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorBsw:'BSW',selectorEs:'ES',selectorIso:'ISO'};
+    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productBsv:'BSV',productBsw:'BSW',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorBsw:'BSW',selectorEs:'ES',selectorIso:'ISO'};
     return map[page]||'';
   }
   function inferSeries(model,source={}){
@@ -775,6 +775,7 @@
       {label:'KV',family:'KV',productGroup:'KV',page:'productKv'},
       {label:'BFI',family:'BFI',productGroup:'BFI',page:'productBfi'},
       {label:'BGF',family:'BGF',productGroup:'BGF',page:'productBgf'},
+      {label:'BSV',family:'BSV',productGroup:'BSV',page:'productBsv'},
       {label:'BSW',family:'BSW',productGroup:'BSW',page:'productBsw'},
       {label:'End Suction',family:'ES',page:'productEs'},
       {label:'ISO',family:'ISO',page:'productIso'},
@@ -789,7 +790,7 @@
     try{sessionStorage.setItem('keysuite-v41412-product-chc-generation',code)}catch(_){}
     window.KeySuiteProduct?.setChcGeneration?.(code);
   }
-  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',KV:'productKv',BFI:'productBfi',BGF:'productBgf',BSW:'productBsw',ISO:'productIso',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
+  function familyPage(fam){return ({CHC:'productChc',CR:'productCr',KV:'productKv',BFI:'productBfi',BGF:'productBgf',BSV:'productBsv',BSW:'productBsw',ISO:'productIso',ES:'productEs',MOTOR:'productMotor',GWS:'productGws',KEYPLC:'productKeyplc',MANIFOLD:'productManifold',COUPLING:'productCoupling',BASEPLATE:'productBaseplate'})[baseFamily(fam)]||''}
   function brandFamilies(brand){
     const key=String(brand.brand_key||'').toLowerCase(),built=isMasterBrand(brand)?BUILTIN_FAMILIES['b.g.reich']:BUILTIN_FAMILIES[key];
     if(built)return built.map(f=>{
