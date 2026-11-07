@@ -1,13 +1,16 @@
 {
-  "version": "5.00.50",
-  "baseline": "5.00.49",
-  "upgrade_supported_from": "5.00.49",
-  "new_database_migration_required": false,
+  "version": "5.00.51",
+  "baseline": "5.00.50",
+  "upgrade_supported_from": "5.00.50",
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
+  "modules": {
+    "KeyStock": "1.00"
+  },
   "changes": [
-    "Place Quantity and editable Unit side by side for every quotation item, and preserve the unit in saved items and PDF output"
+    "Add KeyStock catalogue references, configurable dropdowns, opening balances, locations and audited corrections; protect purchase costs on the server"
   ]
 }
