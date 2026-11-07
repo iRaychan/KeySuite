@@ -296,7 +296,7 @@
   function stampRowBrand(row,brandId=state.selectedBrandId,family=state.selectedFamily,{force=false}={}){
     if(!row)return; const existing=rowBrandId(row); if(existing&&!force)return;
     const brand=byBrandId(brandId)||masterBrand(); if(!brand)return;
-    if(row.dataset.restoredQuotationItem==='true'){row.dataset.v391BrandId=String(brand.id);renderRowBrandChip(row);return;}
+    if(row.dataset.restoredQuotationItem==='true'){row.dataset.v391BrandId=String(brand.id);return;}
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),detectedFamily=baseFamily(sourceFamily(source,row)||String(family||'').toUpperCase());
     const sourceGeneration=String(source.generation_code||pump.generation_code||pump.keysuite_generation_code||'').toUpperCase();
     const detectedGroup=detectedFamily==='CHC'&&['G1','G2'].includes(sourceGeneration)
@@ -312,15 +312,11 @@
     pump.keysuite_brand_id=String(brand.id); pump.keysuite_brand_name=String(brand.brand_name||''); pump.keysuite_brand_logo=String(brand.logo_data||''); pump.keysuite_brand_country_of_origin=String(brand.country_of_origin||''); pump.keysuite_product_family=detectedFamily; pump.keysuite_master_series=masterSeries; pump.keysuite_selling_series=sellingSeries;pump.keysuite_product_group_code=detectedGroup;pump.keysuite_generation_code=generation;pump.keysuite_price_group_code=priceGroup;
     if(Object.keys(source).length)row.dataset.pricingSource=JSON.stringify(source);
     if(Object.keys(pump).length)row.dataset.pumpData=JSON.stringify(pump);
-    renderRowBrandChip(row); mapRowIdentity(row);
+    mapRowIdentity(row);
     const brandedPump=pumpDataOfRow(row);if(Object.keys(brandedPump).length){brandedPump.keysuite_brand_id=String(brand.id);brandedPump.keysuite_brand_name=String(brand.brand_name||'');brandedPump.keysuite_brand_logo=String(brand.logo_data||'');brandedPump.keysuite_brand_country_of_origin=String(brand.country_of_origin||'');brandedPump.keysuite_product_family=detectedFamily;brandedPump.keysuite_product_group_code=detectedGroup;brandedPump.keysuite_generation_code=generation;brandedPump.keysuite_price_group_code=priceGroup;brandedPump.keysuite_master_series=masterSeries;brandedPump.keysuite_selling_series=sellingSeries;brandedPump.quotation_model=row.querySelector('.item-model')?.value||brandedPump.quotation_model||brandedPump.model||'';row.dataset.pumpData=JSON.stringify(brandedPump);}
     applyBrandMargin(row,{resetBase:true});
     if(document.querySelectorAll('#quoteItems .quote-item').length===1&&brand.quotation_template_id){try{window.KeySuiteTemplates?.selectForCustomer?.(String(brand.quotation_template_id),{applyDefaults:false});}catch(_){}}
     postBrandContext();
-  }
-  function renderRowBrandChip(row){
-    if(!row)return; const brand=byBrandId(rowBrandId(row)); if(!brand)return;
-    let chip=row.querySelector('.v391-row-brand-chip'); if(!chip){chip=document.createElement('span');chip.className='v391-row-brand-chip no-print'; const model=row.querySelector('.item-model'); const host=model?.parentElement||row; host.appendChild(chip);} chip.textContent=brand.brand_name;
   }
   function reapplyQuoteCapacity(row){
     try{window.KeySuiteApp?.syncQuoteCapacityDescription?.(row)}catch(error){console.warn('[KeySuite V4.04.16] Unable to reapply quotation capacity after brand mapping.',error)}
@@ -465,7 +461,7 @@
   }
   function applyAllRows({resetBase=false}={}){
     document.querySelectorAll('#quoteItems .quote-item').forEach(row=>{
-      const existing=rowBrandId(row); if(existing){renderRowBrandChip(row);mapRowIdentity(row);applyBrandMargin(row,{resetBase});}
+      const existing=rowBrandId(row); if(existing){mapRowIdentity(row);applyBrandMargin(row,{resetBase});}
     });
   }
 
@@ -1106,14 +1102,14 @@
     // V3.9.4.4.3: no post-login MutationObserver. Existing app wrappers stamp brand at row creation.
     if(state.quoteEventsBound)return;state.quoteEventsBound=true;
     $('qCustomer')?.addEventListener('change',()=>{state.lastQuoteCustomer=quoteCustomerId();applyAllRows({resetBase:true});});
-    document.addEventListener('click',event=>{if(!event.target?.closest?.('[data-page="quotation"],#quoteItems,.quote-item'))return;setTimeout(()=>{document.querySelectorAll('#quoteItems .quote-item').forEach(row=>{if(rowBrandId(row)){renderRowBrandChip(row);mapRowIdentity(row);applyBrandMargin(row,{resetBase:true});}});},0);},true);
+    document.addEventListener('click',event=>{if(!event.target?.closest?.('[data-page="quotation"],#quoteItems,.quote-item'))return;setTimeout(()=>{document.querySelectorAll('#quoteItems .quote-item').forEach(row=>{if(rowBrandId(row)){mapRowIdentity(row);applyBrandMargin(row,{resetBase:true});}});},0);},true);
   }
   function restoreSavedRows(){document.querySelectorAll('#quoteItems .quote-item').forEach(row=>{const source=sourceOfRow(row),pump=pumpDataOfRow(row),bid=source.v391_brand_id||pump.keysuite_brand_id;if(bid)stampRowBrand(row,bid,source.v391_product_family||pump.keysuite_product_family||sourceFamily(source,row),{force:true});});}
   function repairQuotationBrands(){
     if(!state.coreReady)return;
     document.querySelectorAll('#quoteItems .quote-item').forEach(row=>{
       const source=sourceOfRow(row),pump=pumpDataOfRow(row),existing=rowBrandId(row),family=source.v391_product_family||pump.keysuite_product_family||sourceFamily(source,row);
-      if(existing){renderRowBrandChip(row);mapRowIdentity(row);return}
+      if(existing){mapRowIdentity(row);return}
       if(!family||['MANUAL','ASSEMBLY'].includes(String(family).toUpperCase()))return;
       const saved=source.v391_brand_id||pump.keysuite_brand_id;
       const fallback=saved||(row.dataset.restoredQuotationItem==='true'?'':masterBrand()?.id||state.selectedBrandId);

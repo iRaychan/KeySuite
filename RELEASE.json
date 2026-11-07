@@ -1,15 +1,14 @@
 {
-  "version": "5.00.48",
-  "baseline": "5.00.47",
-  "upgrade_supported_from": "5.00.47",
-  "new_database_migration_required": true,
+  "version": "5.00.49",
+  "baseline": "5.00.48",
+  "upgrade_supported_from": "5.00.48",
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Quotation brand descriptions, aligned item and adjustment controls, and reversible manual price status",
-    "Quotation PDF uses saved item descriptions and optional bold item headings",
-    "Customer PDF filename aliases and contact recipient aliases"
+    "Remove redundant quotation item brand labels and use shared Capacity and Head controls on manual items",
+    "Open the existing quotation PDF in a viewer on Mac Safari"
   ]
 }
