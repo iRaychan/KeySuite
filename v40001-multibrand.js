@@ -296,6 +296,7 @@
   function stampRowBrand(row,brandId=state.selectedBrandId,family=state.selectedFamily,{force=false}={}){
     if(!row)return; const existing=rowBrandId(row); if(existing&&!force)return;
     const brand=byBrandId(brandId)||masterBrand(); if(!brand)return;
+    if(row.dataset.restoredQuotationItem==='true'){row.dataset.v391BrandId=String(brand.id);renderRowBrandChip(row);return;}
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),detectedFamily=baseFamily(sourceFamily(source,row)||String(family||'').toUpperCase());
     const sourceGeneration=String(source.generation_code||pump.generation_code||pump.keysuite_generation_code||'').toUpperCase();
     const detectedGroup=detectedFamily==='CHC'&&['G1','G2'].includes(sourceGeneration)
@@ -325,7 +326,7 @@
     try{window.KeySuiteApp?.syncQuoteCapacityDescription?.(row)}catch(error){console.warn('[KeySuite V4.04.16] Unable to reapply quotation capacity after brand mapping.',error)}
   }
   function mapRowIdentity(row){
-    const bid=rowBrandId(row),brand=byBrandId(bid);if(!row||!brand)return;
+    const bid=rowBrandId(row),brand=byBrandId(bid);if(!row||!brand||row.dataset.restoredQuotationItem==='true')return;
     const modelInput=row.querySelector('.item-model'),descInput=row.querySelector('.item-description');if(!modelInput||!descInput)return;
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),family=baseFamily(sourceFamily(source,row)||pump.keysuite_product_family||row.dataset.v391Family||'');
     if(!family||family==='MANUAL'||family==='ASSEMBLY')return;
@@ -340,7 +341,8 @@
     if(String(brand.id)===String(master?.id)){
       let masterDesc=baseDesc;
       const masterName=String(brand.brand_name||brand.name||'').trim();
-      if(['CHC','ES','MOTOR'].includes(family)&&masterName&&!masterDesc.toLowerCase().includes(masterName.toLowerCase())){
+      if(['CHC','ES','CR','KV','BFI','BGF','BSV','BSW','ISO','GWS'].includes(family))masterDesc=window.KeySuiteApp.brandedQuotationDescription(masterDesc,masterName);
+      if(family==='MOTOR'&&masterName&&!masterDesc.toLowerCase().includes(masterName.toLowerCase())){
         const lines=masterDesc.split('\n'),idx=Math.max(0,lines.findIndex(line=>line.trim()&&!/^Capacity:/i.test(line.trim())));
         if(lines[idx])lines[idx]=`${masterName} ${lines[idx].trim()}`;
         masterDesc=lines.join('\n');
@@ -380,7 +382,9 @@
       shownDesc=shownDesc.replace(new RegExp(`\\b${re}\\b`,'g'),sellingSeries);
     }
 
-    if(isUnbrandedOemBrand(brand)){
+    if(['CHC','ES','CR','KV','BFI','BGF','BSV','BSW','ISO','GWS'].includes(family)){
+      shownDesc=window.KeySuiteApp.brandedQuotationDescription(shownDesc,brand.brand_name,master?.brand_name);
+    }else if(isUnbrandedOemBrand(brand)){
       const brandName=String(brand.brand_name||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
       shownDesc=shownDesc.replace(/B\.G\.Reich\s*/gi,'').replace(/\bOEM\s*/gi,'');
       if(brandName)shownDesc=shownDesc.replace(new RegExp(brandName+'\\s*','gi'),'');
@@ -447,8 +451,8 @@
     return {...baseResult,unrounded:replacementUnrounded,final:roundUp10(replacementUnrounded)};
   }
   function applyBrandMargin(row,{resetBase=false}={}){
-    if(!row||state.applyingMargin)return;const price=row.querySelector('.item-price');if(!price)return;
-    const bid=rowBrandId(row);if(!bid)return;const source=sourceOfRow(row);if(source.manual_override===true)return;const cid=quoteCustomerId(),margin=customerBrandMargin(cid,bid);
+    if(!row||state.applyingMargin||row.dataset.restoredQuotationItem==='true'||window.KeySuiteApp?.isQuotationSealed?.())return;const price=row.querySelector('.item-price');if(!price)return;
+    const bid=rowBrandId(row);if(!bid)return;const source=sourceOfRow(row);if(source.manual_override===true||source.quotation_manual_unit_price!=null)return;const cid=quoteCustomerId(),margin=customerBrandMargin(cid,bid);
     state.applyingMargin=true;
     try{
       const adjusted=calculateWithBrandMargin(source,margin);
@@ -484,9 +488,18 @@
     if(state.appWrapped||!window.KeySuiteApp)return; state.appWrapped=true;
     const original=window.KeySuiteApp.addExternalQuoteItem?.bind(window.KeySuiteApp);
     if(original)window.KeySuiteApp.addExternalQuoteItem=data=>{
-      const chosenBrand=byBrandId(state.selectedBrandId)||masterBrand(),family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
+      const explicitBrand=String(data?.brand??data?.brandName??'').trim();
+      const selected=byBrandId(state.selectedBrandId)||masterBrand();
+      const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
+      const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
       const copy={...(data||{})}; if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
-      const row=original(copy); setTimeout(()=>{if(row)stampRowBrand(row,chosenBrand?.id,family,{force:true});},0); return row;
+      const row=original(copy);
+      if(row){
+        if(chosenBrand)stampRowBrand(row,chosenBrand.id,family,{force:true});
+        window.KeySuiteApp.captureQuotationItemOriginal(row,{replace:true});
+        if(typeof calcTotal==='function')calcTotal();
+      }
+      return row;
     };
   }
 
@@ -1103,7 +1116,7 @@
       if(existing){renderRowBrandChip(row);mapRowIdentity(row);return}
       if(!family||['MANUAL','ASSEMBLY'].includes(String(family).toUpperCase()))return;
       const saved=source.v391_brand_id||pump.keysuite_brand_id;
-      const fallback=saved||masterBrand()?.id||state.selectedBrandId;
+      const fallback=saved||(row.dataset.restoredQuotationItem==='true'?'':masterBrand()?.id||state.selectedBrandId);
       if(fallback)stampRowBrand(row,fallback,family,{force:true});
     });
   }

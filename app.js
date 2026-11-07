@@ -562,7 +562,7 @@ function populateQuotationHistoryFilters(rows=quotes()){
 function normalizeCustomerRecord(row){
  let contacts=row.contacts||[];if(typeof contacts==='string'){try{contacts=JSON.parse(contacts)}catch(_){contacts=[]}}
  const pdc=!!row.pdc||/\bPDC\b/i.test(String(row.payment_terms||''));
- return {id:row.id,companyId:row.company_id,company:row.company_name||'',classification:row.classification||'',pricingCategoryId:row.pricing_category_id||'',defaultQuotationTemplateId:row.default_quotation_template_id||'',assignedUserEmail:row.assigned_user_email||'',createdByEmail:row.created_by_email||'',distanceKm:Number(row.distance_km||0),companyPhone:row.company_phone||'',address:row.address||'',terms:normalizeCustomerTermsDays(row.payment_terms),pdc,tinNumber:row.tin_number||'',brnNumber:row.business_registration_no||'',sstNumber:row.sst_number||'',msicCode:row.msic_code||'',businessActivity:row.business_activity||'',notes:row.notes||'',contacts:Array.isArray(contacts)?contacts:[],status:row.status||'active',createdAt:row.created_at||'',updatedAt:row.updated_at||''}
+ return {id:row.id,companyId:row.company_id,company:row.company_name||'',quotationAssignedSaveName:row.quotation_assigned_save_name||'',classification:row.classification||'',pricingCategoryId:row.pricing_category_id||'',defaultQuotationTemplateId:row.default_quotation_template_id||'',assignedUserEmail:row.assigned_user_email||'',createdByEmail:row.created_by_email||'',distanceKm:Number(row.distance_km||0),companyPhone:row.company_phone||'',address:row.address||'',terms:normalizeCustomerTermsDays(row.payment_terms),pdc,tinNumber:row.tin_number||'',brnNumber:row.business_registration_no||'',sstNumber:row.sst_number||'',msicCode:row.msic_code||'',businessActivity:row.business_activity||'',notes:row.notes||'',contacts:Array.isArray(contacts)?contacts:[],status:row.status||'active',createdAt:row.created_at||'',updatedAt:row.updated_at||''}
 }
 function customerClient(){return window.KeySuiteAuth?.getClient?.()||null}
 function companyMasterCustomer(company){
@@ -581,7 +581,7 @@ async function importCompanyMasters(client,rows){
  if(result.error){console.warn('Company master could not be added to Customers',result.error);return rows}
  return rows.concat((result.data||[]).map(normalizeCustomerRecord));
 }
-function remoteCustomerPayload(c){const days=normalizeCustomerTermsDays(c.terms);return {id:c.id,company_id:c.companyId||currentAccess().company_id,company_name:c.company,classification:c.classification||'',pricing_category_id:c.pricingCategoryId||null,default_quotation_template_id:c.defaultQuotationTemplateId||null,assigned_user_email:c.assignedUserEmail||currentEmail(),created_by_email:c.createdByEmail||currentEmail(),distance_km:Number(c.distanceKm||0),company_phone:c.companyPhone||'',address:c.address||'',payment_terms:c.pdc?(Number(days)>0?`${days} days PDC`:'PDC'):days,tin_number:c.tinNumber||'',business_registration_no:c.brnNumber||'',sst_number:c.sstNumber||'',msic_code:c.msicCode||'',business_activity:c.businessActivity||'',notes:c.notes||'',contacts:c.contacts||[],status:c.status||'active',updated_at:new Date().toISOString()}}
+function remoteCustomerPayload(c){const days=normalizeCustomerTermsDays(c.terms);return {id:c.id,company_id:c.companyId||currentAccess().company_id,company_name:c.company,quotation_assigned_save_name:c.quotationAssignedSaveName||null,classification:c.classification||'',pricing_category_id:c.pricingCategoryId||null,default_quotation_template_id:c.defaultQuotationTemplateId||null,assigned_user_email:c.assignedUserEmail||currentEmail(),created_by_email:c.createdByEmail||currentEmail(),distance_km:Number(c.distanceKm||0),company_phone:c.companyPhone||'',address:c.address||'',payment_terms:c.pdc?(Number(days)>0?`${days} days PDC`:'PDC'):days,tin_number:c.tinNumber||'',business_registration_no:c.brnNumber||'',sst_number:c.sstNumber||'',msic_code:c.msicCode||'',business_activity:c.businessActivity||'',notes:c.notes||'',contacts:c.contacts||[],status:c.status||'active',updated_at:new Date().toISOString()}}
 async function loadSecureCustomers(){
  const client=customerClient();if(!client){customerSyncMode='local';customerSyncError='Secure customer connection is unavailable.';renderCustomerAccessNotice();return customers()}
  try{
@@ -703,7 +703,12 @@ function quotationPricingSourceError(row){
  if(!row?.dataset?.pricingSource)return '';
  let source={};try{source=JSON.parse(row.dataset.pricingSource||'{}')}catch(_){return 'Cannot quote: Pricing source data is invalid.'}
  const reason=window.KeySuitePricing?.pricingSourceBlockReason?.(source)||'';
- if(row.dataset.descriptionManuallyEdited==='true'&&Number(row.querySelector('.item-price')?.value||0)>0&&/^Pump price not found:\s*CHC item\.?$/i.test(reason))return '';
+ const price=Number(row.querySelector('.item-price')?.value);
+ if(reason&&source.quotation_manual_unit_price===price&&Number.isFinite(price)&&price>0&&String(source.product_family||source.family).toUpperCase()!=='ASSEMBLY'){
+   const marginError=window.KeySuitePricing?.pricingSourceMarginBlockReason?.(source);
+   if(marginError)return marginError;
+   if(/^Pump price not found:/i.test(reason)||reason==='Cannot quote: No valid USD, RMB or MYR cost is available.')return '';
+ }
  return reason;
 }
 function ensureQuotationSourcePricing(action='continue'){
@@ -744,7 +749,7 @@ function refreshStartContacts(customerId,preferred){
  const select=$('startContact');if(!select)return;
  const customer=customers().find(x=>x.id===String(customerId||'')),contacts=customer?.contacts||[];
  const wanted=preferred!==undefined?String(preferred??''):String($('qContact')?.value||'');
- select.innerHTML='<option value="">Select contact person</option>'+contacts.map((x,i)=>`<option value="${i}">${esc([x.prefix,x.name].filter(Boolean).join(' '))}</option>`).join('');
+ select.innerHTML='<option value="">Select contact person</option>'+contacts.map((x,i)=>`<option value="${i}">${esc(quotationContactName(x))}</option>`).join('');
  if(wanted!==''&&Number(wanted)<contacts.length)select.value=wanted;else if(String($('qContact')?.value||'')!==''&&Number($('qContact').value)<contacts.length)select.value=String($('qContact').value);else select.value='';
  select.disabled=!customer;updateDashboardStartSummary();
 }
@@ -773,7 +778,7 @@ function applyQuotationCustomerSelection(customerId,{refreshPrices=true}={}){
  if($('qPrintedContact'))$('qPrintedContact').value='';
  refreshQuotationContacts();
  const contact=(customer?.contacts||[])[Number($('qContact')?.value)]||{};
- if($('qPrintedContact'))$('qPrintedContact').value=[contact.prefix,contact.name].filter(Boolean).join(' ');
+ if($('qPrintedContact'))$('qPrintedContact').value=quotationContactName(contact);
  window.KeySuitePricing?.selectCustomer?.(id,false);
  if(refreshPrices)window.KeySuitePricing?.refreshQuotePrices?.();
  if(!editingQuoteId&&quotationStatus==='new')window.KeySuiteTemplates?.selectForCustomer?.(customer?.defaultQuotationTemplateId||'',{applyDefaults:true});
@@ -898,15 +903,24 @@ function formatPhoneInputs(){
  });
 }
 
+function quotationContactName(contact={}){
+ const prefix=String(contact.prefix||'').trim(),name=String(contact.quotationAssignedName||'').trim()||String(contact.name||'').trim();
+ if(!name)return '';
+ const title=name.split(/\s+/)[0].replace(/\.$/,'').toLowerCase();
+ return prefix&&title!==prefix.replace(/\.$/,'').toLowerCase()?`${prefix} ${name}`:name;
+}
+const originalCustomerContacts=new WeakMap();
 function contactRow(data={}){
- const row=document.createElement('div');row.className='contact-row';
- row.innerHTML=`<div><label>Prefix</label><select class="contact-prefix"><option ${data.prefix==='Mr.'?'selected':''}>Mr.</option><option ${data.prefix==='Ms.'?'selected':''}>Ms.</option><option ${data.prefix==='Mrs.'?'selected':''}>Mrs.</option><option ${data.prefix==='Dr.'?'selected':''}>Dr.</option><option ${data.prefix==='Ir.'?'selected':''}>Ir.</option><option ${data.prefix==="Dato'"?'selected':''}>Dato'</option></select></div><button class="btn danger remove-contact" type="button">Remove Contact</button><div><label>Name</label><input class="contact-name" value="${esc(data.name||'')}"></div><div><label>Phone</label><input class="contact-phone" placeholder="+60 (x) xxxx xxxx" value="${esc(formatMYPhone(data.phone||''))}"></div><div><label>Email</label><input class="contact-email" type="email" value="${esc(data.email||'')}"></div>`;
+ const row=document.createElement('div');row.className='contact-row';originalCustomerContacts.set(row,data);
+ row.innerHTML=`<div><label>Prefix</label><select class="contact-prefix"><option ${data.prefix==='Mr.'?'selected':''}>Mr.</option><option ${data.prefix==='Ms.'?'selected':''}>Ms.</option><option ${data.prefix==='Mrs.'?'selected':''}>Mrs.</option><option ${data.prefix==='Dr.'?'selected':''}>Dr.</option><option ${data.prefix==='Ir.'?'selected':''}>Ir.</option><option ${data.prefix==="Dato'"?'selected':''}>Dato'</option></select></div><button class="btn danger remove-contact" type="button">Remove Contact</button><div><label>Name</label><input class="contact-name" value="${esc(data.name||'')}"></div><div><label>Quotation Assigned Name<input class="contact-quotation-name" value="${esc(data.quotationAssignedName||'')}"></label></div><div><label>Phone</label><input class="contact-phone" placeholder="+60 (x) xxxx xxxx" value="${esc(formatMYPhone(data.phone||''))}"></div><div><label>Email</label><input class="contact-email" type="email" value="${esc(data.email||'')}"></div>`;
  row.querySelector('.remove-contact').onclick=()=>row.remove();$('contactEditor').appendChild(row);formatPhoneInputs();
 }
 function getContacts(){
  return [...document.querySelectorAll('.contact-row')].map(r=>({
+   ...originalCustomerContacts.get(r),
    prefix:r.querySelector('.contact-prefix').value,
    name:r.querySelector('.contact-name').value.trim(),
+   quotationAssignedName:r.querySelector('.contact-quotation-name').value.trim()||null,
    phone:formatMYPhone(r.querySelector('.contact-phone').value),
    email:r.querySelector('.contact-email').value.trim()
  })).filter(c=>c.name||c.phone||c.email);
@@ -920,7 +934,7 @@ function openNewCustomer(){
  viewedCustomerId=null;
  $('customerEmpty').style.display='none';$('customerDetail').style.display='none';$('customerEditorCard').style.display='block';
  $('customerEditorTitle').textContent='Add New Customer';$('deleteCustomerBtn').style.display='none';
- ['customerId','company','companyPhone','address','customerTerms','tinNumber','brnNumber','sstNumber','msicCode','businessActivity','customerNotes'].forEach(id=>$(id).value='');
+ ['customerId','company','companyPhone','address','quotationAssignedSaveName','customerTerms','tinNumber','brnNumber','sstNumber','msicCode','businessActivity','customerNotes'].forEach(id=>$(id).value='');
  if($('customerPdc'))$('customerPdc').checked=false;syncCustomerPdcUi();
  $('customerDistance').value='0';$('customerClassification').value='';configureCustomerOwner(currentEmail());configureCustomerDistance();configureCustomerTemplate('');
  $('contactEditor').innerHTML='';contactRow();
@@ -932,7 +946,7 @@ function editCustomer(id){
  $('customerEmpty').style.display='none';$('customerDetail').style.display='none';$('customerEditorCard').style.display='block';
  $('customerEditorTitle').textContent='Edit Customer';$('deleteCustomerBtn').textContent='Archive Customer';$('deleteCustomerBtn').style.display=isCustomerAdmin()?'inline-block':'none';
  $('customerId').value=c.id;$('company').value=c.company||'';$('companyPhone').value=formatMYPhone(c.companyPhone||'');
- $('address').value=c.address||'';$('customerTerms').value=normalizeCustomerTermsDays(c.terms);if($('customerPdc'))$('customerPdc').checked=!!c.pdc;syncCustomerPdcUi();$('tinNumber').value=c.tinNumber||'';
+ $('address').value=c.address||'';$('quotationAssignedSaveName').value=c.quotationAssignedSaveName||'';$('customerTerms').value=normalizeCustomerTermsDays(c.terms);if($('customerPdc'))$('customerPdc').checked=!!c.pdc;syncCustomerPdcUi();$('tinNumber').value=c.tinNumber||'';
  $('brnNumber').value=c.brnNumber||'';$('sstNumber').value=c.sstNumber||'';$('msicCode').value=c.msicCode||'';
  $('businessActivity').value=c.businessActivity||'';$('customerNotes').value=c.notes||'';$('customerDistance').value=Number(c.distanceKm||0);$('customerClassification').value=c.classification||'';configureCustomerOwner(c.assignedUserEmail||currentEmail());configureCustomerDistance();configureCustomerTemplate(c.defaultQuotationTemplateId||'');
  $('contactEditor').innerHTML='';(c.contacts?.length?c.contacts:[{}]).forEach(contactRow);
@@ -961,7 +975,7 @@ async function saveCustomer(){
  const button=$('saveCustomer');button.disabled=true;button.textContent='Saving…';
  try{
    const id=customerUuid($('customerId').value),old=customers().find(x=>x.id===id)||{};
-   const c={...old,id,companyId:old.companyId||currentAccess().company_id,company,classification:$('customerClassification').value||'',pricingCategoryId:old.pricingCategoryId||'',defaultQuotationTemplateId:$('customerDefaultQuotationTemplate')?.value||'',assignedUserEmail:isCustomerAdmin()?($('customerOwner').value||currentEmail()):currentEmail(),createdByEmail:old.createdByEmail||currentEmail(),distanceKm:isCustomerAdmin()?Math.max(0,Number($('customerDistance').value||0)):Number(old.distanceKm||0),companyPhone:formatMYPhone($('companyPhone').value),address:$('address').value.trim(),terms:normalizeCustomerTermsDays($('customerTerms').value),pdc:!!$('customerPdc')?.checked,tinNumber:$('tinNumber').value.trim(),brnNumber:$('brnNumber').value.trim(),sstNumber:$('sstNumber').value.trim(),msicCode:$('msicCode').value.trim(),businessActivity:$('businessActivity').value.trim(),notes:$('customerNotes').value.trim(),contacts:getContacts(),status:'active'};
+   const c={...old,id,companyId:old.companyId||currentAccess().company_id,company,quotationAssignedSaveName:$('quotationAssignedSaveName').value.trim()||null,classification:$('customerClassification').value||'',pricingCategoryId:old.pricingCategoryId||'',defaultQuotationTemplateId:$('customerDefaultQuotationTemplate')?.value||'',assignedUserEmail:isCustomerAdmin()?($('customerOwner').value||currentEmail()):currentEmail(),createdByEmail:old.createdByEmail||currentEmail(),distanceKm:isCustomerAdmin()?Math.max(0,Number($('customerDistance').value||0)):Number(old.distanceKm||0),companyPhone:formatMYPhone($('companyPhone').value),address:$('address').value.trim(),terms:normalizeCustomerTermsDays($('customerTerms').value),pdc:!!$('customerPdc')?.checked,tinNumber:$('tinNumber').value.trim(),brnNumber:$('brnNumber').value.trim(),sstNumber:$('sstNumber').value.trim(),msicCode:$('msicCode').value.trim(),businessActivity:$('businessActivity').value.trim(),notes:$('customerNotes').value.trim(),contacts:getContacts(),status:'active'};
    const saved=await saveCustomerRemote(c);viewedCustomerId=saved.id;refreshAll();showCustomerDetail(saved.id);alert('Customer saved.');
  }catch(error){console.error(error);alert(`Customer could not be saved: ${error.message||error}`)}finally{button.disabled=false;button.textContent='Save Customer'}
 }
@@ -1021,8 +1035,8 @@ async function selectCustomerForQuotation(customerId){
 function setQuoteCustomerCollapsed(collapsed=true){const card=$('quoteCustomerCard'),button=$('collapseCustomer');if(!card||!button)return;card.classList.toggle('collapsed',!!collapsed);button.textContent=collapsed?'▼':'▲';button.title=collapsed?'Expand customer details':'Collapse customer details';updateCustomerSummary()}
 
 function updateCustomerSummary(){
- const c=customers().find(x=>x.id===$('qCustomer').value)||{},contact=(c.contacts||[])[Number($('qContact').value)]||{};
- const bits=[c.company,[contact.prefix,contact.name].filter(Boolean).join(' '),$('customerReference')?.value,$('payment')?.value,$('remarks')?.value].filter(Boolean);
+ const c=customers().find(x=>x.id===$('qCustomer').value)||{};
+ const bits=[c.company,$('qPrintedContact')?.value,$('customerReference')?.value,$('payment')?.value,$('remarks')?.value].filter(Boolean);
  if($('customerSummary'))$('customerSummary').textContent=bits.join(' | ')||'No customer selected';
 }
 
@@ -1049,19 +1063,19 @@ function refreshQuotationContacts(){
  const c=customers().find(x=>x.id===customerId);
  const old=$('qContact')?.value||'';
  const contacts=c?.contacts||[];
- $('qContact').innerHTML='<option value="">Select contact person</option>'+contacts.map((x,i)=>`<option value="${i}">${esc([x.prefix,x.name].filter(Boolean).join(' '))}</option>`).join('');
+ $('qContact').innerHTML='<option value="">Select contact person</option>'+contacts.map((x,i)=>`<option value="${i}">${esc(quotationContactName(x))}</option>`).join('');
  if(old && Number(old)<contacts.length)$('qContact').value=old;
  else if(contacts.length)$('qContact').value='0';
  if(c&&$('qPrintedCompany')&&!$('qPrintedCompany').value)$('qPrintedCompany').value=c.company||'';
- const contact=contacts[Number($('qContact').value)]||{};
- if($('qPrintedContact')&&!$('qPrintedContact').value)$('qPrintedContact').value=[contact.prefix,contact.name].filter(Boolean).join(' ');
+ const contact=$('qContact').value===''?{}:contacts[Number($('qContact').value)]||{};
+ if($('qPrintedContact')&&!$('qPrintedContact').value)$('qPrintedContact').value=quotationContactName(contact);
  updateQuotationContactInfo();
  if(c)$('payment').value=formatCustomerTerms(c);
 }
 function updateQuotationContactInfo(){
  const c=customers().find(x=>x.id===$('qCustomer').value);
  const idx=$('qContact').value;
- const person=(c?.contacts||[])[Number(idx)];
+ const person=idx===''?null:(c?.contacts||[])[Number(idx)];
  if(!person){$('qContactInfo').textContent='-';updateCustomerSummary();return}
  const parts=[];
  if(person.phone)parts.push(formatMYPhone(person.phone));
@@ -1078,27 +1092,69 @@ function quoteItemBrands(data={},seen=new Set()){
  for(const key of ['pumpData','motorData','pricingSource','source','source_data','components','items','bom','assembly_items','pumpsetData','keyplcData','manifoldData','baseplateData','tankData']){let v=data[key];if(typeof v==='string'){try{v=JSON.parse(v)}catch{continue}}if(Array.isArray(v))for(const item of v)names.push(...quoteItemBrands(item,seen));else if(v&&typeof v==='object')names.push(...quoteItemBrands(v,seen));}
  return [...new Map(names.map(n=>[n.toLowerCase(),n])).values()];
 }
-function quotePrintDescription(item){const text=String(item.description||''),present=(String(item.model||'')+' '+text).toLowerCase(),brands=(item.manualItem?[item.brand]:quoteItemBrands(item)).filter(b=>b&&b.trim()&&b!=='-'&&!present.includes(b.toLowerCase()));return [brands.length?'Brand: '+brands.join(' / '):'',item.manualItem&&item.manualCapacity?'Capacity: '+item.manualCapacity:'',text].filter(Boolean).join('\n');}
+function brandedQuotationDescription(description,brand,sourceBrand=''){
+ const lines=String(description??'').split('\n');
+ const index=lines.findIndex(line=>line.trim()&&!/^Capacity:/i.test(line.trim()));
+ if(index<0)return lines.join('\n');
+ const name=String(brand??'').trim();
+ let line=lines[index].trimStart();
+ const candidates=[name,sourceBrand,'B.G.Reich'].map(s=>String(s||'').trim()).filter(s=>s&&s!=='-').sort((a,b)=>b.length-a.length);
+ for(const candidate of candidates){
+   while(line.toLowerCase().startsWith(candidate.toLowerCase()+' '))line=line.slice(candidate.length).trimStart();
+ }
+ lines[index]=name&&name!=='-'?`${name} ${line}`:line;
+ return lines.join('\n');
+}
+function captureQuotationItemOriginal(row,{replace=false}={}){
+ if(!replace&&row.dataset.originalQuotationItem)return;
+ const description=row.querySelector('.item-description').value;
+ if(!row.querySelector('.item-model').value&&!description)return;
+ row.dataset.originalQuotationItem=JSON.stringify({unitPrice:Number(row.querySelector('.item-price').value)||0,description});
+}
+function recordQuotationManualPrice(row,input){
+ if(!canEditQuotation()||isQuotationSealed())return;
+ const source=parseQuoteJson(row.dataset.pricingSource),original=parseQuoteJson(row.dataset.originalQuotationItem);
+ const price=input.valueAsNumber;
+ if(Number.isFinite(price)&&price>=0&&price!==original.unitPrice)source.quotation_manual_unit_price=price;
+ else delete source.quotation_manual_unit_price;
+ if(Object.keys(source).length)row.dataset.pricingSource=JSON.stringify(source);
+ else delete row.dataset.pricingSource;
+}
+function quotePrintDescription(item){const text=String(item.description??'');return [item.manualItem&&item.manualCapacity?'Capacity: '+item.manualCapacity:'',text.length||item.descriptionManuallyEdited?text:String(item.model??'')].filter(Boolean).join('\n');}
+function quotationItemPrintBody(item){
+ const heading=item.displayHeader?String(item.itemHeader||'').trim():'';
+ return `<div class="print-item-desc">${heading?`<strong>${esc(heading)}</strong>\n`:''}${esc(quotePrintDescription(item))}</div>`;
+}
 function quoteClipboardKey(){return `keysuite:v50015:quote-item-clipboard:${currentCompanyId()}:${currentEmail().toLowerCase()}`}
 function copyQuoteItemToClipboard(item){try{localStorage.setItem(quoteClipboardKey(),JSON.stringify({copiedAt:new Date().toISOString(),item:structuredClone(item)}));return true}catch(error){alert(`Item could not be copied: ${error.message||error}`);return false}}
 function readQuoteItemClipboard(){try{const payload=JSON.parse(localStorage.getItem(quoteClipboardKey())||'null');return payload?.item&&typeof payload.item==='object'?structuredClone(payload.item):null}catch(_){return null}}
-function pasteQuoteItem(){if(!canEditQuotation(true))return false;const item=readQuoteItemClipboard();if(!item){alert('No copied quotation item is available for this company account. Open any quotation and press Copy on an item first.');return false}const row=quoteItemRow(item);focusNewQuoteItem(row);renumberQuoteItems();calcTotal();updateQuotationStateUi();return true}
-function quoteItemRow(data={}){
+function pasteQuoteItem(){if(!canEditQuotation(true))return false;const item=readQuoteItemClipboard();if(!item){alert('No copied quotation item is available for this company account. Open any quotation and press Copy on an item first.');return false}const row=quoteItemRow(item,{restored:true});focusNewQuoteItem(row);renumberQuoteItems();calcTotal();updateQuotationStateUi();return true}
+function quoteItemRow(data={}, {restored=false}={}){
  const wrap=document.createElement('div');wrap.className='quote-item collapsed';wrap.draggable=false;wrap.dataset.quoteUnit=normalizeQuoteUnit(data.unit);const couplingItem=!data.manualItem&&isCouplingQuoteData(data),motorItem=!data.manualItem&&!couplingItem&&isMotorQuoteData(data),noCapacityItem=data.manualItem||!couplingItem&&(motorItem||isNoCapacityQuoteData(data)),family=quoteProductFamily(data);wrap.dataset.quoteKind=couplingItem?'coupling':motorItem?'motor':noCapacityItem?'static':'standard';if(family)wrap.dataset.quoteFamily=family;
  try{wrap.dataset.quoteItemPayload=JSON.stringify(data)}catch(_){wrap.dataset.quoteItemPayload='{}'}
  if(data.pumpData)wrap.dataset.pumpData=JSON.stringify(data.pumpData);if(data.pricingSource)wrap.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data.couplingData)wrap.dataset.couplingData=JSON.stringify(data.couplingData);if(data.motorData)wrap.dataset.motorData=JSON.stringify(data.motorData);
+ if(restored)wrap.dataset.restoredQuotationItem='true';
+ if(data.originalQuotationItem&&Object.hasOwn(data.originalQuotationItem,'unitPrice'))wrap.dataset.originalQuotationItem=JSON.stringify(data.originalQuotationItem);
  if(data.descriptionManuallyEdited)wrap.dataset.descriptionManuallyEdited='true';if(data.modelManuallyEdited)wrap.dataset.modelManuallyEdited='true';
  wrap.dataset.itemBrands=JSON.stringify(quoteItemBrands(data));if(data.manualItem){wrap.dataset.manualItem='true';wrap.dataset.quoteKind='manual';}
- wrap.addEventListener('input',e=>{if(e.isTrusted&&e.target.matches('.item-price')){let source={};try{source=JSON.parse(wrap.dataset.pricingSource||'{}')}catch(_){}wrap.dataset.pricingSource=JSON.stringify({...source,manual_override:true,manual_price_reason:source.manual_price_reason||'Selling price edited by user'});delete wrap.dataset.pricingValidationError;}if(e.target.matches('.item-model'))wrap.dataset.modelManuallyEdited='true';if(e.target.matches('.item-description'))wrap.dataset.descriptionManuallyEdited='true';},true);
+ wrap.addEventListener('input',e=>{if(e.isTrusted&&e.target.matches('.item-price'))recordQuotationManualPrice(wrap,e.target);if(e.target.matches('.item-model'))wrap.dataset.modelManuallyEdited='true';if(e.target.matches('.item-description'))wrap.dataset.descriptionManuallyEdited='true';},true);
  const savedRemark=String(data.internalRemark??data.remark??'').trim();if(savedRemark)wrap.dataset.internalRemark=savedRemark;
- const normalizedDescription=normalizeDescriptionIndentation(data.description||''),rawDescription=motorItem?normalizedDescription:stripQuotationBrand(normalizedDescription),capacityState=capacityStateFromData(data,rawDescription),shaftState=shaftStateFromData(data,rawDescription),description=data.manualItem||data.descriptionManuallyEdited?String(data.description||''):couplingItem?shaftText(rawDescription,shaftState):motorItem?normalizeMotorQuotationDescription(rawDescription):capacityText(rawDescription,capacityState),baseModel=couplingItem?normalizeCouplingQuoteModel(data.model||'',data):stripQuotationBrand(data.model||''),cleanModel=data.modelManuallyEdited?String(data.model||''):(!couplingItem&&!noCapacityItem)?capacityModelText(baseModel,capacityState):baseModel;
+ const normalizedDescription=normalizeDescriptionIndentation(data.description||''),rawDescription=motorItem?normalizedDescription:stripQuotationBrand(normalizedDescription),capacityState=capacityStateFromData(data,rawDescription),shaftState=shaftStateFromData(data,rawDescription),description=restored||data.manualItem||data.descriptionManuallyEdited?String(data.description||''):couplingItem?shaftText(rawDescription,shaftState):motorItem?normalizeMotorQuotationDescription(rawDescription):capacityText(rawDescription,capacityState),baseModel=couplingItem?normalizeCouplingQuoteModel(data.model||'',data):stripQuotationBrand(data.model||''),cleanModel=restored||data.modelManuallyEdited?String(data.model||''):(!couplingItem&&!noCapacityItem)?capacityModelText(baseModel,capacityState):baseModel;
  const infoRow=data.manualItem?`<div class="quote-item-grid"><div><label>Brand (optional)</label><input class="item-manual-brand" value="${esc(data.brand||'')}"></div><div><label>Capacity (optional)</label><input class="item-manual-capacity" value="${esc(data.manualCapacity||'')}" placeholder="10 m³/hr @ 50 m"></div><div><label>Unit</label><input class="item-manual-unit" value="${esc(data.unit||'unit')}"></div></div>`:couplingItem?`<div class="quote-capacity-row quote-shaft-row no-print"><label class="quote-capacity-toggle"><input class="item-display-shaft" type="checkbox" ${shaftState.displayShaftInfo?'checked':''}> Display Shaft Information</label><div><label>Pump Shaft (mm)</label><input class="item-pump-shaft" type="number" min="0" step="any" value="${esc(shaftState.pumpShaft)}"></div><div><label>Motor Shaft (mm)</label><input class="item-motor-shaft" type="number" min="0" step="any" value="${esc(shaftState.motorShaft)}"></div><div><label>Motor Pole</label><select class="item-motor-pole">${[2,4,6,8].map(pole=>`<option value="${pole}" ${Number(shaftState.motorPole)===pole?'selected':''}>${pole} Pole · ${motorSpeedForPole(pole).toLocaleString('en-MY')} rpm</option>`).join('')}</select></div></div>`:noCapacityItem?'':`<div class="quote-capacity-row no-print"><label class="quote-capacity-toggle"><input class="item-display-capacity" type="checkbox" ${capacityState.displayCapacity?'checked':''}> Display Capacity</label><div><label>Capacity</label><div class="capacity-input-pair"><input class="item-capacity-value" type="number" min="0" step="any" value="${esc(capacityState.capacityValue)}"><select class="item-capacity-unit">${capacityOptions(CAPACITY_UNITS,capacityState.capacityUnit)}</select></div></div><span class="capacity-at">@</span><div><label>Head</label><div class="capacity-input-pair"><input class="item-head-value" type="number" min="0" step="any" value="${esc(capacityState.headValue)}"><select class="item-head-unit">${capacityOptions(HEAD_UNITS,capacityState.headUnit)}</select></div></div></div>`;
- wrap.innerHTML=`<div class="quote-item-head"><button type="button" class="item-status-indicator no-print" aria-label="Item status" data-tooltip="Checking item..."></button><span class="item-remark-indicator no-print" aria-hidden="true"></span><span class="drag-handle no-print" draggable="true" role="button" tabindex="0" aria-label="Drag item to reorder" title="Drag to reorder">☰</span><button type="button" class="collapse-item no-print" title="Expand item">▼</button><b>Item #<span class="item-number"></span></b><span class="item-summary-model">${esc(cleanModel||'New Item')}</span><span class="item-summary-qty">Qty: ${printQty(data.qty??1,data.unit)}</span><span class="item-summary-total">RM 0.00</span></div><div class="quote-item-body"><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" list="quotationModelItemOptions" value="${esc(cleanModel)}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div></div>${infoRow}<div style="margin-top:12px"><label>Description</label><textarea class="item-description" rows="5">${esc(description)}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div><div class="item-body-actions no-print"><button type="button" class="btn secondary duplicate-quote-item" title="Duplicate this item on the same quotation">Clone</button><button type="button" class="btn secondary copy-quote-item" title="Copy this item for another quotation">Copy</button><button type="button" class="btn secondary remark-quote-item" title="Add internal remarks">Remarks</button><button type="button" class="btn danger remove-quote-item" title="Delete">Delete</button></div></div>`;
- $('quoteItems').appendChild(wrap);if(!data.manualItem&&quoteItemBrands(data).length){const label=document.createElement('div');label.className='muted quote-item-brands';label.textContent='Brand: '+quoteItemBrands(data).join(' / ');wrap.querySelector('.quote-item-grid').after(label);}const descriptionArea=wrap.querySelector('.item-description'),toggle=()=>{wrap.classList.toggle('collapsed');wrap.querySelector('.collapse-item').textContent=wrap.classList.contains('collapsed')?'▼':'▲';wrap.querySelector('.collapse-item').title=wrap.classList.contains('collapsed')?'Expand item':'Collapse item';if(!wrap.classList.contains('collapsed'))requestAnimationFrame(()=>resizeQuoteDescription(descriptionArea))};wrap.querySelector('.collapse-item').onclick=toggle;wrap.querySelector('.remove-quote-item').onclick=()=>{if(!canEditQuotation(true))return;wrap.remove();renumberQuoteItems();calcTotal();updateQuotationStateUi()};wrap.querySelector('.duplicate-quote-item').onclick=()=>{if(!canEditQuotation(true))return;const d=completeQuoteItemData(wrap);const copy=quoteItemRow(d);wrap.after(copy);renumberQuoteItems();calcTotal();updateQuotationStateUi()};wrap.querySelector('.copy-quote-item').onclick=()=>{if(copyQuoteItemToClipboard(completeQuoteItemData(wrap))){const button=wrap.querySelector('.copy-quote-item'),label=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=label,1000)}};wrap.querySelector('.remark-quote-item').onclick=()=>openItemRemark(wrap);wrap.querySelector('.item-price')?.addEventListener('input',()=>{delete wrap.dataset.pricingSource});descriptionArea?.addEventListener('input',event=>{resizeQuoteDescription(descriptionArea);if(event.isTrusted)wrap.dataset.descriptionManuallyEdited='true'});requestAnimationFrame(()=>resizeQuoteDescription(descriptionArea));
+ wrap.innerHTML=`<div class="quote-item-head"><button type="button" class="item-status-indicator no-print" aria-label="Item status" data-tooltip="Checking item..."></button><span class="item-remark-indicator no-print" aria-hidden="true"></span><span class="drag-handle no-print" draggable="true" role="button" tabindex="0" aria-label="Drag item to reorder" title="Drag to reorder">☰</span><button type="button" class="collapse-item no-print" title="Expand item">▼</button><b>Item #<span class="item-number"></span></b><span class="item-summary-model">${esc(cleanModel||'New Item')}</span><span class="item-summary-qty">Qty: ${printQty(data.qty??1,data.unit)}</span><span class="item-summary-total">RM 0.00</span></div><div class="quote-item-body"><div class="quote-item-grid"><div><label>Model / Item</label><input class="item-model" list="quotationModelItemOptions" value="${esc(cleanModel)}"></div><div><label>Quantity</label><input class="item-qty" type="number" min="1" value="${data.qty??1}"></div><div><label>Unit Price (RM)</label><input class="item-price" type="number" min="0" step="0.01" value="${data.unitPrice??0}"></div></div>${infoRow}<div class="quote-item-custom-header no-print"><label><input class="item-display-header" type="checkbox" ${data.displayHeader?'checked':''}> Display Header</label><input class="item-custom-header" aria-label="Custom item header" value="${esc(data.itemHeader||'')}"></div><div style="margin-top:12px"><label>Description</label><textarea class="item-description" rows="5">${esc(description)}</textarea></div><div class="quote-total" style="margin-top:10px;font-size:16px">Item Total: <span class="item-total">RM 0.00</span></div><div class="item-body-actions no-print"><button type="button" class="btn secondary duplicate-quote-item" title="Duplicate this item on the same quotation">Clone</button><button type="button" class="btn secondary copy-quote-item" title="Copy this item for another quotation">Copy</button><button type="button" class="btn secondary remark-quote-item" title="Add internal remarks">Remarks</button><button type="button" class="btn danger remove-quote-item" title="Delete">Delete</button></div></div>`;
+ $('quoteItems').appendChild(wrap);if(!data.manualItem&&quoteItemBrands(data).length){const label=document.createElement('div');label.className='muted quote-item-brands';label.textContent='Brand: '+quoteItemBrands(data).join(' / ');wrap.querySelector('.quote-item-grid').after(label);}const descriptionArea=wrap.querySelector('.item-description');descriptionArea.value=description;
+ const toggle=()=>{wrap.classList.toggle('collapsed');wrap.querySelector('.collapse-item').textContent=wrap.classList.contains('collapsed')?'▼':'▲';wrap.querySelector('.collapse-item').title=wrap.classList.contains('collapsed')?'Expand item':'Collapse item';if(!wrap.classList.contains('collapsed'))requestAnimationFrame(()=>resizeQuoteDescription(descriptionArea))};wrap.querySelector('.collapse-item').onclick=toggle;wrap.querySelector('.remove-quote-item').onclick=()=>{if(!canEditQuotation(true))return;wrap.remove();renumberQuoteItems();calcTotal();updateQuotationStateUi()};wrap.querySelector('.duplicate-quote-item').onclick=()=>{if(!canEditQuotation(true))return;const d=completeQuoteItemData(wrap);const copy=quoteItemRow(d,{restored:true});wrap.after(copy);renumberQuoteItems();calcTotal();updateQuotationStateUi()};wrap.querySelector('.copy-quote-item').onclick=()=>{if(copyQuoteItemToClipboard(completeQuoteItemData(wrap))){const button=wrap.querySelector('.copy-quote-item'),label=button.textContent;button.textContent='Copied';setTimeout(()=>button.textContent=label,1000)}};wrap.querySelector('.remark-quote-item').onclick=()=>openItemRemark(wrap);descriptionArea?.addEventListener('input',event=>{resizeQuoteDescription(descriptionArea);if(event.isTrusted)wrap.dataset.descriptionManuallyEdited='true'});requestAnimationFrame(()=>resizeQuoteDescription(descriptionArea));
  if(couplingItem){wrap.querySelector('.item-display-shaft')?.addEventListener('change',()=>syncQuoteShaftDescription(wrap));wrap.querySelectorAll('.item-pump-shaft,.item-motor-shaft').forEach(control=>control.addEventListener('input',()=>syncQuoteShaftDescription(wrap)));wrap.querySelector('.item-motor-pole')?.addEventListener('change',()=>syncQuoteShaftDescription(wrap));wrap.querySelector('.item-model')?.addEventListener('input',()=>updateQuoteShaftWarnings(wrap));setQuoteShaftEnabled(wrap)}else if(!noCapacityItem){wrap.querySelector('.item-display-capacity')?.addEventListener('change',()=>syncQuoteCapacityDescription(wrap));wrap.querySelectorAll('.item-capacity-value,.item-head-value').forEach(control=>control.addEventListener('input',()=>syncQuoteCapacityDescription(wrap)));prepareQuoteCapacityUnits(wrap);wrap.querySelectorAll('.item-capacity-unit,.item-head-unit').forEach(control=>control.addEventListener('change',()=>{convertQuoteCapacityUnit(wrap,control);syncQuoteCapacityDescription(wrap)}));setQuoteCapacityEnabled(wrap)}
- wrap.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons();updateQuotePageIndicators()}));const dragHandle=wrap.querySelector('.drag-handle');dragHandle.addEventListener('dragstart',e=>{if(!canEditQuotation()){e.preventDefault();return}wrap.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','quote-item')});dragHandle.addEventListener('dragend',()=>{wrap.classList.remove('is-dragging');document.querySelectorAll('.quote-item').forEach(x=>x.classList.remove('drag-over'));renumberQuoteItems();calcTotal()});wrap.addEventListener('dragover',e=>{e.preventDefault();if(!wrap.classList.contains('is-dragging'))wrap.classList.add('drag-over')});wrap.addEventListener('dragleave',()=>wrap.classList.remove('drag-over'));wrap.addEventListener('drop',e=>{e.preventDefault();wrap.classList.remove('drag-over');const moving=document.querySelector('.quote-item.is-dragging');if(!moving||moving===wrap)return;const rect=wrap.getBoundingClientRect();wrap.parentNode.insertBefore(moving,e.clientY<rect.top+rect.height/2?wrap:wrap.nextSibling)});syncItemRemarkUi(wrap);renumberQuoteItems();calcTotal();return wrap;
+ wrap.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',()=>{calcTotal();refreshItemExportButtons();updateQuotePageIndicators()}));const dragHandle=wrap.querySelector('.drag-handle');dragHandle.addEventListener('dragstart',e=>{if(!canEditQuotation()){e.preventDefault();return}wrap.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','quote-item')});dragHandle.addEventListener('dragend',()=>{wrap.classList.remove('is-dragging');document.querySelectorAll('.quote-item').forEach(x=>x.classList.remove('drag-over'));renumberQuoteItems();calcTotal()});wrap.addEventListener('dragover',e=>{e.preventDefault();if(!wrap.classList.contains('is-dragging'))wrap.classList.add('drag-over')});wrap.addEventListener('dragleave',()=>wrap.classList.remove('drag-over'));wrap.addEventListener('drop',e=>{e.preventDefault();wrap.classList.remove('drag-over');const moving=document.querySelector('.quote-item.is-dragging');if(!moving||moving===wrap)return;const rect=wrap.getBoundingClientRect();wrap.parentNode.insertBefore(moving,e.clientY<rect.top+rect.height/2?wrap:wrap.nextSibling)});syncItemRemarkUi(wrap);captureQuotationItemOriginal(wrap);renumberQuoteItems();calcTotal();return wrap;
 }
-function getQuoteItemData(r){const brands=JSON.parse(r.dataset.itemBrands||'[]');if(r.dataset.manualItem==='true')return {manualItem:true,productFamily:'MANUAL',model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,brand:r.querySelector('.item-manual-brand').value,manualCapacity:r.querySelector('.item-manual-capacity').value,unit:r.querySelector('.item-manual-unit').value||'unit',qty:Number(r.querySelector('.item-qty').value)||0,unitPrice:Number(r.querySelector('.item-price').value)||0,modelManuallyEdited:true,descriptionManuallyEdited:true};const coupling=r.dataset.quoteKind==='coupling',motor=r.dataset.quoteKind==='motor',staticItem=r.dataset.quoteKind==='static',rawModel=stripQuotationBrand(r.querySelector('.item-model').value.trim()),base={brands,modelManuallyEdited:r.dataset.modelManuallyEdited==='true',model:rawModel,qty:+r.querySelector('.item-qty').value||0,unit:normalizeQuoteUnit(r.dataset.quoteUnit),unitPrice:+r.querySelector('.item-price').value||0,internalRemark:String(r.dataset.internalRemark||'').trim(),descriptionManuallyEdited:r.dataset.descriptionManuallyEdited==='true',pumpData:r.dataset.pumpData?JSON.parse(r.dataset.pumpData):null,motorData:r.dataset.motorData?JSON.parse(r.dataset.motorData):null,pricingSource:r.dataset.pricingSource?JSON.parse(r.dataset.pricingSource):null,couplingData:r.dataset.couplingData?JSON.parse(r.dataset.couplingData):null};if(r.dataset.descriptionManuallyEdited==='true'||r.dataset.modelManuallyEdited==='true')return {...base,model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),...quoteCapacityState(r),...(coupling?{isCoupling:true,productFamily:'COUPLING',shaftInfo:quoteShaftState(r)}:motor?{isMotor:true,productFamily:'MOTOR'}:{})};if(coupling){const shaftInfo=quoteShaftState(r);return {...base,model:normalizeCouplingQuoteModel(base.model,{...base,couplingData:base.couplingData}),isCoupling:true,productFamily:'COUPLING',shaftInfo,description:normalizeDescriptionIndentation(shaftText(r.querySelector('.item-description').value,shaftInfo)).trim()}}if(motor)return {...base,isMotor:true,productFamily:'MOTOR',description:normalizeDescriptionIndentation(normalizeMotorQuotationDescription(r.querySelector('.item-description').value)).trim()};if(staticItem)return {...base,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),description:normalizeDescriptionIndentation(stripCapacityDescription(stripQuotationBrand(r.querySelector('.item-description').value))).trim()};const capacity=quoteCapacityState(r);return {...base,model:splitCapacityModel(rawModel).base,description:normalizeDescriptionIndentation(capacityText(stripQuotationBrand(r.querySelector('.item-description').value),capacity)).trim(),...capacity}}
+function readQuoteItemData(r){const brands=JSON.parse(r.dataset.itemBrands||'[]');if(r.dataset.manualItem==='true')return {manualItem:true,productFamily:'MANUAL',model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,brand:r.querySelector('.item-manual-brand').value,manualCapacity:r.querySelector('.item-manual-capacity').value,unit:r.querySelector('.item-manual-unit').value||'unit',qty:Number(r.querySelector('.item-qty').value)||0,unitPrice:Number(r.querySelector('.item-price').value)||0,modelManuallyEdited:true,descriptionManuallyEdited:true};const coupling=r.dataset.quoteKind==='coupling',motor=r.dataset.quoteKind==='motor',staticItem=r.dataset.quoteKind==='static',rawModel=stripQuotationBrand(r.querySelector('.item-model').value.trim()),base={brands,modelManuallyEdited:r.dataset.modelManuallyEdited==='true',model:rawModel,qty:+r.querySelector('.item-qty').value||0,unit:normalizeQuoteUnit(r.dataset.quoteUnit),unitPrice:+r.querySelector('.item-price').value||0,internalRemark:String(r.dataset.internalRemark||'').trim(),descriptionManuallyEdited:r.dataset.descriptionManuallyEdited==='true',pumpData:r.dataset.pumpData?JSON.parse(r.dataset.pumpData):null,motorData:r.dataset.motorData?JSON.parse(r.dataset.motorData):null,pricingSource:r.dataset.pricingSource?JSON.parse(r.dataset.pricingSource):null,couplingData:r.dataset.couplingData?JSON.parse(r.dataset.couplingData):null};if(r.dataset.descriptionManuallyEdited==='true'||r.dataset.modelManuallyEdited==='true')return {...base,model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),...quoteCapacityState(r),...(coupling?{isCoupling:true,productFamily:'COUPLING',shaftInfo:quoteShaftState(r)}:motor?{isMotor:true,productFamily:'MOTOR'}:{})};if(coupling){const shaftInfo=quoteShaftState(r);return {...base,model:normalizeCouplingQuoteModel(base.model,{...base,couplingData:base.couplingData}),isCoupling:true,productFamily:'COUPLING',shaftInfo,description:normalizeDescriptionIndentation(shaftText(r.querySelector('.item-description').value,shaftInfo)).trim()}}if(motor)return {...base,isMotor:true,productFamily:'MOTOR',description:normalizeDescriptionIndentation(normalizeMotorQuotationDescription(r.querySelector('.item-description').value)).trim()};if(staticItem)return {...base,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),description:normalizeDescriptionIndentation(stripCapacityDescription(stripQuotationBrand(r.querySelector('.item-description').value))).trim()};const capacity=quoteCapacityState(r);return {...base,model:splitCapacityModel(rawModel).base,description:normalizeDescriptionIndentation(capacityText(stripQuotationBrand(r.querySelector('.item-description').value),capacity)).trim(),...capacity}}
+function getQuoteItemData(row){
+ const item=readQuoteItemData(row);
+ return {...item,description:row.querySelector('.item-description').value,
+   originalQuotationItem:parseQuoteJson(row.dataset.originalQuotationItem),
+   displayHeader:row.querySelector('.item-display-header').checked,
+   itemHeader:row.querySelector('.item-custom-header').value};
+}
 function completeQuoteItemData(row){let original={};try{original=JSON.parse(row.dataset.quoteItemPayload||'{}')||{}}catch(_){}return {...original,...getQuoteItemData(row)}}
 
 function renumberQuoteItems(){[...document.querySelectorAll('.quote-item')].forEach((r,i)=>r.querySelector('.item-number').textContent=i+1);refreshItemExportButtons()}
@@ -1107,11 +1163,18 @@ function safePdfName(value){
  return String(value||'Pump Model').replace(/[\\/:*?\"<>|]/g,'-').replace(/\s+/g,' ').trim()||'Pump Model';
 }
 function quotationPdfFilename(company,date,quoteNo){
- const firstWord=String(company||'Quotation').trim().split(/\s+/)[0]||'Quotation';
+ const saveName=String(company||'').trim()||'Quotation';
  const digits=String(date||'').replace(/\D/g,'');const yymmdd=digits.length>=8?digits.slice(2,8):digits.slice(-6).padStart(6,'0');
  const parsed=parseQuoteNo(quoteNo),refDigits=String(parsed?.running||String(quoteNo||'').match(/(\d{1,4})(?!.*\d)/)?.[1]||'0').padStart(4,'0').slice(-4);
- const revision=Number(parsed?.revision||quotationRevisionNumber||quoteRevisionNumberFromNo(quoteNo)||0),suffix=revision?`-R${revision}`:'';
- return safePdfName(`${firstWord} - ${yymmdd} - ${refDigits}${suffix}.pdf`);
+ const revision=Number(parsed?.revision||quoteRevisionNumberFromNo(quoteNo)||0),suffix=revision?`-R${revision}`:'';
+ const filenameName=saveName.replace(/[\\/:*?"<>|\x00-\x1f\x7f]/g,'-').replace(/[. ]+$/,'')||'Quotation';
+ return `${filenameName} - ${yymmdd} - ${refDigits}${suffix}.pdf`;
+}
+function quotationExportCompany(){
+ const saved=currentQuote()?.pricingCustomerSnapshot,live=selectedQuotationCustomer();
+ return firstQuoteText(saved?.quotationAssignedSaveName,
+   saved&&Object.hasOwn(saved,'quotationAssignedSaveName')?'':live?.quotationAssignedSaveName,
+   saved?.company,live?.company,$('qPrintedCompany')?.value,'Quotation');
 }
 function restorePrintState(){
  document.body.classList.remove('export-single');
@@ -1287,7 +1350,7 @@ function refreshItemExportButtons(){
 }
 
 function getQuoteItems(){return [...document.querySelectorAll('.quote-item')].map(getQuoteItemData).filter(x=>x.model||x.description||Number(x.unitPrice)>0)}
-function setQuoteItems(items=[]){$('quoteItems').innerHTML='';(items.length?items:[{}]).forEach(quoteItemRow);calcTotal()}
+function setQuoteItems(items=[]){$('quoteItems').innerHTML='';(items.length?items:[{}]).forEach(item=>quoteItemRow(item,{restored:items.length>0}));calcTotal()}
 function assignedQuotationPrefix(){return String(currentProfile().quotation_prefix||window.KeySuiteQuotationReferences?.getState?.().prefix||'').trim().toUpperCase()}
 function parseQuoteNo(value){
  const text=String(value||'').trim(),match=text.match(/^([A-Z0-9]{1,8})[\/-](\d{4})[\/-](\d{1,4})(?:-r(\d+)|\s*\(r(\d+)\)|-v(\d+))?$/i);
@@ -1411,17 +1474,18 @@ function calcTotal(){
  let total=0,complete=0,warning=0,error=0;
  const rows=[...document.querySelectorAll('.quote-item')];
  rows.forEach(r=>{
-  const model=r.querySelector('.item-model').value.trim(),qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,description=r.querySelector('.item-description').value.trim(),itemTotal=qty*price;
+  const model=r.querySelector('.item-model').value.trim(),qty=+r.querySelector('.item-qty').value||0,price=+r.querySelector('.item-price').value||0,itemTotal=qty*price;
   r.querySelector('.item-total').textContent=money(itemTotal);r.querySelector('.item-summary-model').textContent=model||'New Item';r.querySelector('.item-summary-qty').textContent=`Qty: ${printQty(qty,r.dataset.quoteUnit)}`;r.querySelector('.item-summary-total').textContent=money(itemTotal);r.classList.remove('status-complete','status-warning','status-error');
   let status,tooltip;
-  const required=[];if(!model)required.push('Product / model');if(qty<=0)required.push('Valid quantity');
+  const original=parseQuoteJson(r.dataset.originalQuotationItem);
   const pricingError=quotationPricingSourceError(r);if(pricingError)r.dataset.pricingValidationError=pricingError;else delete r.dataset.pricingValidationError;
-  if(required.length){status='error';error++;tooltip=`RED — ERROR\nCannot save or seal this item.\nMissing: ${required.join(', ')}`;}
-  else if(pricingError){status='error';error++;tooltip=`RED — PRICING BLOCKED\n${pricingError}`;}
-  else if(price<=0){status='error';error++;tooltip='RED — PRICE REQUIRED\nThis draft can be saved.\nEnter a Unit Price before sealing the quotation.';}
-  else if(!description){status='warning';warning++;tooltip='YELLOW — WARNING\nDescription is empty.\nThe quotation can be sealed, but please review this item.';}
-  else if(r.dataset.descriptionManuallyEdited==='true'){status='warning';warning++;tooltip='YELLOW — MANUALLY EDITED\nDescription was amended manually.\nPricing is retained and the quotation can be sealed after review.';}
-  else{status='complete';complete++;tooltip='GREEN — COMPLETE\nModel, quantity, price and description are ready.\nReady to seal and export.';}
+  if(price===0){status='error';error++;tooltip='RED — Unit price is zero.';}
+  else if(Object.hasOwn(original,'unitPrice')&&(price!==original.unitPrice||r.querySelector('.item-description').value!==original.description)){status='warning';warning++;tooltip='YELLOW — Unit price or description differs from the transferred item.';}
+
+
+
+  else{status='complete';complete++;tooltip='GREEN — Transferred price and description match.';}
+  if(pricingError)tooltip+='\nPricing validation: '+pricingError;
   r.classList.add(`status-${status}`);const indicator=r.querySelector('.item-status-indicator');if(indicator){indicator.dataset.tooltip=tooltip;indicator.setAttribute('aria-label',tooltip.replace(/\n/g,' — '));}
   total+=itemTotal;
  });
@@ -1452,7 +1516,7 @@ async function saveQuote(options={}){
  const pricingCustomer=selectedQuotationCustomer(),existing=currentQuote();
  const lockedCustomerId=$('qCustomer').value;
  const lockedPricingCustomerId=quotationPricingCustomerId||pricingCustomer?.id||$('qCustomer').value;
- const lockedSnapshot=customerSnapshot(pricingCustomer)||quotationPricingCustomerSnapshot;
+ const lockedSnapshot=customerSnapshot(existing?.pricingCustomerSnapshot||pricingCustomer)||quotationPricingCustomerSnapshot;
  const q={
   ...(existing||{}),id:editingQuoteId||newUuid(),companyId:currentCompanyId(),company_id:currentCompanyId(),no:quotationNo,date:isRevisionCopy()?(existing?.date||$('qDate').value):$('qDate').value,revisionDate:isRevisionCopy()?($('qRevisionDate').value||localCalendarDate()):'',originalDate:isRevisionCopy()?(existing?.originalDate||existing?.date||$('qDate').value):$('qDate').value,showRevision:isRevisionCopy(),documentType:$('qDocumentType').value,
   customerId:lockedCustomerId,contactIndex:$('qContact').value,printedCompany:$('qPrintedCompany')?.value.trim()||'',printedContact:$('qPrintedContact')?.value.trim()||'',
@@ -1496,9 +1560,10 @@ function loadQuote(id){
  setQuoteNoValue(q.no||'');$('qDate').value=q.originalDate||q.date||'';$('qRevisionDate').value=q.revisionDate||'';$('showRevision').checked=isRevisionCopy();$('qDocumentType').value=q.documentType||'Quotation';
  $('qCustomer').value=q.customerId||quotationPricingCustomerId||'';refreshQuotationContacts();$('qContact').value=q.contactIndex!=null?String(q.contactIndex):'';updateQuotationContactInfo();
  const displayCustomer=customers().find(x=>x.id===$('qCustomer').value)||quotationPricingCustomerSnapshot||{};
- const displayContact=(displayCustomer.contacts||[])[Number($('qContact').value)]||{};
+ const contactIndex=$('qContact').value;
+ const displayContact=contactIndex===''?{}:(q.pricingCustomerSnapshot?.contacts||displayCustomer.contacts||[])[Number(contactIndex)]||{};
  if($('qPrintedCompany'))$('qPrintedCompany').value=q.printedCompany||displayCustomer.company||'';
- if($('qPrintedContact'))$('qPrintedContact').value=q.printedContact||[displayContact.prefix,displayContact.name].filter(Boolean).join(' ');
+ if($('qPrintedContact'))$('qPrintedContact').value=q.printedContact||quotationContactName(displayContact);
  $('preparedBy').value=q.preparedBy||currentProfile().display_name||'';$('preparedByDesignation').value=q.preparedByDesignation||currentProfile().designation||'';window.ksSignatoryName=q.signatoryName||currentProfile().signatory_name||currentProfile().display_name||'';window.ksSignatureImage=q.signatureImage||currentProfile().signature_image||'';
  $('project').value=[q.project,q.project2].filter(Boolean).join(' ').trim();$('project2').value='';syncProjectFields('quotation');$('customerReference').value=q.customerReference||'';$('delivery').value=q.delivery||'Ex - Stock subject to prior sales. Otherwise 2-3 months upon confirmation order.';$('delivery2').value=q.delivery2||'';$('validity').value=q.validity||'14 days';$('priceBasis').value=q.priceBasis||'Ex - K.L. only, nett in Ringgit Malaysia.';$('payment').value=q.payment||'Cash before delivery';$('remarks').value=q.remarks||'';
  window.KeySuiteTemplates?.loadSelection?.(q.quotationTemplateId||'',q.quotationTemplateSnapshot||null,(q.status||'')==='sealed');
@@ -1812,7 +1877,8 @@ window.addEventListener('message',function(event){
    }catch(error){console.warn('[KeySuite V4.15.10] Selling Brand quote handoff skipped.',error)}
  };
  applySelectedSellingBrand();
- setTimeout(applySelectedSellingBrand,0);
+ captureQuotationItemOriginal(row,{replace:true});
+
  calcTotal();refreshItemExportButtons();focusNewQuoteItem(row);
 });
 
@@ -1822,7 +1888,7 @@ function displayDate(value){
  return d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
 }
 function estimatePrintItemHeight(item){
- const text=[item.model||'',normalizeDescriptionIndentation(item.description||'')].join('\n');
+ const text=[item.displayHeader?String(item.itemHeader||'').trim():'',quotePrintDescription(item)].filter(Boolean).join('\n');
  const logical=text.split(/\n/);
  const charsPerLine=normalizeQuoteUnit(item.unit)==='set'?116:70;
  let lines=0;
@@ -1907,9 +1973,10 @@ function itemPageHtml(pageNo,totalPages,quoteNo,date,rows,showSummary,subtotal){
 function buildPrintQuotation(){
  document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo){img.onerror=null;img.src=KEYLARGO_LOGO_DATA}});
  const c=customers().find(x=>x.id===$('qCustomer').value)||selectedQuotationCustomer()||{};
- const contact=(c.contacts||[])[Number($('qContact').value)]||{};
+ const index=$('qContact').value;
+ const contact=index===''?{}:(currentQuote()?.pricingCustomerSnapshot?.contacts||c.contacts||[])[Number(index)]||{};
  const printedCompany=$('qPrintedCompany')?.value.trim()||c.company||'-';
- const printedContact=$('qPrintedContact')?.value.trim()||[contact.prefix,contact.name].filter(Boolean).join(' ')||'-';
+ const printedContact=$('qPrintedContact')?.value.trim()||quotationContactName(contact)||'-';
  const title=$('qDocumentType').value||'Quotation';
  $('pDocTitle').textContent=title;
  $('pTo').textContent=printedCompany;
@@ -1939,11 +2006,11 @@ function buildPrintQuotation(){
  const items=getQuoteItems();
  let subtotal=0;
  const prepared=items.map((item,i)=>{
-   const amount=item.qty*item.unitPrice,description=normalizeDescriptionIndentation(quotePrintDescription(item));subtotal+=amount;
+   const amount=item.qty*item.unitPrice,description=quotePrintDescription(item),body=quotationItemPrintBody(item);subtotal+=amount;
    const setItem=normalizeQuoteUnit(item.unit)==='set',capacityItem=/^Capacity:/i.test(description.trim()),capacityClass=capacityItem?' print-capacity-item':'';
    const html=setItem
-     ?`<tr class="print-system-item-head${capacityClass}"><td rowspan="2">${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div></td><td>${printQty(item.qty,item.unit)}</td><td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr><tr class="print-system-item-desc-row${capacityClass}"><td class="print-system-desc-cell" colspan="4"><div class="print-item-desc">${esc(description)}</div></td></tr>`
-     :`<tr class="${capacityClass.trim()}"><td>${i+1}</td><td><div class="print-item-model">${esc(item.model)}</div><div class="print-item-desc">${esc(description)}</div></td><td>${printQty(item.qty,item.unit)}</td><td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr>`;
+     ?`<tr class="print-system-item-head${capacityClass}"><td rowspan="2">${i+1}</td><td></td><td>${printQty(item.qty,item.unit)}</td><td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr><tr class="print-system-item-desc-row${capacityClass}"><td class="print-system-desc-cell" colspan="4">${body}</td></tr>`
+     :`<tr class="${capacityClass.trim()}"><td>${i+1}</td><td>${body}</td><td>${printQty(item.qty,item.unit)}</td><td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr>`;
    return {height:estimatePrintItemHeight(item),html};
  });
  const pages=paginatePrintItems(prepared);
@@ -1995,9 +2062,16 @@ function openHistoryQuotationPdf(id){
 function quotationPrintCss(){let css='';for(const sheet of [...document.styleSheets]){try{css+=[...sheet.cssRules].map(rule=>rule.cssText).join('\n')}catch(_){}}return css.replace(/@media\s+print/gi,'@media all').replace(/body\.print-complete\s+#printQuotationDocument/g,'#printQuotationDocument').replace(/body\.print-complete\s+\.app/g,'.app')}
 function encodeAscii(value){return new TextEncoder().encode(String(value))}
 function concatBytes(parts){const length=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(length);let offset=0;for(const part of parts){out.set(part,offset);offset+=part.length}return out}
-async function jpegFromPrintPage(page,css){const width=794,height=1123,markup=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}html,body{margin:0;background:#fff}.print-page{display:block!important;margin:0!important;width:210mm!important;height:297mm!important}</style>${page.outerHTML}</div></foreignObject></svg>`,url=URL.createObjectURL(new Blob([markup],{type:'image/svg+xml'}));try{const image=await new Promise((resolve,reject)=>{const node=new Image();node.onload=()=>resolve(node);node.onerror=reject;node.src=url}),canvas=document.createElement('canvas');canvas.width=width*2;canvas.height=height*2;const g=canvas.getContext('2d');g.scale(2,2);g.fillStyle='#fff';g.fillRect(0,0,width,height);g.drawImage(image,0,0,width,height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.92));return new Uint8Array(await blob.arrayBuffer())}finally{URL.revokeObjectURL(url)}}
+async function jpegFromPrintPage(page,css){const width=794,height=1123;
+ const serializer=new XMLSerializer();
+ const style=document.createElement('style');
+ style.textContent=`${css}html,body{margin:0;background:#fff}.print-page{display:block!important;margin:0!important;width:210mm!important;height:297mm!important}`;
+ const documentRoot=page.closest('#printQuotationDocument').cloneNode(false);
+ documentRoot.appendChild(page.cloneNode(true));
+ const markup=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${serializer.serializeToString(style)}${serializer.serializeToString(documentRoot)}</div></foreignObject></svg>`,url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(markup);
+ const image=await new Promise((resolve,reject)=>{const node=new Image();node.onload=()=>resolve(node);node.onerror=reject;node.src=url}),canvas=document.createElement('canvas');canvas.width=width*2;canvas.height=height*2;const g=canvas.getContext('2d');g.scale(2,2);g.fillStyle='#fff';g.fillRect(0,0,width,height);g.drawImage(image,0,0,width,height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.92));return new Uint8Array(await blob.arrayBuffer())}
 function pdfFromJpegs(images){const objects=[],pageRefs=[],imageRefs=[];objects.push(null);objects.push(null);images.forEach((jpeg,index)=>{const imageRef=objects.length+1;imageRefs.push(imageRef);objects.push({binary:jpeg,head:`<< /Type /XObject /Subtype /Image /Width 1588 /Height 2246 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`,tail:'\nendstream'});const content=`q 595 0 0 842 0 0 cm /Im${index} Do Q`,contentRef=objects.length+1;objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);const pageRef=objects.length+1;pageRefs.push(pageRef);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im${index} ${imageRef} 0 R >> >> /Contents ${contentRef} 0 R >>`)});objects[0]='<< /Type /Catalog /Pages 2 0 R >>';objects[1]=`<< /Type /Pages /Kids [${pageRefs.map(ref=>`${ref} 0 R`).join(' ')}] /Count ${pageRefs.length} >>`;const parts=[encodeAscii('%PDF-1.4\n%KeySuite\n')],offsets=[0];let length=parts[0].length;objects.forEach((object,index)=>{offsets[index+1]=length;const head=encodeAscii(`${index+1} 0 obj\n`),body=typeof object==='string'?encodeAscii(object):concatBytes([encodeAscii(object.head),object.binary,encodeAscii(object.tail)]),tail=encodeAscii('\nendobj\n');parts.push(head,body,tail);length+=head.length+body.length+tail.length});const xref=length;parts.push(encodeAscii(`xref\n0 ${objects.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n ').join('\n')}\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`));return new Blob(parts,{type:'application/pdf'})}
-async function openHistoryQuotationPdfModal(id){const quote=quotes().find(row=>String(row.id)===String(id));if(!quote)return;if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}loadQuote(quote.id);await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,80)));buildPrintQuotation();document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});await Promise.all([...document.querySelectorAll('#printQuotationDocument img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));const customer=$('qPrintedCompany')?.value.trim()||selectedQuotationCustomer()?.company||'',filename=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation'),css=quotationPrintCss(),content=$('printQuotationDocument').innerHTML;let dialog=$('keyhqPdfModal');if(!dialog){dialog=document.createElement('dialog');dialog.id='keyhqPdfModal';dialog.className='keyhq-pdf-modal';dialog.innerHTML='<header><div><small>KEYHQ · ORIGINAL KEYSUITE QUOTATION</small><h2 id="keyhqPdfTitle"></h2></div><div><button type="button" data-pdf-download>Download PDF</button><button type="button" data-pdf-print>Print</button><button type="button" data-pdf-close aria-label="Close">×</button></div></header><iframe title="Original KeySuite quotation PDF preview"></iframe><span class="keyhq-pdf-status"></span>';document.body.appendChild(dialog);const style=document.createElement('style');style.textContent='.keyhq-pdf-modal{position:fixed;inset:18px;z-index:7000;width:auto;height:auto;max-width:none;max-height:none;padding:0;border:1px solid #34556c;border-radius:14px;background:#0b1622;color:#eef8ff}.keyhq-pdf-modal::backdrop{background:#02060dcc}.keyhq-pdf-modal header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e2030}.keyhq-pdf-modal h2{margin:2px 0 0;font-size:14px}.keyhq-pdf-modal small{color:#8bd4e8;font-size:8px}.keyhq-pdf-modal header div:last-child{display:flex;gap:8px}.keyhq-pdf-modal button{border:0;border-radius:8px;padding:9px 12px;background:#c8ff66;color:#12200a;font-weight:900;cursor:pointer}.keyhq-pdf-modal [data-pdf-close]{background:#263d50;color:#fff}.keyhq-pdf-modal iframe{width:100%;height:calc(100% - 62px);border:0;background:#25282d}.keyhq-pdf-status{position:absolute;left:18px;bottom:8px;padding:5px 8px;border-radius:8px;background:#07111ddd;color:#dff8ff;font-size:10px;pointer-events:none}';document.head.appendChild(style);dialog.querySelector('[data-pdf-close]').onclick=()=>dialog.close()}const frame=dialog.querySelector('iframe'),status=dialog.querySelector('.keyhq-pdf-status');$('keyhqPdfTitle').textContent=filename;frame.srcdoc=`<!doctype html><meta charset="utf-8"><style>${css}#printQuotationDocument{display:block!important}.print-page{display:block!important}@media screen{html,body{background:#25282d!important}body{display:block!important;margin:0!important;padding:24px!important;box-sizing:border-box}#printQuotationDocument{width:210mm;margin:0 auto!important;background:transparent!important}.print-page{background:#fff!important;margin:0 auto 18px!important;box-shadow:0 4px 24px #0006}}</style><div id="printQuotationDocument">${content}</div>`;dialog.querySelector('[data-pdf-print]').onclick=()=>frame.contentWindow?.print();dialog.querySelector('[data-pdf-download]').onclick=async()=>{const button=dialog.querySelector('[data-pdf-download]');button.disabled=true;status.textContent='Rendering original KeySuite pages…';try{const pages=[...frame.contentDocument.querySelectorAll('.print-page')],images=[];for(let i=0;i<pages.length;i++){status.textContent=`Rendering page ${i+1} of ${pages.length}…`;images.push(await jpegFromPrintPage(pages[i],css))}const url=URL.createObjectURL(pdfFromJpegs(images)),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);status.textContent='PDF downloaded.'}catch(error){console.error(error);status.textContent='PDF rendering failed. Use Print instead.'}finally{button.disabled=false}};status.textContent='Original sealed quotation · permissions preserved';dialog.showModal()}
+async function openHistoryQuotationPdfModal(id){const quote=quotes().find(row=>String(row.id)===String(id));if(!quote)return;if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}loadQuote(quote.id);await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,80)));buildPrintQuotation();document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});await Promise.all([...document.querySelectorAll('#printQuotationDocument img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));const customer=quotationExportCompany(),filename=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation'),css=quotationPrintCss(),content=$('printQuotationDocument').outerHTML;let dialog=$('keyhqPdfModal');if(!dialog){dialog=document.createElement('dialog');dialog.id='keyhqPdfModal';dialog.className='keyhq-pdf-modal';dialog.innerHTML='<header><div><small>KEYHQ · ORIGINAL KEYSUITE QUOTATION</small><h2 id="keyhqPdfTitle"></h2></div><div><button type="button" data-pdf-download>Download PDF</button><button type="button" data-pdf-print>Print</button><button type="button" data-pdf-close aria-label="Close">×</button></div></header><iframe title="Original KeySuite quotation PDF preview"></iframe><span class="keyhq-pdf-status"></span>';document.body.appendChild(dialog);const style=document.createElement('style');style.textContent='.keyhq-pdf-modal{position:fixed;inset:18px;z-index:7000;width:auto;height:auto;max-width:none;max-height:none;padding:0;border:1px solid #34556c;border-radius:14px;background:#0b1622;color:#eef8ff}.keyhq-pdf-modal::backdrop{background:#02060dcc}.keyhq-pdf-modal header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e2030}.keyhq-pdf-modal h2{margin:2px 0 0;font-size:14px}.keyhq-pdf-modal small{color:#8bd4e8;font-size:8px}.keyhq-pdf-modal header div:last-child{display:flex;gap:8px}.keyhq-pdf-modal button{border:0;border-radius:8px;padding:9px 12px;background:#c8ff66;color:#12200a;font-weight:900;cursor:pointer}.keyhq-pdf-modal [data-pdf-close]{background:#263d50;color:#fff}.keyhq-pdf-modal iframe{width:100%;height:calc(100% - 62px);border:0;background:#25282d}.keyhq-pdf-status{position:absolute;left:18px;bottom:8px;padding:5px 8px;border-radius:8px;background:#07111ddd;color:#dff8ff;font-size:10px;pointer-events:none}';document.head.appendChild(style);dialog.querySelector('[data-pdf-close]').onclick=()=>dialog.close()}const frame=dialog.querySelector('iframe'),status=dialog.querySelector('.keyhq-pdf-status');$('keyhqPdfTitle').textContent=filename;frame.srcdoc=`<!doctype html><meta charset="utf-8"><style>${css}#printQuotationDocument{display:block!important}.print-page{display:block!important}@media screen{html,body{background:#25282d!important}body{display:block!important;margin:0!important;padding:24px!important;box-sizing:border-box}#printQuotationDocument{width:210mm;margin:0 auto!important;background:transparent!important}.print-page{background:#fff!important;margin:0 auto 18px!important;box-shadow:0 4px 24px #0006}}</style>${content}`;dialog.querySelector('[data-pdf-print]').onclick=()=>frame.contentWindow?.print();dialog.querySelector('[data-pdf-download]').onclick=async()=>{const button=dialog.querySelector('[data-pdf-download]');button.disabled=true;status.textContent='Rendering original KeySuite pages…';try{const pages=[...frame.contentDocument.querySelectorAll('.print-page')],images=[];for(let i=0;i<pages.length;i++){status.textContent=`Rendering page ${i+1} of ${pages.length}…`;images.push(await jpegFromPrintPage(pages[i],css))}const url=URL.createObjectURL(pdfFromJpegs(images)),link=document.createElement('a');link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);status.textContent='PDF downloaded.'}catch(error){console.error(error);status.textContent='PDF rendering failed. Use Print instead.'}finally{button.disabled=false}};status.textContent='Original sealed quotation · permissions preserved';dialog.showModal()}
 async function printCompleteQuotation(options={}){
  if(!ensureSealedForPdf())return;
  const historySnapshot=!!options.historySnapshot;
@@ -2009,7 +2083,7 @@ async function printCompleteQuotation(options={}){
  await Promise.all(logoImages.map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve()));
  let restorePdfImages=()=>{};
  try{if(window.KeySuitePdfOptimization)restorePdfImages=await window.KeySuitePdfOptimization.optimizeDocument(document.getElementById('printQuotationDocument'),{profile:'quotation'});}catch(error){console.warn('Quotation PDF optimization:',error)}
- const customer=$('qPrintedCompany')?.value.trim()||selectedQuotationCustomer()?.company||'';const pdfName=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation');
+ const customer=quotationExportCompany();const pdfName=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation');
  restorePrintState();window.__ksOldTitle=document.title;lockQuotationPdfTitle(pdfName);document.body.classList.add('print-complete');
  window.addEventListener('afterprint',()=>{try{restorePdfImages()}catch(_){}document.body.classList.remove('print-complete');restorePrintState()},{once:true});
  requestAnimationFrame(()=>setTimeout(()=>window.print(),80));
@@ -2070,14 +2144,14 @@ $('startCustomerClear')?.addEventListener('click',()=>{
 document.addEventListener('click',event=>{if(!$('startCustomerPicker')?.contains(event.target))closeStartCustomerMenu()});
 $('qContact').addEventListener('change',()=>{
  const c=customers().find(x=>x.id===$('qCustomer').value),contact=(c?.contacts||[])[Number($('qContact').value)]||{};
- if($('qPrintedContact'))$('qPrintedContact').value=[contact.prefix,contact.name].filter(Boolean).join(' ');
+ if($('qPrintedContact'))$('qPrintedContact').value=quotationContactName(contact);
  updateQuotationContactInfo();syncStartContact();if(viewedCustomerId)showCustomerDetail(viewedCustomerId)
 });
 $('startContact')?.addEventListener('change',()=>{
  if(!canEditQuotation(true)){syncStartContact();return}
  const value=$('startContact').value||'';if($('qContact'))$('qContact').value=value;
  const c=customers().find(x=>x.id===$('qCustomer').value),contact=(c?.contacts||[])[Number(value)]||{};
- if($('qPrintedContact'))$('qPrintedContact').value=value===''?'':[contact.prefix,contact.name].filter(Boolean).join(' ');
+ if($('qPrintedContact'))$('qPrintedContact').value=value===''?'':quotationContactName(contact);
  updateQuotationContactInfo();syncStartContact();
 });
 $('customerPdc')?.addEventListener('change',syncCustomerPdcUi);
@@ -2244,7 +2318,13 @@ window.KeySuiteApp={
  hasQuotationPricingContext(){const customer=selectedQuotationCustomer();return !!(customer&&customer.pricingCategoryId)},
  selectCustomerForQuotation,
  hydrateQuoteItemCapacity,syncQuoteCapacityDescription,focusQuoteItem:focusNewQuoteItem,
- addExternalQuoteItem(data){if(!canEditQuotation(true))return null;const rows=[...document.querySelectorAll('.quote-item')],first=rows[0],empty=rows.length===1&&first&&!first.querySelector('.item-model').value&&!first.querySelector('.item-description').value&&!Number(first.querySelector('.item-price').value||0),coupling=isCouplingQuoteData(data||{}),motor=!coupling&&isMotorQuoteData(data||{}),noCapacity=!coupling&&(motor||isNoCapacityQuoteData(data||{}));if(empty)first.remove();const row=quoteItemRow(data||{});row.dataset.quoteUnit=normalizeQuoteUnit(data?.unit);if(data?.pumpData)row.dataset.pumpData=JSON.stringify(data.pumpData);if(data?.motorData)row.dataset.motorData=JSON.stringify(data.motorData);if(data?.pricingSource)row.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data?.couplingData)row.dataset.couplingData=JSON.stringify(data.couplingData);const incomingCapacity=capacityStateFromData(data||{},data?.description||'');row.querySelector('.item-model').value=coupling?normalizeCouplingQuoteModel(data.model||'',data):noCapacity?stripQuotationBrand(data.model||''):capacityModelText(data.model||'',incomingCapacity);row.querySelector('.item-qty').value=data.qty||1;row.querySelector('.item-price').value=Number(data.unitPrice||0).toFixed(2);row.querySelector('.item-description').value=coupling?shaftText(data.description||'',shaftStateFromData(data,data.description||'')):motor?normalizeMotorQuotationDescription(data.description||''):normalizeDescriptionIndentation(stripQuotationBrand(data.description||''));if(coupling)syncQuoteShaftDescription(row);else if(!noCapacity)applyQuoteCapacityData(row,data||{});calcTotal();refreshItemExportButtons();focusNewQuoteItem(row);return row;},
+ brandedQuotationDescription,captureQuotationItemOriginal,
+ addExternalQuoteItem(data){if(!canEditQuotation(true))return null;const rows=[...document.querySelectorAll('.quote-item')],first=rows[0],empty=rows.length===1&&first&&!first.querySelector('.item-model').value&&!first.querySelector('.item-description').value&&!Number(first.querySelector('.item-price').value||0),coupling=isCouplingQuoteData(data||{}),motor=!coupling&&isMotorQuoteData(data||{}),noCapacity=!coupling&&(motor||isNoCapacityQuoteData(data||{}));if(empty)first.remove();const row=quoteItemRow(data||{});row.dataset.quoteUnit=normalizeQuoteUnit(data?.unit);if(data?.pumpData)row.dataset.pumpData=JSON.stringify(data.pumpData);if(data?.motorData)row.dataset.motorData=JSON.stringify(data.motorData);if(data?.pricingSource)row.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data?.couplingData)row.dataset.couplingData=JSON.stringify(data.couplingData);const incomingCapacity=capacityStateFromData(data||{},data?.description||'');row.querySelector('.item-model').value=coupling?normalizeCouplingQuoteModel(data.model||'',data):noCapacity?stripQuotationBrand(data.model||''):capacityModelText(data.model||'',incomingCapacity);row.querySelector('.item-qty').value=data.qty||1;row.querySelector('.item-price').value=Number(data.unitPrice||0).toFixed(2);row.querySelector('.item-description').value=coupling?shaftText(data.description||'',shaftStateFromData(data,data.description||'')):motor?normalizeMotorQuotationDescription(data.description||''):normalizeDescriptionIndentation(stripQuotationBrand(data.description||''));if(coupling)syncQuoteShaftDescription(row);else if(!noCapacity)applyQuoteCapacityData(row,data||{});
+ const source=quotePricingSource(data),brand=data.brand??data.brandName??source.v391_brand_name??data.pumpData?.keysuite_brand_name;
+ if(brand!=null&&!data.descriptionManuallyEdited&&['CHC','CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSV','BSW','ES','ISO','GWS'].includes(quoteProductFamily(data))){
+   const area=row.querySelector('.item-description');area.value=brandedQuotationDescription(area.value,brand);
+ }
+ captureQuotationItemOriginal(row,{replace:true});calcTotal();refreshItemExportButtons();focusNewQuoteItem(row);return row;},
  ensureQuotationPricingContext,ensureQuotationSourcePricing,
  canEditQuotation,
  isQuotationSealed,
@@ -2269,7 +2349,7 @@ $('startProject')?.addEventListener('input',()=>syncProjectFields('dashboard'));
 $('project')?.addEventListener('input',()=>syncProjectFields('quotation'));
 
 syncOwnerKeyVisibility();newQuote();refreshAll();updateQuotationStateUi();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=42922');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=50048');
 
 
 // Two-line popup editor for Project and Delivery.

@@ -758,7 +758,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const customer=quotationCustomer(),cat=categoryForCustomer(customer);if(!customer||!cat)return;
     for(const row of [...document.querySelectorAll('.quote-item[data-pricing-source]')]){
       let source={};try{source=JSON.parse(row.dataset.pricingSource||'{}')}catch(_){ }
-      if(source.manual_override===true)continue;
+      if(source.manual_override===true||source.quotation_manual_unit_price!=null||row.dataset.restoredQuotationItem==='true')continue;
       if(String(source.product_family||'').toUpperCase()==='ASSEMBLY'){
         // V4.28.71 Assembly/System quotations carry the already-final assembly
         // unit price. Customer/category refresh must not re-run leaf pricing or Fuel.

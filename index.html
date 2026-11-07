@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.47</title>
-  <script>window.KEYSUITE_VERSION='5.00.47';window.KEYSUITE_BUILD='V5.00.47';</script>
+  <title>KeySuite V5.00.48</title>
+  <script>window.KEYSUITE_VERSION='5.00.48';window.KEYSUITE_BUILD='V5.00.48';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -332,9 +332,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     .es-product-toolbar{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.es-product-toolbar select{width:100%}@media(max-width:900px){.es-product-toolbar{grid-template-columns:1fr 1fr}}@media(max-width:560px){.es-product-toolbar{grid-template-columns:1fr}}.es-product-material{min-width:190px}.gws-product-toolbar{grid-template-columns:minmax(190px,300px) minmax(220px,420px)}
     .price-completion-indicator{font-weight:700;color:#475569}
     .category-manual-calculator{margin-top:16px;padding:14px;border:1px solid #dbe3ec;border-radius:10px;background:#f8fafc}.category-manual-calculator h3{margin:0 0 6px}.category-manual-grid{display:grid;grid-template-columns:minmax(150px,1fr) minmax(120px,.7fr) minmax(130px,.8fr);gap:10px;align-items:end}.category-manual-result{margin-top:12px;padding:12px;border:1px solid #bfdbfe;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:space-between;gap:12px}.category-manual-result strong{font-size:22px;color:#17365d}.category-manual-result small{display:block;color:#64748b;margin-top:3px}@media(max-width:720px){.category-manual-grid{grid-template-columns:1fr}.category-manual-result{align-items:flex-start;flex-direction:column}}
-    .quote-item-head{grid-template-columns:28px 18px 30px 48px max-content minmax(220px,1fr) 72px 130px}.item-remark-indicator{display:none;width:12px;height:12px;border-radius:50%;background:#D5BD50;box-shadow:0 0 0 2px rgba(213,189,80,.22);justify-self:center}.quote-item.collapsed.has-internal-remark .item-remark-indicator{display:inline-block}.remark-quote-item.has-remark{background:#D5BD50!important;border-color:#b59b32!important;color:#332b0d!important;font-weight:800}.item-remark-dialog textarea{min-height:180px}.item-remark-help{font-size:12px;color:#64748b;margin-top:6px}
-    @media(max-width:900px){.quote-item-head{grid-template-columns:24px 14px 28px 42px max-content minmax(140px,1fr) 62px 105px}}
-    @media(max-width:560px){.quote-item-head{grid-template-columns:22px 12px 26px 38px max-content minmax(110px,1fr) 54px 90px}}
+    .quote-item .quote-item-head{grid-template-columns:28px 18px 30px 36px 76px minmax(0,1fr) 110px 136px;column-gap:8px}.quote-item-head>b{white-space:nowrap}.item-summary-model{min-width:0;overflow-wrap:anywhere}.item-summary-qty,.item-summary-total{text-align:right;white-space:nowrap}.item-remark-indicator{display:block;visibility:hidden;width:12px;height:12px;border-radius:50%;background:#D5BD50;box-shadow:0 0 0 2px rgba(213,189,80,.22);justify-self:center}.quote-item.collapsed.has-internal-remark .item-remark-indicator{visibility:visible}.remark-quote-item.has-remark{background:#D5BD50!important;border-color:#b59b32!important;color:#332b0d!important;font-weight:800}.item-remark-dialog textarea{min-height:180px}.item-remark-help{font-size:12px;color:#64748b;margin-top:6px}
+    .quote-item-custom-header{display:flex;align-items:center;gap:10px;margin-top:12px}.quote-item-custom-header label{display:flex;align-items:center;white-space:nowrap;gap:6px;margin:0}.quote-item-custom-header input[type=checkbox]{width:auto}.quote-item-custom-header input[type=text],.item-custom-header{min-width:0;max-width:28rem}
+    .quote-adjustment-row{display:grid;grid-template-columns:4.5rem 3.5rem minmax(3rem,7rem) minmax(0,1fr);gap:8px;align-items:center;width:min(100%,25rem)}.quote-adjustment-row label{margin:0}.quote-adjustment-row input,.quote-adjustment-row select{box-sizing:border-box;height:40px;width:100%}.quote-adjustment-row input{text-align:right}.quote-adjustment-row output{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.quote-adjustment-value{position:relative}.quote-adjustment-value input{padding-inline-end:1.5rem;appearance:textfield}.quote-adjustment-value input::-webkit-inner-spin-button,.quote-adjustment-value input::-webkit-outer-spin-button{appearance:none}.quote-adjustment-value span{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);pointer-events:none}
+    @media(max-width:900px){.quote-item .quote-item-head{grid-template-columns:24px 12px 26px 30px 67px minmax(0,1fr) 85px 98px;column-gap:5px}}
+    @media(max-width:560px){.quote-item .quote-item-head{grid-template-columns:22px 10px 22px 24px 56px minmax(0,1fr) 62px 76px;column-gap:3px;font-size:11px}}
 
     /* V2.14 system automation, quotation isolation and alignment */
     .assembly-quote-fields{align-items:start}.assembly-quote-fields>div{display:grid;grid-template-rows:18px 42px minmax(28px,auto);align-content:start}.assembly-quote-fields>div>label{margin:0;line-height:18px}.assembly-quote-fields>div>input{height:42px;box-sizing:border-box}.assembly-quote-help{min-height:18px}
@@ -653,7 +655,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.47</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.48</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -669,7 +671,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.47</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.48</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -695,7 +697,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.47</div>
+    <div class="suite-version">KeySuite V5.00.48</div>
   </aside>
 
   <main>
@@ -832,6 +834,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
               <div id="customerDistanceWrap"><label>Distance (km) · Admin only</label><input id="customerDistance" type="number" min="0" step="0.1" value="0"></div>
               <div><label>Company Phone</label><input id="companyPhone" placeholder="+60 (x) xxxx xxxx"></div>
               <div class="span-3"><label>Address</label><textarea id="address" style="min-height:110px"></textarea></div>
+              <div style="grid-column:1/-1"><label for="quotationAssignedSaveName">Quotation Assigned Save Name</label><input id="quotationAssignedSaveName"></div>
               <div><label>Terms (days)</label><input id="customerTerms" type="number" min="0" step="1" inputmode="numeric" placeholder="Example: 60"></div>
               <div><label>&nbsp;</label><label class="template-check" style="height:42px;align-items:center"><input id="customerPdc" type="checkbox"> PDC</label></div>
               <div class="span-2"><label>Default Quotation Template</label><select id="customerDefaultQuotationTemplate"><option value="">Use company default template</option></select></div>
@@ -1276,8 +1279,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div id="quoteItems"></div><datalist id="quotationModelItemOptions"></datalist>
         <div class="quote-adjustments no-print" style="display:grid;justify-items:end;gap:8px;margin-top:20px">
           <div>Sub-total: <span id="quoteSubtotal">RM 0.00</span></div>
-          <div><label for="quoteSst" style="display:inline">SST</label> <input id="quoteSst" type="number" min="0" max="100" step="any" style="width:7em"> %: <span id="quoteSstAmount">+ RM 0.00</span></div>
-          <div><label for="quoteDiscount" style="display:inline">Discount</label> <select id="quoteDiscountMode" aria-label="Discount unit" style="width:auto"><option value="%">%</option><option value="RM">RM</option></select> <input id="quoteDiscount" type="number" min="0" step="any" style="width:7em">: <span id="quoteDiscountAmount">− RM 0.00</span></div>
+          <div class="quote-adjustment-row"><label for="quoteSst">SST</label><span></span><div class="quote-adjustment-value"><input id="quoteSst" type="number" min="0" max="100" step="any" placeholder="0"><span aria-hidden="true">%</span></div><output id="quoteSstAmount">+ RM 0.00</output></div>
+          <div class="quote-adjustment-row"><label for="quoteDiscount">Discount</label><select id="quoteDiscountMode" aria-label="Discount unit"><option value="%">%</option><option value="RM">RM</option></select><input id="quoteDiscount" type="number" min="0" step="any" placeholder="0.00"><output id="quoteDiscountAmount">− RM 0.00</output></div>
           <div id="quoteAdjustmentError" role="status" style="color:#b91c1c" hidden></div>
         </div>
         <div class="quote-total" style="margin-top:20px">Total: <span id="quoteTotal">RM 0.00</span></div>
@@ -2261,13 +2264,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="kv-fixes-v50026.js?v=50026"></script>
 <script src="kv-price-data-v50017.js?v=50046"></script>
 <script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50046"></script>
+<script src="app.js?v=50048"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50037"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50047"></script>
+<script src="pricing.js?v=50048"></script>
 <script src="pump-pdf-download-v50035.js?v=50035"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=50047"></script>
@@ -2389,10 +2392,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
 <script src="kv-product-families-v50027.js?v=50028"></script>
-<script src="v41200-bootstrap.js?v=50047"></script>
+<script src="v41200-bootstrap.js?v=50048"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
-<script src="v50047-version-lock.js?v=50047"></script>
+<script src="v50048-version-lock.js?v=50048"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

@@ -1,14 +1,15 @@
 {
-  "version": "5.00.47",
-  "baseline": "5.00.46",
-  "upgrade_supported_from": "5.00.46",
+  "version": "5.00.48",
+  "baseline": "5.00.47",
+  "upgrade_supported_from": "5.00.47",
   "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Bug 001: Product Family Mapping, Category Compare, and pricing selectors share one 16-family registry",
-    "OEM mapping validation accepts the configured family identifiers without changing existing records"
+    "Quotation brand descriptions, aligned item and adjustment controls, and reversible manual price status",
+    "Quotation PDF uses saved item descriptions and optional bold item headings",
+    "Customer PDF filename aliases and contact recipient aliases"
   ]
 }
