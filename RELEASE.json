@@ -1,14 +1,13 @@
 {
-  "version": "5.00.49",
-  "baseline": "5.00.48",
-  "upgrade_supported_from": "5.00.48",
+  "version": "5.00.50",
+  "baseline": "5.00.49",
+  "upgrade_supported_from": "5.00.49",
   "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Remove redundant quotation item brand labels and use shared Capacity and Head controls on manual items",
-    "Open the existing quotation PDF in a viewer on Mac Safari"
+    "Place Quantity and editable Unit side by side for every quotation item, and preserve the unit in saved items and PDF output"
   ]
 }

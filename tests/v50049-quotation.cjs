@@ -61,7 +61,7 @@ const windowsChrome = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537
       await manual.locator('.quote-capacity-row').evaluate(e=>[...e.children].map(c=>c.className)));
     assert.equal(await capacity.inputValue(),'10');
     assert.equal(await manual.locator('.item-head-value').inputValue(),'50');
-    assert.equal(await manual.locator('.item-manual-unit').inputValue(),'box');
+    assert.equal(await manual.locator('.item-unit').inputValue(),'box');
     assert.match(await rows.nth(2).locator('.quote-capacity-row').textContent(),/Dual speed/);
     assert.equal(await page.evaluate(()=>quotePrintDescription(getQuoteItems()[1])),'Capacity: 10 m³/hr @ 50 m\nLegacy description');
     await toggle.uncheck();

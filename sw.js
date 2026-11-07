@@ -1,6 +1,6 @@
-/* KeySuite V5.00.49 Service Worker. */
-const CACHE='keysuite-v50049-quotation';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50049"></script>';
+/* KeySuite V5.00.50 Service Worker. */
+const CACHE='keysuite-v50050-quotation';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50050"></script>';
 const SHELL=[
  './bsw-variants-v50036.js','./bsw-pricing-v50036.js','./customer-remarks-v50036.js','./product-audit-v50036.js','./v50037-version-lock.js',
  './iso-products-v50011.js','./iso-v50011.js','./component-prices-v50011.js','./manual-price-v50011.js','./selector-iso/index.html','./selector-iso/iso-data.js','./selector-iso/es-core.js','./selector-iso/motor-data.js','./selector-iso/favicon.svg','./selector-iso/bgreich-logo.png','./keyhq/avatar/assets/keyhq-hybrid.glb',
@@ -13,7 +13,7 @@ const SHELL=[
 SHELL.push('./bgf-curve-v50021.js','./selector-bgf/index.html','./bgf-data-v50026.js','./bgf-selector-v50026.js','./kv-fixes-v50026.js');
 SHELL.push('./selector-bsw/index.html','./bsw-data-v50027.js','./selector-bsw-data-v50027.js','./bsw-selector-v50027.js','./bsw-v50027.js','./costing-audit-v50032.js','./v50032-bugfixes.css','./v50035-version-lock.js','./v50033-actions.css','./v50033-series-registry.js');
 SHELL[SHELL.indexOf('./v42875-version-lock.js')]='./v50035-version-lock.js';
-SHELL.push('./v50049-version-lock.js','./product-family-registry-v50047.js','./RELEASE.json');
+SHELL.push('./v50050-version-lock.js','./product-family-registry-v50047.js','./RELEASE.json');
 SHELL.push('./pump-pdf-download-v50035.js','./vendor/html2canvas-1.4.1.min.js','./vendor/jspdf-2.5.2.umd.min.js');
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>undefined)))});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('keysuite-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
