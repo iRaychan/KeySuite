@@ -1,13 +1,14 @@
 {
-  "version": "5.00.43",
-  "baseline": "5.00.42",
-  "upgrade_supported_from": "5.00.42",
-  "new_database_migration_required": false,
+  "version": "5.00.47",
+  "baseline": "5.00.46",
+  "upgrade_supported_from": "5.00.46",
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "changes": [
-    "Bug 04: Floating Go Back closes an inline Product Curve through the existing dialog return path"
+    "Bug 001: Product Family Mapping, Category Compare, and pricing selectors share one 16-family registry",
+    "OEM mapping validation accepts the configured family identifiers without changing existing records"
   ]
 }

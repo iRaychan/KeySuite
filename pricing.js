@@ -3,7 +3,7 @@
 
   let secureData={
     companies:[],users:[],categories:[],products:[],kvProducts:[],kvAddonPricing:{series_code:'KV1',material_sicsic:0,material_tctc:0,oring_epdm:0,oring_nbr:0},bfiProducts:[],esProducts:[],gwsProducts:[],keyplcProducts:[],manifoldProducts:[],motorProducts:[],couplingProducts:[],
-    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},CR:{USD:5.8,RMB:.65,MYR:1},KV:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},BGF:{USD:5.8,RMB:.65,MYR:1},BSW:{USD:5.8,RMB:.65,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1}},chcSealAddons:[],crSealAddons:[],
+    productMultipliers:{CHC:{USD:5.8,RMB:.65,MYR:1},CHC_G1:{USD:5.8,RMB:.65,MYR:1},CHC_G2:{USD:5.8,RMB:.65,MYR:1},CR:{USD:5.8,RMB:.65,MYR:1},KV:{USD:5.8,RMB:.65,MYR:1},BFI:{USD:1,RMB:1,MYR:1},BGF:{USD:5.8,RMB:.65,MYR:1},BSV:{USD:5.8,RMB:.65,MYR:1},BSW:{USD:5.8,RMB:.65,MYR:1},ES:{USD:5.8,RMB:.65,MYR:1},ISO:{USD:5.8,RMB:.65,MYR:1},GWS:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1},MANIFOLD:{USD:5.8,RMB:.65,MYR:1},MOTOR:{USD:5.8,RMB:.65,MYR:1},COUPLING:{USD:5.8,RMB:.65,MYR:1},BASEPLATE:{USD:1,RMB:1,MYR:1}},chcSealAddons:[],crSealAddons:[],
     fuel_price:2,fuel_base_price:2,fuel_efficiency:6.3,return_journey:true,customerPricing:null,customerPricingRows:[]
   };
   let access=null;
@@ -54,23 +54,15 @@
   }
 
   const familyLabel=family=>family==='CHC_G1'?'CHC G1':family==='CHC_G2'?'CHC G2':String(family||'');
-  const PRODUCT_GROUP_LABELS={BASEPLATE:'Baseplate',BFI:'BFI',BGF:'BGF',BSV:'BSV',BSW:'BSW',CHC_G1:'CHC G1',CHC_G2:'CHC G2',COUPLING:'Coupling',CR:'CR',KV:'KV',ES:'ES',GWS:'GWS',ISO:'ISO',KEYPLC:'KeyPLC',MANIFOLD:'Manifold',MOTOR:'Motor'};
   function productGroupRegistry(){
-    const groups=new Map();
-    document.querySelectorAll('[data-category-product]').forEach(button=>{
-      const code=String(button.dataset.categoryProduct||'').trim().toUpperCase();
-      if(!code||code==='GENERAL'||code==='KEYLAB')return;
-      groups.set(code,PRODUCT_GROUP_LABELS[code]||String(button.textContent||code).trim()||code);
-    });
-    Object.entries(PRODUCT_GROUP_LABELS).forEach(([code,label])=>groups.set(code,label));
-    return [...groups].map(([code,label])=>({code,label})).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true,sensitivity:'base'}));
+    return (window.KeySuiteProductFamilies?.list?.()||[]).map(({code,label})=>({code,label})).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true,sensitivity:'base'}));
   }
   function syncPricingFamilyTabs(){
     const host=byId('pricingFamilyTabs');if(!host)return;
     const groups=productGroupRegistry();
     host.innerHTML=groups.map(group=>`<button type="button" class="pricing-family-tab ${group.code===selectedPricingFamily?'active':''}" data-pricing-family="${e(group.code)}" role="tab">${e(group.label)}</button>`).join('');
   }
-  const normalizedFamily=family=>{const raw=String(family||'CHC_G2').toUpperCase();return ['CHC_G1','CHC_G2','CHC','CR','KV','BFI','BGF','BSV','BSW','ES','ISO','GWS','KEYPLC','MANIFOLD','MOTOR','COUPLING','BASEPLATE'].includes(raw)?raw:'CHC_G2'};
+  const normalizedFamily=family=>window.KeySuiteProductFamilies?.get?.(family)?.code||'CHC_G2';
   function multipliers(family='CHC_G2'){
     const raw=normalizedFamily(family),code=raw==='CHC'?'CHC_G2':raw;
     const book=secureData.productMultipliers||{};

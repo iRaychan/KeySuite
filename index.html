@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.46</title>
-  <script>window.KEYSUITE_VERSION='5.00.46';window.KEYSUITE_BUILD='V5.00.46';</script>
+  <title>KeySuite V5.00.47</title>
+  <script>window.KEYSUITE_VERSION='5.00.47';window.KEYSUITE_BUILD='V5.00.47';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -653,7 +653,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.46</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.47</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -669,7 +669,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.46</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.47</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -695,7 +695,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.46</div>
+    <div class="suite-version">KeySuite V5.00.47</div>
   </aside>
 
   <main>
@@ -1438,22 +1438,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
               <div class="category-product-rule-layout">
                 <div>
                   <div class="category-product-sort-row"><span>Product Rules</span><button class="btn secondary" id="categoryProductSortDirection" type="button" title="Sort product rules A to Z" aria-label="Sort product rules A to Z or Z to A">A→Z</button></div>
-                  <div class="category-product-buttons" aria-label="Product pricing rules">
-                  <button class="category-product-button" type="button" data-category-product="CHC_G1">CHC G1</button>
-                  <button class="category-product-button active" type="button" data-category-product="CHC_G2">CHC G2</button>
-                  <button class="category-product-button" type="button" data-category-product="CR">CR</button>
-                  <button class="category-product-button" type="button" data-category-product="KV">KV</button>
-                  <button class="category-product-button" type="button" data-category-product="BFI">BFI</button>
-                  <button class="category-product-button" type="button" data-category-product="BGF">BGF</button>
-                  <button class="category-product-button" type="button" data-category-product="BSV">BSV</button>
-                  <button class="category-product-button" type="button" data-category-product="BSW">BSW</button>
-                  <button class="category-product-button" type="button" data-category-product="ES">ES</button><button class="category-product-button" type="button" data-category-product="ISO">ISO</button>
-                  <button class="category-product-button" type="button" data-category-product="GWS">GWS</button>
-                  <button class="category-product-button" type="button" data-category-product="KEYPLC">KeyPLC</button>
-                  <button class="category-product-button" type="button" data-category-product="MANIFOLD">Manifold</button>
-                  <button class="category-product-button" type="button" data-category-product="MOTOR">Motor</button><button class="category-product-button" type="button" data-category-product="COUPLING">Coupling</button>
-                  <button class="category-product-button" type="button" data-category-product="BASEPLATE">Baseplate</button>
-                  </div>
+                  <div class="category-product-buttons" aria-label="Product pricing rules"></div>
                 </div>
                 <div class="category-rule-editor">
                   <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
@@ -2028,22 +2013,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card">
           <h2>Category Pricing Rule</h2>
           <div><label>Category</label><div class="pricing-category-select-row"><select id="pricingCategorySelect"></select><button class="btn" id="savePricingCategory" type="button">Save Category</button></div><div id="pricingCategoryMessage" class="muted" style="margin-top:7px">The Owner assigns the pricing category to each customer.</div></div>
-          <div class="pricing-family-tabs" id="pricingFamilyTabs" role="tablist" aria-label="Product pricing rule">
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BASEPLATE">Baseplate</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="CHC_G1">CHC G1</button>
-            <button class="pricing-family-tab active" type="button" role="tab" aria-selected="true" data-pricing-family="CHC_G2">CHC G2</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="CR">CR</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BFI">BFI</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BGF">BGF</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="BSW">BSW</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="COUPLING">Coupling</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="ES">ES</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="GWS">GWS</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="KEYPLC">KeyPLC</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="ISO">ISO</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="MANIFOLD">Manifold</button>
-            <button class="pricing-family-tab" type="button" role="tab" aria-selected="false" data-pricing-family="MOTOR">Motor</button>
-          </div>
+          <div class="pricing-family-tabs" id="pricingFamilyTabs" role="tablist" aria-label="Product pricing rule"></div>
           <div class="pricing-factor-mode-tabs" role="tablist" aria-label="Pricing factor view">
             <button class="pricing-factor-mode-tab" type="button" role="tab" aria-selected="false" data-pricing-factor-mode="assembly">Assembly</button>
             <button class="pricing-factor-mode-tab active" type="button" role="tab" aria-selected="true" data-pricing-factor-mode="quotation">Quote</button>
@@ -2296,10 +2266,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js"></script>
 <script src="manual-price-v50011.js"></script>
-<script src="pricing.js?v=50046"></script>
+<script src="product-family-registry-v50047.js?v=50047"></script>
+<script src="pricing.js?v=50047"></script>
 <script src="pump-pdf-download-v50035.js?v=50035"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50046-category-save"></script>
+<script src="categories.js?v=50047"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50046"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
@@ -2418,10 +2389,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
 <script src="kv-product-families-v50027.js?v=50028"></script>
-<script src="v41200-bootstrap.js?v=50046"></script>
+<script src="v41200-bootstrap.js?v=50047"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
-<script src="v50037-version-lock.js?v=50046"></script>
+<script src="v50047-version-lock.js?v=50047"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

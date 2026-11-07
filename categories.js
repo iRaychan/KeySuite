@@ -14,8 +14,8 @@
   const canView=()=>permissionLevel('manage_categories')!=='none';
   const isOwner=()=>permissionLevel('manage_categories')==='full';
   const categories=()=>window.KEYSUITE_SECURE_DATA?.categories||[];
-  const productFamilies=()=>[...new Map([...document.querySelectorAll('#categoryForm [data-category-product]')]
-    .map(button=>[button.dataset.categoryProduct,{code:button.dataset.categoryProduct,label:button.textContent.trim()}])).values()];
+  const productFamilies=()=>window.KeySuiteProductFamilies?.list?.().map(({code,label})=>({code,label}))||[];
+  function syncProductFamilyButtons(){const host=document.querySelector('#categoryForm .category-product-buttons');if(!host)return;host.innerHTML=productFamilies().map(({code,label})=>`<button class="category-product-button ${code===selectedProduct?'active':''}" type="button" data-category-product="${esc(code)}">${esc(label)}</button>`).join('')}
   const isSubmersible=code=>code==='BSV'||code==='BSW';
   const hasTrimming=code=>['ES','ISO'].includes(code)||isSubmersible(code);
   async function saveSubmersible(client,id,code,rule,name=null){
@@ -253,7 +253,7 @@
     ['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>stop(true)));target.addEventListener('click',event=>event.preventDefault());target.addEventListener('contextmenu',event=>event.preventDefault());
   }
   function bind(){
-    if(bound)return;bound=true;
+    if(bound)return;bound=true;syncProductFamilyButtons();
     byId('categoryForm')?.addEventListener('submit',save);byId('newPricingCategory')?.addEventListener('click',newCategory);byId('cancelCategoryEdit')?.addEventListener('click',cancel);
     byId('categorySortDirection')?.addEventListener('click',()=>{categorySort.dir='asc';saveCategorySort();syncCategorySortUi();renderRows()});
     byId('categoryProductSortDirection')?.addEventListener('click',()=>{productSort.dir=productSort.dir==='asc'?'desc':'asc';saveProductSort();applyProductSort()});

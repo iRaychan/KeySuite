@@ -117,22 +117,14 @@
   };
   const productGroupLabel=value=>{
     const group=normalizeProductGroup(value);
-    return ({CHC:'CHC',CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',KV:'KV',BFI:'BFI',ES:'End Suction',MOTOR:'Motor'})[group]||String(value||group).replace(/_/g,' ');
+    return ({CHC:'CHC',CHC_G1:'CHC C4',CHC_G2:'CHC C6'})[group]||window.KeySuiteProductFamilies?.label?.(group,'mapping')||String(value||group).replace(/_/g,' ');
   };
   // V4.21.09 naming: Price Group/admin pricing uses G1/G2; customer-facing Series uses C4/C6.
   const priceGroupAdminLabel=value=>{
     const group=normalizeProductGroup(value);
-    return ({CHC:'CHC G2',CHC_G1:'CHC G1',CHC_G2:'CHC G2',CR:'CR',KV:'KV',BFI:'BFI',ES:'End Suction',MOTOR:'Motor'})[group]||String(value||group).replace(/_/g,' ');
+    return group==='CHC'?window.KeySuiteProductFamilies?.label?.('CHC_G2','mapping'):(window.KeySuiteProductFamilies?.label?.(group,'mapping')||String(value||group).replace(/_/g,' '));
   };
-  const PRICE_GROUP_OPTIONS=[
-    {value:'CHC_G1',label:'CHC G1'},
-    {value:'CHC_G2',label:'CHC G2'},
-    {value:'CR',label:'CR'},
-    {value:'KV',label:'KV'},
-    {value:'BFI',label:'BFI'},
-    {value:'ES',label:'End Suction'},
-    {value:'MOTOR',label:'Motor'}
-  ];
+  const priceGroupRegistry=()=>window.KeySuiteProductFamilies?.list?.().map(item=>({value:item.code,label:item.mappingLabel||item.label}))||[];
 
   const DEFAULT_GENERAL={usdActual:4.5,usdBased:4.5,rmbActual:.65,rmbBased:.65,fuelPrice:2,fuelBasePrice:2,fuelEfficiency:6.3,returnJourney:true};
   const state={
@@ -657,7 +649,7 @@
   function priceGroupOptions(selected=''){
     const stored=normalizeProductGroup(selected||'');
     const current=stored==='CHC'?'CHC_G2':stored;
-    const options=PRICE_GROUP_OPTIONS.slice();
+    const options=priceGroupRegistry();
     if(current&&!options.some(x=>x.value===current))options.push({value:current,label:priceGroupAdminLabel(current)});
     const placeholder=current?'':'<option value="" selected disabled>Select Price Group</option>';
     return placeholder+options.map(x=>`<option value="${esc(x.value)}" ${current===x.value?'selected':''}>${esc(x.label)}</option>`).join('');
