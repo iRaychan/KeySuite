@@ -1,175 +1,131 @@
-/* One-click technical reports for static and native-renderer hosting. */
+/* Prepare the existing technical report and hand it to the browser's print dialog. */
 (() => {
   'use strict';
-  const root = new URL('.', document.currentScript.src);
-  const nativeEnabled = document.currentScript.dataset.native === 'true';
-  let running = false;
-  function namesFor(source) {
-    try { return source.top.KeySuitePumpPdfNames; } catch (_) { return null; }
-  }
-  async function nativePdf(report, title) {
-    const signal = AbortSignal.timeout(12000);
-    const html = await capture(report, signal);
-    const response = await fetch(new URL('api/technical-pdf', root), {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({html,title}),
-      signal,
-    });
-    if (!response.ok || !/^application\/pdf\b/i.test(response.headers.get('Content-Type') || '')) {
-      throw new Error('The technical PDF renderer is unavailable.');
+  const reserved = new WeakMap();
+  const reportUrl = new URL('pump-pdf-report.html', document.currentScript.src).href;
+
+  // Reserve the popup during a button click when the selector receives its
+  // export request asynchronously through postMessage.
+  function reserve(source) {
+    const existing = reserved.get(source);
+    if (existing && !existing.closed) return true;
+    const report = window.open(reportUrl, '_blank');
+    if (!report) {
+      window.alert('Allow pop-ups for KeySuite, then click PDF again.');
+      return false;
     }
-    const blob = await response.blob();
-    if (await blob.slice(0, 5).text() !== '%PDF-') throw new Error('The renderer returned an invalid PDF.');
-    return blob;
+    reserved.set(source, report);
+    setTimeout(() => {
+      if (reserved.get(source) !== report) return;
+      reserved.delete(source);
+      if (!report.closed) report.close();
+    }, 30000);
+    return true;
   }
-  function loadScript(doc, path) {
-    return new Promise((resolve, reject) => {
-      const script = doc.createElement('script');
-      script.src = new URL(path, root).href;
-      const timeout = setTimeout(() => {
-        script.remove();
-        reject(new Error('A PDF export script did not load in time.'));
-      }, 12000);
-      script.onload = () => { clearTimeout(timeout); resolve(); };
-      script.onerror = () => { clearTimeout(timeout); reject(new Error('A PDF export script could not load.')); };
-      doc.head.appendChild(script);
-    });
-  }
-  async function browserPdf(report, title) {
-    await report.__KEYSUITE_PDF_BRAND_READY__;
-    await Promise.all([
-      loadScript(report.document, 'vendor/html2canvas-1.4.1.min.js'),
-      loadScript(report.document, 'vendor/jspdf-2.5.2.umd.min.js'),
-      loadScript(report.document, 'pump-pdf-download-v50035.js?v=50058'),
-    ]);
-    return report.KeySuitePumpPdfDownload.render(report, title);
-  }
-  function readDataUrl(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-  }
-  async function capture(report,signal) {
-    const doc = report.document;
-    await report.__KEYSUITE_PDF_BRAND_READY__;
-    await doc.fonts?.ready;
-    const copy = doc.documentElement.cloneNode(true);
-    copy.querySelectorAll('script,base,link,iframe,object,embed,meta[http-equiv]').forEach(node => node.remove());
-    const images = [...doc.querySelectorAll('img,svg image')];
-    const copies = [...copy.querySelectorAll('img,svg image')];
-    await Promise.all(images.map(async (img, index) => {
-      const url = img.currentSrc || img.getAttribute('src') || img.getAttribute('href') || img.getAttribute('xlink:href');
-      if (!url) return;
-      const absolute = new URL(url, doc.baseURI);
-      let data = absolute.href;
-      if (absolute.protocol !== 'data:') {
-        const response = await fetch(absolute,{signal});
-        if (!response.ok) throw new Error('A technical report image could not load.');
-        data = await readDataUrl(await response.blob());
-      }
-      const target = copies[index];
-      if (img.localName === 'image') {
-        target.removeAttribute('xlink:href');
-        target.setAttribute('href', data);
-      } else {
-        target.removeAttribute('srcset');
-        target.setAttribute('src', data);
-      }
-    }));
-    return '<!doctype html>' + copy.outerHTML;
-  }
+
   function openReport(source, html, filename, title) {
-    if (running) return;
-    const names = namesFor(source), ticket = names?.ticket?.(filename);
+    const names = window.KeySuitePumpPdfNames;
+    const ticket = names?.ticket?.(filename);
+    const pending = reserved.get(source);
+    reserved.delete(source);
     if (names && /^Item\s+\d+\s*-/i.test(filename) && !ticket) {
+      pending?.close();
       source.alert('The PDF Item No. changed. Please try again.');
       return;
     }
-    const brand = window.KeySuiteSelectorBrand;
-    const chc = /\/selector(?:-g1)?\//i.test(source.location.pathname);
-    if (brand) html = brand.transformReportHtml(html,source).replaceAll('<\\/script>', '</script>');
-    running = true;
-    const iframe = document.createElement('iframe');
-    iframe.title = 'Technical report';
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.cssText = 'position:fixed;left:0;top:0;width:1280px;height:1000px;border:0;opacity:0;pointer-events:none';
-    const frameUrl = new URL('pump-pdf-report.html', root);
-    let captured = false;
-    let finished = false;
-    const deadline = setTimeout(() => finish(new Error('The report did not become ready.')), 30000);
-    function finish(error) {
-      if (finished) return;
-      finished = true;
-      clearTimeout(deadline);
-      iframe.remove();
-      running = false;
-      if (error) source.alert('PDF generation failed: ' + error.message);
+    const sourceUrl = new URL(source.location.href);
+    const printInPlace = source === window && sourceUrl.searchParams.get('autoPdf') === '1';
+    const report = printInPlace ? source : pending && !pending.closed ? pending : window.open(reportUrl, '_blank');
+    if (!report) {
+      source.alert('Allow pop-ups for KeySuite, then click PDF again.');
+      return;
     }
-    iframe.onload = () => {
-      const report = iframe.contentWindow;
-      if (!report || report.location.href !== frameUrl.href) return;
-      iframe.onload = null;
-      const take = async () => {
-        if (captured) return;
-        captured = true;
-        clearTimeout(deadline);
-        try {
-          if (chc) brand?.applyReport?.(report.document,source);
-          const reportTitle = title || report.document.title;
-          let blob;
-          if (nativeEnabled) {
-            try { blob = await nativePdf(report, reportTitle); }
-            catch (error) { console.warn('Native technical PDF failed. Using browser export.', error.message); }
-          }
-          blob ??= await browserPdf(report, reportTitle);
-          const fresh = names?.ticket?.(filename);
-          if (ticket && (!fresh || JSON.stringify(ticket)!==JSON.stringify(fresh))) {
-            throw new Error('The PDF Item No. changed during export. Please try again.');
-          }
-          const url = URL.createObjectURL(blob);
-          const link = source.document.createElement('a');
-          link.href = url;
-          link.download = String(filename || 'Pump').replace(/\.pdf$/i, '') + '.pdf';
-          source.document.body.appendChild(link);
-          link.click();
-          link.remove();
-          names?.commit?.(filename, ticket);
-          setTimeout(() => URL.revokeObjectURL(url), 30000);
-          finish();
-        } catch (error) { finish(error); }
-      };
+    const brand = window.KeySuiteSelectorBrand;
+    const chc = /\/selector(?:-g1)?\//i.test(sourceUrl.pathname);
+    const printTitle = String(filename || title || 'Pump').replace(/\.pdf$/i, '');
+    let initialPrint = true;
+    let printing = false;
+    const lockTitle = () => { report.document.title = printTitle; };
+
+    async function requestPrint(nativePrint, restoreAnimation) {
+      if (printing || report.closed) return;
+      printing = true;
       try {
-        const prefix = '<base href="' + source.location.href.replace(/[&"]/g, c=>c==='&'?'&amp;':'&quot;') + '">' +
-          '<script>window.print=()=>parent.KeySuiteTechnicalPdf.captureFrame(window);' +
-          'window.requestAnimationFrame=callback=>setTimeout(()=>callback(performance.now()),16);<\/script>';
-        activeCapture.set(report,take);
-        report.opener = source;
-        report.document.open();
-        report.document.write(html.replace(/<head\b[^>]*>/i, head => head + prefix));
-        report.document.close();
-        // A document written during an iframe's load does not consistently
-        // receive a second load event. Run the existing setup after its assets
-        // finish, once, without relying on a new window's navigation lifecycle.
-        const runSetup = async () => {
-          if (captured || finished || !iframe.isConnected) return;
-          if (report.document.readyState!=='complete' || typeof report.onload!=='function') {
-            setTimeout(runSetup,30);
-            return;
-          }
-          const setup=report.onload;
-          report.onload=null;
-          try { await setup.call(report); } catch (error) { finish(error); }
+        if (initialPrint) {
+          if (chc) brand?.applyReport?.(report.document, source);
+          await report.__KEYSUITE_PDF_BRAND_READY__;
+          await report.document.fonts?.ready;
+          report.addEventListener('beforeprint', lockTitle);
+          initialPrint = false;
+          // Browsers expose neither the Save outcome nor whether Print was canceled.
+          names?.commit?.(filename, ticket);
+        }
+        restoreAnimation();
+        lockTitle();
+        report.focus();
+        nativePrint();
+      } catch (error) {
+        report.alert('Unable to open the print dialog: ' + error.message);
+      } finally {
+        printing = false;
+      }
+    }
+
+    function writeReport() {
+      try {
+        if (brand) html = brand.transformReportHtml(html, source).replaceAll('<\\/script>', '</script>');
+        // The selector already has the optimizer. Reuse it and avoid blocking
+        // the report parser on a second copy of the same script.
+        const optimizer = printInPlace ? null : source.KeySuitePdfOptimization || window.KeySuitePdfOptimization;
+        if (optimizer) html = html.replace(/<script\s+src="[^"]*\/pdf-optimization\.js[^"]*"\s*><\/script>/gi, '');
+        const base = sourceUrl.href.replace(/[&"]/g, c => c === '&' ? '&amp;' : '&quot;');
+        const prefix = '<base href="' + base + '">' +
+          '<style>@media print{#keysuiteReportPrint{display:none!important}}' +
+          '@media screen{#keysuiteReportPrint{position:fixed;top:8px;right:8px;z-index:10000}}</style>' +
+          '<script>{const printNative=window.print.bind(window);' +
+          'const animate=window.requestAnimationFrame.bind(window);' +
+          // Print tabs may start in the background where animation frames pause.
+          'window.requestAnimationFrame=callback=>setTimeout(()=>callback(performance.now()),16);' +
+          'window.print=()=>window.__KEYSUITE_REQUEST_PRINT__(printNative,()=>{window.requestAnimationFrame=animate;});}</script>';
+        const button = '<button id="keysuiteReportPrint" type="button" hidden onclick="window.print()">Print / Save as PDF</button>';
+        const setup = '<script>{const prepare=window.onload;let started=false;const deadline=Date.now()+30000;' +
+          'const run=()=>{if(started)return;if(document.readyState!=="complete"){if(Date.now()<deadline)setTimeout(run,50);return;}started=true;' +
+          'Promise.resolve().then(()=>prepare?.call(window)).catch(error=>alert("Unable to prepare the PDF report: "+error.message));};' +
+          'window.onload=run;setTimeout(run,0);}</script>';
+        const doc = report.document;
+        if (!printInPlace) report.opener = source;
+        doc.open();
+        if (optimizer) report.KeySuitePdfOptimization = optimizer;
+        report.__KEYSUITE_REQUEST_PRINT__ = (nativePrint, restoreAnimation) => {
+          report.document.getElementById('keysuiteReportPrint')?.removeAttribute('hidden');
+          return requestPrint(nativePrint, restoreAnimation);
         };
-        setTimeout(runSetup,0);
-      } catch (error) { finish(error); }
-    };
-    iframe.src = frameUrl.href;
-    document.body.appendChild(iframe);
+        doc.write(html.replace(/<head\b[^>]*>/i, head => head + prefix)
+          .replace(/<\/body>/i, button + setup + '</body>'));
+        doc.close();
+      } catch (error) {
+        if (!printInPlace) report.close();
+        source.alert('Unable to prepare the PDF report: ' + error.message);
+      }
+    }
+    if (printInPlace) {
+      writeReport();
+      return;
+    }
+    const deadline = Date.now() + 20000;
+    function waitForReportHost() {
+      if (report.closed) return;
+      if (report.location.href === reportUrl && report.document.readyState === 'complete') {
+        writeReport();
+      } else if (Date.now() < deadline) {
+        setTimeout(waitForReportHost, 50);
+      } else {
+        report.close();
+        source.alert('Unable to open the technical report. Please try again.');
+      }
+    }
+    waitForReportHost();
   }
-  const activeCapture = new WeakMap();
-  window.KeySuiteTechnicalPdf = {openReport,captureFrame:report => activeCapture.get(report)?.()};
+
+  window.KeySuiteTechnicalPdf = {openReport, reserve};
 })();

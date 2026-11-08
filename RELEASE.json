@@ -1,8 +1,8 @@
 {
-  "version": "5.00.58",
-  "baseline": "5.00.57",
-  "upgrade_supported_from": "5.00.57",
-  "release_status": "technical_pdf_hotfix_review",
+  "version": "5.00.59",
+  "baseline": "5.00.58",
+  "upgrade_supported_from": "5.00.58",
+  "release_status": "manual_pdf_review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
   "supabase_data_seed_required": false,
@@ -13,8 +13,7 @@
     "KeyStock": "1.02"
   },
   "changes": [
-    "Restore one-click technical PDF export on static hosting with the bundled browser renderer",
-    "One-click searchable technical PDF download using a shared native print service",
+    "Restore browser Print / Save as PDF for technical reports and quotations",
     "ISO Dashboard Cold Item lookup uses the effective ISO source catalogue",
     "ES and ISO costing and quotation use the selected seal and elastomer",
     "Existing ES and ISO Page 3 artwork verified against the approved PNG"

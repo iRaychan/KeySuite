@@ -198,29 +198,15 @@
     if(d.notes&&!jsonish(d.notes))html+=`<div class="keyai-notes"><b>Notes</b><div>${esc(d.notes)}</div></div>`;
     return html;
   }
-  async function openInboxPdf(enquiryId,button){
-    const c=client();if(!c||!enquiryId)return;
-    const original=button?button.textContent:'PDF';
-    const popup=window.open('about:blank','_blank');
-    if(button){button.disabled=true;button.textContent='Generating…'}
-    try{
-      const {data,error}=await c.functions.invoke('telegram-webhook',{body:{action:'generate_curve_pdf',enquiry_id:String(enquiryId)}});
-      if(error)throw error;
-      let blob=data instanceof Blob?data:null;
-      if(!blob&&data instanceof ArrayBuffer)blob=new Blob([data],{type:'application/pdf'});
-      if(!blob&&data)blob=new Blob([data],{type:'application/pdf'});
-      if(!blob||!blob.size)throw new Error('No PDF data was returned.');
-      const url=URL.createObjectURL(blob);
-      if(popup)popup.location.replace(url);
-      else{const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.click()}
-      setTimeout(()=>URL.revokeObjectURL(url),300000);
-    }catch(error){
-      if(popup)popup.close();
-      console.error('KeyBot Inbox PDF generation failed',error);
-      alert('PDF could not be generated. '+String(error?.message||error||'Please try again.'));
-    }finally{
-      if(button){button.disabled=false;button.textContent=original||'PDF'}
+  function openInboxPdf(curveUrl){
+    const url=new URL(curveUrl,location.href);
+    if(url.origin!==location.origin||!/\/selector(?:-g1|-bfi|-es)?\/(?:index\.html)?$/.test(url.pathname)){
+      alert('This enquiry does not have a printable KeySuite selector link.');
+      return;
     }
+    if(url.pathname.endsWith('/'))url.pathname+='index.html';
+    url.searchParams.set('autoPdf','1');
+    if(!window.open(url.href,'_blank'))alert('Allow pop-ups for KeySuite, then click PDF again.');
   }
   function inboxKind(item){
     const st=String(item?.status||'');
@@ -253,7 +239,7 @@
       return `<details class="keyai-enquiry"><summary class="keyai-enquiry-summary"><div class="keyai-enquiry-head"><div><b>${esc(sender)}</b><div class="keyai-enquiry-meta">${esc(formatTime(item.created_at))} · Telegram</div></div><div class="keyai-enquiry-badges">${followupBadge}<span class="keyai-enquiry-status ${statusClass(item.status)}">${esc(statusLabel(item.status))}</span>${attention?'<span class="keyai-enquiry-status error">Incomplete</span>':''}</div></div><div class="keyai-enquiry-preview">${esc(preview||'No message')}</div></summary><div class="keyai-enquiry-body"><div class="keyai-enquiry-message">${esc(item.raw_message||'')}</div>${draft}${actions}${item.ai_error?`<div class="keyai-enquiry-ai"><b>AI error:</b> ${esc(item.ai_error)}</div>`:''}</div></details>`;
     }).join('')||'<div class="muted">No enquiries match this view.</div>';
     box.querySelectorAll('[data-keyai-pdf-id]').forEach(btn=>{
-      btn.addEventListener('click',()=>openInboxPdf(btn.getAttribute('data-keyai-pdf-id'),btn));
+      btn.addEventListener('click',()=>openInboxPdf(btn.closest('.keyai-enquiry-actions').querySelector('a').href));
     });
   }
   async function loadInbox(silent=false){

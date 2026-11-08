@@ -102,12 +102,9 @@ const windowsChrome = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537
       quotationStatus='sealed';
       await printCompleteQuotation({historySnapshot:true});
       await new Promise(resolve=>setTimeout(resolve,200));
-      const safari={userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15'};
-      return [prints,!!$('macQuotationPdfPreview'),isMacQuotationSafari(safari),
-        isMacQuotationSafari({...safari,maxTouchPoints:5}),
-        isMacQuotationSafari({userAgent:navigator.userAgent.replace('Chrome/','Edg/')})];
+      return [prints,!!$('macQuotationPdfPreview')];
     });
-    assert.deepEqual(printRoutes,[1,false,true,false,false]);
+    assert.deepEqual(printRoutes,[1,false]);
     await page.evaluate(async () => {
       loadQuote(currentQuote().id);
       await sealQuotation();
@@ -115,9 +112,14 @@ const windowsChrome = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537
       window.qaSealedId=currentQuote().id;
       await openHistoryQuotationPdfModal(window.qaSealedId);
     });
-    const historyDownload=page.waitForEvent('download');
-    await page.locator('[data-pdf-download]').click();
-    const history=await historyDownload;
+    const printButton=page.locator('[data-pdf-print]');
+    await printButton.waitFor();
+    await page.waitForFunction(()=>!document.querySelector('[data-pdf-print]').disabled);
+    const keyhqFrame=page.frameLocator('#keyhqPdfModal iframe');
+    assert.match(await keyhqFrame.locator('#printQuotationDocument').textContent(),/Legacy description/);
+    await keyhqFrame.locator('body').evaluate(el=>{el.ownerDocument.defaultView.print=()=>el.dataset.printCalled='yes'});
+    await printButton.click();
+    assert.equal(await keyhqFrame.locator('body').getAttribute('data-print-called'),'yes');
     await page.locator('[data-pdf-close]').click();
     await page.evaluate(async () => {
       await reviseQuotation();
@@ -125,21 +127,12 @@ const windowsChrome = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537
       if(!isRevisionCopy()||item.brand!=='Original OEM'||item.capacityUnit!=='L/s'||item.headUnit!=='bar')throw Error('Manual capacity lost in revision');
       loadQuote(window.qaSealedId);
       Object.defineProperty(navigator,'userAgent',{value:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15'});
-      window.print=()=>{throw Error('Preview opened the print panel automatically')};
+      window.print=()=>{window.qaNativePrint=(window.qaNativePrint||0)+1};
       await printCompleteQuotation({historySnapshot:true});
     });
-    const preview=page.locator('#macQuotationPdfPreview');
-    const downloadLink=preview.getByRole('link',{name:'Download PDF'});
-    const href=await downloadLink.getAttribute('href');
-    assert.equal(await preview.locator('iframe').getAttribute('src'),href);
-    assert.equal(await preview.getByRole('link',{name:'Open PDF to Print'}).getAttribute('href'),href);
-    const previewDownload=page.waitForEvent('download');
-    await downloadLink.click();
-    const pdf=await previewDownload;
-    assert.equal(pdf.suggestedFilename(),history.suggestedFilename());
-    const fs=require('node:fs/promises');
-    assert.deepEqual(await fs.readFile(await pdf.path()),await fs.readFile(await history.path()));
+    await page.waitForFunction(()=>window.qaNativePrint===1);
+    assert.equal(await page.locator('#macQuotationPdfPreview').count(),0);
     assert.deepEqual(errors,[]);
-    console.log('PASS manual items, legacy data, controls, units, save/reopen, clone/revision, Windows routing, and preview/download PDF byte identity');
+    console.log('PASS manual items, save/reopen, clone/revision, and native Print for KeyHQ and both quotation browser routes');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode=1; });
