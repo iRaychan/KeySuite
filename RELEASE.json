@@ -1,9 +1,10 @@
 {
-  "version": "5.00.56",
-  "baseline": "5.00.55",
-  "upgrade_supported_from": "5.00.55",
-  "release_status": "bugs_001_005_review",
-  "new_database_migration_required": true,
+  "version": "5.00.57",
+  "baseline": "5.00.56",
+  "upgrade_supported_from": "5.00.56",
+  "release_status": "phase_05_review",
+  "technical_pdf_service_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -12,10 +13,9 @@
     "KeyStock": "1.02"
   },
   "changes": [
-    "Original ES and ISO V1.3 drawings in technical PDF Page 3",
-    "ES and ISO component pricing by verified model shaft size",
-    "Numerically sorted ES and ISO Coupling model lists",
-    "Aligned ES and ISO complete pumpset quotation descriptions",
-    "Editable Dashboard Selection PDF item number"
+    "One-click searchable technical PDF download using a shared native print service",
+    "ISO Dashboard Cold Item lookup uses the effective ISO source catalogue",
+    "ES and ISO costing and quotation use the selected seal and elastomer",
+    "Existing ES and ISO Page 3 artwork verified against the approved PNG"
   ]
 }

@@ -299,7 +299,9 @@
       const locked=sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT;
       if(locked&&typeof locked==='object')return {...locked,...isoLiveReportIdentity(sourceWin),pdfMetadataTitle:window.KeySuitePumpPdfNames?.metadataTitleFromPump?.(sourceWin?.__KEYSUITE_CURRENT_SELECTION?.()||{model:locked.displayModel||locked.masterModel})||locked.pdfMetadataTitle,pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||locked.pdfFileTitle||'')};
     }catch(_){}
-    const family=String(sourceWin?.__KEYSUITE_V39445_FAMILY||'CHC').toUpperCase();
+    const path=String(sourceWin?.location?.pathname||'');
+    const series=path.match(/\/selector-(es|iso|cr|kv|bfi|bgf|bsw)\//i)?.[1];
+    const family=String(series||sourceWin?.__KEYSUITE_V39445_FAMILY||'CHC').toUpperCase();
     const ctx=context(family,sourceWin);
     let logo=String(ctx?.logo||'').trim();
     try{if(sourceWin?.document){applySelectorLogo(sourceWin.document,ctx);if(logo)logo=displayedSelectorLogo(sourceWin.document)||logo;}}catch(_){}
@@ -368,7 +370,6 @@
       product = /^product/i.test(sourceWin?.frameElement?.id || '') ||
         new URLSearchParams(sourceWin?.location?.search).get('product') === '1';
     } catch (_) {}
-    if (!product) html=window.KeySuitePumpPdfDownload?.inject?.(html,sourceWin)||html;
     const snapshot=reportContextSnapshot(sourceWin);
     let out=html;
     // Native-source correction: Page 2 must say 1 Stage, otherwise n Stages.
@@ -558,5 +559,5 @@
     try{delete frame.contentWindow.__KEYSUITE_MODEL_PRESENTATION_CONTEXT;delete frame.contentWindow.__KEYSUITE_HIDE_INNER_ACTIONS;applyPinnedChrome(frame.contentDocument,frame.contentWindow);if(isActiveFrame(frame))refresh(frame);return true}catch(_){return false}
   }
 
-  window.KeySuiteSelectorBrand={version:'4.22.03',refresh,getDefaultLogo:()=>defaultBrandLogo,refreshLogo:()=>refresh(),modelAlias:text=>modelAlias(text,context()),modelAliasFor:(text,ctx)=>modelAlias(text,ctx),brandAlias:text=>brandAlias(text,context()),context,collapseSummaryForFrame,pinContext,clearPinnedContext,transformReportHtml,installReportWriteTransform,liveMaterial,materialProfile};window.KeySuiteV40001SelectorBrand=window.KeySuiteSelectorBrand;
+  window.KeySuiteSelectorBrand={version:'4.22.03',refresh,getDefaultLogo:()=>defaultBrandLogo,refreshLogo:()=>refresh(),modelAlias:text=>modelAlias(text,context()),modelAliasFor:(text,ctx)=>modelAlias(text,ctx),brandAlias:text=>brandAlias(text,context()),context,collapseSummaryForFrame,pinContext,clearPinnedContext,transformReportHtml,applyReport,installReportWriteTransform,liveMaterial,materialProfile};window.KeySuiteV40001SelectorBrand=window.KeySuiteSelectorBrand;
 })();

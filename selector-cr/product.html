@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script defer src="../technical-pdf.js?v=50057"></script>
 <script src="../power-curve.js?v=42872"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KeyCR - CR Series</title>
@@ -1392,72 +1393,7 @@ window.onload=async()=>{
 };
 <\/script>
  </body></html>`;
-
-
- const originalPageTitle=document.title;
- let originalTopPageTitle='';
- document.title=pdfFileTitle;
- try{if(window.top&&window.top!==window){originalTopPageTitle=String(window.top.document.title||'');window.top.document.title=pdfFileTitle;}}catch(_){}
- const restorePrintTitles=()=>{document.title=originalPageTitle;try{if(window.top&&window.top!==window&&originalTopPageTitle)window.top.document.title=originalTopPageTitle;}catch(_){}};
- const isMobilePrint=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && window.innerWidth<900);
- const isMacSafariPrint=/Macintosh/i.test(navigator.userAgent)&&/Safari\//i.test(navigator.userAgent)&&!/(?:Chrome|Chromium|CriOS|Edg|OPR)\//i.test(navigator.userAgent);
- if(isMobilePrint||isMacSafariPrint){
-   const reportPrintWindow=window.open("","_blank");
-   if(!reportPrintWindow){
-     restorePrintTitles();
-     alert("Your browser blocked the PDF window. Please allow pop-ups for this site, then press EXPORT PDF again.");
-     return;
-   }
-   try{
-     reportPrintWindow.document.open();
-     reportPrintWindow.document.write(keysuiteCrApplyBrandingToReport(report));
-     reportPrintWindow.document.close();
-     try{reportPrintWindow.document.title=pdfFileTitle;reportPrintWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;reportPrintWindow.addEventListener('beforeprint',()=>{try{reportPrintWindow.document.title=pdfFileTitle;}catch(_){}});}catch(_){}
-     setTimeout(()=>{restorePrintTitles();try{flowInput.disabled=false;headInput.disabled=false;}catch(e){}},1000);
-   }catch(error){
-     try{reportPrintWindow.close();}catch(e){}
-     restorePrintTitles();
-     alert("Unable to prepare the PDF report. Please try again.");
-   }
-   return;
- }
- const previousFrame=document.getElementById("pdfPrintFrame");
- if(previousFrame)previousFrame.remove();
- const frame=document.createElement("iframe");
- frame.id="pdfPrintFrame";
- frame.name=pdfFileTitle;
- frame.title=pdfFileTitle;
- frame.setAttribute("aria-hidden","true");
- frame.style.position="fixed";
- frame.style.right="0";
- frame.style.bottom="0";
- frame.style.width="1px";
- frame.style.height="1px";
- frame.style.border="0";
- frame.style.opacity="0";
- frame.style.pointerEvents="none";
- document.body.appendChild(frame);
- const printWindow=frame.contentWindow;
- const printDocument=frame.contentDocument||printWindow.document;
- const cleanupPrintFrame=()=>{
-   try{window.focus();}catch(e){}
-   setTimeout(()=>{
-     if(frame.parentNode)frame.parentNode.removeChild(frame);
-     restorePrintTitles();
-     try{flowInput.disabled=false;headInput.disabled=false;flowInput.focus();}catch(e){}
-   },100);
- };
- try{
-   printDocument.open();
-   printDocument.write(keysuiteCrApplyBrandingToReport(report));
-   printDocument.close();
-   try{printDocument.title=pdfFileTitle;printWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;frame.name=pdfFileTitle;frame.title=pdfFileTitle;printWindow.addEventListener('beforeprint',()=>{try{printDocument.title=pdfFileTitle;frame.name=pdfFileTitle;frame.title=pdfFileTitle;document.title=pdfFileTitle;if(window.top&&window.top!==window)window.top.document.title=pdfFileTitle;}catch(_){}});}catch(_){}
-   printWindow.addEventListener("afterprint",cleanupPrintFrame,{once:true});
-   setTimeout(cleanupPrintFrame,120000);
- }catch(error){
-   cleanupPrintFrame();
-   alert("Unable to prepare the PDF report. Please try again.");
- }
+ (window.top.KeySuiteTechnicalPdf||window.KeySuiteTechnicalPdf).openReport(window,keysuiteCrApplyBrandingToReport(report),pdfFileTitle,pdfFileTitle);
 }
 
 

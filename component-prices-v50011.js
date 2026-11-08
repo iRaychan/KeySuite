@@ -24,13 +24,25 @@
    family,new Map(Object.entries(sizes).flatMap(([size,models])=>models.split(' ').map(model=>[model,size])))
  ]));
  function shaftSize(family,model){return shaftByModel[family]?.get(String(model||'').trim().toUpperCase().replace(/^(?:ES|ISO)\s+/,''));}
- let rows=[],available=false;
+ let rows=[],available=false,loadError=false;
  const key=r=>[r.family,r.kind,r.size_group,r.material].join('|');
  const defaults=[];
  for(const family of ['ES','ISO'])for(const size_group of Object.keys(shaftModels[family]))for(const [kind,materials] of Object.entries(pumpMaterials))for(const material of materials)defaults.push({family,kind,size_group,material,price_myr:null});
  for(const family of ['CHC','CR'])for(const size_group of [...groups,...(family==='CR'?['320']:[])])for(const material of ['Viton','EPDM'])defaults.push({family,kind:'oring',size_group,material,price_myr:null});
  function group(model){const series=Number(String(model||'').match(/(?:CHC[SN]?|CR[SN]?)\s*(\d+)\s*-/i)?.[1]);return series===320?'320':[[1,5],[8,20],[32,90],[120,200]].find(([a,b])=>series>=a&&series<=b)?.join('_')||null;}
- function price(family,kind,size_group,material){const row=rows.find(r=>key(r)===key({family,kind,size_group:String(size_group),material}));return row?.price_myr===null||row?.price_myr===undefined?null:Number(row.price_myr);}
+ function price(family,kind,size_group,material){
+   const raw=rows.find(r=>key(r)===key({family,kind,size_group:String(size_group),material}))?.price_myr;
+   if(raw==null||String(raw).trim()==='')return null;
+   const value=Number(raw);
+   return Number.isFinite(value)&&value>=0?value:null;
+ }
+ function pumpOptions(options={}){
+   return {
+     sealType:options.sealType||options.keysuite_seal_type||'',
+     seal:options.seal||options.keysuite_seal||options.keysuite_seal_material||'Car/Cer',
+     elastomer:options.elastomer||options.keysuite_elastomer||'Viton',
+   };
+ }
  function additions(family,model,options={}){
    const pumpFamily=Object.hasOwn(shaftModels,family);
    const requests=[],rawElastomer=String(options.elastomer||options.keysuite_elastomer||'Viton').trim().toUpperCase();
@@ -52,7 +64,9 @@
      if(value===null)missing.push(`${family} ${size.replace('_','–')} ${material} ${kind==='oring'?'O-ring':'seal'}`);
      else total+=value;
    }
-   return missing.length?{error:`Component price not entered: ${missing.join(', ')}.`,total:null,details}:{total,details};
+   return missing.length?{error:!available&&loadError
+     ?`Component price lookup failed for ${family}. Reload KeySuite before quoting.`
+     :`Component price not entered: ${missing.join(', ')}.`,total:null,details}:{total,details};
  }
  function apply(calc,family,model,options={}){
    const pump=Object.hasOwn(shaftModels,family);
@@ -61,9 +75,11 @@
    const base=Number(calc.componentBasePrice??calc.finalPrice??0);
    const beforeFuel=Number(calc.componentBaseBeforeFuel??calc.beforeFuel??base);
    const addon=result.error?0:result.total;
+   const unrounded=Number(calc.componentBaseUnroundedPrice??calc.unroundedPrice??base);
    return {...calc,componentBasePrice:base,componentAddon:result.total,componentDetails:result.details||[],
      componentPricingError:result.error||'',finalPrice:base+addon,
-     ...(pump?{componentBaseBeforeFuel:beforeFuel,beforeFuel:beforeFuel+addon}:{})};
+     ...(pump?{componentBaseBeforeFuel:beforeFuel,beforeFuel:beforeFuel+addon,
+       componentBaseUnroundedPrice:unrounded,unroundedPrice:unrounded+addon}:{})};
  }
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const savedKeys=new Set();
@@ -116,6 +132,7 @@
    rows=defaults.map(row=>({...row}));
    savedKeys.clear();
    available=false;
+   loadError=false;
    try{
      const result=await window.KeySuiteAuth.getClient().from('ks_component_prices_v50011').select('family,kind,size_group,material,price_myr');
      if(result.error)throw result.error;
@@ -124,8 +141,8 @@
        const target=rows.find(record=>key(record)===key(row));
        if(target){Object.assign(target,row);savedKeys.add(key(row));}
      }
-   }catch(error){console.info('Component pricing setup pending:',error.message);}
+   }catch(error){loadError=true;console.info('Component pricing setup pending:',error.message);}
    render();
  }
- window.KeySuiteComponents={init,render,apply,additions,group,shaftSize,defaults,loadForTest(data){rows=data;}};
+ window.KeySuiteComponents={init,render,apply,additions,group,shaftSize,pumpOptions,defaults,loadForTest(data){rows=data;loadError=false;}};
 })();

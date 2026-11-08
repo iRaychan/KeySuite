@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script defer src="../technical-pdf.js?v=50057"></script>
 <script src="../power-curve.js?v=42872"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script>if(/Macintosh/i.test(navigator.userAgent||'')&&/Safari\//i.test(navigator.userAgent||'')&&!/(?:Chrome|Chromium|CriOS|Edg|OPR)/i.test(navigator.userAgent||''))document.documentElement.classList.add('macos-safari');</script>
@@ -1319,26 +1320,7 @@ window.onload=async()=>{
 };
 <\/script>
  </body></html>`;
-
- const autoPdfInPlace=new URLSearchParams(location.search).get('autoPdf')==='1';
- const printWindow=autoPdfInPlace?window:window.open("","_blank");
- if(!printWindow){
-   alert("Allow pop-ups to export the PDF.");
-   return;
- }
- try{
-   printWindow.document.open();
-   printWindow.document.write(keysuiteChcApplyBrandingToReport(report));
-   printWindow.document.close();
-   try{
-     printWindow.document.title=pdfMetadataTitle;
-     printWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;
-     setTimeout(()=>{try{printWindow.document.title=pdfMetadataTitle;}catch(_){}},50);
-   }catch(_){}
- }catch(error){
-   try{printWindow.close();}catch(_){}
-   alert("Unable to prepare the PDF report. Please try again.");
- }
+ (window.top.KeySuiteTechnicalPdf||window.KeySuiteTechnicalPdf).openReport(window,keysuiteChcApplyBrandingToReport(report),pdfFileTitle,pdfMetadataTitle);
 }
 
 

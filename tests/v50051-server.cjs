@@ -9,6 +9,9 @@ const withLedger=process.env.KEYSTOCK_V102==='1';
   process.env.KEYSTOCK_V101==='1'?(await require('./v50052-db.cjs').fixture()).db:await create();
   await as(db,readOnly?'user':'owner','test-a',!readOnly);const server=http.createServer(async(req,res)=>{
  try{
+  if(req.url==='/api/technical-pdf'&&process.env.KEYSUITE_PDF_ORIGIN){
+    await require('../tools/technical-pdf-server.cjs').handleTechnicalPdf(req,res);return;
+  }
   if(withLedger&&req.url.startsWith('/__stock_customers?')&&req.method==='GET'){
     const term=new URL(req.url,'http://localhost').searchParams.get('q');
     const {rows}=await db.query("select id,company_name from public.ks_customers where status='active' and company_name ilike $1 order by company_name limit 25",[term]);

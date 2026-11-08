@@ -409,7 +409,12 @@
   function calculateWithBrandMargin(source,brandMargin){
     if(source?.manual_override===true)return null;
     const result=calculateBaseWithBrandMargin(source,brandMargin);if(!result)return null;
+    const pump=['ES','ISO'].includes(source?.product_family);
     const addon=source?.fixed_price?0:num(source?.seal_addon_myr,0)+num(source?.component_addon_myr,0);
+    if(pump&&source?.fixed_price){
+      const component=num(source.component_addon_myr,0);
+      return {...result,unrounded:result.final,final:result.final,beforeFuel:result.final-component};
+    }
     return {...result,final:result.final+addon,unrounded:result.unrounded+addon};
   }
   function calculateBaseWithBrandMargin(source,brandMargin){

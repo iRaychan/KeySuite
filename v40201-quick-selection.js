@@ -165,7 +165,11 @@ function priceCatalogueFor(e){
 }
 function dashboardPriceAvailable(e,data){
   if(typeof data?.price_available==='boolean')return data.price_available;
-  const wanted=priceModelKey(data?.base_model||data?.model,e?.family),row=priceCatalogueFor(e).find(x=>priceModelKey(x?.model||x?.id,e?.family)===wanted);
+  const model=data?.base_model||data?.model;
+  const wanted=priceModelKey(model,e?.family);
+  const row=upper(e?.family)==='ISO'
+    ?window.KeySuiteISO?.findProduct?.(model)
+    :priceCatalogueFor(e).find(x=>priceModelKey(x?.model||x?.id,e?.family)===wanted);
   if(!row)return false;
   if(hasPositivePrice(row.pricesByCurrency))return true;
   return Array.isArray(row.variants)&&row.variants.some(v=>hasPositivePrice({priceUsd:v?.priceUsd,priceRmb:v?.priceRmb,priceMyr:v?.priceMyr}));

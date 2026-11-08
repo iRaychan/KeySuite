@@ -1804,7 +1804,7 @@ async function routeEsSelection(p={},route='quotation'){
  const id=esSelectionProductId(p),material=String(p.keysuite_material||'CI / SS / SS / MS');
  // Complete ES sets use the same Assembly component pricing/BOM as Move to Pumpset → Move to Quotation.
  const pricingMode=(target==='assembly'||!bare)?'assembly':'quotation';
- const found=window.KeySuitePricing?.findEsPrice?.(id,material,{pricingMode,seal:p.keysuite_seal,elastomer:p.keysuite_elastomer});
+ const found=window.KeySuitePricing?.findEsPrice?.(id,material,{pricingMode,sealType:p.keysuite_seal_type,seal:p.keysuite_seal,elastomer:p.keysuite_elastomer});
  if(!found||window.KeySuitePricing.quoteBlockReason(found.calc)){
    const description=window.KeySuitePricing.esDescription({model:p.quotation_model||p.model},material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true});
    const capacity=esSelectionCapacity(p);

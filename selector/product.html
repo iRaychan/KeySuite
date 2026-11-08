@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script defer src="../technical-pdf.js?v=50057"></script>
 <script src="../power-curve.js?v=42872"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KeyCHC - CHC Series</title>
@@ -1375,52 +1376,7 @@ window.onload=async()=>{
 };
 <\/script>
  </body></html>`;
-
-
- const originalPageTitle=document.title;
- let originalTopPageTitle='';
- document.title=pdfFileTitle;
- try{if(window.top&&window.top!==window){originalTopPageTitle=String(window.top.document.title||'');window.top.document.title=pdfFileTitle;}}catch(_){}
- const restorePrintTitles=()=>{document.title=originalPageTitle;try{if(window.top&&window.top!==window&&originalTopPageTitle)window.top.document.title=originalTopPageTitle;}catch(_){}};
- const isMobilePrint=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints>1 && window.innerWidth<900);
- if(isMobilePrint){
-   const mobilePrintWindow=window.open("","_blank");
-   if(!mobilePrintWindow){
-     restorePrintTitles();
-     alert("Your phone blocked the PDF window. Please allow pop-ups for this site, then press EXPORT PDF again.");
-     return;
-   }
-   try{
-     mobilePrintWindow.document.open();
-     mobilePrintWindow.document.write(keysuiteChcApplyBrandingToReport(report));
-     mobilePrintWindow.document.close();
-     try{mobilePrintWindow.document.title=pdfFileTitle;mobilePrintWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;mobilePrintWindow.addEventListener('beforeprint',()=>{try{mobilePrintWindow.document.title=pdfFileTitle;}catch(_){}});}catch(_){}
-     setTimeout(()=>{restorePrintTitles();try{flowInput.disabled=false;headInput.disabled=false;}catch(e){}},1000);
-   }catch(error){
-     try{mobilePrintWindow.close();}catch(e){}
-     restorePrintTitles();
-     alert("Unable to prepare the PDF report on this phone. Please try again.");
-   }
-   return;
- }
- const printWindow=window.open("","_blank");
- if(!printWindow){
-   restorePrintTitles();
-   alert("Your browser blocked the PDF window. Please allow pop-ups for this site, then press EXPORT PDF again.");
-   return;
- }
- try{
-   const printDocument=printWindow.document;
-   printDocument.open();
-   printDocument.write(keysuiteChcApplyBrandingToReport(report));
-   printDocument.close();
-   try{printDocument.title=pdfFileTitle;printWindow.__KEYSUITE_PDF_FILE_TITLE__=pdfFileTitle;printWindow.addEventListener('beforeprint',()=>{try{printDocument.title=pdfFileTitle;document.title=pdfFileTitle;if(window.top&&window.top!==window)window.top.document.title=pdfFileTitle;}catch(_){}});}catch(_){}
-   setTimeout(()=>{restorePrintTitles();try{flowInput.disabled=false;headInput.disabled=false;}catch(e){}},1000);
- }catch(error){
-   try{printWindow.close();}catch(e){}
-   restorePrintTitles();
-   alert("Unable to prepare the PDF report. Please try again.");
- }
+ (window.top.KeySuiteTechnicalPdf||window.KeySuiteTechnicalPdf).openReport(window,keysuiteChcApplyBrandingToReport(report),pdfFileTitle,pdfFileTitle);
 }
 
 
