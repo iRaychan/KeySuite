@@ -888,7 +888,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   function esDescription(product,material,options={}){
     const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),sizes=esConnectionSizes(product?.model),isGland=/\bGP\b/i.test(String(material||''));
     const lines=[`B.G.Reich End Suction Pump Model: ${esModelName(product?.model)}`,`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
-    if(options.trimmed&&Number(options.impellerMm)>0)lines.push(`Impeller Diameter: ${Number(options.impellerMm).toLocaleString(undefined,{maximumFractionDigits:2})} mm (Trimmed)`);
+
     if(!isGland&&seal!==ES_DEFAULT_SEAL)lines.push(`Mech Seal Material: ${seal}`);
     if(elastomer!==ES_DEFAULT_ELASTOMER)lines.push(`Elastomer: ${elastomer}`);
     if(options.bareShaft!==false)lines.push('(Bare shaft pump only)');return lines.join('\n');

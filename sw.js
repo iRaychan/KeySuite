@@ -1,6 +1,6 @@
-/* KeySuite V5.00.54 Service Worker. */
-const CACHE='keysuite-v50054-keystock';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50054"></script>';
+/* KeySuite V5.00.55 Service Worker. */
+const CACHE='keysuite-v50055-keystock';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50055"></script>';
 const SHELL=[
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',
  './bsw-variants-v50036.js','./bsw-pricing-v50036.js','./customer-remarks-v50036.js','./product-audit-v50036.js','./v50037-version-lock.js',

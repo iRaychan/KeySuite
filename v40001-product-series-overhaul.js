@@ -32,7 +32,7 @@
   let selectionBfiOpen=false;
   let selectionBfiHome=null;
   let selectionIsoOpen=false;
-  let selectionIsoHome=null;
+
   let currentFamily='CHC';
   let lastScrollY=0;
   const lastDuty={CHC:null,CR:null,KV:null,BGF:null,BSW:null,BFI:null,ES:null,ISO:null};
@@ -148,6 +148,13 @@
       if(!displayModel)displayModel=norm(payload.display_model)||norm(payload.keysuite_display_model)||norm(payload.quotation_model);
       if((f==='ES'||f==='ISO')&&!masterModel){const h=frame?.contentDocument?.querySelector('#summary h1')?.textContent||'';masterModel=norm(h)}
     }catch(_){}
+    if(f==='ISO'){
+      // Product and Quick Selection can pin branding while the selected curve changes.
+      // The active ISO record owns both model labels.
+      const live=norm(frame?.contentWindow?.__KEYSUITE_CURRENT_SELECTION?.()?.model);
+      masterModel=live;
+      displayModel=live;
+    }
     if(!displayModel&&masterModel){
       try{displayModel=window.KeySuiteSelectorBrand?.modelAliasFor?.(masterModel,ctx)||''}catch(_){}
       if(!displayModel)displayModel=aliasModel(masterModel,ctx);
@@ -538,22 +545,23 @@
   function prepareSelectionIsoFrame(frame=$('selectorIsoFrame')){try{const doc=frame?.contentDocument;if(!doc?.body)return false;doc.body.classList.add('product-frame','ks3963-product-es');ensureFrameStyle(doc,'ISO');installPdfHooks(frame,'ISO',{generic:true});resizeFrame(frame);return true}catch(_){return false}}
   function openSelectionIsoPanel(){
     const frame=$('selectorIsoFrame'),dlg=productDialog(),host=$('productCurveHost'),main=mainHost();if(!frame||!dlg||!host||!main)return false;
-    if(inlineOpen)closeInline(true);if(!selectionIsoHome)selectionIsoHome=frame.parentNode||$('selectorIso');if(dlg.parentNode!==main)main.appendChild(dlg);
+    if(selectionIsoOpen)return true;if(inlineOpen)closeInline(true);if(dlg.parentNode!==main)main.appendChild(dlg);
     document.querySelectorAll('.ks3963-product-curve-open').forEach(el=>el.classList.remove('ks3963-product-curve-open'));
     ['CHC','CR','BFI','ES','ISO'].forEach(f=>{const productFrame=frameFor(f);if(productFrame)productFrame.style.display='none'});
     if(frame.parentNode!==host)host.appendChild(frame);frame.style.display='block';frame.style.opacity='1';frame.style.visibility='visible';
     selectionIsoOpen=true;dlg.classList.add('ks3963-inline');dlg.setAttribute('open','');dlg.dataset.ksSelectionIsoInline='1';delete dlg.dataset.ks3963Inline;
     const title=$('productCurveTitle');if(title){title.textContent='Selector · ISO';title.dataset.v393MasterText='Selector · ISO'}const close=$('closeProductCurve');if(close)close.hidden=true;
-    prepareSelectionIsoFrame(frame);setTimeout(()=>{prepareSelectionIsoFrame(frame);window.scrollTo({top:0,behavior:'auto'})},0);return true;
+    prepareSelectionIsoFrame(frame);window.KeySuiteModelReturn?.syncUniversalButton?.();setTimeout(()=>{prepareSelectionIsoFrame(frame);window.scrollTo({top:0,behavior:'auto'})},0);return true;
   }
   function closeSelectionIsoPanel(){
     if(!selectionIsoOpen)return false;const frame=$('selectorIsoFrame'),dlg=productDialog();selectionIsoOpen=false;
-    if(frame&&selectionIsoHome&&frame.parentNode!==selectionIsoHome)selectionIsoHome.appendChild(frame);if(frame)frame.style.display='none';
+    // Keep the iframe mounted so its live duty, model and scroll state survive page navigation.
+    if(frame)frame.style.display='none';
     if(dlg?.dataset?.ksSelectionIsoInline==='1'){dlg.classList.remove('ks3963-inline');dlg.removeAttribute('open');delete dlg.dataset.ksSelectionIsoInline}
     const close=$('closeProductCurve');if(close)close.hidden=false;return true;
   }
   function installSelectionIsoProductPanel(){
-    const frame=$('selectorIsoFrame');if(!frame)return false;if(!selectionIsoHome)selectionIsoHome=frame.parentNode||$('selectorIso');
+    const frame=$('selectorIsoFrame');if(!frame)return false;
     if(frame.dataset.ks50015ProductPanel!=='1'){frame.dataset.ks50015ProductPanel='1';frame.addEventListener('load',()=>setTimeout(()=>prepareSelectionIsoFrame(frame),0))}
     prepareSelectionIsoFrame(frame);if(document.querySelector('.page.active')?.id==='selectorIso')openSelectionIsoPanel();return true;
   }

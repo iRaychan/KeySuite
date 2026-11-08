@@ -29,10 +29,12 @@
   const numericModel=value=>number(String(value||'').match(/\d+(?:\.\d+)?/)?.[0]);
   const sortedComponents=type=>[...componentRows(type)].sort((a,b)=>numericModel(a.model)-numericModel(b.model));
   const findComponent=(type,model)=>componentRows(type).find(row=>String(row.model).toUpperCase()===String(model||'').toUpperCase())||null;
-  const effectiveMaxSpeed=row=>String(row?.model||'').toUpperCase()==='FCL 224'?Math.max(3000,number(row?.maxSpeedRpm||row?.max_speed_rpm)):number(row?.maxSpeedRpm||row?.max_speed_rpm);
-  const fBushModel=row=>String(row?.fBush||row?.pumpBush||row?.pump_bush||'');
-  const hBushModel=row=>String(row?.hBush||row?.motorBush||row?.motor_bush||'');
-  const bushMax=model=>number(findComponent('bush',model)?.maxShaftMm||BUSH_SPECS.find(row=>row.model===String(model))?.max_shaft_mm);
+  // Coupling workbook V1.1, "Coupling" B:F (Pin & Bush), I:M (Tyre), P:Q (Bush).
+  const technicalSpec=(specs,row)=>specs.find(spec=>spec.model===String(row?.model||'').toUpperCase());
+  const effectiveMaxSpeed=row=>number(technicalSpec([...PIN_SPECS,...TYRE_SPECS],row)?.max_speed_rpm);
+  const fBushModel=row=>String(technicalSpec(TYRE_SPECS,row)?.pump_bush||'');
+  const hBushModel=row=>String(technicalSpec(TYRE_SPECS,row)?.motor_bush||'');
+  const bushMax=model=>number(technicalSpec(BUSH_SPECS,{model})?.max_shaft_mm);
   const tyreFlangeMax=(product,type,bush)=>{const bushLimit=bushMax(bush),flangeLimit=number(TYRE_FLANGE_MAX_BORE[String(product?.model||'').toUpperCase()]?.[String(type||'').toUpperCase()]);return bushLimit>0&&flangeLimit>0?Math.min(bushLimit,flangeLimit):bushLimit||flangeLimit};
   const pricingCustomer=()=>window.KeySuiteApp?.getPricingCustomer?.()||window.KeySuiteApp?.getSelectedCustomer?.()||null;
   const categories=()=>secureData.categories||[];
@@ -49,7 +51,30 @@
     const frame=String(row.frames?.[String(number(pole))]||'');if(!frame||frame.toLowerCase()==='x')return null;
     const shaft=SHAFT_BY_FRAME[frame];return {frame,shaftSize:number(number(pole)===2?shaft?.['2']:shaft?.other)};
   }
-  function pumpShaft(model){return number(PUMP_SHAFTS[normalizePumpModel(model)]||0)}
+  function isoPumpModels(){
+    const pumps=new Map();
+    for(const pump of [...(window.ISO_SELECTOR_DB?.pumps||[]),...(window.KEYSUITE_ISO_PRODUCTS||[])]){
+      if(Number(pump.dimensions?.shaft_mm)>0)pumps.set('ISO '+pump.model.toUpperCase(),pump.dimensions);
+    }
+    return pumps;
+  }
+  function isoPumpDimensions(model){return isoPumpModels().get(normalizePumpModel(model))}
+  function pumpShaft(model){
+    const key=normalizePumpModel(model);
+    return number(key.startsWith('ISO ')?isoPumpDimensions(key)?.shaft_mm:PUMP_SHAFTS[key]);
+  }
+  function pumpTorqueLimitReasons(c){
+    const limits=c.pumpItems?.length
+      ?c.pumpItems.map(row=>[row.model,isoPumpDimensions(row.model)])
+      :[[c.pumpModel,isoPumpDimensions(c.pumpModel)]];
+    return limits.flatMap(([model,dims])=>{
+      const limit=Number(dims?.max_torque_nm);
+      if(model?.startsWith('ISO ')&&!(limit>0))return [`${model} pump-shaft torque limit is unavailable for Ø${dims?.shaft_mm||'—'} mm`];
+      return limit>0&&c.motorTorque>limit
+        ?[`Required torque ${Math.ceil(c.motorTorque)} Nm exceeds ${model} pump-shaft limit ${limit} Nm`]
+        :[];
+    });
+  }
   function contextForSelection(pumpModel,hp,pole){
     const motor=frameFor(hp,pole),rpm=speedForPole(pole);
     return {pumpModel:normalizePumpModel(pumpModel),pumpShaft:pumpShaft(pumpModel),motorHp:number(hp),motorPole:number(pole||2),motorFrame:motor?.frame||'',motorShaft:number(motor?.shaftSize),motorTorque:torqueForMotor(hp,pole),motorRpm:rpm,couplingQty:1,pumpCount:1,motorCount:1};
@@ -60,7 +85,8 @@
   }
   function missingContextReasons(context){const c=normalizeContext(context),reasons=[];if(!c.pumpModel)reasons.push('Pump model is not selected');if(!(c.pumpShaft>0))reasons.push('Missing pump-shaft data');if(!(c.motorShaft>0))reasons.push('Missing motor-shaft data');if(!(c.motorTorque>0))reasons.push('Missing motor torque');if(!(c.motorRpm>0))reasons.push('Missing motor speed');return reasons}
   function pinEvaluation(product,context){
-    const c=normalizeContext(context),reasons=missingContextReasons(c),maxShaft=number(product?.maxShaftMm||product?.max_shaft_mm),torque=number(product?.torqueNm||product?.torque_nm),speed=effectiveMaxSpeed(product);
+    const c=normalizeContext(context),reasons=missingContextReasons(c),spec=technicalSpec(PIN_SPECS,product),maxShaft=number(spec?.max_shaft_mm),torque=number(spec?.torque_nm),speed=effectiveMaxSpeed(product);
+    reasons.push(...pumpTorqueLimitReasons(c));
     if(c.pumpShaft>maxShaft)reasons.push(`Pump shaft ${c.pumpShaft} mm exceeds maximum shaft ${maxShaft} mm`);
     if(c.motorShaft>maxShaft)reasons.push(`Motor shaft ${c.motorShaft} mm exceeds maximum shaft ${maxShaft} mm`);
     if(c.motorTorque>torque)reasons.push(`Required torque ${Math.ceil(c.motorTorque)} Nm exceeds rated torque ${torque} Nm`);
@@ -69,10 +95,11 @@
   }
   function tyreArrangements(product){
     const f=fBushModel(product),h=hBushModel(product),arrangements=[{key:'pump_h_motor_f',pumpBushType:'H',pumpBush:h,motorBushType:'F',motorBush:f},{key:'pump_f_motor_h',pumpBushType:'F',pumpBush:f,motorBushType:'H',motorBush:h}];
-    return arrangements.filter((row,index,rows)=>row.pumpBush&&row.motorBush&&row.pumpBush!=='-'&&row.motorBush!=='-'&&rows.findIndex(other=>other.pumpBush===row.pumpBush&&other.motorBush===row.motorBush)===index);
+    return arrangements.filter((row,index,rows)=>row.pumpBush&&row.motorBush&&row.pumpBush!=='-'&&row.motorBush!=='-'&&rows.findIndex(other=>other.pumpBush===row.pumpBush&&other.motorBush===row.motorBush&&tyreFlangeMax(product,other.pumpBushType,other.pumpBush)===tyreFlangeMax(product,row.pumpBushType,row.pumpBush)&&tyreFlangeMax(product,other.motorBushType,other.motorBush)===tyreFlangeMax(product,row.motorBushType,row.motorBush))===index);
   }
   function tyreArrangementEvaluation(product,context,arrangement){
-    const c=normalizeContext(context),reasons=missingContextReasons(c),torque=number(product?.torqueNm||product?.torque_nm),speed=effectiveMaxSpeed(product),pumpMax=tyreFlangeMax(product,arrangement?.pumpBushType,arrangement?.pumpBush),motorMax=tyreFlangeMax(product,arrangement?.motorBushType,arrangement?.motorBush);
+    const c=normalizeContext(context),reasons=missingContextReasons(c),torque=number(technicalSpec(TYRE_SPECS,product)?.torque_nm),speed=effectiveMaxSpeed(product),pumpMax=tyreFlangeMax(product,arrangement?.pumpBushType,arrangement?.pumpBush),motorMax=tyreFlangeMax(product,arrangement?.motorBushType,arrangement?.motorBush);
+    reasons.push(...pumpTorqueLimitReasons(c));
     if(!(pumpMax>0))reasons.push(`Pump ${arrangement?.pumpBushType||''} Bush data is unavailable`);else if(c.pumpShaft>pumpMax)reasons.push(`Pump shaft ${c.pumpShaft} mm exceeds ${arrangement.pumpBushType} Bush ${arrangement.pumpBush} maximum ${pumpMax} mm`);
     if(!(motorMax>0))reasons.push(`Motor ${arrangement?.motorBushType||''} Bush data is unavailable`);else if(c.motorShaft>motorMax)reasons.push(`Motor shaft ${c.motorShaft} mm exceeds ${arrangement.motorBushType} Bush ${arrangement.motorBush} maximum ${motorMax} mm`);
     if(c.motorTorque>torque)reasons.push(`Required torque ${Math.ceil(c.motorTorque)} Nm exceeds rated torque ${torque} Nm`);
@@ -118,7 +145,7 @@
   }
   function snapshot(found){return window.KeySuitePricing?.sourceSnapshot?.(found)||{product_family:'COUPLING',product_id:found.product.id,configuration:found.product.configuration,pricing_mode:found.calc.pricingMode,calculated_price:found.calc.finalPrice}}
 
-  function shaftLimits(config={}){const type=normalizeType(config.type||config.resolvedType||(/^FCL\b/i.test(String(config.model||''))?'pin_bush':'tyre'));if(type==='tyre'){return {pumpMax:number(config.pumpBushMax||bushMax(config.pumpBush)),motorMax:number(config.motorBushMax||bushMax(config.motorBush)),pumpBush:config.pumpBush||'',motorBush:config.motorBush||''}}const product=findComponent('pin_bush',config.model),max=number(product?.maxShaftMm||product?.max_shaft_mm);return {pumpMax:max,motorMax:max}}
+  function shaftLimits(config={}){const type=normalizeType(config.type||config.resolvedType||(/^FCL\b/i.test(String(config.model||''))?'pin_bush':'tyre'));if(type==='tyre'){return {pumpMax:number(config.pumpBushMax||bushMax(config.pumpBush)),motorMax:number(config.motorBushMax||bushMax(config.motorBush)),pumpBush:config.pumpBush||'',motorBush:config.motorBush||''}}const spec=technicalSpec(PIN_SPECS,config),max=number(spec?.max_shaft_mm);return {pumpMax:max,motorMax:max}}
 
   function contextFromItems(items=[]){
     const pumps=(items||[]).filter(item=>item?.section==='pump'||String(item?.model||'').toUpperCase().startsWith('ES ')).map(item=>{const model=normalizePumpModel(item?.pumpData?.model||item?.pumpData?.quotation_model||item?.model||'');return {item,model,shaft:pumpShaft(model),qty:Math.max(0,number(item?.qty||1))}});
@@ -171,7 +198,12 @@
 
   function message(id,text,type='info'){const box=byId(id);if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
   function fillProductSelectors(){
-    const pump=byId('couplingProductPump');if(pump){const previous=normalizePumpModel(pump.value);pump.innerHTML=Object.keys(PUMP_SHAFTS).map(model=>`<option value="${esc(model)}">${esc(`ES ${model}`)}</option>`).join('');if(PUMP_SHAFTS[previous])pump.value=previous}
+    const pump=byId('couplingProductPump'),iso=byId('couplingProductPumpSeries')?.value==='ISO';
+    if(pump){
+      const previous=normalizePumpModel(pump.value),models=iso?[...isoPumpModels().keys()]:Object.keys(PUMP_SHAFTS);
+      pump.innerHTML=models.map(model=>`<option value="${esc(model)}">${esc(iso?model:'ES '+model)}</option>`).join('');
+      if(models.includes(previous))pump.value=previous;
+    }
     const hp=byId('couplingProductMotorHp');if(hp){const previous=hp.value;hp.innerHTML=MOTOR_FRAMES.map(row=>`<option value="${row.hp}">${esc(hpLabel(row.hp))} HP</option>`).join('');if(MOTOR_FRAMES.some(row=>String(row.hp)===previous))hp.value=previous}
   }
   function modelOptions(type,selected){return sortedComponents(normalizeType(type)==='tyre'?'tyre':'pin_bush').map(row=>`<option value="${esc(row.model)}" ${row.model===selected?'selected':''}>${esc(row.model)}</option>`).join('')}
@@ -236,11 +268,12 @@
   async function saveRate(currency){if(!canEditPrices()||!unlockedRates.has(currency))return;const value=number(rateInput(currency)?.value),client=window.KeySuiteAuth?.getClient?.();if(!client||value<=0)return;try{const {error}=await client.rpc('keysuite_save_coupling_multiplier_v228',{p_currency:currency,p_multiplier:value});if(error)throw error;secureData.productMultipliers=secureData.productMultipliers||{};secureData.productMultipliers.COUPLING={...(secureData.productMultipliers.COUPLING||{}),[currency]:value,MYR:1};window.KeySuitePricing?.syncPriceListSettings?.({productMultipliers:secureData.productMultipliers});setRateUnlocked(currency,false);message('couplingPriceMessage',`Coupling ${currency} rate saved.`,'info');renderProduct()}catch(error){message('couplingPriceMessage',error.message||String(error),'error')}}
 
   function initialize(){
-    fillProductSelectors();const context=window.KeySuiteAssembly?.getCurrentPumpsetContext?.();if(context?.pumpModel&&PUMP_SHAFTS[normalizePumpModel(context.pumpModel)])byId('couplingProductPump').value=normalizePumpModel(context.pumpModel);if(context?.motorHp)byId('couplingProductMotorHp').value=String(context.motorHp);if(context?.motorPole)byId('couplingProductMotorPole').value=String(context.motorPole);productPumpShaftManual=false;syncProductPumpShaftInput(true);const currency=byId('couplingPriceCurrency');if(currency)currency.value=validCurrency(localStorage.getItem('ks_coupling_price_currency')||'RMB');
+    const context=window.KeySuiteAssembly?.getCurrentPumpsetContext?.(),model=normalizePumpModel(context?.pumpModel),series=byId('couplingProductPumpSeries');if(series&&pumpShaft(model)>0)series.value=model.startsWith('ISO ')?'ISO':'ES';fillProductSelectors();if(pumpShaft(model)>0&&byId('couplingProductPump'))byId('couplingProductPump').value=model;if(context?.motorHp)byId('couplingProductMotorHp').value=String(context.motorHp);if(context?.motorPole)byId('couplingProductMotorPole').value=String(context.motorPole);productPumpShaftManual=false;syncProductPumpShaftInput(true);const currency=byId('couplingPriceCurrency');if(currency)currency.value=validCurrency(localStorage.getItem('ks_coupling_price_currency')||'RMB');
   }
   function bind(){
     if(bound)return;bound=true;
     ['couplingProductType','couplingProductMotorHp','couplingProductMotorPole'].forEach(id=>byId(id)?.addEventListener('change',renderProduct));
+    byId('couplingProductPumpSeries')?.addEventListener('change',()=>{fillProductSelectors();productPumpShaftManual=false;syncProductPumpShaftInput(true);renderProduct()});
     byId('couplingProductPump')?.addEventListener('change',()=>{productPumpShaftManual=false;syncProductPumpShaftInput(true);renderProduct()});
     byId('couplingProductPumpShaft')?.addEventListener('input',event=>{const raw=String(event.target.value||'').trim();productPumpShaftManual=raw!==''&&number(raw)>0;updateProductPumpShaftAppearance();renderProduct()});
     byId('couplingProductPumpShaft')?.addEventListener('change',()=>{if(!productPumpShaftManual)syncProductPumpShaftInput(true);renderProduct()});

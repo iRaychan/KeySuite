@@ -156,7 +156,7 @@ function pumpDescriptionParts(item){
  const lines=String(item?.description||'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trimEnd()).filter(Boolean),modelFromItem=String(item?.pumpData?.quotation_model||item?.pumpData?.model||item?.model||'').replace(/^(?:ES|ISO)\s*/i,'').trim();
  const duty=String(item?.pumpData?.quotation_duty||'').trim(),capacity=lines.find(line=>/^Capacity:/i.test(line))||(duty?`Capacity: ${duty}`:'');
  let modelLine=lines.find(line=>/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line))||`B.G.Reich End Suction Pump Model: ${modelFromItem}`;
- modelLine=modelLine.replace(/(Model:\s*)(?:(?:ES|ISO)\s*)?/i,iso?'$1ISO ':'$1ES ');
+ modelLine=modelLine.replace(/(Model:\s*)(?:(?:ES|ISO)\s*)?/i,iso?'$1':'$1ES ');
  const suction=lines.find(line=>/^Suction\s*x\s*Discharge:/i.test(line))||'';
  const material=lines.find(line=>/^Pump Material:/i.test(line))||'';
  const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line)&&!/Bare shaft pump only/i.test(line));
@@ -165,9 +165,13 @@ function pumpDescriptionParts(item){
 function completedPumpsetDescription(d=current){
  if(!d||d.assembly_type!=='pumpset')return '';
  const pumps=(d.items||[]).filter(item=>item.section==='pump');pumps.forEach(sanitizeEsPumpDescription);const motor=(d.items||[]).find(item=>item.section==='motor'),couplings=(d.items||[]).filter(item=>item.section==='coupling'&&item.couplingData?.model),coupling=couplings.find(isAutoCouplingItem)||couplings[0];
- if(!pumps.length||!motor||!coupling)return '';
+ const iso=pumps.length>0&&pumps.every(item=>String(item.productFamily||sourceObject(item).product_family).toUpperCase()==='ISO');
+ if(!pumps.length||!motor||(!iso&&!coupling))return '';
  const motorLine=normalizeDescriptionIndentation(String(motor.description||'')).split('\n').find(line=>/^c\/w(?:\t+| +)/i.test(line))||String(motor.description||'').trim();
- const couplingLine=window.KeySuiteCoupling?.assemblyDescription?.(coupling.couplingData?.selectionMode||d.coupling_mode||'flexible')||String(coupling.description||'').trim();
+ const hasBaseplate=(d.items||[]).some(item=>item.section==='baseplate'&&Number(item.qty)>0);
+ const couplingLine=coupling&&(!iso||hasBaseplate)
+  ?window.KeySuiteCoupling?.assemblyDescription?.(coupling.couplingData?.selectionMode||d.coupling_mode||'flexible')||String(coupling.description||'').trim()
+  :'';
  return pumps.map((pump,index)=>{const part=pumpDescriptionParts(pump),lines=[part.model];if(index===0)lines.push(motorLine,couplingLine);lines.push(part.suction,part.material,...part.extras);return lines.filter(Boolean).join('\n')}).join('\n');
 }
 function rebuildDescription(d=current){
@@ -610,6 +614,7 @@ async function addItem(item,explicitRoute){
    const reset=blank('pumpset'),keepId=target.id,keepCreated=target.created_at||reset.created_at;
    Object.keys(target).forEach(key=>delete target[key]);
    Object.assign(target,reset,{id:keepId,created_at:keepCreated,customer_id:customerId,quote_session_id:session});
+   if(route.couplingMode)target.coupling_mode=route.couplingMode;
    currentPinned=false;
  }
  if(type==='system'&&route.section==='pumpset'&&(target.items||[]).some(x=>x.section==='pumpset')&&!currentPinned){
@@ -641,16 +646,18 @@ async function toSystem(){
 async function quotePumpsetSelection(items=[],meta={}){
  if(!Array.isArray(items)||!items.length)return false;
  const customerId=quoteCustomerId();if(!customerId){alert('Select a customer before adding the Pumpset to Quotation.');return false}
+ const family=String(items.find(item=>item.section==='pump')?.productFamily||'ES').toUpperCase();
  const d=blank('pumpset');d.customer_id=customerId;d.quote_session_id=quoteSessionId();d.model_item=String(meta.model||items.find(item=>item.section==='pump')?.model||'ES Pumpset');d.name=d.model_item;d.quote_qty=Math.max(.01,Number(meta.qty||1)||1);
  d.items=items.map(item=>normalizeItem({...item,id:item.id||uid()},'pumpset')).filter(item=>sections.pumpset.includes(item.section));
+ if(meta.couplingMode)d.coupling_mode=meta.couplingMode;
  const capacity=meta.capacity||null;if(capacity){const flow=String(capacity.capacityValue??capacity.capacity_value??'').trim(),head=String(capacity.headValue??capacity.head_value??'').trim();if(flow||head){copyCapacity(d,capacity);d.display_capacity=true}}
- syncAutomaticComponents(d);const requiredSections=['pump','motor','coupling','baseplate'],missingSections=requiredSections.filter(section=>!(d.items||[]).some(item=>item.section===section));if(missingSections.length){alert(`Unable to create a complete ES Pumpset automatically. Missing: ${missingSections.map(section=>labels[section]||section).join(', ')}. Move to Pumpset to review the selection.`);return false}if(blockMissingPumpsetSourceCosts(d.items||[]))return false;if(blockAssemblyMargin(d.items||[]))return false;rebuildDescription(d);
+ syncAutomaticComponents(d);const requiredSections=['pump','motor','coupling','baseplate'],missingSections=requiredSections.filter(section=>!(d.items||[]).some(item=>item.section===section));if(missingSections.length){alert(`Unable to create a complete ${family} Pumpset automatically. Missing: ${missingSections.map(section=>labels[section]||section).join(', ')}. Move to Pumpset to review the selection.`);return false}if(blockMissingPumpsetSourceCosts(d.items||[]))return false;if(blockAssemblyMargin(d.items||[]))return false;rebuildDescription(d);
  syncQuoteUnitPrice(d);const unitPrice=quoteUnitPrice(d);if(!(unitPrice>0)){alert('Quotation pricing is not available for this Pumpset.');return false}
- const displayPricing=consolidatedPricing(d,'assembly');const pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:'PUMPSET_DIRECT_ES',carried_final_price:true,calculated_price:Number(unitPrice||0)};
+ const displayPricing=consolidatedPricing(d,'assembly');const pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:`PUMPSET_DIRECT_${family}`,carried_final_price:true,calculated_price:Number(unitPrice||0)};
  if(await window.KeySuiteApp?.selectCustomerForQuotation?.(customerId)===false)return false;window.KeySuiteApp?.showPage?.('quotation');
  const pumpData=meta.pumpData||items.find(item=>item.section==='pump'&&item.pumpData)?.pumpData||null;
  const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:d.model_item,qty:d.quote_qty,unitPrice:Number(unitPrice||0),description:d.description,unit:'set',sourceType:'pumpset',brands:window.quoteItemBrands?.({items:d.items})||[],pricingSource,pumpData,displayCapacity:!!d.display_capacity,capacityValue:d.capacity_value||'',capacityUnit:d.capacity_unit||'m³/hr',headValue:d.head_value||'',headUnit:d.head_unit||'Mtr'});
- if(!row){alert('Unable to add the ES Pumpset to Quotation.');return false}
+ if(!row){alert(`Unable to add the ${family} Pumpset to Quotation.`);return false}
  return true;
 }
 async function toQuotation(){

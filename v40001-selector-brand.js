@@ -287,12 +287,17 @@
     }
   }
 
+  function isoLiveReportIdentity(sourceWin){
+    const selection=sourceWin?.__KEYSUITE_CURRENT_SELECTION?.();
+    return selection?.product==='ISO'?{masterModel:selection.model,displayModel:selection.model}:{};
+  }
+
   function reportContextSnapshot(sourceWin=null){
     // V3.9.4.4.11: PDF identity is frozen at the instant the user presses PDF.
     // This prevents later navigation/material/brand events from reverting TESK/OEM output.
     try{
       const locked=sourceWin?.__KEYSUITE_PDF_PRESENTATION_SNAPSHOT;
-      if(locked&&typeof locked==='object')return {...locked,pdfMetadataTitle:window.KeySuitePumpPdfNames?.metadataTitleFromPump?.(sourceWin?.__KEYSUITE_CURRENT_SELECTION?.()||{model:locked.displayModel||locked.masterModel})||locked.pdfMetadataTitle,pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||locked.pdfFileTitle||'')};
+      if(locked&&typeof locked==='object')return {...locked,...isoLiveReportIdentity(sourceWin),pdfMetadataTitle:window.KeySuitePumpPdfNames?.metadataTitleFromPump?.(sourceWin?.__KEYSUITE_CURRENT_SELECTION?.()||{model:locked.displayModel||locked.masterModel})||locked.pdfMetadataTitle,pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||locked.pdfFileTitle||'')};
     }catch(_){}
     const family=String(sourceWin?.__KEYSUITE_V39445_FAMILY||'CHC').toUpperCase();
     const ctx=context(family,sourceWin);
@@ -308,6 +313,7 @@
       masterSeries:String(ctx?.masterSeries||family),
       masterModel:String(ctx?.masterModel||''),
       displayModel:String(ctx?.displayModel||''),
+      ...isoLiveReportIdentity(sourceWin),
       pdfFileTitle:String(sourceWin?.__KEYSUITE_PDF_FILE_TITLE__||''),
       material:liveMaterial(family,sourceWin)||String(ctx?.material||''),
       seal:norm(sourceWin?.keysuiteExportPayload?.keysuite_seal)||'Car/Cer',

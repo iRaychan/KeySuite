@@ -1,9 +1,9 @@
 {
-  "version": "5.00.54",
-  "baseline": "5.00.53",
-  "upgrade_supported_from": "5.00.53",
-  "release_status": "phase_2_ledger_review",
-  "new_database_migration_required": true,
+  "version": "5.00.55",
+  "baseline": "5.00.54",
+  "upgrade_supported_from": "5.00.54",
+  "release_status": "phase_3_bugfix_review",
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -12,8 +12,9 @@
     "KeyStock": "1.02"
   },
   "changes": [
-    "Atomic multi-row receiving and protected FIFO stock ledger",
-    "Reservations, partial fulfillment, releases, stock movements and lifetime history",
-    "Configurable series and product serial tracking"
+    "Original ISO drawing in technical PDF Page 3",
+    "ISO coupling shaft and torque checks against engineering source data",
+    "Consistent ISO model identity and floating Back navigation",
+    "ES and ISO quotation description corrections"
   ]
 }

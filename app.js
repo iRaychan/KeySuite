@@ -1788,7 +1788,7 @@ async function routeEsSelection(p={},route='quotation'){
 
 window.addEventListener('message',function(event){
  if(!event.data)return;
- if(event.source===$('selectorIsoFrame')?.contentWindow){if(event.data.type==='KEYSUITE_ADD_SELECTION')void window.KeySuiteISO.route(event.data.payload||{},event.data.route||'quotation');return;}
+ if(event.origin===location.origin&&(event.source===$('selectorIsoFrame')?.contentWindow||event.source===$('productIsoSelectorFrame')?.contentWindow)){if(event.data.type==='KEYSUITE_ADD_SELECTION')void window.KeySuiteISO.route(event.data.payload||{},event.data.route||'quotation');return;}
  const fromEs=event.source===$('selectorEsFrame')?.contentWindow||String(event.data.product||'').toUpperCase()==='ES';
  const fromBfi=event.source===$('selectorBfiFrame')?.contentWindow||event.source===$('productBfiSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BFI';
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';

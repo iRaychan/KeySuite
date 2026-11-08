@@ -24,7 +24,7 @@ async function run(){
     await page.goto(base+'/__safari_fixture.html');
     await page.getByText('Open local KeyStock test',{exact:true}).click();
     await at('#stockTable [data-stock-detail]').first().waitFor();
-    assert.equal(await at('html').getAttribute('data-keysuite-version'),'5.00.54');
+    assert.equal(await at('html').getAttribute('data-keysuite-version'),process.env.KEYSUITE_TEST_VERSION||'5.00.54');
     assert.equal(await at('#stockVersion').textContent(),'V1.02');
     assert.match(await at('#keyStockNav').evaluate(node=>getComputedStyle(node).boxShadow),/rgb\(22, 239, 247\)/);
     assert.deepEqual(await at('#stockTabs button').allTextContents(),
