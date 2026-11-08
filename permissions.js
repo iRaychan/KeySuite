@@ -12,6 +12,10 @@
   const stockKeys=['add_stock_model','edit_stock_model','delete_stock_model','delete_stock_mapping','manage_stock_locations','manage_stock_suppliers'];
   for(const [role,permissions] of Object.entries(DEFAULTS)){
     for(const key of stockKeys)permissions[key]=['owner','admin'].includes(role)?'full':'none';
+    permissions.view_stock='full';
+    for(const key of ['receive_stock','manage_stock_dropdowns','reserve_stock','confirm_stock_out','adjust_stock','move_stock']){
+      permissions[key]=['owner','admin'].includes(role)?'full':'none';
+    }
   }
   let matrix=structuredClone(DEFAULTS),roles=[...BASE_ROLES];
   const normalize=value=>String(value||'none').trim().toLowerCase();

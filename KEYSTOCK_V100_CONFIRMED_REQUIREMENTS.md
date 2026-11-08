@@ -1,5 +1,7 @@
 # KeyStock V1.00 confirmed design requirements
 
+The table below records the V5.00.53 review state. See [the V5.00.54 review](KEYSTOCK_PHASE2_V50054_REVIEW.md) for the completed ledger workflows and remaining items.
+
 V5.00.53 is a Phase 2 review build from the supplied V5.00.52 full build. The installed KeyStock runtime remains V1.01, with the Phase 1 database contract.
 
 | Requirement | V5.00.52 audit | V5.00.53 status |

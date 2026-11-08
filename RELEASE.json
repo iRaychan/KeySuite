@@ -1,19 +1,19 @@
 {
-  "version": "5.00.53",
-  "baseline": "5.00.52",
-  "upgrade_supported_from": "5.00.52",
-  "release_status": "phase_2_review_build",
-  "new_database_migration_required": false,
+  "version": "5.00.54",
+  "baseline": "5.00.53",
+  "upgrade_supported_from": "5.00.53",
+  "release_status": "phase_2_ledger_review",
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "modules": {
-    "KeyStock": "1.01"
+    "KeyStock": "1.02"
   },
   "changes": [
-    "Phase 2 Bug 001: cyan KeyStock sidebar entry",
-    "KeyStock internal navigation and opening-balance views",
-    "Transaction workflows pending Phase 2 database design and approval"
+    "Atomic multi-row receiving and protected FIFO stock ledger",
+    "Reservations, partial fulfillment, releases, stock movements and lifetime history",
+    "Configurable series and product serial tracking"
   ]
 }

@@ -19,6 +19,13 @@
   };
   const LEVEL_LABELS={none:'No',view:'View',own:'Own',assigned:'Assigned',all:'All',full:'Full'};
   const PERMISSION_ROWS=[
+    {key:'view_stock',label:'View Stock',options:['none','full']},
+    {key:'receive_stock',label:'Add Stock (Receiving)',options:['none','full']},
+    {key:'manage_stock_dropdowns',label:'Manage Stock Dropdowns',options:['none','full']},
+    {key:'reserve_stock',label:'Reserve / Release Stock',options:['none','full']},
+    {key:'confirm_stock_out',label:'Confirm Stock Out',options:['none','full']},
+    {key:'adjust_stock',label:'Adjust Stock / Write Off / Customer Return',options:['none','full']},
+    {key:'move_stock',label:'Transfer / Reconfigure Stock',options:['none','full']},
     {key:'add_stock_model',label:'Add Stock Models',options:['none','full']},
     {key:'edit_stock_model',label:'Edit Stock Models',options:['none','full']},
     {key:'delete_stock_model',label:'Delete Stock Models',options:['none','full']},
