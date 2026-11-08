@@ -1,13 +1,49 @@
-/* One-click technical reports. Product and Selection share the native print renderer. */
+/* One-click technical reports for static and native-renderer hosting. */
 (() => {
   'use strict';
   const root = new URL('.', document.currentScript.src);
+  const nativeEnabled = document.currentScript.dataset.native === 'true';
   let running = false;
   function namesFor(source) {
     try { return source.top.KeySuitePumpPdfNames; } catch (_) { return null; }
   }
-  function reportEndpoint() {
-    return new URL('api/technical-pdf', root);
+  async function nativePdf(report, title) {
+    const signal = AbortSignal.timeout(12000);
+    const html = await capture(report, signal);
+    const response = await fetch(new URL('api/technical-pdf', root), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({html,title}),
+      signal,
+    });
+    if (!response.ok || !/^application\/pdf\b/i.test(response.headers.get('Content-Type') || '')) {
+      throw new Error('The technical PDF renderer is unavailable.');
+    }
+    const blob = await response.blob();
+    if (await blob.slice(0, 5).text() !== '%PDF-') throw new Error('The renderer returned an invalid PDF.');
+    return blob;
+  }
+  function loadScript(doc, path) {
+    return new Promise((resolve, reject) => {
+      const script = doc.createElement('script');
+      script.src = new URL(path, root).href;
+      const timeout = setTimeout(() => {
+        script.remove();
+        reject(new Error('A PDF export script did not load in time.'));
+      }, 12000);
+      script.onload = () => { clearTimeout(timeout); resolve(); };
+      script.onerror = () => { clearTimeout(timeout); reject(new Error('A PDF export script could not load.')); };
+      doc.head.appendChild(script);
+    });
+  }
+  async function browserPdf(report, title) {
+    await report.__KEYSUITE_PDF_BRAND_READY__;
+    await Promise.all([
+      loadScript(report.document, 'vendor/html2canvas-1.4.1.min.js'),
+      loadScript(report.document, 'vendor/jspdf-2.5.2.umd.min.js'),
+      loadScript(report.document, 'pump-pdf-download-v50035.js?v=50058'),
+    ]);
+    return report.KeySuitePumpPdfDownload.render(report, title);
   }
   function readDataUrl(blob) {
     return new Promise((resolve, reject) => {
@@ -82,20 +118,14 @@
         captured = true;
         clearTimeout(deadline);
         try {
-          const signal = AbortSignal.timeout(45000);
           if (chc) brand?.applyReport?.(report.document,source);
-          const printable = await capture(report,signal);
-          const response = await fetch(reportEndpoint(), {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({html:printable,title:title || report.document.title}),
-            signal,
-          });
-          if (!response.ok || !/^application\/pdf\b/i.test(response.headers.get('Content-Type') || '')) {
-            throw new Error('The technical PDF renderer is unavailable.');
+          const reportTitle = title || report.document.title;
+          let blob;
+          if (nativeEnabled) {
+            try { blob = await nativePdf(report, reportTitle); }
+            catch (error) { console.warn('Native technical PDF failed. Using browser export.', error.message); }
           }
-          const blob = await response.blob();
-          if (await blob.slice(0, 5).text() !== '%PDF-') throw new Error('The renderer returned an invalid PDF.');
+          blob ??= await browserPdf(report, reportTitle);
           const fresh = names?.ticket?.(filename);
           if (ticket && (!fresh || JSON.stringify(ticket)!==JSON.stringify(fresh))) {
             throw new Error('The PDF Item No. changed during export. Please try again.');
@@ -125,7 +155,7 @@
         // receive a second load event. Run the existing setup after its assets
         // finish, once, without relying on a new window's navigation lifecycle.
         const runSetup = async () => {
-          if (captured || !iframe.isConnected) return;
+          if (captured || finished || !iframe.isConnected) return;
           if (report.document.readyState!=='complete' || typeof report.onload!=='function') {
             setTimeout(runSetup,30);
             return;

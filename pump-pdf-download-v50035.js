@@ -33,9 +33,7 @@
    .replace(/<script src="[^"]*\/pdf-optimization\.js[^"]*"/i,
     `<script defer src="${new URL('pdf-optimization.js?v=42508',root)}"`);
  }
- async function download(report,config){
-  if(busy.has(report))return busy.get(report);
-  const task=(async()=>{
+ async function render(report,title){
    const doc=report.document;await doc.fonts?.ready;
    await Promise.all([...doc.images].map(image=>image.decode?.().catch(()=>{})||Promise.resolve()));
    const printStyle=doc.createElement('style');printStyle.textContent=[...doc.querySelectorAll('style')].map(style=>style.textContent.replace(/@media\s+print/g,'@media screen')).join('\n');doc.head.appendChild(printStyle);
@@ -43,7 +41,7 @@
    const pages=[...doc.body.querySelectorAll('.report,.tech-page,.dimension-page,.legacy-page,.print-page')].filter(page=>!page.parentElement.closest('.report,.tech-page,.dimension-page,.legacy-page,.print-page')&&report.getComputedStyle(page).display!=='none');
    if(!pages.length)throw Error('Report pages are unavailable.');
    const pdf=new report.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-   pdf.setProperties({title:config.title,creator:'KeySuite',author:'KeySuite'});
+   pdf.setProperties({title,creator:'KeySuite',author:'KeySuite'});
    for(let index=0;index<pages.length;index++){
     if(index)pdf.addPage();
     const page=pages[index],bounds=page.getBoundingClientRect();
@@ -58,19 +56,27 @@
      scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:Math.ceil(bounds.width),
      ...(drawing?{onclone:clone=>{clone.getElementById(drawing.id).style.visibility='hidden';}}:{})
     });
-    const width=194,height=canvas.height/canvas.width*width;
-    pdf.addImage(canvas.toDataURL('image/jpeg',.96),'JPEG',8,8,width,Math.min(281,height));
+    const width=Math.min(194,281*canvas.width/canvas.height),height=canvas.height/canvas.width*width;
+    const left=(210-width)/2;
+    pdf.addImage(canvas.toDataURL('image/jpeg',.96),'JPEG',left,8,width,height);
     if(artwork){
      const box=artwork.bounds,scale=width/bounds.width;
-     pdf.addImage(artwork.bytes,'PNG',8+(box.left-bounds.left)*scale,8+(box.top-bounds.top)*scale,box.width*scale,box.height*scale,undefined,'FAST');
+     pdf.addImage(artwork.bytes,'PNG',left+(box.left-bounds.left)*scale,8+(box.top-bounds.top)*scale,box.width*scale,box.height*scale,undefined,'FAST');
     }
    }
+   printStyle.remove();
+   return pdf.output('blob');
+ }
+ async function download(report,config){
+  if(busy.has(report))return busy.get(report);
+  const task=(async()=>{
+   const blob=await render(report,config.title);
    if(report.closed)return null;
-   const blob=pdf.output('blob'),url=URL.createObjectURL(blob),link=doc.createElement('a');link.href=url;link.download=config.filename.replace(/\.pdf$/i,'')+'.pdf';doc.body.appendChild(link);link.click();link.remove();
+   const doc=report.document,url=URL.createObjectURL(blob),link=doc.createElement('a');link.href=url;link.download=config.filename.replace(/\.pdf$/i,'')+'.pdf';doc.body.appendChild(link);link.click();link.remove();
    window.KeySuitePumpPdfNames?.commit?.(config.filename,config.itemTicket);setTimeout(()=>URL.revokeObjectURL(url),30000);
-   printStyle.remove();return blob;
+   return blob;
   })();busy.set(report,task);
   try{return await task}catch(error){busy.delete(report);if(!report.closed)report.alert('PDF generation failed: '+error.message);throw error}
  }
- window.KeySuitePumpPdfDownload={inject,download,openSelectionReport};
+ window.KeySuitePumpPdfDownload={inject,download,openSelectionReport,render};
 })();
