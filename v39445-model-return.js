@@ -36,7 +36,10 @@ function goBackPage(){
   const dlg=$('productCurveDialog');
   // Product remains active behind the Curve. Close it before reading page history.
   if(isInlineProductCurve(dlg))return closeProductCurveThroughDialog(dlg);
-  const current=activePage();let stack=readPageStack(),target='';if(current==='quotation'){const origin=readQuotationSelectionOrigin();if(origin&&validInternalPage(origin))target=origin;saveQuotationSelectionOrigin('')}while(stack.length&&!target){const candidate=stack.pop();if(candidate&&candidate!==current&&validInternalPage(candidate))target=candidate}savePageStack(stack);if(!target)target='dashboard';suppressNextPageHistory=true;try{window.KeySuiteApp?.showPage?.(target)}catch(_){suppressNextPageHistory=false;window.KeySuiteApp?.showPage?.('dashboard')}setTimeout(()=>{suppressNextPageHistory=false;syncAfterNavigation()},0)
+  const current=activePage();
+  if(current==='keyStock'&&window.KeyStock?.back?.())return;
+  let stack=readPageStack(),target='';if(current==='quotation'){const origin=readQuotationSelectionOrigin();if(origin&&validInternalPage(origin))target=origin;saveQuotationSelectionOrigin('')}while(stack.length&&!target){const candidate=stack.pop();if(candidate&&candidate!==current&&validInternalPage(candidate))target=candidate}savePageStack(stack);if(!target&&current==='keyStock')return window.KeyStock?.resetTab?.();
+  if(!target)target='dashboard';suppressNextPageHistory=true;try{window.KeySuiteApp?.showPage?.(target)}catch(_){suppressNextPageHistory=false;window.KeySuiteApp?.showPage?.('dashboard')}setTimeout(()=>{suppressNextPageHistory=false;syncAfterNavigation()},0)
 }
 function closeProductCurveThroughDialog(dlg=$('productCurveDialog')){
   if(!dlg)return false;

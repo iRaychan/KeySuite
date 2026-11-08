@@ -9,6 +9,10 @@
     owner:{key_dashboard:'full',keyai_access:'full',keyai_openai_control:'full',keyai_sender_assign:'full',manage_roles:'full',customer_settings:'full',company_pricing:'full',manage_categories:'full',manage_price_list:'full',change_fuel_price:'full',use_quick_selection:'full',use_selector:'full',use_product:'full',choose_brand_series:'full',view_customers:'all',edit_customers:'all',customer_assignment:'full',create_quotations:'full',view_quotations:'all',delete_quotation_history:'full',own_profile:'full'}
   };
   Object.keys(DEFAULTS).forEach(role=>{DEFAULTS[role].view_costing_breakdown=role==='owner'?'full':'none'});
+  const stockKeys=['add_stock_model','edit_stock_model','delete_stock_model','delete_stock_mapping','manage_stock_locations','manage_stock_suppliers'];
+  for(const [role,permissions] of Object.entries(DEFAULTS)){
+    for(const key of stockKeys)permissions[key]=['owner','admin'].includes(role)?'full':'none';
+  }
   let matrix=structuredClone(DEFAULTS),roles=[...BASE_ROLES];
   const normalize=value=>String(value||'none').trim().toLowerCase();
   const validRole=value=>normalize(value).replace(/\s+/g,'_').replace(/[^a-z0-9_-]/g,'').slice(0,40);

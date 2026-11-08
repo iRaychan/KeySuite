@@ -19,6 +19,12 @@
   };
   const LEVEL_LABELS={none:'No',view:'View',own:'Own',assigned:'Assigned',all:'All',full:'Full'};
   const PERMISSION_ROWS=[
+    {key:'add_stock_model',label:'Add Stock Models',options:['none','full']},
+    {key:'edit_stock_model',label:'Edit Stock Models',options:['none','full']},
+    {key:'delete_stock_model',label:'Delete Stock Models',options:['none','full']},
+    {key:'delete_stock_mapping',label:'Delete Stock Mappings',options:['none','full']},
+    {key:'manage_stock_locations',label:'Manage Stock Locations',options:['none','full']},
+    {key:'manage_stock_suppliers',label:'Manage Stock Suppliers',options:['none','full']},
     {key:'view_costing_breakdown',label:'View Costing Breakdown',options:['none','full']},
     {key:'key_dashboard',label:'Key button / Key Dashboard',options:['none','full'],className:'permission-key-row'},
     {key:'keyai_access',label:'KeyBot access',options:['none','full']},
