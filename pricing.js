@@ -639,11 +639,11 @@
     if(family==='KV'){const model=source.technical_model||source.price_model||source.model;return findKvPrice(model,{...options,customer,category:cat,pricingMode,material:source.material_variant||source.variant||source.material||'KV',seal:source.seal_faces||source.seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
     if(family==='BSV')return window.KeySuiteBSV?.findPrice(source.technical_model||source.product_id,source.variant,{...options,customer,category:cat,pricingMode});
     if(family==='BSW')return window.KeySuiteBSW?.findPrice?.(source.technical_model||source.model||source.product_id,{...options,customer,category:cat,pricingMode,variant:source.variant||source.material});
-    if(family==='ISO')return window.KeySuiteISO?.findPrice(source.product_id,source.material,{...options,customer,category:cat,pricingMode,seal:source.seal_material,elastomer:source.elastomer});
+    if(family==='ISO')return window.KeySuiteISO?.findPrice(source.product_id,source.material,{...options,customer,category:cat,pricingMode,sealType:source.seal_type,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='BGF')return findBgfPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
     if(family==='BFI')return findBfiPrice(source.product_id||source.model,source.motor_phase||source.variant||'3Ph',{...options,customer,category:cat,pricingMode,material:source.pump_material||source.material_variant||source.material,bareShaft:source.bare_shaft===true,motor_hp:source.motor_hp?Number(source.motor_hp):undefined,pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class});
     if(family==='GWS')return findGwsPrice(source.product_id||source.model,null,{...options,customer,category:cat,pricingMode});
-    if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode,seal:source.seal_material,elastomer:source.elastomer});
+    if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode,sealType:source.seal_type,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='KEYPLC'){
       const qty=Math.max(1,Number(String(source.variant||source.material||'1').replace(/\D/g,''))||1);
       return findKeyplcPrice(source.product_id,qty,{...options,customer,category:cat,pricingMode,enclosure:source.panel_type||'indoor'});
@@ -860,9 +860,8 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const variants=product.variants||[];
     const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
     if(!variant)return null;
-    const dims=window.ES_SELECTOR_DB?.pumps?.find(p=>p.model===esModelName(product.model))?.dimensions||product.dimensions||{};
-    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material,shaft_mm:dims.shaft_mm});
-    return calc?{product,variant,material:variant.material,calc,category:cat,customer,family:'ES',sourceExtra:{seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
+    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material});
+    return calc?{product,variant,material:variant.material,calc,category:cat,customer,family:'ES',sourceExtra:{seal_type:options.sealType||(/\bGP\b/i.test(variant.material)?'Gland Packing':'Mechanical Seal'),seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
   }
 
   const ES_DEFAULT_SEAL='Carbon Ceramic (Ca Ce)';

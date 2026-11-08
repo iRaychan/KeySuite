@@ -1,36 +1,131 @@
 (() => {
  'use strict';
- const sizes=[24,32,45,55],groups=['1_5','8_20','32_90','120_200'],couplingToSeal={24:24,32:32,42:45,48:55};
+ const groups=['1_5','8_20','32_90','120_200'];
+ // V1.3 Dimension sheets: model column B, shaft column O. Q:R is a separate torque reference.
+ const shaftModels={
+  ES: {
+   24:'32-13 32-16 32-20 32-26 40-13 40-16 40-20 40-26 50-13 50-16 50-20 50-26 65-13 65-16 65-20 80-16',
+   32:'40-32 40-32H 50-26G 50-32 50-32H 65-20G 65-26 65-32 65-32H 80-20 80-26 80-32 80-32H 100-16 100-20 100-26 100-26H 100-32 125-20 125-26 150-20',
+   42:'40-32G 50-32G 65-32G 80-32G 80-40 100-26G 100-32G 100-40 125-32 125-40 150-26 150-32 150-40 200-26',
+   48:'200-32 200-40 250-32 250-40',
+  },
+  ISO: {
+   24:'50-32-160 50-32-200 65-40-200 65-50-160 80-50-200 80-65-160',
+   32:'65-40-250 65-40-315 80-50-250 80-50-315 100-65-200 100-65-250 100-80-160 125-100-200',
+   37:'100-65-315S',
+   42:'100-65-315 125-80-400 125-100-250 125-100-315 125-100-400 150-125-250 150-125-315 150-125-400',
+   48:'125-100-500 150-125-500 200-150-315 200-150-400 200-150-500 250-200-200 250-200-315 250-200-400 300-250-315',
+   65:'250-200-250 250-200-500 300-250-250 300-250-400 300-250-500',
+   75:'350-300-400 350-300-500',
+  },
+ };
+ const pumpMaterials={seal:['Car/Cer','SiC/SiC','Tungsten'],oring:['Viton','EPDM','NBR']};
+ const shaftByModel=Object.fromEntries(Object.entries(shaftModels).map(([family,sizes])=>[
+   family,new Map(Object.entries(sizes).flatMap(([size,models])=>models.split(' ').map(model=>[model,size])))
+ ]));
+ function shaftSize(family,model){return shaftByModel[family]?.get(String(model||'').trim().toUpperCase().replace(/^(?:ES|ISO)\s+/,''));}
  let rows=[],available=false;
  const key=r=>[r.family,r.kind,r.size_group,r.material].join('|');
  const defaults=[];
- for(const family of ['ES','ISO'])for(const size of sizes)for(const [kind,materials] of [['seal',['Car/Cer','SiC/SiC']],['oring',['Viton','EPDM']]])for(const material of materials)defaults.push({family,kind,size_group:String(size),material,price_myr:null});
+ for(const family of ['ES','ISO'])for(const size_group of Object.keys(shaftModels[family]))for(const [kind,materials] of Object.entries(pumpMaterials))for(const material of materials)defaults.push({family,kind,size_group,material,price_myr:null});
  for(const family of ['CHC','CR'])for(const size_group of [...groups,...(family==='CR'?['320']:[])])for(const material of ['Viton','EPDM'])defaults.push({family,kind:'oring',size_group,material,price_myr:null});
  function group(model){const series=Number(String(model||'').match(/(?:CHC[SN]?|CR[SN]?)\s*(\d+)\s*-/i)?.[1]);return series===320?'320':[[1,5],[8,20],[32,90],[120,200]].find(([a,b])=>series>=a&&series<=b)?.join('_')||null;}
  function price(family,kind,size_group,material){const row=rows.find(r=>key(r)===key({family,kind,size_group:String(size_group),material}));return row?.price_myr===null||row?.price_myr===undefined?null:Number(row.price_myr);}
  function additions(family,model,options={}){
-   const requests=[],rawElastomer=String(options.elastomer||options.keysuite_elastomer||'Viton').trim().toUpperCase(),elastomer=rawElastomer==='EPDM'?'EPDM':rawElastomer==='VITON'?'Viton':null;
+   const pumpFamily=Object.hasOwn(shaftModels,family);
+   const requests=[],rawElastomer=String(options.elastomer||options.keysuite_elastomer||'Viton').trim().toUpperCase();
+   const elastomer=(pumpFamily?pumpMaterials.oring:['Viton','EPDM']).find(value=>value.toUpperCase()===rawElastomer);
    if(!elastomer)return {error:`No ${family} O-ring price table for ${rawElastomer}. Enter a manual selling price.`};
-   if(['ES','ISO'].includes(family)){
-     const size=options.sealSize||couplingToSeal[options.shaft_mm];
+   if(pumpFamily){
+     const size=shaftSize(family,model);
      const text=String(options.seal||options.keysuite_seal||'Car/Cer').toLowerCase();
-     const seal=/sic.*sic|silicon/.test(text)?'SiC/SiC':/car|ca\s*ce/.test(text)?'Car/Cer':null;
-     if(!size)return {error:`${family} seal size is unavailable for shaft ${options.shaft_mm||'not supplied'}. Enter a manual selling price.`};
-     if(!/\bGP\b/i.test(options.material||'')){if(!seal)return {error:`No ${family} price table for selected seal.`};requests.push(['seal',String(size),seal]);}
-     requests.push(['oring',String(size),elastomer]);
+     const seal=/tungsten/.test(text)?'Tungsten':/sic.*sic|silicon/.test(text)?'SiC/SiC':/car|ca\s*ce/.test(text)?'Car/Cer':null;
+     if(!size)return {error:`No V1.3 shaft size for ${family} model ${model}. Enter a manual selling price.`};
+     const packing=/\bGP\b|gland packing/i.test([options.material,options.sealType,options.keysuite_seal_type].join(' '));
+     if(!packing){if(!seal)return {error:`No ${family} price table for selected seal.`};requests.push(['seal',size,seal,seal==='Car/Cer']);}
+     requests.push(['oring',size,elastomer,elastomer==='Viton']);
    }else{const size=group(model);if(!size)return {error:`No ${family} O-ring group for ${model}.`};requests.push(['oring',size,elastomer]);}
    let total=0;const missing=[],details=[];
-   for(const [kind,size,material] of requests){const value=price(family,kind,size,material);details.push({pricelist:'Component Pricelist',family,kind,size,material,currency:'MYR',sourcePrice:value,multiplier:1,baseMyr:value,adjustment:value});if(value===null)missing.push(`${family} ${size.replace('_','–')} ${material} ${kind==='oring'?'O-ring':'seal'}`);else total+=value;}
+   for(const [kind,size,material,included] of requests){
+     const value=included?0:price(family,kind,size,material);
+     details.push({pricelist:'Component Pricelist',family,kind,size,material,currency:'MYR',sourcePrice:value,multiplier:1,baseMyr:value,adjustment:value,...(included?{includedInBase:true}:{})});
+     if(value===null)missing.push(`${family} ${size.replace('_','–')} ${material} ${kind==='oring'?'O-ring':'seal'}`);
+     else total+=value;
+   }
    return missing.length?{error:`Component price not entered: ${missing.join(', ')}.`,total:null,details}:{total,details};
  }
- function apply(calc,family,model,options={}){if(!calc||calc.fixedPrice)return calc;const result=additions(family,model,options),base=Number(calc.componentBasePrice??calc.finalPrice??0);return {...calc,componentBasePrice:base,componentAddon:result.total,componentDetails:result.details||[],componentPricingError:result.error||'',finalPrice:result.error?base:base+result.total};}
+ function apply(calc,family,model,options={}){
+   const pump=Object.hasOwn(shaftModels,family);
+   if(!calc||(calc.fixedPrice&&!pump))return calc;
+   const result=additions(family,model,options);
+   const base=Number(calc.componentBasePrice??calc.finalPrice??0);
+   const beforeFuel=Number(calc.componentBaseBeforeFuel??calc.beforeFuel??base);
+   const addon=result.error?0:result.total;
+   return {...calc,componentBasePrice:base,componentAddon:result.total,componentDetails:result.details||[],
+     componentPricingError:result.error||'',finalPrice:base+addon,
+     ...(pump?{componentBaseBeforeFuel:beforeFuel,beforeFuel:beforeFuel+addon}:{})};
+ }
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- function render(){for(const family of ['CHC','CR','ES','ISO']){const parent=document.getElementById(`${family.toLowerCase()}PriceList`);if(!parent)continue;let box=parent.querySelector('.component-price-editor');if(!box){box=document.createElement('div');box.className='card component-price-editor';parent.appendChild(box);}
-   const owner=String(window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner',groupList=family==='CR'?[...groups,'320']:groups,sizeLabels={1_5:'1–5',8_20:'8–20',32_90:'32–90',120_200:'120–200',320:'320',24:'24',32:'32',45:'45',55:'55'};
-   const table=(kind,title,materials)=>{const relevant=rows.filter(r=>r.family===family&&r.kind===kind),sizes=family==='ES'||family==='ISO'?['24','32','45','55']:groupList;return `<h3>${title}</h3><div style="overflow:auto"><table class="pricelist-table compact-component-table"><thead><tr><th>Size / Group</th>${materials.map(m=>`<th>${esc(m)} (MYR)</th>`).join('')}<th></th></tr></thead><tbody>${sizes.map(size=>`<tr data-component-group="${family}|${kind}|${size}"><td><b>${esc(sizeLabels[size]||size)}</b></td>${materials.map(material=>{const record=relevant.find(r=>String(r.size_group)===String(size)&&r.material===material);return `<td><input data-component-price="${esc(record?key(record):'')}" type="number" min="0" step="0.01" placeholder="Not entered" value="${record?.price_myr??''}" aria-label="${esc(family+' '+size+' '+material+' MYR')}" ${owner&&available&&record?'':'disabled'}></td>`}).join('')}<td><button class="btn" type="button" data-save-component-group>Save</button></td></tr>`).join('')}</tbody></table></div>`};
-   box.innerHTML=`<h2>${family} component surcharges · MYR</h2><p>Blank means not entered. Enter 0 explicitly only when included at no extra charge.</p>${available?'':'<p>Database setup pending; values cannot be saved yet.</p>'}${family==='ES'||family==='ISO'?table('seal','Mechanical Seal Add-ons',['Car/Cer','SiC/SiC'])+table('oring','O-ring Surcharges',['Viton','EPDM']):table('oring','O-ring Surcharges',['Viton','EPDM'])}`;
-   box.querySelectorAll('[data-save-component-group]').forEach(button=>{button.disabled=!owner||!available;button.onclick=async()=>{const tr=button.closest('[data-component-group]'),inputs=[...tr.querySelectorAll('[data-component-price]')],records=inputs.map(input=>rows.find(r=>key(r)===input.dataset.componentPrice));if(records.some(r=>!r))return alert('A source component row is missing; no values were saved.');for(const input of inputs){if(input.value.trim()!==''&&(!input.checkValidity()||Number(input.value)<0)){input.reportValidity();return}}button.disabled=true;const original=button.textContent;button.textContent='Saving…';try{const client=window.KeySuiteAuth?.getClient?.();if(!client)throw Error('Supabase is not connected.');for(let i=0;i<records.length;i++){const price_myr=inputs[i].value.trim()===''?null:Number(inputs[i].value),{data,error}=await client.from('ks_component_prices_v50011').upsert({...records[i],price_myr},{onConflict:'family,kind,size_group,material'}).select();if(error)throw error;if(data?.length!==1)throw Error('Price was not saved.');Object.assign(records[i],data[0])}window.KeySuitePricing?.refreshQuotePrices?.();button.textContent='Saved'}catch(e){alert(`Component price could not be saved: ${e.message}`);button.textContent=original}finally{button.disabled=false}}});
- }}
- async function init(){rows=defaults.map(r=>({...r}));available=false;try{const result=await window.KeySuiteAuth.getClient().from('ks_component_prices_v50011').select('family,kind,size_group,material,price_myr');if(result.error)throw result.error;available=true;for(const row of result.data||[]){const target=rows.find(r=>key(r)===key(row));if(target)Object.assign(target,row);}}catch(e){console.info('Component pricing setup pending:',e.message);}render();}
- window.KeySuiteComponents={init,render,apply,additions,group,couplingToSeal,defaults,loadForTest(data){rows=data;}};
+ const savedKeys=new Set();
+ function render(){
+   for(const family of ['CHC','CR','ES','ISO']){
+     const parent=document.getElementById(`${family.toLowerCase()}PriceList`);
+     if(!parent)continue;
+     let box=parent.querySelector('.component-price-editor');
+     if(!box){box=document.createElement('div');box.className='card component-price-editor';parent.appendChild(box);}
+     const pump=Object.hasOwn(shaftModels,family);
+     const owner=String(window.KEYSUITE_ACCESS?.role||'').toLowerCase()==='owner';
+     const sizes=pump?Object.keys(shaftModels[family]):family==='CR'?[...groups,'320']:groups;
+     const table=(kind,title,materials)=>{
+       const groupsHtml=sizes.map(size=>{
+         const records=materials.map(material=>rows.find(row=>key(row)===key({family,kind,size_group:size,material})));
+         const editable=owner&&available&&records.every(record=>record&&(!pump||savedKeys.has(key(record))));
+         const inputs=records.map((record,i)=>`<td><input data-component-price="${esc(record?key(record):'')}" type="number" min="0" step="0.01" placeholder="Not entered" value="${record?.price_myr??''}" aria-label="${esc(family+' '+size+' '+materials[i]+' MYR')}" ${editable?'':'disabled'}></td>`).join('');
+         return `<tr data-component-group="${family}|${kind}|${size}"><td><b>${esc(size.replace('_','–'))}</b></td>${inputs}<td><button class="btn" type="button" data-save-component-group ${editable?'':'disabled'}>Save</button></td></tr>`;
+       }).join('');
+       return `<h3>${title}</h3><div style="overflow:auto"><table class="pricelist-table compact-component-table"><thead><tr><th>Size / Group</th>${materials.map(m=>`<th>${esc(m)} (MYR)</th>`).join('')}<th></th></tr></thead><tbody>${groupsHtml}</tbody></table></div>`;
+     };
+     const setupPending=!available||(pump&&defaults.some(row=>row.family===family&&!savedKeys.has(key(row))));
+     box.innerHTML=`<h2>${family} component surcharges · MYR</h2><p>Blank means not entered. Enter 0 explicitly only when included at no extra charge.</p>${pump?'<p>Standard Car/Cer and Viton are included in the base pump price.</p>':''}${setupPending?'<p>Database setup pending. Unavailable price groups are read-only.</p>':''}${pump?table('seal','Mechanical Seal Add-ons',pumpMaterials.seal):''}${table('oring','O-ring Surcharges',pump?pumpMaterials.oring:['Viton','EPDM'])}`;
+     box.querySelectorAll('[data-save-component-group]').forEach(button=>{button.onclick=()=>saveGroup(button);});
+   }
+ }
+ async function saveGroup(button){
+   if(button.disabled)return;
+   const inputs=[...button.closest('[data-component-group]').querySelectorAll('[data-component-price]')];
+   const records=inputs.map(input=>rows.find(row=>key(row)===input.dataset.componentPrice));
+   if(records.some(record=>!record))return alert('A source component row is missing. No values were saved.');
+   for(const input of inputs){if(!input.checkValidity()){input.reportValidity();return;}}
+   const payload=records.map((record,i)=>({...record,price_myr:inputs[i].value.trim()===''?null:Number(inputs[i].value)}));
+   button.disabled=true;
+   const original=button.textContent;
+   button.textContent='Saving…';
+   try{
+     const client=window.KeySuiteAuth?.getClient?.();
+     if(!client)throw Error('Supabase is not connected.');
+     const {data,error}=await client.from('ks_component_prices_v50011').upsert(payload,{onConflict:'family,kind,size_group,material'}).select();
+     if(error)throw error;
+     if(data?.length!==records.length)throw Error('Price group could not be confirmed.');
+     for(const row of data)Object.assign(records.find(record=>key(record)===key(row)),row);
+     window.KeySuitePricing?.refreshQuotePrices?.();
+     button.textContent='Saved';
+   }catch(error){alert(`Component price could not be saved: ${error.message}`);button.textContent=original;}
+   finally{button.disabled=false;}
+ }
+ async function init(){
+   rows=defaults.map(row=>({...row}));
+   savedKeys.clear();
+   available=false;
+   try{
+     const result=await window.KeySuiteAuth.getClient().from('ks_component_prices_v50011').select('family,kind,size_group,material,price_myr');
+     if(result.error)throw result.error;
+     available=true;
+     for(const row of result.data||[]){
+       const target=rows.find(record=>key(record)===key(row));
+       if(target){Object.assign(target,row);savedKeys.add(key(row));}
+     }
+   }catch(error){console.info('Component pricing setup pending:',error.message);}
+   render();
+ }
+ window.KeySuiteComponents={init,render,apply,additions,group,shaftSize,defaults,loadForTest(data){rows=data;}};
 })();

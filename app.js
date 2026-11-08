@@ -1154,6 +1154,20 @@ function quotationItemPrintBody(item){
  const heading=item.displayHeader?String(item.itemHeader||'').trim():'';
  return `<div class="print-item-desc">${heading?`<strong>${esc(heading)}</strong>\n`:''}${esc(quotePrintDescription(item))}</div>`;
 }
+function esIsoPumpsetPrintParts(item,description){
+ const source=item.pricingSource||{},kind=String(source.source_kind||'');
+ const family=String(item.pumpData?.product||quoteProductFamily(item)).toUpperCase();
+ const esIso=/^PUMPSET_DIRECT_(ES|ISO)$/.test(kind)||
+   (kind!=='SYSTEM'&&(['ES','ISO'].includes(family)||
+    (kind==='PUMPSET'&&/^\s*(?:Capacity:[^\n]*\n)?[^\n]*\b(?:ISO )?End Suction Pump Model:/i.test(description))));
+ if(!esIso||!/^\s*Capacity:/i.test(description))return null;
+ const [first,...rest]=description.replace(/^(?:[^\S\r\n]*\r?\n)+/,'').split('\n');
+ const heading=item.displayHeader?String(item.itemHeader||'').trim():'';
+ return {
+   first:`<div class="print-item-desc">${heading?`<strong>${esc(heading)}</strong>\n`:''}${esc(first)}</div>`,
+   rest:`<div class="print-item-desc">${esc(rest.join('\n'))}</div>`
+ };
+}
 function quoteClipboardKey(){return `keysuite:v50015:quote-item-clipboard:${currentCompanyId()}:${currentEmail().toLowerCase()}`}
 function copyQuoteItemToClipboard(item){try{localStorage.setItem(quoteClipboardKey(),JSON.stringify({copiedAt:new Date().toISOString(),item:structuredClone(item)}));return true}catch(error){alert(`Item could not be copied: ${error.message||error}`);return false}}
 function readQuoteItemClipboard(){try{const payload=JSON.parse(localStorage.getItem(quoteClipboardKey())||'null');return payload?.item&&typeof payload.item==='object'?structuredClone(payload.item):null}catch(_){return null}}
@@ -1247,14 +1261,39 @@ function pumpPdfCounterContext(){
  return customerId;
 }
 function resetPumpPdfItemCounter(){
- try{localStorage.removeItem('keysuite_pump_pdf_counter_v40606')}catch(_){}
+ try{setNextPumpPdfItemNumber(1)}catch(_){}
+ syncPumpPdfItemInput(true);
 }
-function nextPumpPdfItemNumber(){
+function pumpPdfCounterState(){
  const key='keysuite_pump_pdf_counter_v40606',context=pumpPdfCounterContext();
- let state={context:'',count:0};
+ let state={};
  try{state=JSON.parse(localStorage.getItem(key)||'{}')||state}catch(_){}
- if(String(state.context||'')!==context)state={context,count:0};
- return Math.max(0,Number(state.count)||0)+1;
+ if(String(state.context||'')!==context)state={};
+ const count=Number(state.count);
+ return {context,number:Number.isSafeInteger(count)&&count>=0&&count<Number.MAX_SAFE_INTEGER?count+1:1,revision:state.revision||''};
+}
+function nextPumpPdfItemNumber(){return pumpPdfCounterState().number;}
+function syncPumpPdfItemInput(force=false){
+ const input=$('ksDashPdfItemNo');
+ if(input&&(force||document.activeElement!==input))input.value=String(nextPumpPdfItemNumber()).padStart(2,'0');
+}
+window.addEventListener('KEYSUITE_DASHBOARD_CUSTOMER_CHANGED',()=>syncPumpPdfItemInput(true));
+window.addEventListener('storage',event=>{if(event.key==='keysuite_pump_pdf_counter_v40606')syncPumpPdfItemInput();});
+function setNextPumpPdfItemNumber(value){
+ const number=Number(value);
+ if(!/^\d+$/.test(String(value).trim())||!Number.isSafeInteger(number)||number<1||number>=Number.MAX_SAFE_INTEGER)return false;
+ localStorage.setItem('keysuite_pump_pdf_counter_v40606',JSON.stringify({context:pumpPdfCounterContext(),count:number-1,revision:crypto.randomUUID()}));
+ return true;
+}
+function pumpPdfDownloadTicket(filename){
+ const state=pumpPdfCounterState();
+ return Number(String(filename||'').match(/^Item\s+(\d+)\s*-/i)?.[1])===state.number?state:null;
+}
+function commitPumpPdfDownload(filename,ticket=pumpPdfDownloadTicket(filename)){
+ const current=pumpPdfDownloadTicket(filename);
+ if(!ticket||!current||ticket.context!==current.context||ticket.number!==current.number||ticket.revision!==current.revision)return;
+ setNextPumpPdfItemNumber(ticket.number+1);
+ syncPumpPdfItemInput();
 }
 function pumpPayloadCoupling(pump={}){
  let coupling=pump?.export_state?.couplingType||pump?.coupling_type||'';
@@ -1300,7 +1339,6 @@ function pumpPdfFilenameFromPayload(pump={},itemNumber=1){
  if(!bare){if(hp>0)motorBits.push(`${capacityNumber(hp,1)}HP`);if(pole>0)motorBits.push(`${capacityNumber(pole,0)}P`);if(efficiency)motorBits.push(efficiency);if(isEs){const coupling=pumpPayloadCoupling(pump);if(coupling)motorBits.push(coupling)}}
  let dutyFlow=Number(pump.required_total_flow_m3h??pump.required_flow_m3h??pump.flow_m3h??pump.pumpData?.flowM3h),dutyHead=Number(pump.required_head_m??pump.head_m??pump.pumpData?.headM),originalDuty=pumpPdfOriginalDuty(pump);
  const numbered=Number(itemNumber)>0,no=String(Math.max(1,Number(itemNumber)||1)).padStart(2,'0'),motor=motorBits.length?` cw ${motorBits.join(' ')}`:'',duty=originalDuty?` - ${originalDuty}`:(dutyFlow>0&&dutyHead>0)?` - ${capacityNumber(dutyFlow,2)}m3／hr @ ${capacityNumber(dutyHead,2)} Mtr`:'';
- // B4.06.13: without a selected customer, use only pump model + duty capacity and do not consume Item numbering.
  return safePdfName(numbered?`Item ${no} - ${model}${duty}`:`${model}${duty}`);
 }
 function quotePumpPdfFilename(row,itemNumber){
@@ -1334,10 +1372,13 @@ function productCurvePdfFilename(pump = {}, now = new Date()) {
 }
 window.KeySuitePumpPdfNames={
  productFromPayload:productCurvePdfFilename,
- nextFromPayload:pump=>pumpPdfFilenameFromPayload(pump,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
+ nextFromPayload:pump=>pumpPdfFilenameFromPayload(pump,nextPumpPdfItemNumber()),
  nextFromRow:row=>quotePumpPdfFilename(row,pumpPdfHasSelectedCustomer()?nextPumpPdfItemNumber():0),
  metadataTitleFromPump:(pump,now=new Date())=>pumpPdfMetadataTitle(pump,now),
- commit:filename=>{if(!pumpPdfHasSelectedCustomer())return;const number=Number(String(filename||'').match(/^Item\s+(\d+)/i)?.[1]);if(!number)return;const context=pumpPdfCounterContext(),key='keysuite_pump_pdf_counter_v40606';let previous={};try{previous=JSON.parse(localStorage.getItem(key)||'{}')}catch(_){}const count=previous.context===context?Math.max(Number(previous.count)||0,number):number;localStorage.setItem(key,JSON.stringify({context,count}));},
+ ticket:pumpPdfDownloadTicket,
+ commit:commitPumpPdfDownload,
+ setNext:setNextPumpPdfItemNumber,
+ syncInput:syncPumpPdfItemInput,
  context:pumpPdfCounterContext,
  reset:resetPumpPdfItemCounter
 };
@@ -2040,10 +2081,11 @@ function buildPrintQuotation(){
  const prepared=items.map((item,i)=>{
    const amount=item.qty*item.unitPrice,description=quotePrintDescription(item),body=quotationItemPrintBody(item);subtotal+=amount;
    const setItem=quoteUsesSetPrintLayout(item),capacityItem=/^Capacity:/i.test(description.trim()),capacityClass=capacityItem?' print-capacity-item':'';
+   const pumpParts=setItem?esIsoPumpsetPrintParts(item,description):null;
    const customUnit=!['unit','set'].includes(item.unit.toLowerCase());
    const qtyCell=`<td${customUnit?' style="white-space:normal;overflow-wrap:anywhere"':''}>${esc(printQty(item.qty,item.unit))}</td>`;
    const html=setItem
-     ?`<tr class="print-system-item-head${capacityClass}"><td rowspan="2">${i+1}</td><td></td>${qtyCell}<td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr><tr class="print-system-item-desc-row${capacityClass}"><td class="print-system-desc-cell" colspan="4">${body}</td></tr>`
+     ?`<tr class="print-system-item-head${capacityClass}"><td rowspan="2">${i+1}</td><td>${pumpParts?.first||''}</td>${qtyCell}<td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr><tr class="print-system-item-desc-row${capacityClass}${pumpParts?' print-pump-continuation':''}"><td class="print-system-desc-cell" colspan="4">${pumpParts?.rest??body}</td></tr>`
      :`<tr class="${capacityClass.trim()}"><td>${i+1}</td><td>${body}</td>${qtyCell}<td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr>`;
    return {height:estimatePrintItemHeight(item),html};
  });

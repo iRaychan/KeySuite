@@ -22,7 +22,7 @@ REPORT = ROOT / '_pages-report'
 RUNTIME_DIRS = {'assets', 'data', 'keyhq', 'vendor', 'selector', 'selector-g1',
                 'selector-cr', 'selector-kv', 'selector-bgf', 'selector-bsw',
                 'selector-bfi', 'selector-es', 'selector-iso'}
-ROOT_FILES = {'index.html', 'manifest.json', 'CNAME', 'VERSION.txt', 'RELEASE.json',
+ROOT_FILES = {'index.html', 'pump-pdf-report.html', 'manifest.json', 'CNAME', 'VERSION.txt', 'RELEASE.json',
               'KEYHQ_RELEASE.json', 'robots.txt', '404.html', 'favicon.ico'}
 ROOT_SUFFIXES = {'.js', '.css', '.csv', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.pdf'}
 TEXT_SUFFIXES = {'.js', '.css', '.html', '.json'}

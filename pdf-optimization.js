@@ -83,6 +83,7 @@
     const originals=[];
     await Promise.all(images.map(async img=>{
       try{
+        if(img.hasAttribute('data-keysuite-preserve-original'))return;
         const original=img.getAttribute('src')||'';
         const optimized=await optimizedSource(img,options.profile||'datasheet');
         if(!optimized||optimized===original)return;

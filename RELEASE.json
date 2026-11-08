@@ -1,9 +1,9 @@
 {
-  "version": "5.00.55",
-  "baseline": "5.00.54",
-  "upgrade_supported_from": "5.00.54",
-  "release_status": "phase_3_bugfix_review",
-  "new_database_migration_required": false,
+  "version": "5.00.56",
+  "baseline": "5.00.55",
+  "upgrade_supported_from": "5.00.55",
+  "release_status": "bugs_001_005_review",
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -12,9 +12,10 @@
     "KeyStock": "1.02"
   },
   "changes": [
-    "Original ISO drawing in technical PDF Page 3",
-    "ISO coupling shaft and torque checks against engineering source data",
-    "Consistent ISO model identity and floating Back navigation",
-    "ES and ISO quotation description corrections"
+    "Original ES and ISO V1.3 drawings in technical PDF Page 3",
+    "ES and ISO component pricing by verified model shaft size",
+    "Numerically sorted ES and ISO Coupling model lists",
+    "Aligned ES and ISO complete pumpset quotation descriptions",
+    "Editable Dashboard Selection PDF item number"
   ]
 }

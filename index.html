@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.55</title>
-  <script>window.KEYSUITE_VERSION='5.00.55';window.KEYSUITE_BUILD='V5.00.55';</script>
+  <title>KeySuite V5.00.56</title>
+  <script>window.KEYSUITE_VERSION='5.00.56';window.KEYSUITE_BUILD='V5.00.56';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -140,6 +140,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   .print-item-model{font-weight:700;margin-bottom:1.5mm}.print-item-desc{font-size:10pt;white-space:pre-wrap;line-height:1.35;tab-size:4;overflow-wrap:normal;word-break:normal}
   .print-system-item-head td{padding-bottom:0}.print-system-item-head .print-item-model{margin-bottom:0}.print-system-item-desc-row td{padding-top:1.5mm}.print-system-item-desc-row .print-system-desc-cell{width:auto!important;text-align:left!important;white-space:normal!important}.print-system-item-desc-row .print-item-desc{width:100%}
   .print-capacity-item .print-item-model{margin-bottom:.35mm}.print-system-item-desc-row.print-capacity-item td{padding-top:.35mm}
+  .print-system-item-desc-row.print-pump-continuation td{padding-top:0}
   .print-summary-spacer td{height:5mm;padding:0!important}
   .print-summary-line td{height:0;padding:0!important;border:0!important}
   .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
@@ -658,7 +659,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.55</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.56</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -674,7 +675,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.55</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.56</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -700,7 +701,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.55</div>
+    <div class="suite-version">KeySuite V5.00.56</div>
   </aside>
 
   <main>
@@ -1078,9 +1079,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="card es-product-toolbar iso-product-toolbar"><div><label>Material</label><select id="isoMaterial"></select></div><div><label>Seal Type</label><select id="isoSealType"><option>Mechanical Seal</option><option>Gland Packing</option></select></div><div><label>Seal Material</label><select id="isoSeal"><option value="Carbon Ceramic">Carbon Ceramic</option><option value="Silicon Carbide">Silicon Carbide</option><option value="Tungsten">Tungsten</option><option value="Graphite">Graphite</option></select></div><div><label>Elastomer</label><select id="isoElastomer"><option>Viton</option><option>EPDM</option><option>NBR</option></select></div></div>
       <div class="page-title-row" style="margin:16px 0 0"><div><h2 style="margin:0">ISO Models</h2></div><div class="price-list-search"><label>Search Model</label><input id="isoSearch" placeholder="Example: ISO 50-32-160"></div></div>
       <div class="product-layout es-product-layout iso-product-layout"><div class="card"><h2>ISO Series</h2><div id="isoProductSeriesList" class="product-series-list"></div></div><div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="isoProductSeriesTitle" style="margin:0">ISO Models</h2><div id="isoProductCount" class="muted"></div></div></div><div id="isoProducts" class="product-model-grid"></div></div></div>
-      <iframe id="productIsoSelectorFrame" src="about:blank" data-src="selector-iso/index.html?product=1&amp;v=50055" title="ISO Product Curve" style="display:none"></iframe>
+      <iframe id="productIsoSelectorFrame" src="about:blank" data-src="selector-iso/index.html?product=1&amp;v=50056" title="ISO Product Curve" style="display:none"></iframe>
     </section>
-    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50055" title="ISO Selection" style="width:100%;height:2600px;border:0;display:block"></iframe></section>
+    <section id="selectorIso" class="page"><h1>ISO Selection</h1><iframe id="selectorIsoFrame" src="selector-iso/index.html?v=50056" title="ISO Selection" style="width:100%;height:2600px;border:0;display:block"></iframe></section>
     <section id="isoPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
       <div class="page-title-row"><div><h1>ISO Price List</h1><div class="muted">Maintain independent ISO source prices by material, selected currency and rarity.</div></div></div>
@@ -2256,25 +2257,25 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="permissions.js?v=50055"></script>
+<script src="permissions.js?v=50056"></script>
 <script src="v40407-role-authority.js?v=50028"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50055"></script>
+<script src="assembly.js?v=50056"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="supabase/functions/shared-kv/kv-data.js?v=50046"></script><script src="bsw-data-v50027.js?v=50027"></script>
 <script src="kv-fixes-v50026.js?v=50026"></script>
 <script src="kv-price-data-v50017.js?v=50046"></script>
-<script src="pdf-optimization.js?v=42821"></script>
-<script src="app.js?v=50055"></script>
-<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50055"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
+<script src="pdf-optimization.js?v=50056"></script>
+<script src="app.js?v=50056"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50056"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
-<script src="component-prices-v50011.js"></script>
+<script src="component-prices-v50011.js?v=50056"></script>
 <script src="manual-price-v50011.js"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50055"></script>
-<script src="pump-pdf-download-v50035.js?v=50035"></script>
+<script src="pricing.js?v=50056"></script>
+<script src="pump-pdf-download-v50035.js?v=50056"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=50047"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
@@ -2290,9 +2291,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bgf-v50006.js?v=50030"></script>
 <script src="bsw-v50027.js?v=50030"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50055"></script>
-<script src="motor.js?v=50055"></script>
-<script src="coupling.js?v=50055"></script>
+<script src="roles.js?v=50056"></script>
+<script src="motor.js?v=50056"></script>
+<script src="coupling.js?v=50056"></script>
 <script src="baseplate.js?v=42872"></script>
 <script src="quotation-templates.js?v=409"></script>
 
@@ -2395,12 +2396,12 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
 <script src="kv-product-families-v50027.js?v=50028"></script>
-<script src="v41200-bootstrap.js?v=50055"></script>
+<script src="v41200-bootstrap.js?v=50056"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
-<script src="v50051-version-lock.js?v=50055"></script>
-<link rel="stylesheet" href="keystock-v100.css?v=50055">
-<script src="keystock-v100.js?v=50055"></script>
+<script src="v50051-version-lock.js?v=50056"></script>
+<link rel="stylesheet" href="keystock-v100.css?v=50056">
+<script src="keystock-v100.js?v=50056"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{

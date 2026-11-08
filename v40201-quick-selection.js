@@ -182,6 +182,10 @@ function applyDashboardStockPriority(e,data,includeColdItems=false){
 
 function style(){if($('ksV39444QuickStyle'))return;const s=document.createElement('style');s.id='ksV39444QuickStyle';s.textContent=`
 #ksDutyProducts,#ksDutyBodies,#ks3944Material,#ksDashMaterial,.ks3944-material{display:none!important}
+.ks-pdf-item-flow-row{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px}
+.ks-pdf-item-flow-row>.ks-duty-row{flex:1 1 310px}
+#ksDashboardDutyFinder .ks-pdf-item-number{display:inline-flex;align-items:center;gap:8px;margin:9px 0 0 auto;white-space:nowrap;font-size:12px;font-weight:700}
+#ksDashboardDutyFinder .ks-pdf-item-number input{width:60px;min-height:36px;text-align:center}
 .ks42513-check-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
 .ks42704-cold-inline{display:inline-flex;align-items:center;gap:7px;color:#17365d;font-size:12px;font-weight:700;line-height:1.2;cursor:pointer;white-space:nowrap}.ks42704-cold-inline input{width:auto!important;min-height:0!important;margin:0!important;accent-color:#1264a3}
 .ks405-quick-enhanced-inline{display:inline-flex;align-items:center;gap:7px;margin-left:7px;padding-left:8px;border-left:1px solid #c7d7e5;color:#075d91;font-size:12px;font-weight:400;line-height:1.2;cursor:pointer;white-space:nowrap}.ks405-quick-enhanced-inline input{width:auto!important;min-height:0!important;margin:0!important;accent-color:#1264a3}.ks405-quick-family-line{display:flex;align-items:center;gap:12px;margin-top:8px;font-size:12px;font-weight:400;line-height:1.2;color:#17365d}.ks405-quick-family-line>span{font:inherit}.ks405-quick-family-line .ks405-quick-enhanced-inline{margin-left:0;padding-left:0;border-left:0;color:inherit;font:inherit}.ks405-enhanced-tag{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid #9dc4e3;border-radius:999px;background:#eef7ff;color:#075d91;font-size:9px;font-weight:900;vertical-align:middle}
@@ -270,7 +274,27 @@ function syncBrandMaster(card){
 }
 function syncAllBrandMasters(){document.querySelectorAll('#ks39442PrefGrid .ks39442-pref-brand').forEach(syncBrandMaster)}
 
-function ensureUi(){const box=$('ksDashboardDutyFinder');if(!box)return false;if(!canQuick()){box.style.display='none';return true}box.style.display='';removeMaterialControls();$('ks405QuickEnhanced')?.remove();$('ks405QuickEnhancedLocked')?.remove();
+function ensurePdfItemInput(){
+ const flowRow=$('ksDashFlow')?.closest('.ks-duty-row'),names=window.KeySuitePumpPdfNames;
+ if(!flowRow||!names)return;
+ if(!$('ksDashPdfItemNo')){
+   const row=document.createElement('div');
+   row.className='ks-pdf-item-flow-row';
+   flowRow.before(row);
+   row.appendChild(flowRow);
+   const control=document.createElement('label');
+   control.className='ks-pdf-item-number';
+   control.innerHTML='PDF Item No. <input id="ksDashPdfItemNo" type="text" inputmode="numeric" autocomplete="off">';
+   row.appendChild(control);
+   const input=$('ksDashPdfItemNo');
+   input.addEventListener('input',()=>names.setNext(input.value));
+   input.addEventListener('blur',()=>names.syncInput(true));
+   input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();input.blur();}});
+ }
+ names.syncInput();
+}
+
+function ensureUi(){const box=$('ksDashboardDutyFinder');if(!box)return false;if(!canQuick()){box.style.display='none';return true}box.style.display='';ensurePdfItemInput();removeMaterialControls();$('ks405QuickEnhanced')?.remove();$('ks405QuickEnhancedLocked')?.remove();
 // V4.25.14: Check Pumps stays directly below Head; Brand / Series Settings is inserted immediately after it before its controls are bound.
 let checkRow=$('ks42513CheckRow');if(!checkRow){checkRow=document.createElement('div');checkRow.id='ks42513CheckRow';checkRow.className='ks42513-check-row';const headRow=$('ksDashHead')?.closest?.('.ks-duty-row');if(headRow)headRow.insertAdjacentElement('afterend',checkRow);else{const actions=box.querySelector('.ks-duty-actions');box.insertBefore(checkRow,actions||box.firstChild)}}const checkButton=$('ksDashSelect');if(checkButton&&checkButton.parentElement!==checkRow)checkRow.appendChild(checkButton);
 let coldLabel=$('ks42704ColdLabel');if(!coldLabel){coldLabel=document.createElement('label');coldLabel.id='ks42704ColdLabel';coldLabel.className='ks42704-cold-inline';coldLabel.title='Include suitable pump models without a filled price';coldLabel.innerHTML='<input type="checkbox" id="ks42704IncludeCold"><span>Cold Item</span>';checkRow.appendChild(coldLabel)}const coldCheck=$('ks42704IncludeCold');if(coldCheck)coldCheck.checked=state.includeColdItems;

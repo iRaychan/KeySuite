@@ -201,6 +201,7 @@
     const pump=byId('couplingProductPump'),iso=byId('couplingProductPumpSeries')?.value==='ISO';
     if(pump){
       const previous=normalizePumpModel(pump.value),models=iso?[...isoPumpModels().keys()]:Object.keys(PUMP_SHAFTS);
+      models.sort((a,b)=>a.localeCompare(b,'en',{numeric:true,sensitivity:'variant'}));
       pump.innerHTML=models.map(model=>`<option value="${esc(model)}">${esc(iso?model:'ES '+model)}</option>`).join('');
       if(models.includes(previous))pump.value=previous;
     }
