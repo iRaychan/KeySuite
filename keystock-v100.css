@@ -1,4 +1,60 @@
-#keyStock .stock-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}#keyStock .stock-tabs .active{background:#17365d;color:white}
+/* Phase 2 Bug 001. Paint the existing KeyStock button without changing its box. */
+#keyStockNav {
+  display:flex; align-items:center; justify-content:space-between;
+  position:relative; isolation:isolate; overflow:hidden;
+  color:#fff; font-weight:700;
+  background:linear-gradient(110deg,#075469,#063e5a);
+  box-shadow:inset 0 0 0 2px #16eff7,inset 0 0 14px #05e9ff3d,0 0 10px #05e9ff58;
+}
+#keyStockNav::before {
+  content:""; position:absolute; z-index:-1; right:-16px; bottom:-32px;
+  width:68px; height:68px; border:1px solid #21e8f966; border-radius:50%;
+  box-shadow:0 0 16px #05e9ff3d;
+}
+#keyStockNav:hover,#keyStockNav.active {background:linear-gradient(110deg,#086378,#074663)}
+#keyStockNav svg,#keyStock .stock-tabs svg {
+  width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.65;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+#keyStockNav svg {position:absolute;right:14px;top:50%;transform:translateY(-50%);width:21px;height:21px}
+@media (min-width:621px) and (max-width:1000px){#keyStockNav svg{right:8px;width:16px;height:16px}}
+@media (max-width:620px){#keyStockNav svg{position:static;transform:none;margin-left:6px}}
+
+#keyStock .stock-workspace {
+  display:grid;grid-template-columns:minmax(155px,235px) minmax(0,1fr);align-items:start;gap:16px;
+}
+#keyStock .stock-tabs {
+  display:grid;gap:5px;padding:9px;background:#fff;border:1px solid #e2e8f0;border-radius:13px;
+}
+#keyStock .stock-tabs button {
+  display:flex;align-items:center;gap:9px;width:100%;min-height:43px;padding:9px 10px;
+  border:1px solid transparent;border-radius:8px;background:var(--stock-tab-color);color:#111;
+  text-align:left;
+}
+#keyStock .stock-tabs button[aria-current="page"] {border-color:#475569;font-weight:700}
+#keyStock .stock-tabs [data-tab="check"] {--stock-tab-color:#ffe5e5}
+#keyStock .stock-tabs [data-tab="missing"] {--stock-tab-color:#ffead7}
+#keyStock .stock-tabs [data-tab="reservations"] {--stock-tab-color:#fff3cc}
+#keyStock .stock-tabs [data-tab="movement"] {--stock-tab-color:#e3f2da}
+#keyStock .stock-tabs [data-tab="history"] {--stock-tab-color:#ddf0f5}
+#keyStock .stock-tabs [data-tab="dropdowns"] {--stock-tab-color:#eee2f5}
+#keyStock .stock-management-label {border-top:1px solid #e2e8f0;margin-top:6px;padding:9px 0 2px;font-size:.75rem;text-transform:uppercase}
+#keyStock #stockUtilities {margin-bottom:12px}
+#keyStock #stockUtilities:not([open]) summary {margin-bottom:0}
+#keyStock .stock-phase2-table th,#keyStock .stock-phase2-table td {text-align:center;vertical-align:middle}
+#keyStock .stock-phase2-table td {background:#fff}
+#keyStock .stock-phase2-table th input {margin-top:6px;min-width:110px}
+#keyStock .stock-detail-head {display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#keyStock .stock-detail-head h2 {margin:0}
+#keyStock .stock-detail-metrics {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+#keyStock .stock-history-metrics {grid-template-columns:repeat(3,minmax(0,1fr))}
+#keyStock .stock-detail-metrics>div {display:grid;gap:8px;text-align:center;border:1px solid #cbd5e1;border-radius:8px;padding:10px 4px}
+#keyStock .stock-detail-metrics .stock-link {text-align:center;color:#1763a2}
+#keyStock .stock-normal-row {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0}
+#keyStock .stock-normal-row span {border:1px solid #cbd5e1;border-radius:6px;padding:5px 8px}
+#keyStock .stock-sr {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media (max-width:760px){#keyStock .stock-workspace{grid-template-columns:1fr}}
+@media (max-width:480px){#keyStock .stock-detail-metrics{font-size:.8rem;gap:4px}}
 #keyStock .stock-form{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:16px}#keyStock .stock-wide{grid-column:1/-1}#keyStock .stock-tools{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:16px 0}#keyStock .stock-tools>label{min-width:180px;flex:1}#keyStock label{display:block}#keyStock label input,#keyStock label select{display:block;margin-top:6px;width:100%;box-sizing:border-box}#keyStock input[type=checkbox]{display:inline;width:auto;margin-right:6px}#keyStock .stock-message{white-space:pre-wrap;padding:12px 16px;border-radius:10px;background:#edf5fc;margin-bottom:16px}#keyStock .stock-message.error{background:#fff0ee;color:#922}#keyStock .stock-scroll{overflow:auto}#keyStock table{border-collapse:collapse;width:100%}#keyStock th,#keyStock td{text-align:left;padding:12px;border-bottom:1px solid #e3eaf3;vertical-align:top}#keyStock th{background:#eef3f8}#keyStock .stock-link{background:none;border:0;color:#17365d;cursor:pointer;text-align:left;font:inherit;font-weight:700;padding:0}#keyStock .stock-options{display:grid;gap:10px}#keyStock .stock-option{display:grid;grid-template-columns:minmax(150px,1fr) auto auto auto;align-items:center;gap:8px}#keyStock details{padding:14px;border:1px solid #dbe4ee;border-radius:10px}#keyStock summary{cursor:pointer;font-weight:700;margin-bottom:12px}#keyStock .stock-badge{display:inline-block;padding:4px 8px;background:#edf5fc;border-radius:6px;font-size:12px}#keyStock .stock-targets{max-height:240px;overflow:auto;padding:10px;border:1px solid #dbe4ee}#keyStock .stock-targets label{margin:7px}#keyStock small{display:block;color:#64748b;margin-top:5px}#keyStock .stock-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}#keyStock .stock-summary{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0;color:#17365d}@media(max-width:800px){#keyStock .stock-form{grid-template-columns:1fr}#keyStock .stock-option{grid-template-columns:1fr auto auto}#keyStock .stock-option label{grid-column:1/-1}}
 
 #keyStock .stock-heading,#keyStock #stockEditActions,#keyStock .stock-ref {

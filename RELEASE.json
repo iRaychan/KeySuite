@@ -1,8 +1,9 @@
 {
-  "version": "5.00.52",
-  "baseline": "5.00.51",
-  "upgrade_supported_from": "5.00.51",
-  "new_database_migration_required": true,
+  "version": "5.00.53",
+  "baseline": "5.00.52",
+  "upgrade_supported_from": "5.00.52",
+  "release_status": "phase_2_review_build",
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -11,6 +12,8 @@
     "KeyStock": "1.01"
   },
   "changes": [
-    "KeyStock Phase 1 bug fixes 001\u2013011"
+    "Phase 2 Bug 001: cyan KeyStock sidebar entry",
+    "KeyStock internal navigation and opening-balance views",
+    "Transaction workflows pending Phase 2 database design and approval"
   ]
 }

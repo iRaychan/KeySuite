@@ -4,7 +4,24 @@
   const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uid=()=>crypto.randomUUID(), sort=(a,b)=>(a.sort_order-b.sort_order)||String(a.id).localeCompare(String(b.id));
   let state=null, tab='check', selected='', family='', query='', location='', busy=false, request=0, entryId=uid(), correction=null;
-  const pages={check:'Stock Check',items:'Stock Item Management',input:'Stock Input',dropdowns:'Dropdown Management',location:'Stock by Location'};
+  const pages={
+    check:['Stock Check','M16 16l5 5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0'],
+    missing:['Missing Parts','M12 3l9 5v8l-9 5-9-5V8l9-5Zm0 5v5m0 3v.1'],
+    reservations:['Reservations','M6 4h12v16l-6-4-6 4z'],
+    movement:['Stock Movement','M3 7h17m-4-4 4 4-4 4M21 17H4m4-4-4 4 4 4'],
+    history:['Stock History','M3 12a9 9 0 1 0 3-7M3 3v5h5m4-2v6l4 2'],
+    dropdowns:['Dropdown Management','M3 4h18v3l-7 7v6l-4-2v-4L3 7z']
+  };
+  const navIcon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"></path></svg>`;
+  const locationLabel=id=>state.locations.find(l=>l.id===id)?.label||'Not Assigned';
+  let stockFilter=emptyStockFilter();
+  let historyFilter=emptyHistoryFilter();
+  let movementFilter={period:'30',from:'',to:'',open:false};
+  let dropdownFilter=['','','',''];
+  let missingFilter={model:'',series:'',component:''};
+  let newestFirst=false;
+  function emptyStockFilter(){return {location:'',supplier:'',open:false};}
+  function emptyHistoryFilter(){return {model:'',period:'all',from:'',to:'',open:false};}
   const caps = key => state?.permissions?.[key] === true;
   const mayEdit = () => ['add_stock_model','edit_stock_model','delete_stock_model'].some(caps);
   const natural = new Intl.Collator('en',{numeric:true,sensitivity:'base'});
@@ -36,7 +53,7 @@
     trail.push({tab,selected,family,query,location,status,scroll:scrollRoot()?.scrollTop||0,y:window.scrollY});
     if (trail.length>40) trail.shift();
     tab=next;
-    if(key){selected=key;family=item().family;query='';}
+    if(key){selected=key;if(next!=='detail'){family=item().family;query='';}}
     correction=null;
     entryId=uid();
     render();
@@ -206,8 +223,7 @@
     }catch(e){
       if(token!==request)return false;
       state=null;
-      $('stockEdit').hidden=true;
-      $('stockContent').innerHTML='';
+      clearStockView();
       message(`KeyStock is unavailable. ${e.message}`,true);
       return false;
     }
@@ -269,6 +285,265 @@
     });
   }
   const formatQty = n => n.toLocaleString(undefined,{maximumFractionDigits:12});
+  const textMatch=(value,term)=>String(value??'').toLowerCase().includes(term.trim().toLowerCase());
+  const configById=()=>new Map(state.configurations.map(c=>[c.id,c]));
+  const localDate=timestamp=>new Date(timestamp).toLocaleDateString('en-CA',{timeZone:'Asia/Kuala_Lumpur'});
+  const stockTable=(headers,rows,empty,attributes='')=>`<div class="stock-scroll"><table class="stock-phase2-table" ${attributes}>
+    <thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.length?rows.join(''):`<tr><td colspan="${headers.length}">${esc(empty)}</td></tr>`}</tbody></table></div>`;
+  const textRow=values=>`<tr>${values.map(value=>`<td>${esc(value)}</td>`).join('')}</tr>`;
+  function batchesForCheck(configs) {
+    if(tab==='detail'&&trail.at(-1)?.tab==='location'){
+      return state.opening_balances.filter(b=>!b.voided_at&&configs.has(b.configuration_id)&&(b.location_id||'')===location);
+    }
+    const prefix=stockFilter.location.trim().toLowerCase();
+    const supplier=stockFilter.supplier;
+    const supplierNames=new Map(state.suppliers.map(s=>[s.id,s.label]));
+    const locations=new Map(state.locations.map(l=>[l.id,l.label.toLowerCase()]));
+    return state.opening_balances.filter(b=>!b.voided_at&&configs.has(b.configuration_id)
+      &&(!prefix||(Number(b.quantity)>0&&locations.get(b.location_id)?.startsWith(prefix)))
+      &&(!supplier.trim()||textMatch(b.supplier,supplier)||textMatch(supplierNames.get(b.supplier_id),supplier)));
+  }
+  function stockCheckResults(){
+    const configs=configById(), totals=new Map(), configured=new Set(state.configurations.map(c=>c.item_key));
+    for(const b of batchesForCheck(configs)){
+      const key=configs.get(b.configuration_id).item_key;
+      totals.set(key,(totals.get(key)||0)+Number(b.quantity));
+    }
+    const requireBatch=Boolean(stockFilter.location.trim()||stockFilter.supplier.trim());
+    const models=filtered().filter(i=>{
+      const total=totals.get(i.key)||0;
+      return (!requireBatch||totals.has(i.key))&&(status!=='positive'||total>0)
+        &&(status!=='zero'||total===0)&&(status!=='unconfigured'||!configured.has(i.key));
+    });
+    const rows=models.map(i=>{
+      const qty=formatQty(totals.get(i.key)||0);
+      return `<tr><td><button class="stock-link" data-stock-detail="${esc(i.key)}">${esc(i.model)}</button>
+        <small>${esc(i.brand)} · ${esc(i.family)}</small></td><td>${qty}</td><td>—</td><td>—</td><td>${qty}</td></tr>`;
+    });
+    return `<p class="stock-summary">${formatQty(models.length)} ${models.length===1?'model':'models'} shown</p>
+      ${stockTable(['Model','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Stock Check results"')}`;
+  }
+  function stockCheck(){
+    return `<label>Search Model<input id="stockQuery" type="search" value="${esc(query)}" placeholder="Search model or brand"></label>
+      <details id="stockCheckFilter" ${stockFilter.open?'open':''}><summary>Filter</summary>
+        <div class="stock-tools">
+          <label>Location<input id="stockFilterLocation" type="search" value="${esc(stockFilter.location)}" placeholder="Location prefix"></label>
+          <label>Supplier<input id="stockFilterSupplier" type="search" list="stockSupplierChoices" value="${esc(stockFilter.supplier)}">
+            <datalist id="stockSupplierChoices">${state.suppliers.map(s=>`<option value="${esc(s.label)}"></option>`).join('')}</datalist>
+          </label>
+          <label>Serial Number<input disabled placeholder="Serial tracking unavailable"></label>
+          <label>Product Family<select id="stockFamily"><option value="">All families</option>${[...new Set(items().map(i=>i.family))].sort(natural.compare).map(f=>`<option ${family===f?'selected':''}>${esc(f)}</option>`).join('')}</select></label>
+          <label>Stock Status<select id="stockStatus">${[['','All statuses'],['unconfigured','Not Configured'],['zero','Zero Stock'],['positive','In Stock']].map(([value,label])=>`<option value="${value}" ${value===status?'selected':''}>${label}</option>`).join('')}</select></label>
+        </div>
+      </details>
+      <p class="stock-metrics-note">On Hand is physical stock from active opening balances. Reserve and Not Complete totals are unavailable.</p>
+      <div id="stockTable">${stockCheckResults()}</div>`;
+  }
+  function bindStockCheck(){
+    const update=()=>{$('stockTable').innerHTML=stockCheckResults();bindStockDetailLinks();};
+    $('stockCheckFilter').ontoggle=e=>{stockFilter.open=e.target.open;};
+    $('stockQuery').oninput=e=>{query=e.target.value;update();};
+    $('stockFamily').onchange=e=>{family=e.target.value;update();};
+    $('stockStatus').onchange=e=>{status=e.target.value;update();};
+    $('stockFilterLocation').oninput=e=>{stockFilter.location=e.target.value;update();};
+    $('stockFilterSupplier').oninput=e=>{stockFilter.supplier=e.target.value;update();};
+    bindStockDetailLinks();
+  }
+  function bindStockDetailLinks(){
+    $('stockTable').querySelectorAll('[data-stock-detail]').forEach(b=>b.onclick=()=>moveTo('detail',b.dataset.stockDetail));
+  }
+  function stockDetail(){
+    const model=item();
+    if(!model)return '<p>This model is unavailable.</p>';
+    const configs=new Map(state.configurations.filter(c=>c.item_key===selected).map(c=>[c.id,c]));
+    const batches=batchesForCheck(configs).sort((a,b)=>(newestFirst?-1:1)*(a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id)));
+    const total=formatQty(batches.reduce((sum,b)=>sum+Number(b.quantity),0));
+    const columns=state.groups.filter(g=>g.item_key===selected&&g.kind==='normal'&&(!g.retired
+      ||batches.some(b=>Object.hasOwn(configs.get(b.configuration_id).selections,g.id)))).sort(sort);
+    const rows=batches.map(b=>{
+      const config=configs.get(b.configuration_id);
+      return textRow([...columns.map(g=>b.snapshot?.selections?.[g.id]?.option
+        ||state.options.find(o=>o.id===config.selections[g.id])?.label||'—'),
+      b.snapshot?.variant||config.variant||'Unmapped',locationLabel(b.location_id),localDate(b.created_at),
+      formatQty(Number(b.quantity)),'—','—',formatQty(Number(b.quantity)),'—']);
+    });
+    const normal=columns.map(g=>{
+      const tally=new Map();
+      for(const b of batches){
+        const option=configs.get(b.configuration_id).selections[g.id];
+        if(option)tally.set(option,(tally.get(option)||0)+Number(b.quantity));
+      }
+      const choices=state.options.filter(o=>o.group_id===g.id&&(!o.retired||tally.has(o.id))).sort(sort);
+      return `<div class="stock-normal-row"><b>${esc(g.label)}</b>${choices.map(o=>
+        `<span>${esc(o.label)} <strong>${formatQty(tally.get(o.id)||0)}</strong></span>`).join('')}</div>`;
+    }).join('');
+    return `<div class="stock-detail-head"><button class="btn secondary" id="stockDetailBack">Back</button><h2>${esc(model.model)}</h2></div>
+      <div class="stock-detail-metrics">${[['Total',total],['Reserve','—'],['Not Complete','—'],['On Hand',total]].map(([label,value],i)=>
+        `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
+      <p id="stockMetricStatus" class="stock-metrics-note" role="status" hidden></p>
+      ${normal}<h3>Stock Breakdown by Configuration &amp; Location</h3>
+      <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
+      <p class="stock-metrics-note">Dates are the recorded opening-entry dates. Batch actions require the transaction ledger.</p>
+      ${stockTable([...columns.map(g=>g.label),'Pricelist Mapping','Location','Add In Date','Total','Reserve','Not Complete','On Hand','Actions'],rows,'No active opening balances match these filters.')}`;
+  }
+  function bindStockDetail(){
+    $('stockDetailBack').onclick=back;
+    $('stockDateOrder').onchange=e=>{newestFirst=e.target.value==='newest';render();};
+    $('stockContent').querySelectorAll('[data-stock-metric]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.stockMetric==='2'){
+        missingFilter={model:item().model,series:item().family,component:''};
+        moveTo('missing');
+      }else{
+        const notice=$('stockMetricStatus');
+        notice.textContent='Reservation details require the reservation ledger.';
+        notice.hidden=false;
+      }
+    });
+  }
+  function missingRows(){
+    const configs=configById(), models=new Map(items().map(i=>[i.key,i]));
+    const balances=new Map(state.opening_balances.filter(b=>!b.voided_at).map(b=>[b.id,b]));
+    const options=new Map(state.options.map(o=>[o.id,o.label]));
+    const shortages=new Map();
+    for(const q of state.critical_quantities){
+      const config=configs.get(balances.get(q.opening_id)?.configuration_id);
+      const model=models.get(config?.item_key);
+      const component=options.get(q.option_id)||'Historical component';
+      if(!model||Number(q.missing_quantity)<=0||!textMatch(model.model,missingFilter.model)
+        ||!textMatch(model.family,missingFilter.series)||!textMatch(component,missingFilter.component))continue;
+      const key=config.id+':'+q.option_id;
+      const row=shortages.get(key)||{model,config,component,quantity:0};
+      row.quantity+=Number(q.missing_quantity);
+      shortages.set(key,row);
+    }
+    return [...shortages.values()].sort((a,b)=>modelCompare(a.model,b.model)).map(row=>
+      textRow([row.model.model,configLabel(row.config),row.component,'Unknown','Unknown','Unknown',formatQty(row.quantity)]));
+  }
+  function missingResults(){
+    return stockTable(['Model','Configuration','Missing Component','Qty Affected','Required','Available','Shortage'],missingRows(),'No recorded shortages match these filters.');
+  }
+  function missingParts(){
+    return `<h2>Missing Parts</h2><p class="stock-metrics-note">Shows shortages recorded on active opening balances. Component requirements, available components and allocation are unknown.</p>
+      <div class="stock-tools">${Object.entries(missingFilter).map(([key,value])=>
+        `<label>${{model:'Model',series:'Series',component:'Component'}[key]}<input type="search" data-missing-filter="${key}" value="${esc(value)}"></label>`).join('')}</div>
+      <div id="stockMissingResults">${missingResults()}</div>`;
+  }
+  function timeFrame(id,filter,days){
+    const choices=[...days.map(n=>[String(n),'Last '+n+' Days']),['all','All Time'],['custom','Custom Date Range']];
+    const label=choices.find(([value])=>value===filter.period)[1];
+    return `<details id="${id}" ${filter.open?'open':''}><summary>Time Frame · ${label}</summary>
+      <div class="stock-tools"><label>Period<select data-period>${choices.map(([value,label])=>
+        `<option value="${value}" ${value===filter.period?'selected':''}>${label}</option>`).join('')}</select></label>
+        ${filter.period==='custom'?`<label>From<input type="date" data-date="from" value="${esc(filter.from)}"></label>
+          <label>To<input type="date" data-date="to" value="${esc(filter.to)}"></label>`:''}</div></details>`;
+  }
+  function bindTimeFrame(id,filter,refresh){
+    const element=$(id);
+    element.ontoggle=()=>{filter.open=element.open;};
+    element.querySelector('[data-period]').onchange=e=>{
+      filter.period=e.target.value;
+      filter.open=element.open;
+      render();
+      $(id).querySelector('[data-period]').focus();
+    };
+    element.querySelectorAll('[data-date]').forEach(input=>input.onchange=()=>{
+      filter[input.dataset.date]=input.value;
+      refresh?.();
+    });
+  }
+  function matchesPeriod(timestamp,filter){
+    if(filter.period==='all')return true;
+    const date=localDate(timestamp);
+    if(filter.period==='custom')return (!filter.from||date>=filter.from)&&(!filter.to||date<=filter.to);
+    const today=localDate(Date.now());
+    const start=new Date(today+'T00:00:00Z');
+    start.setUTCDate(start.getUTCDate()-Number(filter.period)+1);
+    return date>=start.toISOString().slice(0,10)&&date<=today;
+  }
+  function stockHistoryResults(){
+    const configs=configById(), models=new Map(items().map(i=>[i.key,i]));
+    const entries=[];
+    for(const b of state.opening_balances){
+      const model=models.get(configs.get(b.configuration_id)?.item_key);
+      if(!model||!textMatch(model.model,historyFilter.model))continue;
+      entries.push({b,model,timestamp:b.created_at,type:'Opening balance',status:b.voided_at?'Corrected':'Active'});
+      if(b.voided_at)entries.push({b,model,timestamp:b.voided_at,type:'Opening balance correction',status:'Recorded'});
+    }
+    const rows=entries.filter(e=>matchesPeriod(e.timestamp,historyFilter))
+      .sort((a,b)=>b.timestamp.localeCompare(a.timestamp)).map(({b,model,timestamp,type,status})=>textRow([
+        localDate(timestamp),model.model,'—',type,formatQty(Number(b.quantity)),'—',
+        b.supplier||'—',locationLabel(b.location_id),status
+      ]));
+    const current=state.opening_balances.reduce((sum,b)=>sum+(!b.voided_at
+      &&configs.get(b.configuration_id)?.item_key===historyFilter.selected?Number(b.quantity):0),0);
+    return `${historyFilter.selected?`<div class="stock-detail-metrics stock-history-metrics">
+      <div><b>Total Purchased</b><strong>—</strong></div><div><b>Total Delivered</b><strong>—</strong></div>
+      <div><b>Current Stock</b><strong>${formatQty(current)}</strong></div></div>`:''}
+      ${stockTable(['Date','Model','Serial Number','Movement Type','Qty','Reference','Supplier / Customer','Location','Status'],rows,'No opening-balance events match these filters.')}`;
+  }
+  function stockHistory(){
+    return `<h2>Stock History</h2><p class="stock-metrics-note">Opening balances and corrections are available. Purchases, deliveries and serial history require the transaction ledger.</p>
+      <div class="stock-tools">
+        <label>Search Model<input id="stockHistoryModel" type="search" value="${esc(historyFilter.model)}"></label>
+        <label>Search Serial Number<input disabled placeholder="Serial tracking unavailable"></label>
+        <label>Lifetime summary model<select id="stockHistorySelection"><option value="">Select a model</option>
+          ${items().map(i=>`<option value="${esc(i.key)}" ${i.key===historyFilter.selected?'selected':''}>${esc(i.model)} · ${esc(i.family)}</option>`).join('')}</select></label>
+      </div>
+      ${timeFrame('stockHistoryTime',historyFilter,[30,90,365])}
+      <div id="stockHistoryResults">${stockHistoryResults()}</div>`;
+  }
+  function bindStockHistory(){
+    const refresh=()=>{$('stockHistoryResults').innerHTML=stockHistoryResults();};
+    $('stockHistoryModel').oninput=e=>{historyFilter.model=e.target.value;refresh();};
+    $('stockHistorySelection').onchange=e=>{historyFilter.selected=e.target.value;refresh();};
+    bindTimeFrame('stockHistoryTime',historyFilter,refresh);
+  }
+  function dropdownOverviewRows(){
+    const models=new Map(items().map(i=>[i.key,i]));
+    const kindLabels={linked:'Pricelist Link',critical:'Critical Group',normal:'Normal Group'};
+    const rows=[];
+    for(const g of state.groups){
+      const model=models.get(g.item_key);
+      if(g.retired||!model)continue;
+      const labels=options(g).map(o=>o.label);
+      if(g.kind==='linked'){
+        for(const m of state.mappings){
+          if(!m.retired&&m.item_key===g.item_key&&Object.hasOwn(m.selections,g.id))labels.push(configLabel(m));
+        }
+      }
+      const values=[model.family,kindLabels[g.kind],g.label,labels.join(' · ')];
+      if(!values.every((v,i)=>textMatch(v,dropdownFilter[i])))continue;
+      rows.push({model,g,values});
+    }
+    rows.sort((a,b)=>modelCompare(a.model,b.model)||sort(a.g,b.g));
+    return rows.length?rows.map(({model,values})=>`<tr><td>${esc(values[0])}<small>
+      <button class="stock-link" data-dropdown-model="${esc(model.key)}">${esc(model.model)}</button></small>
+      </td>${values.slice(1).map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')
+      :'<tr><td colspan="4">No groups match these filters.</td></tr>';
+  }
+  function dropdownOverview(){
+    return `<details open><summary>Configured groups</summary><div class="stock-scroll">
+      <table class="stock-phase2-table"><thead><tr>${['Series','Grouping Type','Group','Options / Mapping'].map((title,i)=>
+        `<th scope="col">${title}<input type="search" data-dropdown-filter="${i}" aria-label="Filter ${title}" value="${esc(dropdownFilter[i])}"></th>`).join('')}</tr></thead>
+      <tbody id="stockDropdownOverview">${dropdownOverviewRows()}</tbody></table></div></details>`;
+  }
+  function bindDropdownOverview(){
+    const rows=$('stockDropdownOverview');
+    rows.onclick=e=>{
+      const button=e.target.closest('[data-dropdown-model]');
+      if(!button)return;
+      selected=button.dataset.dropdownModel;
+      family=item().family;
+      query='';
+      render();
+      $('stockModel')?.focus();
+    };
+    $('stockContent').querySelectorAll('[data-dropdown-filter]').forEach(input=>input.oninput=()=>{
+      dropdownFilter[Number(input.dataset.dropdownFilter)]=input.value;
+      rows.innerHTML=dropdownOverviewRows();
+    });
+  }
   function configurationTable(rows) {
     const columns=kind=>[...new Set(rows.flatMap(r=>Object.keys(r.config.selections)))].map(id=>
       state.groups.find(g=>g.id===id)).filter(g=>g?.kind===kind).sort(sort);
@@ -418,27 +693,55 @@
       edit.onpointerdown=null;edit.onkeydown=null;
       edit.onclick=()=>{editMode=false;editKey='';render();};
     }
-    $('stockTabs').innerHTML=Object.entries(pages).map(([key,label])=>
-      `<button class="btn secondary ${tab===key?'active':''}" data-tab="${key}">${label}</button>`).join('');
+    if((tab==='input'||tab==='dropdowns')&&!state.can_manage)tab='check';
+    const currentTab=tab==='detail'?'check':tab;
+    $('stockTabs').innerHTML=Object.entries(pages).filter(([key])=>key!=='dropdowns'||state.can_manage)
+      .map(([key,[label,path]])=>`${key==='dropdowns'?'<div class="stock-management-label">Management</div>':''}
+        <button type="button" data-tab="${key}" ${currentTab===key?'aria-current="page"':''}>${navIcon(path)}<span>${label}</span></button>`).join('');
     $('stockTabs').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>moveTo(b.dataset.tab));
+    const utilities=$('stockUtilities');
+    utilities.hidden=false;
+    utilities.innerHTML=`<summary>Existing stock tools</summary><div class="stock-actions">
+      <button type="button" class="btn secondary" data-stock-tool="location">Stock by Location</button>
+      ${mayEdit()||caps('manage_stock_suppliers')?`<button type="button" class="btn secondary" data-stock-tool="items">Stock Item Management</button>`:''}
+      ${state.can_manage?`<button type="button" class="btn secondary" data-stock-tool="input">Opening Balance Records</button>`:''}
+      </div>`;
+    utilities.querySelectorAll('[data-stock-tool]').forEach(b=>b.onclick=()=>{utilities.open=false;moveTo(b.dataset.stockTool);});
     let body;
-    if(tab==='check'||tab==='location'){
-      const controls=tab==='location'
-        ? `<label>Location<select id="stockLocation"><option value="">Not Assigned</option>${refOptions('location',location,true)}</select></label>
-           ${manageReferences('location')}`
-        : `<label>Stock Status<select id="stockStatus">${[['','All statuses'],['unconfigured','Not Configured'],['zero','Zero Stock'],['positive','In Stock']].map(([value,label])=>`<option value="${value}" ${value===status?'selected':''}>${label}</option>`).join('')}</select></label>`;
-      body=filters()+controls+`<div id="stockTable">${table()}</div>`;
-    }else if(tab==='items')body=filters()+management()+manageReferences('supplier');
+    if(tab==='check')body=stockCheck();
+    else if(tab==='detail')body=stockDetail();
+    else if(tab==='missing')body=missingParts();
+    else if(tab==='history')body=stockHistory();
+    else if(tab==='reservations')body='<h2>Reservations</h2><p>The current database has no reservation ledger. Reservation balances and stock-out actions are unavailable.</p>';
+    else if(tab==='movement')body=`<h2>Stock Movement</h2>${timeFrame('stockMovementTime',movementFilter,[7,30,90])}
+      <p>The current database has no stock movement ledger.</p>`;
+    else if(tab==='location')body=filters()+`<label>Location<select id="stockLocation"><option value="">Not Assigned</option>${refOptions('location',location,true)}</select></label>
+        ${manageReferences('location')}<div id="stockTable">${table()}</div>`;
+    else if(tab==='items')body=filters()+management()+manageReferences('supplier');
     else if(tab==='input')body=filters(true)+inputForm();
-    else body=state.can_manage?filters(true)+dropdowns():'<p>Owner or Admin access is required to manage dropdowns.</p>';
+    else body=dropdownOverview()+filters(true)+dropdowns();
     $('stockContent').innerHTML=body;
-    bindFilters();bindInput();bindDropdowns();bindManagement();bindReferences();bindRows();
-    const refreshTable=()=>{$('stockTable').innerHTML=table();bindRows();};
-    if($('stockStatus')) $('stockStatus').onchange=e=>{status=e.target.value;refreshTable();};
-    if($('stockLocation')) $('stockLocation').onchange=e=>{location=e.target.value;refreshTable();};
+    if(tab==='check')bindStockCheck();
+    else if(tab==='detail')bindStockDetail();
+    else if(tab==='history')bindStockHistory();
+    else if(tab==='movement')bindTimeFrame('stockMovementTime',movementFilter);
+    else if(tab==='missing'){
+      $('stockContent').querySelectorAll('[data-missing-filter]').forEach(input=>input.oninput=()=>{
+        missingFilter[input.dataset.missingFilter]=input.value;
+        $('stockMissingResults').innerHTML=missingResults();
+      });
+    }else{
+      bindFilters();bindInput();bindDropdowns();bindManagement();bindReferences();bindRows();
+      if(tab==='dropdowns')bindDropdownOverview();
+      if($('stockLocation'))$('stockLocation').onchange=e=>{
+        location=e.target.value;
+        $('stockTable').innerHTML=table();
+        bindRows();
+      };
+    }
   }
   function bindRows() {
-    $('stockContent').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>moveTo('input',b.dataset.item));
+    $('stockContent').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>moveTo(state.can_manage?'input':'detail',b.dataset.item));
     $('stockContent').querySelectorAll('[data-expand-model]').forEach(b=>b.onclick=()=>{
       const key=b.dataset.expandModel;
       if(expanded.has(key))expanded.delete(key);else expanded.add(key);
@@ -447,7 +750,60 @@
       [...$('stockTable').querySelectorAll('[data-expand-model]')].find(n=>n.dataset.expandModel===key)?.focus({preventScroll:true});
     });
   }
-  function install(){if($('keyStock'))return;const main=document.querySelector('main');if(!main)return;const section=document.createElement('section');section.id='keyStock';section.className='page';section.innerHTML='<div class="stock-heading"><h1>KeyStock <small>V1.01</small></h1><div id="stockEditActions"><button class="btn secondary" id="stockEdit" hidden>Hold 3s to Edit</button><button class="btn secondary" id="stockRefresh">Refresh</button></div></div><div id="stockMessage" class="stock-message"></div><div id="stockTabs" class="stock-tabs"></div><div id="stockContent" class="card"></div>';main.append(section);const nav=document.createElement('button');nav.type='button';nav.textContent='KeyStock';nav.dataset.page='keyStock';nav.id='keyStockNav';nav.onclick=()=>window.KeySuiteApp.showPage('keyStock');$('keyAiNavButton')?.before(nav);$('stockRefresh').onclick=load;window.addEventListener('KEYSUITE_PAGE_CHANGED',e=>{if(e.detail?.page==='keyStock'){trail.length=0;if(state)render();else load();}});window.addEventListener('KEYSUITE_AUTH_CONTEXT_READY',()=>{++authContext;state=null;selected='';family='';query='';location='';status='';tab='check';trail.length=0;expanded.clear();editMode=false;editKey='';correction=null;entryId=uid();$('stockEdit').hidden=true;++request;$('stockContent').innerHTML='';});window.addEventListener('keysuite-permissions-changed',()=>{state=null;editMode=false;editKey='';++request;$('stockEdit').hidden=true;if($('keyStock').classList.contains('active'))load();else $('stockContent').innerHTML='';});}
+  function clearStockView(){
+    $('stockEdit').hidden=true;
+    $('stockUtilities').hidden=true;
+    $('stockUtilities').replaceChildren();
+    $('stockTabs').replaceChildren();
+    $('stockContent').replaceChildren();
+  }
+  function install(){
+    const main=document.querySelector('main');
+    if($('keyStock')||!main)return;
+    const section=document.createElement('section');
+    section.id='keyStock';
+    section.className='page';
+    section.innerHTML=`<div class="stock-heading"><h1>KeyStock <small>V1.01</small></h1>
+      <div id="stockEditActions"><button class="btn secondary" id="stockEdit" hidden>Hold 3s to Edit</button>
+      <button class="btn secondary" id="stockRefresh">Refresh</button></div></div>
+      <div id="stockMessage" class="stock-message" role="status"></div>
+      <details id="stockUtilities" hidden></details>
+      <div class="stock-workspace"><div id="stockTabs" class="stock-tabs" role="navigation" aria-label="KeyStock"></div>
+      <div id="stockContent" class="card"></div></div>`;
+    main.append(section);
+    const nav=document.createElement('button');
+    nav.type='button';
+    nav.innerHTML='<span>KeyStock</span>'+navIcon('M12 2l4 2.3v4.5L12 11 8 8.8V4.3L12 2zM8 4.3l4 2.3 4-2.3m-4 2.3V11m-5 0 4 2.3v4.5L7 20l-4-2.2v-4.5L7 11zm-4 2.3 4 2.3 4-2.3m-4 2.3V20m10-9 4 2.3v4.5L17 20l-4-2.2v-4.5l4-2.3zm-4 2.3 4 2.3 4-2.3m-4 2.3V20');
+    nav.dataset.page='keyStock';
+    nav.id='keyStockNav';
+    nav.onclick=()=>window.KeySuiteApp.showPage('keyStock');
+    $('keyAiNavButton')?.before(nav);
+    $('stockRefresh').onclick=load;
+    window.addEventListener('KEYSUITE_PAGE_CHANGED',e=>{
+      if(e.detail?.page!=='keyStock')return;
+      if(tab==='detail')back();
+      trail.length=0;
+      if(state)render();else load();
+    });
+    window.addEventListener('KEYSUITE_AUTH_CONTEXT_READY',()=>{
+      ++authContext;++request;
+      state=null;selected='';family='';query='';location='';status='';tab='check';trail.length=0;
+      expanded.clear();editMode=false;editKey='';correction=null;entryId=uid();
+      stockFilter=emptyStockFilter();
+      historyFilter=emptyHistoryFilter();
+      movementFilter={period:'30',from:'',to:'',open:false};
+      missingFilter={model:'',series:'',component:''};
+      dropdownFilter=['','','',''];
+      newestFirst=false;
+      clearStockView();
+      message('');
+    });
+    window.addEventListener('keysuite-permissions-changed',()=>{
+      state=null;editMode=false;editKey='';++request;
+      clearStockView();
+      if($('keyStock').classList.contains('active'))load();
+    });
+  }
   window.KeyStock={version:'1.01',refresh:load,back,resetTab:()=>{tab='check';correction=null;entryId=uid();render();},stockRows:()=>state?stockRows():[],resolve:(s,d)=>state?resolve(s,d):null};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
