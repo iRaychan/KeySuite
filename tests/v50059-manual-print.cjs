@@ -116,7 +116,7 @@ async function run(){
           const dim=await popup.locator('.dimension-drawing img').evaluate(img=>[img.naturalWidth,img.naturalHeight]);
           assert.deepEqual(dim,[1911,858]);
         }
-        if(engine==='chrome' && product && ['BGF','ES','ISO'].includes(family)){
+        if(engine==='chrome' && product && ['BGF','ES','ISO','CHC-C4'].includes(family)){
           await popup.pdf({path:path.join(output,family+'.pdf'),preferCSSPageSize:true,printBackground:true});
         }
         await popup.locator('#keysuiteReportPrint').evaluate(el=>el.click());

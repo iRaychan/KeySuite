@@ -114,7 +114,8 @@
     const npsh = Math.max(0, fitValue(npshFit, q));
     const shutoff = curve.shutoff_power_per_impeller_kw || {};
     const mix = mixFor(model);
-    const zeroPower = (mix.full * Number(shutoff.full || 0) + mix.medium * Number(shutoff.medium || 0) + mix.small * Number(shutoff.small || 0)) * ratio ** 3;
+    const rated = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+    const zeroPower = (mix.full * rated(shutoff.full) + mix.medium * rated(shutoff.medium) + mix.small * rated(shutoff.small)) * ratio ** 3;
     const powerPoints = headFit.pts.map(point => {
       if (Math.abs(point.x) < 1e-9) return { x: 0, y: zeroPower };
       const eff = Math.max(1, Math.min(100, fitValue(effFit, point.x)));
