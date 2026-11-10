@@ -1,10 +1,10 @@
 {
-  "version": "5.00.61",
-  "baseline": "5.00.60",
-  "upgrade_supported_from": "5.00.60",
-  "release_status": "development_checkpoint_b",
+  "version": "5.00.62",
+  "baseline": "5.00.61",
+  "upgrade_supported_from": "5.00.61",
+  "release_status": "review",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,9 +13,9 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Four-column series Dropdown Management with shared Critical and Normal options",
-    "Permission-aware three-second editing protection",
-    "Restore V5.00.56 Mac Safari quotation PDF preview; generator retained verbatim",
-    "Pricelist mapping engine reserved for Checkpoint C"
+    "Brand Mapping frontend filter by Brand with Unassigned option",
+    "Fixed Brand Mapping column widths and narrow-screen horizontal scrolling",
+    "CHC G1/G2 material variant mapping and source-price identity in Costing Audit",
+    "Preserved exact active variant mappings ahead of derived master mapping"
   ]
 }

@@ -131,7 +131,7 @@
     initialized:false,loading:false,loadPromise:null,coreReady:false,coreError:'',general:{...DEFAULT_GENERAL},generalEditing:false,generalHoldTimer:null,generalHoldTick:null,generalHoldStarted:0,
     brands:[],series:[],mappings:[],assignments:new Map(),customerMargins:new Map(),
     baseMultipliers:{},effectiveMultipliers:{},selectedBrandId:'',selectedFamily:'',selectedProductGroup:'',
-    pricingWrapped:false,appWrapped:false,applyingRates:false,applyingMargin:false,quoteObserver:null,customerObserver:null,productDisplayObserver:null,lastCompanyCustomer:'',lastQuoteCustomer:'',mappingSort:{key:'brand',dir:1}
+    pricingWrapped:false,appWrapped:false,applyingRates:false,applyingMargin:false,quoteObserver:null,customerObserver:null,productDisplayObserver:null,lastCompanyCustomer:'',lastQuoteCustomer:'',mappingSort:{key:'brand',dir:1},mappingBrandFilter:'all'
   };
 
   function msg(id,text,type=''){
@@ -168,10 +168,40 @@
   }
   function inferSeries(model,source={}){
     const raw=String(source.material||source.variant||'').toUpperCase(); if(['CHC','CHCS','CHCN'].includes(raw))return raw;
+    if(/^SS\s*316$/.test(raw))return 'CHCN';
+    if(/^SS\s*304$/.test(raw))return 'CHCS';
     const m=String(model||'').trim().match(/^(CHCS|CHCN|CHC)\b/i); return m?m[1].toUpperCase():String(source.master_series||'').toUpperCase();
+  }
+  function resolveChcMapping(brandId,productGroup,variant){
+    const group=normalizeProductGroup(productGroup),wanted=String(variant||'CHC').toUpperCase();
+    if(!['CHC_G1','CHC_G2','CHC'].includes(group)||!['CHC','CHCS','CHCN'].includes(wanted))return null;
+    const rows=state.mappings.filter(m=>String(m.brand_id)===String(brandId)&&m.active!==false&&normalizeProductGroup(m.master_family)===group);
+    const exact=rows.filter(m=>String(m.master_series||'').trim().toUpperCase()===wanted);
+    if(exact.length===1)return {...exact[0],resolved_source_series:wanted};
+    if(exact.length>1){console.warn('Ambiguous CHC variant mapping',brandId,group,wanted);return null}
+    const masters=rows.filter(m=>String(m.master_series||'').trim().toUpperCase()==='CHC');
+    if(masters.length!==1){if(masters.length>1)console.warn('Ambiguous CHC master mapping',brandId,group);return null}
+    const master=masters[0],selling=String(master.selling_series||'').trim();
+    if(!selling)return null;
+    const suffix=wanted==='CHCS'?'S':wanted==='CHCN'?'N':'';
+    return {...master,master_series:wanted,selling_series:selling+suffix,resolved_source_series:wanted,derived_variant:true};
+  }
+  function resolveChcIdentity(brandId,productGroup,model,material=''){
+    const raw=String(model||'').trim(),variant=/^CHCN\b/i.test(raw)?'CHCN':/^CHCS\b/i.test(raw)?'CHCS':chcMasterSeriesFromMaterial(material);
+    const mapping=resolveChcMapping(brandId,productGroup,variant);
+    if(!mapping)return null;
+    const tail=raw.replace(/^(?:CHCN|CHCS|CHC|[A-Za-z][A-Za-z0-9]*)\s*/i,'').trim();
+    if(!tail)return null;
+    return {sourceModel:`${variant} ${tail}`,sellingModel:`${mapping.selling_series} ${tail}`,sourceSeries:variant,sellingSeries:mapping.selling_series,priceGroup:priceGroupFor(productGroup),mapping};
   }
   function familyMapping(brandId,family,series='',productGroup=''){
     const fam=baseFamily(family),group=normalizeProductGroup(productGroup||family)||fam;
+    if(fam==='CHC'){
+      const resolved=resolveChcMapping(brandId,group,series||'CHC');
+      if(resolved)return resolved;
+      if(group==='CHC_G1')return null;
+      if(state.mappings.some(m=>String(m.brand_id)===String(brandId)&&m.active!==false&&normalizeProductGroup(m.master_family)===group))return null;
+    }
     let rows=state.mappings.filter(m=>String(m.brand_id)===String(brandId)&&m.active!==false&&normalizeProductGroup(m.master_family)===group);
     // Legacy CHC mappings remain valid for an ungenerated CHC group and are a
     // safe technical fallback only. G1/G2 commercial identity is never changed.
@@ -188,6 +218,13 @@
   }
   function modelMapping(brandId,family,model,series='',productGroup=''){
     const fam=baseFamily(family),group=normalizeProductGroup(productGroup||family)||fam;
+    if(fam==='CHC'){
+      const variant=/^CHCN\b/i.test(String(model))?'CHCN':/^CHCS\b/i.test(String(model))?'CHCS':String(series||'CHC').toUpperCase();
+      const resolved=resolveChcMapping(brandId,group,variant);
+      if(resolved)return resolved;
+      if(group==='CHC_G1')return null;
+      if(state.mappings.some(m=>String(m.brand_id)===String(brandId)&&m.active!==false&&normalizeProductGroup(m.master_family)===group))return null;
+    }
     let rows=state.mappings.filter(x=>String(x.brand_id)===String(brandId)&&x.active!==false&&normalizeProductGroup(x.master_family)===group);
     if(!rows.length&&group!==fam){
       rows=state.mappings.filter(x=>String(x.brand_id)===String(brandId)&&x.active!==false&&normalizeProductGroup(x.master_family)===fam);
@@ -522,6 +559,20 @@
   function injectStyle(){
     if($('v391Style'))return; const s=document.createElement('style');s.id='v391Style';s.textContent=`
       .v391-card{background:#fff;border:1px solid #dce4ec;border-radius:14px;padding:18px}.v391-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.v391-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v391-field label{display:block;font-weight:700;margin:0 0 6px}.v391-field input,.v391-field select{width:100%;box-sizing:border-box}.v391-table input,.v391-table select{min-width:88px}.v40401-sort{border:0;background:transparent;padding:0;font:inherit;font-weight:800;color:inherit;cursor:pointer;white-space:nowrap}.v40401-sort.active{color:#0f4c81}.v40401-map-delete.holding{background:#fee2e2!important;border-color:#dc2626!important;color:#991b1b!important}.v391-compact{display:grid;gap:9px;margin-top:10px}.v391-compact-head,.v391-compact-row{display:grid;grid-template-columns:110px minmax(115px,170px) minmax(115px,170px);gap:10px;align-items:center}.v391-compact-row>label{margin:0;font-weight:800}.v391-compact input{width:100%;box-sizing:border-box}.v391-fuel-compact .v391-compact-row{grid-template-columns:110px minmax(115px,170px)}.v391-note{font-size:12px;color:#64748b;margin-top:6px;line-height:1.4}.v391-chip{display:inline-flex;padding:4px 9px;border-radius:999px;background:#eaf4ff;border:1px solid #bfdbfe;font-size:12px;font-weight:800}.v391-general-locked input{background:#f3f4f6!important;color:#6b7280!important;cursor:not-allowed}.v391-row-brand-chip{display:inline-flex;margin:5px 0 0 8px;padding:2px 7px;border-radius:999px;background:#eef6ff;border:1px solid #bfdcff;color:#1e4f7a;font-size:10px;font-weight:800;vertical-align:middle}.v391-logo-preview{width:100%;height:120px;object-fit:contain;border:1px solid #dbe4ec;border-radius:10px;background:#fff;padding:12px}.v391-brand-logo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.v392-logo-panel{display:grid;grid-template-columns:minmax(220px,320px) minmax(280px,1fr);gap:18px;align-items:start}.v392-logo-preview-box{border:1px solid #dbe4ec;border-radius:12px;background:#f8fafc;padding:12px}.v392-logo-help{font-size:12px;color:#64748b;line-height:1.5;margin-top:8px}@media(max-width:760px){.v392-logo-panel{grid-template-columns:1fr}}.v391-brand-tree{display:grid;gap:4px;padding:3px 0 4px}.v391-brand-tree details{border-radius:7px;overflow:hidden}.v391-brand-tree summary{list-style:none;cursor:pointer;padding:8px 11px;font:inherit;font-weight:400;color:#dbeafe;display:flex;align-items:center;gap:7px}.v391-brand-tree .v391-brand-root[open]>summary,.v391-brand-tree .v391-direct-brand-root[open]>summary{background:#5891D6;color:#fff}.v391-brand-tree .v391-brand-list>details>summary{font:inherit;font-weight:400;color:#fff}.v391-brand-tree summary::-webkit-details-marker{display:none}.v391-brand-tree summary:before{content:'▶';font-size:9px;opacity:.8}.v391-brand-tree details[open]>summary:before{content:'▼'}.v391-brand-tree .v391-brand-list>details>summary{padding-left:20px}.v391-brand-tree .v391-brand-root>summary,.v391-brand-tree .v391-direct-brand-root>summary{color:#fff}.v391-brand-tree .v391-family-btn{display:block;width:calc(100% - 18px);margin:1px 9px 3px;padding:7px 11px 7px 24px;text-align:left;border:0;border-radius:6px;background:transparent;color:#cbd5e1;cursor:pointer}.v391-brand-tree .v391-family-btn:hover,.v391-brand-tree .v391-family-btn.active{background:rgba(255,255,255,.12);color:#fff}.v391-brand-tree .v391-direct-product-btn{display:block;width:100%;margin:0;padding:8px 11px;text-align:left;border:0;border-radius:7px;background:transparent;color:#fff;cursor:pointer;font:inherit;font-weight:400}.v391-brand-tree .v391-direct-product-btn:hover,.v391-brand-tree .v391-direct-product-btn.active{background:rgba(255,255,255,.12);color:#fff}.v391-effective-note{font-size:11px;color:#475569;margin-top:4px}.v391-effective-note b{color:#0f766e}.v391-margin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}.v391-margin-item{border:1px solid #e2e8f0;border-radius:9px;padding:10px;background:#fbfdff}.v391-margin-item label{display:block;font-weight:800;margin-bottom:6px}.v391-margin-input-wrap{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center}.v391-margin-default{font-size:10px;color:#64748b;margin-top:5px}.fuel-inline-setting{display:none!important}@media(max-width:700px){.v391-pair{grid-template-columns:1fr}}
+      #v391MappingTable{table-layout:fixed;width:100%;min-width:1240px}
+      #v391MappingTable th,#v391MappingTable td{box-sizing:border-box;overflow:hidden}
+      #v391MappingTable th:nth-child(1),#v391MappingTable td:nth-child(1){width:13%}
+      #v391MappingTable th:nth-child(2),#v391MappingTable td:nth-child(2){width:13%}
+      #v391MappingTable th:nth-child(3),#v391MappingTable td:nth-child(3){width:17%}
+      #v391MappingTable th:nth-child(4),#v391MappingTable td:nth-child(4){width:16%}
+      #v391MappingTable th:nth-child(5),#v391MappingTable td:nth-child(5){width:16%}
+      #v391MappingTable th:nth-child(6),#v391MappingTable td:nth-child(6){width:6%}
+      #v391MappingTable th:nth-child(7),#v391MappingTable td:nth-child(7){width:19%}
+      #v391MappingTable input,#v391MappingTable select{width:100%;min-width:0;box-sizing:border-box;text-overflow:ellipsis}
+      #v391MappingTable .v391-map-active{width:18px}
+      #v391MappingTable td:last-child>div{display:flex;gap:6px}
+      #v391MappingTable td:last-child .btn{min-width:0}
+      #v391MappingFilter{min-width:190px;max-width:300px}
     `;document.head.appendChild(s);
   }
   function hideOldFuel(){document.querySelectorAll('.fuel-inline-setting').forEach(n=>n.style.setProperty('display','none','important'));const card=document.querySelector('.key-module-card[data-go="companyPricing"] p');if(card)card.textContent='Assign customer pricing categories and view protected product selling prices.';}
@@ -552,7 +603,7 @@
       <div id="v391BrandMessage" class="auth-message"></div>
       <div class="v391-card"><div class="table-wrap"><table class="v391-table"><thead><tr><th>Brand</th><th>Code</th><th>Type</th><th>Country of Origin</th><th>Quotation Template</th><th>Active</th><th></th></tr></thead><tbody id="v391BrandRows"></tbody></table></div><div class="v391-note">Country of Origin is brand-specific and is used in customer-facing technical/curve PDFs where that field is displayed.</div></div>
       <div class="v391-card" style="margin-top:16px"><div class="page-title-row"><div><h2 style="margin:0">Brand Logo</h2><div class="muted">Logo used by that brand's pump curve and technical PDFs.</div></div></div><div class="v392-logo-panel"><div><label>Select Brand</label><select id="v392LogoBrandSelect"></select><div class="v392-logo-help"><b>Brand Logo:</b> 900 × 200 px, transparent PNG preferred, JPG/WebP accepted, maximum 2 MB. Uploaded images are fitted proportionally into a 900 × 200 px canvas without stretching or cropping.</div></div><div class="v392-logo-preview-box"><img id="v392BrandLogoPreview" class="v391-logo-preview" alt="Brand logo preview"><div id="v393BrandLogoStatus" class="v392-logo-help"></div><input id="v392BrandLogoFile" type="file" accept="image/png,image/jpeg,image/webp" hidden><div class="v391-brand-logo-actions" style="margin-top:10px"><button class="btn secondary" id="v392UploadLogo" type="button">Upload / Replace</button><button class="btn secondary" id="v392RemoveLogo" type="button">Remove</button><button class="btn" id="v392SaveLogo" type="button">Save Logo</button></div></div></div></div>
-      <div class="v391-card" style="margin-top:16px"><div class="page-title-row"><div><h2 style="margin:0">OEM Series Mapping</h2><div class="muted">Brand → Main Series → Sub Series → Model. Engineering names remain internal.</div></div><button class="btn" id="v391AddMapping">+ Add Mapping</button></div><div class="table-wrap"><table class="v391-table"><thead><tr><th><button class="v40401-sort active" type="button" data-map-sort="brand">Brand ↑</button></th><th><button class="v40401-sort" type="button" data-map-sort="family">Price Group</button></th><th><button class="v40401-sort" type="button" data-map-sort="series">Brand Series</button></th><th>Base Sub Series</th><th>Selling Sub Series</th><th>Active</th><th></th></tr></thead><tbody id="v391MappingRows"></tbody></table></div></div>`;main.appendChild(brands);
+      <div class="v391-card" style="margin-top:16px"><div class="page-title-row"><div><h2 style="margin:0">OEM Series Mapping</h2><div class="muted">Brand → Main Series → Sub Series → Model. Engineering names remain internal.</div></div><button class="btn" id="v391AddMapping">+ Add Mapping</button></div><label for="v391MappingFilter" style="display:block;font-weight:700;margin:12px 0 5px">Filter by Brand</label><select id="v391MappingFilter" aria-label="Filter by Brand"><option value="all">All Brands</option></select><div class="table-wrap"><table class="v391-table" id="v391MappingTable"><thead><tr><th><button class="v40401-sort active" type="button" data-map-sort="brand">Brand ↑</button></th><th><button class="v40401-sort" type="button" data-map-sort="family">Price Group</button></th><th><button class="v40401-sort" type="button" data-map-sort="series">Brand Series</button></th><th>Base Sub Series</th><th>Selling Sub Series</th><th>Active</th><th></th></tr></thead><tbody id="v391MappingRows"></tbody></table></div></div>`;main.appendChild(brands);
     $('v391BackPrice').onclick=()=>window.KeySuiteApp?.showPage?.('priceListDashboard'); $('v391BackKey').onclick=()=>window.KeySuiteApp?.showPage?.('keyDashboard');
     $('v392LogoBrandSelect').addEventListener('change',renderBrandLogoPanel);
     $('v392UploadLogo').onclick=()=>$('v392BrandLogoFile').click();
@@ -560,7 +611,7 @@
     $('v392RemoveLogo').onclick=()=>{$('v392BrandLogoPreview').removeAttribute('src');$('v392BrandLogoPreview').dataset.pending='';$('v392BrandLogoPreview').dataset.remove='1';};
     $('v392SaveLogo').onclick=saveBrandLogoPanel;
     $('v391UnlockGeneral').addEventListener('pointerdown',startGeneralHold);['pointerup','pointerleave','pointercancel'].forEach(n=>$('v391UnlockGeneral').addEventListener(n,stopGeneralHold));$('v391UnlockGeneral').oncontextmenu=e=>e.preventDefault();
-    $('v391SaveGeneral').onclick=saveGeneral; $('v391AddBrand').onclick=()=>addBrandRow(); $('v391AddMapping').onclick=()=>addMappingRow(); document.querySelectorAll('[data-map-sort]').forEach(b=>b.onclick=()=>setMappingSort(b.dataset.mapSort));
+    $('v391SaveGeneral').onclick=saveGeneral; $('v391AddBrand').onclick=()=>addBrandRow(); $('v391AddMapping').onclick=()=>addMappingRow(); $('v391MappingFilter').onchange=e=>{state.mappingBrandFilter=e.target.value;renderMappings()}; document.querySelectorAll('[data-map-sort]').forEach(b=>b.onclick=()=>setMappingSort(b.dataset.mapSort));
   }
   function showPage(id){window.KeySuiteApp?.showPage?.(id);if(id==='generalPriceList')renderGeneral();if(id==='brandManagement')renderBrands();}
 
@@ -648,7 +699,7 @@
   function mappingSortValue(m,key){const brand=byBrandId(m.brand_id),group=normalizeProductGroup(m.master_family);if(key==='brand')return String(brand?.brand_name||'');if(key==='family')return priceGroupAdminLabel(group);if(key==='series')return brandSeriesFor(brand,group);return ''}
   function setMappingSort(key){if(state.mappingSort.key===key)state.mappingSort.dir*=-1;else state.mappingSort={key,dir:1};renderMappings()}
   function renderMappingSortHeaders(){document.querySelectorAll('[data-map-sort]').forEach(b=>{const active=b.dataset.mapSort===state.mappingSort.key,label=b.dataset.mapSort==='brand'?'Brand':b.dataset.mapSort==='family'?'Price Group':'Brand Series';b.classList.toggle('active',active);b.textContent=label+(active?(state.mappingSort.dir>0?' ↑':' ↓'):'')})}
-  function renderMappings(){const body=$('v391MappingRows');if(!body)return;body.innerHTML='';const {key,dir}=state.mappingSort;state.mappings.slice().sort((a,b)=>mappingSortValue(a,key).localeCompare(mappingSortValue(b,key),undefined,{numeric:true,sensitivity:'base'})*dir||String(a.master_series||'').localeCompare(String(b.master_series||''),undefined,{numeric:true})).forEach(m=>addMappingRow(m));renderMappingSortHeaders();}
+  function renderMappings(){const body=$('v391MappingRows'),filter=$('v391MappingFilter');if(!body||!filter)return;body.innerHTML='';const choices=new Map();state.mappings.forEach(m=>{const id=String(m.brand_id||''),name=byBrandId(id)?.brand_name||'Unassigned';choices.set(id||'unassigned',name)});filter.innerHTML='<option value="all">All Brands</option>'+[...choices].sort((a,b)=>a[1].localeCompare(b[1])).map(([id,name])=>`<option value="${esc(id)}">${esc(name)}</option>`).join('');if(state.mappingBrandFilter!=='all'&&!choices.has(state.mappingBrandFilter))state.mappingBrandFilter='all';filter.value=state.mappingBrandFilter;const {key,dir}=state.mappingSort;state.mappings.filter(m=>state.mappingBrandFilter==='all'||String(m.brand_id||'unassigned')===state.mappingBrandFilter).sort((a,b)=>mappingSortValue(a,key).localeCompare(mappingSortValue(b,key),undefined,{numeric:true,sensitivity:'base'})*dir||String(a.master_series||'').localeCompare(String(b.master_series||''),undefined,{numeric:true})).forEach(m=>addMappingRow(m));renderMappingSortHeaders();}
   function brandOptions(selected=''){return commercialBrands().map(b=>`<option value="${esc(b.id)}" ${String(b.id)===String(selected)?'selected':''}>${esc(b.brand_name)}</option>`).join('')}
   function customerBrandOptions(selected=''){
     const list=customerAssignableBrands(),current=byBrandId(selected);
@@ -1240,6 +1291,6 @@
     let appTries=0;const waitApp=()=>{appTries++;if(window.KeySuiteApp&&window.KeySuitePricing){wrapPricing();wrapApp();observeQuote();observeProductDisplay();bindSelectionDefaults();addCustomerBrandSection();bindMaterialContext();if(state.coreReady){renderProductTree();decorateProductDisplay()}return}if(appTries<60)setTimeout(waitApp,250);else console.warn('KeySuite V4.01: pricing/app wrappers were not ready; Brand navigation remains available.');};waitApp();
   }
 
-  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
+  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,resolveChcIdentity,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
