@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "test:series": "node v50061-db.cjs",
+    "test:ledger": "KEYSTOCK_TEST_V103=1 node v50054-db.cjs",
+    "test:rollback": "node v50061-rollback.cjs",
+    "preview": "KEYSTOCK_V103=1 KEYSTOCK_TEST_PORT=8304 node v50051-server.cjs"
+  },
+  "devDependencies": {"@electric-sql/pglite": "0.3.14"}
+}

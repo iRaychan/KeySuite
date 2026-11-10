@@ -1,0 +1,5 @@
+
+> test:ledger
+> KEYSTOCK_TEST_V103=1 node v50054-db.cjs
+
+PASS: additive seed, inventory and cost preservation, receiving atomicity, retry, FIFO, reservation and partial fulfillment, release, transfer, reconfigure, return, adjustments, serial policy, audit and access controls.

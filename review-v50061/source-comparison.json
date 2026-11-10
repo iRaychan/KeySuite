@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "restoredV50056GeneratorAndPreviewIdentical": true,
+  "v50060AppUnchangedExceptRestorationAndSafariRouting": true,
+  "restoredGeneratorSha256": "49b41abe9fe6cd311223edde6a1c503d553ddf54d89c5015a51193991697284e",
+  "changedBaselineFiles": [
+    "index.html",
+    "tests/v50054-db.cjs",
+    "tests/v50051-server.cjs",
+    "keystock-v100.js",
+    "v41200-bootstrap.js",
+    "v50051-version-lock.js",
+    "RELEASE.json",
+    ".gitignore",
+    "manifest.json",
+    "keystock-v100.css",
+    "VERSION.txt",
+    "app.js",
+    "sw.js"
+  ]
+}

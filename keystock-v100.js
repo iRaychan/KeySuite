@@ -1,4 +1,4 @@
-/* KeyStock V1.01: catalogue references, configurable options and opening balances only. */
+/* KeyStock V1.03: series options and the existing stock ledger. */
 (() => {
   'use strict';
   const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -19,6 +19,7 @@
   let historyFilter=emptyHistoryFilter();
   let movementFilter={period:'30',from:'',to:'',open:false};
   let dropdownFilter=['','','',''];
+  let dropdownSeries='', dropdownKind='critical', dropdownOption='', optionDraft=null;
   let missingFilter={model:'',series:'',component:''};
   let newestFirst=false;
   function emptyStockFilter(){return {location:'',supplier:'',serial:'',open:false};}
@@ -75,11 +76,12 @@
   }
   // A release, focus loss or pointer cancellation cancels the gesture. Keyboard Space also works.
   function hold(button, seconds, callback) {
+    const label=button.textContent;
     button.cancelStockHold?.();
+    button.textContent=label;
     button.stockHoldEvents?.abort();
     const events=button.stockHoldEvents=new AbortController();
     let timer, started;
-    const label=button.textContent;
     function cancel(){clearTimeout(timer);timer=undefined;button.textContent=label;}
     button.cancelStockHold=cancel;
     function start(){
@@ -87,7 +89,19 @@
       started=performance.now();
       const tick=()=>{
         const left=seconds-(performance.now()-started)/1000;
-        if(left<=0){cancel();callback();return;}
+        if(left<=0){
+          cancel();
+          // The release click must not activate the freshly rendered Done Editing action.
+          const suppress=e=>{e.preventDefault();e.stopImmediatePropagation();};
+          const events=['pointerup','keyup','blur','pointercancel'];
+          const release=()=>setTimeout(()=>{
+            button.removeEventListener('click',suppress,true);
+            events.forEach(name=>button.removeEventListener(name,release));
+          },0);
+          button.addEventListener('click',suppress,{capture:true,once:true});
+          events.forEach(name=>button.addEventListener(name,release));
+          callback();return;
+        }
         button.textContent=`Hold ${Math.ceil(left)}s`;
         timer=setTimeout(tick,80);
       };
@@ -207,7 +221,8 @@
 
   const item=key=>items().find(x=>x.key===(key||selected));
   function items(){const all=new Map((state?.catalog||[]).map(x=>[x.key,x]));for(const x of state?.items||[])if(!all.has(x.key))all.set(x.key,{...x,choices:[],unavailable:!x.independent});return [...all.values()].sort(modelCompare);}
-  const groups=(kind)=>state.groups.filter(g=>g.item_key===selected&&!g.retired&&(!kind||g.kind===kind)).sort(sort);
+  const belongs=(g,key)=>g.item_key===key||!!g.series_key&&g.series_key===item(key)?.family;
+  const groups=(kind)=>state.groups.filter(g=>belongs(g,selected)&&!g.retired&&(!kind||g.kind===kind)).sort(sort);
   const options=g=>state.options.filter(o=>o.group_id===g.id&&!o.retired).sort(sort);
   const choices=()=>item()?.choices||[];
   const choiceOptions=value=>'<option value="">Unmapped — select exact configuration</option>'+choices().map(v=>`<option value="${esc(v.code)}" ${v.code===value?'selected':''}>${esc(v.label)}</option>`).join('');
@@ -215,7 +230,7 @@
   async function rpc(action,payload={}){
     const client=window.KeySuiteAuth?.getClient?.();
     if(!client)throw Error('Sign in to connect KeyStock.');
-    const p=action==='state'?{...payload,ledger_client:'v102'}:payload;
+    const p={...payload,config_client:'v103',...(action==='state'?{ledger_client:'v102'}:{})};
     const {data,error}=await client.rpc('keysuite_stock_v100',{p_action:action,p_payload:p});
     if(error)throw error;
     return data;
@@ -230,7 +245,7 @@
       state=data;
       render();
       const writable=data.can_manage||Object.values(data.permissions).some(Boolean);
-      message(`KeyStock ${ledger()?'V1.02':'V1.01'} · ${items().length.toLocaleString()} catalogue models · ${writable?'Editing available':'Read only'}`);
+      message(`KeyStock ${data.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01'} · ${items().length.toLocaleString()} catalogue models · ${writable?'Editing available':'Read only'}`);
       return true;
     }catch(e){
       if(token!==request)return false;
@@ -266,7 +281,8 @@
   function filters(withModel=false){return `<div class="stock-tools"><label>Product Family<select id="stockFamily"><option value="">All families</option>${[...new Set(items().map(i=>i.family))].sort(natural.compare).map(f=>`<option ${family===f?'selected':''}>${esc(f)}</option>`).join('')}</select></label><label>Search model / brand<input id="stockQuery" value="${esc(query)}" placeholder="Search catalogue"></label>${withModel?`<label>Model / Item<select id="stockModel"><option value="">Select a model</option>${filtered().map(i=>`<option value="${esc(i.key)}" ${i.key===selected?'selected':''}>${esc(i.model)}</option>`).join('')}</select></label>`:''}</div>`;}
   const filtered=()=>items().filter(i=>(!family||i.family===family)&&(!query||[i.brand,i.family,i.model].join(' ').toLowerCase().includes(query.toLowerCase())));
   function bindFilters(){if($('stockFamily'))$('stockFamily').onchange=e=>{family=e.target.value;render();};if($('stockQuery'))$('stockQuery').onchange=e=>{query=e.target.value;render();};if($('stockModel'))$('stockModel').onchange=e=>{selected=e.target.value;correction=null;entryId=uid();render();};}
-  function configLabel(config){const terms=[];for(const [gid,oid] of Object.entries(config.selections||{})){const g=state.groups.find(g=>g.id===gid),o=state.options.find(o=>o.id===oid);terms.push(`${g?.label||'Retired group'}: ${o?.label||'Retired option'}`);}if(config.variant)terms.unshift(config.variant);return terms.join(' · ')||'Unconfigured';}
+  const optionLabel=value=>(Array.isArray(value)?value:[value]).map(id=>state.options.find(o=>o.id===id)?.label||'').filter(Boolean).join(', ')||'—';
+  function configLabel(config){const terms=[];for(const [gid,oid] of Object.entries(config.selections||{})){const g=state.groups.find(g=>g.id===gid);terms.push(`${g?.label||'Retired group'}: ${optionLabel(oid)}`);}if(config.variant)terms.unshift(config.variant);return terms.join(' · ')||'Unconfigured';}
   function stockRows() {
     const active=new Map(), missing=new Map(), configs=new Map();
     for(const b of currentBatches()){
@@ -391,12 +407,12 @@
       ||a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id)));
     const total=formatQty(batches.reduce((sum,b)=>sum+Number(b.quantity),0));
     const reserved=formatQty(batches.reduce((sum,b)=>sum+Number(b.reserved||0),0));
-    const columns=state.groups.filter(g=>g.item_key===selected&&g.kind==='normal'&&(!g.retired
+    const columns=state.groups.filter(g=>belongs(g,selected)&&g.kind==='normal'&&(!g.retired
       ||batches.some(b=>Object.hasOwn(configs.get(b.configuration_id).selections,g.id)))).sort(sort);
     const rows=batches.map(b=>{
       const config=configs.get(b.configuration_id);
       const values=[...columns.map(g=>(!ledger()||b.legacy&&b.id===b.lot_id?b.snapshot?.selections?.[g.id]?.option:'')
-        ||state.options.find(o=>o.id===config.selections[g.id])?.label||'—'),
+        ||optionLabel(config.selections[g.id])),
       config.variant||'Unmapped',locationLabel(b.location_id),
       b.received_on||(b.legacy?'Opening · '+localDate(b.created_at):localDate(b.created_at)),
       formatQty(Number(b.quantity)),ledger()?formatQty(Number(b.reserved)):'—','—',formatQty(Number(b.quantity))];
@@ -607,6 +623,80 @@
   }
 
   const seriesLabels={ES:'ES',ISO:'ISO',CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',KV:'KV',BSW:'BSW',BSV:'BSV',MOTOR:'Motor',BGF:'BGF',BFI:'BFI'};
+  const groupingLabels={linked:'Pricelist Link',critical:'Critical Group',normal:'Normal Group'};
+  function seriesDropdowns(){
+    if(state.config_version!=='v103')return '<h2>Dropdown Management</h2><p>The V1.03 database update is required for this development interface.</p>';
+    const catalog=state.catalog||[], series=[...new Set(catalog.map(i=>i.family))];
+    const preferred=['ES','ISO','CHC_G1','CHC_G2','CR','KV','BSV','BSW'];
+    series.sort((a,b)=>(preferred.includes(a)?preferred.indexOf(a):99)-(preferred.includes(b)?preferred.indexOf(b):99)||natural.compare(a,b));
+    if(!series.includes(dropdownSeries)){dropdownSeries=series[0]||'';dropdownOption='';optionDraft=null;}
+    const members=catalog.filter(i=>i.family===dropdownSeries), label=seriesLabels[dropdownSeries]||dropdownSeries;
+    const group=state.groups.find(g=>g.series_key===dropdownSeries&&g.kind===dropdownKind&&!g.retired);
+    const configurations=new Map();
+    for(const model of members)for(const choice of model.choices||[]){
+      if(!configurations.has(choice.code))configurations.set(choice.code,{id:choice.code,label:choice.label,models:[]});
+      configurations.get(choice.code).models.push(model);
+    }
+    const list=dropdownKind==='linked'?[...configurations.values()]:group?options(group):[];
+    if(!list.some(o=>o.id===dropdownOption))dropdownOption=list[0]?.id||'';
+    const option=list.find(o=>o.id===dropdownOption), editable=editMode&&canDropdowns();
+    const row=(attribute,id,text,active,sub='')=>`<button type="button" class="stock-browser-row" ${attribute}="${esc(id)}" aria-pressed="${active}"><span>${esc(text)}${sub?`<small>${esc(sub)}</small>`:''}</span><span aria-hidden="true">›</span></button>`;
+    let details='';
+    if(dropdownKind==='linked'){
+      details=`<p class="stock-browser-note">Existing catalogue configurations. Exact Pricelist mapping and arrangement editing are reserved for Checkpoint C.</p>
+        ${option?`<h3>${esc(option.label)}</h3><p>${esc(option.id)}</p><p>Available in the catalogue for ${option.models.length} of ${members.length} ${esc(label)} models.</p>
+          <details><summary>Applicable models</summary><ul>${option.models.map(m=>`<li>${esc(m.model)}</li>`).join('')}</ul></details>`:'<p>No catalogue configurations are available for this series.</p>'}`;
+    }else if(optionDraft&&editable){
+      details=`<form id="stockSeriesOptionForm"><h3>${optionDraft.id?'Edit option':'Add option'}</h3>
+        <label>Option name<input name="label" maxlength="120" required value="${esc(optionDraft.label)}" autocomplete="off"></label>
+        <p>Applies to all ${members.length} ${esc(label)} models.</p><div class="stock-actions"><button class="btn">Save option</button><button type="button" class="btn secondary" id="stockOptionCancel">Cancel</button></div></form>`;
+    }else{
+      details=`<p class="stock-browser-applies">✓ Available to all ${members.length} ${esc(label)} models</p>
+        ${option?`<hr><small>Selected option</small><h3>${esc(option.label)}</h3><div class="stock-actions">
+        <button type="button" class="btn secondary" id="stockOptionEdit" ${editable?'':'disabled'}>Edit</button>
+        <button type="button" class="btn stock-danger" id="stockOptionDelete" ${editable?'':'disabled'}>Delete</button></div>`:'<p>No options yet. Add an option to configure this series.</p>'}
+        <hr><p class="stock-browser-note">${dropdownKind==='critical'?'Shared component definitions.':'Independent options; select all applicable options when receiving stock.'} No additional group creation is required.</p>
+        ${editable?'':'<p class="stock-browser-note">Hold the “Hold 3s to Edit” button to make changes.</p>'}`;
+    }
+    return `<div class="stock-browser-heading"><div><h2>Dropdown Management</h2><p>Configure once for every model in a series</p></div><span>${editable?'Editing enabled':'View mode'}</span></div>
+      <div class="stock-browser-scroll" tabindex="0" aria-label="Four-column dropdown configuration"><div class="stock-browser">
+        <section aria-labelledby="stockSeriesTitle"><h3 id="stockSeriesTitle">1. Series</h3>${series.map(s=>row('data-series',s,seriesLabels[s]||s,s===dropdownSeries)).join('')}</section>
+        <section aria-labelledby="stockGroupingTitle"><h3 id="stockGroupingTitle">2. Grouping</h3>${Object.entries(groupingLabels).map(([k,v])=>row('data-grouping',k,v,k===dropdownKind)).join('')}</section>
+        <section aria-labelledby="stockOptionsTitle"><h3 id="stockOptionsTitle">3. ${dropdownKind==='linked'?'Configurations':dropdownKind==='critical'?'Critical Options':'Normal Options'}</h3>
+        ${list.map(o=>row('data-series-option',o.id,o.label,o.id===dropdownOption)).join('')||'<p class="stock-browser-note">No options configured.</p>'}
+        ${dropdownKind==='linked'?'':`<button type="button" class="btn secondary stock-option-add" id="stockOptionAdd" ${editable?'':'disabled'}>＋ Add Option</button>`}</section>
+        <section aria-labelledby="stockDetailsTitle"><h3 id="stockDetailsTitle">4. Option Details</h3><p>${esc(label)} — ${groupingLabels[dropdownKind]}</p>${details}</section>
+      </div></div><p class="stock-browser-note">Series settings are shared automatically. Scroll horizontally on narrower screens.</p>`;
+  }
+  function bindSeriesDropdowns(){
+    const root=$('stockContent');
+    root.querySelectorAll('[data-series],[data-grouping],[data-series-option]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.series){dropdownSeries=b.dataset.series;dropdownOption='';}
+      if(b.dataset.grouping){dropdownKind=b.dataset.grouping;dropdownOption='';}
+      if(b.dataset.seriesOption)dropdownOption=b.dataset.seriesOption;
+      optionDraft=null;render();
+    });
+    const editable=()=>!busy&&editMode&&canDropdowns();
+    if($('stockOptionAdd'))$('stockOptionAdd').onclick=()=>{if(!editable())return;optionDraft={label:''};render();$('stockSeriesOptionForm').elements.label.focus();};
+    if($('stockOptionEdit'))$('stockOptionEdit').onclick=()=>{if(!editable())return;optionDraft={...state.options.find(o=>o.id===dropdownOption)};render();$('stockSeriesOptionForm').elements.label.focus();};
+    if($('stockOptionCancel'))$('stockOptionCancel').onclick=()=>{optionDraft=null;render();};
+    if($('stockSeriesOptionForm'))$('stockSeriesOptionForm').onsubmit=e=>{
+      e.preventDefault();if(!editable())return;
+      const label=e.target.elements.label.value.trim();
+      if(!label)return message('Enter an option name.',true);
+      // Keep a failed draft available for correction or a refresh after a conflict.
+      optionDraft.label=label;
+      save('series_option_save',{series_key:dropdownSeries,kind:dropdownKind,id:optionDraft.id,revision:optionDraft.revision,label},result=>{
+        dropdownOption=result.id;optionDraft=null;
+      });
+    };
+    if($('stockOptionDelete'))$('stockOptionDelete').onclick=()=>{
+      if(!editable())return;
+      const option=state.options.find(o=>o.id===dropdownOption);
+      if(!option||!window.confirm(`Delete “${option.label}” from every ${seriesLabels[dropdownSeries]||dropdownSeries} model? Options used by stock records cannot be deleted.`))return;
+      save('series_option_delete',{series_key:dropdownSeries,kind:dropdownKind,id:option.id,revision:option.revision},()=>{dropdownOption='';});
+    };
+  }
   const today=()=>localDate(Date.now());
   const actionLabels={issue:'Stock Out',return:'Customer Return',write_off:'Write Off',transfer:'Transfer Location',
     reconfigure:'Reconfigure Stock',adjust:'Add / Adjust Stock',reserve:'Reservation',release:'Return to Available',receive:'Receiving'};
@@ -783,10 +873,10 @@
         const refresh=()=>{
           const pos=ledger().positions.find(p=>p.id===source.value);
           const cfg=state.configurations.find(c=>c.id===pos?.configuration_id);
-          const relevant=state.groups.filter(g=>g.item_key===cfg?.item_key&&g.kind==='normal'&&!g.retired);
+          const relevant=state.groups.filter(g=>cfg&&belongs(g,cfg.item_key)&&g.kind==='normal'&&!g.retired);
           $('stockReconfigureOptions').innerHTML=`<label>Change one Normal Group option<select name="choice" required>
             <option value="">Select group and option</option>${relevant.flatMap(g=>options(g).filter(o=>o.id!==cfg.selections[g.id])
-              .map(o=>`<option value="${g.id}:${o.id}">${esc(g.label)} · ${esc(o.label)}</option>`)).join('')}</select></label>`;
+              .map(o=>`<option value="${g.id}:${o.id}">${g.series_key?(cfg.selections[g.id]?.includes(o.id)?'Remove':'Add')+' · ':esc(g.label)+' · '}${esc(o.label)}</option>`)).join('')}</select></label>`;
         };
         source.onchange=refresh;refresh();
       }
@@ -849,7 +939,7 @@
         const row=rows.children[Number(panel.dataset.row)];
         if(!row)return;
         drafts.set(row,{key:panel.dataset.key,groups:Object.fromEntries([...panel.querySelectorAll('[data-receive-group]')]
-          .map(s=>[s.dataset.receiveGroup,s.value])),variant:panel.querySelector('[data-receive-variant]')?.value||'',
+          .map(s=>[s.dataset.receiveGroup,s.multiple?[...s.selectedOptions].map(o=>o.value).sort():s.value])),variant:panel.querySelector('[data-receive-variant]')?.value||'',
           serials:panel.querySelector('[name=serials]')?.value||''});
       });
     }
@@ -857,13 +947,14 @@
       config.innerHTML=[...rows.children].map((row,index)=>{
         const model=findModel(row.querySelector('[name=model]').value);
         if(!model)return '';
-        const groups=state.groups.filter(g=>g.item_key===model.key&&!g.retired&&g.kind!=='critical').sort(sort);
+        const groups=state.groups.filter(g=>belongs(g,model.key)&&!g.retired&&g.kind!=='critical').sort(sort);
         const old=drafts.get(row), draft=old?.key===model.key?old:{groups:{}};
         const choices=model.choices||[];
         return `<fieldset data-row="${index}" data-key="${esc(model.key)}"><legend>Row ${index+1} · ${esc(model.model)}</legend>
           <div class="stock-form">${groups.map(g=>`<label>${g.kind==='linked'?'Pricelist Link · ':''}${esc(g.label)}
-            <select data-receive-group="${g.id}" required><option value="">Select</option>${options(g).map(o=>
-              `<option value="${o.id}" ${draft.groups[g.id]===o.id?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`).join('')}
+            ${g.series_key?'<small>Optional · select all that apply (⌘ / Ctrl-click)</small>':''}
+            <select data-receive-group="${g.id}" ${g.series_key?'multiple':'required'}>${g.series_key?'':'<option value="">Select</option>'}${options(g).map(o=>
+              `<option value="${o.id}" ${(g.series_key?draft.groups[g.id]?.includes(o.id):draft.groups[g.id]===o.id)?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`).join('')}
           ${groups.some(g=>g.kind==='linked')||!choices.length?'':`<label>Existing Pricelist configuration<select data-receive-variant>
             <option value="">Unmapped</option>${choices.map(v=>`<option value="${esc(v.code)}" ${draft.variant===v.code?'selected':''}>${esc(v.label)}</option>`).join('')}</select></label>`}
           <label>Serial numbers ${serialPolicy(model)?'(required)':'(optional)'}
@@ -921,7 +1012,7 @@
         <label>Apply to<select name="scope"><option value="series">Series</option><option value="product">Product</option></select></label>
         <label>Series or product<select name="subject" required></select></label>
         <label>Serial tracking<select name="required"><option value="">Use default / inherit</option><option value="true">Required</option><option value="false">Optional</option></select></label>
-        <button class="btn">Save serial rule</button>
+        <button class="btn" ${editMode?'':'disabled'}>Save serial rule</button>
       </form><p class="stock-metrics-note">Product rules override series rules for new receipts. Existing lots retain their tracking.</p></details>`;
   }
   function bindSerialPolicy(){
@@ -941,6 +1032,7 @@
     scope.onchange=updateSubjects;subject.onchange=updateRule;updateSubjects();
     f.onsubmit=e=>{
       e.preventDefault();
+      if(!editMode||!canDropdowns())return message('Hold 3s to Edit before saving.',true);
       submitLedger(f,'serial_policy',{scope:scope.value,subject:subject.value,required:required.value===''?null:required.value==='true'});
     };
   }
@@ -948,7 +1040,7 @@
     const columns=kind=>[...new Set(rows.flatMap(r=>Object.keys(r.config.selections)))].map(id=>
       state.groups.find(g=>g.id===id)).filter(g=>g?.kind===kind).sort(sort);
     const normal=columns('normal'), linked=columns('linked');
-    const cell=(r,g)=>esc(state.options.find(o=>o.id===r.config.selections[g.id])?.label||'—');
+    const cell=(r,g)=>esc(optionLabel(r.config.selections[g.id]));
     const locationLabel=r=>state.locations.find(l=>l.id===r.location)?.label||'Not Assigned';
     return `<div class="stock-scroll"><table class="stock-config-table">
       <thead><tr>${normal.map(g=>`<th>${esc(g.label)}</th>`).join('')}
@@ -1100,17 +1192,17 @@
   function render() {
     if(!state)return;
     const edit=$('stockEdit');
-    edit.hidden=!mayEdit();
+    edit.hidden=tab==='dropdowns'?!canDropdowns():!mayEdit();
     edit.cancelStockHold?.();
     edit.textContent=editMode?'Done Editing':'Hold 3s to Edit';
-    hold(edit,3,()=>{editMode=true;editKey='';if(tab==='items')render();else moveTo('items');});
+    hold(edit,3,()=>{editMode=true;editKey='';if(tab==='items'||tab==='dropdowns')render();else moveTo('items');});
     if(editMode){
       edit.onpointerdown=null;edit.onkeydown=null;
-      edit.onclick=()=>{editMode=false;editKey='';render();};
+      edit.onclick=()=>{editMode=false;editKey='';optionDraft=null;render();};
     }
     if((tab==='input'&&!ledger()&&!state.can_manage)||(tab==='dropdowns'&&!canDropdowns())
       ||(tab==='receive'&&!ledgerCap('receive_stock')))tab='check';
-    $('stockVersion').textContent=ledger()?'V1.02':'V1.01';
+    $('stockVersion').textContent=state.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01';
     const currentTab=tab==='detail'?'check':tab;
     const pageItems=Object.entries(pages).filter(([key])=>
       (key!=='dropdowns'||canDropdowns())&&(key!=='receive'||ledgerCap('receive_stock')));
@@ -1143,7 +1235,7 @@
         ${manageReferences('location')}<div id="stockTable">${table()}</div>`;
     else if(tab==='items')body=filters()+management()+manageReferences('supplier');
     else if(tab==='input')body=filters(true)+(ledger()?(item()?history(item()):'<p>Select a model to view original opening balances.</p>'):inputForm());
-    else body=dropdownOverview()+serialPolicyView()+filters(true)+dropdowns();
+    else body=seriesDropdowns()+serialPolicyView();
     $('stockContent').innerHTML=body;
     if(tab==='check')bindStockCheck();
     else if(tab==='detail')bindStockDetail();
@@ -1160,7 +1252,7 @@
       });
     }else{
       bindFilters();bindInput();bindDropdowns();bindManagement();bindReferences();bindRows();
-      if(tab==='dropdowns'){bindDropdownOverview();bindSerialPolicy();}
+      if(tab==='dropdowns'){bindSeriesDropdowns();bindSerialPolicy();}
       if($('stockLocation'))$('stockLocation').onchange=e=>{
         location=e.target.value;
         $('stockTable').innerHTML=table();
@@ -1225,6 +1317,7 @@
       movementFilter={period:'30',from:'',to:'',open:false};
       missingFilter={model:'',series:'',component:''};
       dropdownFilter=['','','',''];
+      dropdownSeries='';dropdownKind='critical';dropdownOption='';optionDraft=null;
       newestFirst=false;
       actionContext=null;
       clearStockView();
@@ -1237,6 +1330,6 @@
       if($('keyStock').classList.contains('active'))load();
     });
   }
-  window.KeyStock={version:'1.02',refresh:load,back,resetTab:()=>{tab='check';correction=null;actionContext=null;entryId=uid();render();},stockRows:()=>state?stockRows():[],resolve:(s,d)=>state?resolve(s,d):null};
+  window.KeyStock={version:'1.03',refresh:load,back,resetTab:()=>{tab='check';correction=null;actionContext=null;entryId=uid();render();},stockRows:()=>state?stockRows():[],resolve:(s,d)=>state?resolve(s,d):null};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

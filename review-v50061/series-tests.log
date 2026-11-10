@@ -1,0 +1,24 @@
+
+> test:series
+> node v50061-db.cjs
+
+{
+  "passed": true,
+  "baselineModels": 2587,
+  "checks": [
+    "shared ES/ISO/C4/C6 inheritance",
+    "future models",
+    "stable rename IDs",
+    "duplicate normalization",
+    "stale edits",
+    "safe deletion",
+    "independent Normal selections",
+    "receiving canonicalization",
+    "reconfigure toggle",
+    "legacy inventory preserved",
+    "tenant isolation",
+    "delegated and denied permissions",
+    "anonymous denial",
+    "private helper privileges"
+  ]
+}

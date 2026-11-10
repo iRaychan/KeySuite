@@ -2138,6 +2138,70 @@ function openHistoryQuotationPdf(id){
 }
 function quotationPrintCss(){let css='';for(const sheet of [...document.styleSheets]){try{css+=[...sheet.cssRules].map(rule=>rule.cssText).join('\n')}catch(_){}}return css.replace(/@media\s+print/gi,'@media all').replace(/body\.print-complete\s+#printQuotationDocument/g,'#printQuotationDocument').replace(/body\.print-complete\s+\.app/g,'.app')}
 async function openHistoryQuotationPdfModal(id){const quote=quotes().find(row=>String(row.id)===String(id));if(!quote)return;if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}loadQuote(quote.id);await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,80)));buildPrintQuotation();document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});await Promise.all([...document.querySelectorAll('#printQuotationDocument img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));const customer=quotationExportCompany(),filename=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation'),css=quotationPrintCss(),content=$('printQuotationDocument').outerHTML;let dialog=$('keyhqPdfModal');if(!dialog){dialog=document.createElement('dialog');dialog.id='keyhqPdfModal';dialog.className='keyhq-pdf-modal';dialog.innerHTML='<header><div><small>KEYHQ · ORIGINAL KEYSUITE QUOTATION</small><h2 id="keyhqPdfTitle"></h2></div><div><button type="button" data-pdf-print>Print / Save as PDF</button><button type="button" data-pdf-close aria-label="Close">×</button></div></header><iframe title="Original KeySuite quotation print preview"></iframe><span class="keyhq-pdf-status"></span>';document.body.appendChild(dialog);const style=document.createElement('style');style.textContent='.keyhq-pdf-modal{position:fixed;inset:18px;z-index:7000;width:auto;height:auto;max-width:none;max-height:none;padding:0;border:1px solid #34556c;border-radius:14px;background:#0b1622;color:#eef8ff}.keyhq-pdf-modal::backdrop{background:#02060dcc}.keyhq-pdf-modal header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e2030}.keyhq-pdf-modal h2{margin:2px 0 0;font-size:14px}.keyhq-pdf-modal small{color:#8bd4e8;font-size:8px}.keyhq-pdf-modal header div:last-child{display:flex;gap:8px}.keyhq-pdf-modal button{border:0;border-radius:8px;padding:9px 12px;background:#c8ff66;color:#12200a;font-weight:900;cursor:pointer}.keyhq-pdf-modal [data-pdf-close]{background:#263d50;color:#fff}.keyhq-pdf-modal iframe{width:100%;height:calc(100% - 62px);border:0;background:#25282d}.keyhq-pdf-status{position:absolute;left:18px;bottom:8px;padding:5px 8px;border-radius:8px;background:#07111ddd;color:#dff8ff;font-size:10px;pointer-events:none}';document.head.appendChild(style);dialog.querySelector('[data-pdf-close]').onclick=()=>dialog.close()}const frame=dialog.querySelector('iframe'),status=dialog.querySelector('.keyhq-pdf-status'),print=dialog.querySelector('[data-pdf-print]');print.disabled=true;frame.onload=()=>{print.disabled=false};$('keyhqPdfTitle').textContent=filename;frame.srcdoc=`<!doctype html><meta charset="utf-8"><title>${esc(filename.replace(/\.pdf$/i,''))}</title><style>@page{size:A4;margin:0}${css}#printQuotationDocument{display:block!important}.print-page{display:block!important}@media screen{html,body{background:#25282d!important}body{display:block!important;margin:0!important;padding:24px!important;box-sizing:border-box}#printQuotationDocument{width:210mm;margin:0 auto!important;background:transparent!important}.print-page{background:#fff!important;margin:0 auto 18px!important;box-shadow:0 4px 24px #0006}}</style>${content}`;print.onclick=()=>{frame.contentWindow?.focus();frame.contentWindow?.print()};status.textContent='Original sealed quotation · permissions preserved';dialog.showModal()}
+function encodeAscii(value){return new TextEncoder().encode(String(value))}
+function concatBytes(parts){const length=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(length);let offset=0;for(const part of parts){out.set(part,offset);offset+=part.length}return out}
+async function jpegFromPrintPage(page,css){const width=794,height=1123;
+ const serializer=new XMLSerializer();
+ const style=document.createElement('style');
+ style.textContent=`${css}html,body{margin:0;background:#fff}.print-page{display:block!important;margin:0!important;width:210mm!important;height:297mm!important}`;
+ const documentRoot=page.closest('#printQuotationDocument').cloneNode(false);
+ documentRoot.appendChild(page.cloneNode(true));
+ const markup=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${serializer.serializeToString(style)}${serializer.serializeToString(documentRoot)}</div></foreignObject></svg>`,url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(markup);
+ const image=await new Promise((resolve,reject)=>{const node=new Image();node.onload=()=>resolve(node);node.onerror=reject;node.src=url}),canvas=document.createElement('canvas');canvas.width=width*2;canvas.height=height*2;const g=canvas.getContext('2d');g.scale(2,2);g.fillStyle='#fff';g.fillRect(0,0,width,height);g.drawImage(image,0,0,width,height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.92));return new Uint8Array(await blob.arrayBuffer())}
+function pdfFromJpegs(images){const objects=[],pageRefs=[],imageRefs=[];objects.push(null);objects.push(null);images.forEach((jpeg,index)=>{const imageRef=objects.length+1;imageRefs.push(imageRef);objects.push({binary:jpeg,head:`<< /Type /XObject /Subtype /Image /Width 1588 /Height 2246 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`,tail:'\nendstream'});const content=`q 595 0 0 842 0 0 cm /Im${index} Do Q`,contentRef=objects.length+1;objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);const pageRef=objects.length+1;pageRefs.push(pageRef);objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im${index} ${imageRef} 0 R >> >> /Contents ${contentRef} 0 R >>`)});objects[0]='<< /Type /Catalog /Pages 2 0 R >>';objects[1]=`<< /Type /Pages /Kids [${pageRefs.map(ref=>`${ref} 0 R`).join(' ')}] /Count ${pageRefs.length} >>`;const parts=[encodeAscii('%PDF-1.4\n%KeySuite\n')],offsets=[0];let length=parts[0].length;objects.forEach((object,index)=>{offsets[index+1]=length;const head=encodeAscii(`${index+1} 0 obj\n`),body=typeof object==='string'?encodeAscii(object):concatBytes([encodeAscii(object.head),object.binary,encodeAscii(object.tail)]),tail=encodeAscii('\nendobj\n');parts.push(head,body,tail);length+=head.length+body.length+tail.length});const xref=length;parts.push(encodeAscii(`xref\n0 ${objects.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n ').join('\n')}\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`));return new Blob(parts,{type:'application/pdf'})}
+async function quotationPdfBlob(root,css,onProgress){
+ const pages=[...root.querySelectorAll('.print-page')],images=[];
+ for(let i=0;i<pages.length;i++){
+   onProgress(`Rendering page ${i+1} of ${pages.length}…`);
+   images.push(await jpegFromPrintPage(pages[i],css));
+ }
+ return pdfFromJpegs(images);
+}
+function isMacQuotationSafari({userAgent='',maxTouchPoints=0}=navigator){
+ return /Macintosh/.test(userAgent)&&maxTouchPoints<2&&/Version\/[\d.]+.*Safari\//.test(userAgent)&&!/(Chrome|Chromium|Edg|CriOS|FxiOS|OPR)\//.test(userAgent);
+}
+async function previewMacQuotationPdf({historySnapshot}){
+ if($('macQuotationPdfPreview')?.open)return;
+ const filename=quotationPdfFilename(quotationExportCompany(),$('qDate').value,$('quoteNo').value||'Quotation');
+ const root=$('printQuotationDocument'),css=quotationPrintCss(),snapshot=root.cloneNode(true);
+ const dialog=document.createElement('dialog');
+ dialog.id='macQuotationPdfPreview';
+ dialog.className='no-print';
+ dialog.setAttribute('aria-label','Quotation PDF preview');
+ dialog.style.cssText='width: min(96vw,1100px); height: 92vh; padding: 16px; border: 1px solid #d4dde9; border-radius: 12px;';
+ dialog.innerHTML='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><strong></strong><a class="btn secondary" target="_blank" rel="noopener" hidden>Open PDF to Print</a><a class="btn secondary" download hidden>Download PDF</a><button type="button" class="btn secondary">Close</button></div><p role="status">Preparing PDF…</p><iframe title="Quotation PDF preview" hidden style="width:100%;height:calc(100% - 76px);border:0"></iframe>';
+ const [open,download]=dialog.querySelectorAll('a');
+ const status=dialog.querySelector('[role="status"]'),frame=dialog.querySelector('iframe');
+ dialog.querySelector('strong').textContent=filename;
+ dialog.querySelector('button').onclick=()=>dialog.close();
+ let url;
+ dialog.addEventListener('close',()=>{
+   dialog.remove();
+   if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);
+ },{once:true});
+ document.body.appendChild(dialog);
+ dialog.showModal();
+ try{
+   await Promise.all([...root.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})));
+   if(!dialog.open)return;
+   const pdf=await quotationPdfBlob(snapshot,css,message=>{status.textContent=message});
+   if(!dialog.open)return;
+   url=URL.createObjectURL(pdf);
+   frame.src=open.href=download.href=url;
+   download.download=filename;
+   frame.hidden=open.hidden=download.hidden=false;
+   status.textContent='To print, open the PDF and choose File → Print in Safari.';
+ }catch(error){
+   console.error('Quotation PDF preview:',error);
+   status.textContent='Safari could not prepare this PDF preview. The original quotation print dialog is available below.';
+   const fallback=document.createElement('button');
+   fallback.type='button';
+   fallback.className='btn secondary';
+   fallback.textContent='Open quotation print dialog';
+   fallback.onclick=()=>{dialog.close();printCompleteQuotation({historySnapshot,nativePrint:true})};
+   status.after(fallback);
+ }
+}
 async function printCompleteQuotation(options={}){
  if(!ensureSealedForPdf())return;
  const historySnapshot=!!options.historySnapshot;
@@ -2145,6 +2209,7 @@ async function printCompleteQuotation(options={}){
  if(!historySnapshot&&!ensureQuotationSourcePricing('generate this quotation'))return;
  buildPrintQuotation();
  document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});
+ if(!options.nativePrint&&isMacQuotationSafari())return previewMacQuotationPdf({historySnapshot});
  const logoImages=[...document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo')];
  await Promise.all(logoImages.map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve()));
  let restorePdfImages=()=>{};

@@ -1,21 +1,21 @@
 {
-  "version": "5.00.60",
-  "baseline": "5.00.58",
-  "upgrade_supported_from": "5.00.58",
-  "release_status": "manual_pdf_review",
+  "version": "5.00.61",
+  "baseline": "5.00.60",
+  "upgrade_supported_from": "5.00.60",
+  "release_status": "development_checkpoint_b",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "modules": {
-    "KeyStock": "1.02"
+    "KeyStock": "1.03"
   },
   "changes": [
-    "Restore browser Print / Save as PDF for technical reports and quotations",
-    "ISO Dashboard Cold Item lookup uses the effective ISO source catalogue",
-    "ES and ISO costing and quotation use the selected seal and elastomer",
-    "Existing ES and ISO Page 3 artwork verified against the approved PNG"
+    "Four-column series Dropdown Management with shared Critical and Normal options",
+    "Permission-aware three-second editing protection",
+    "Restore V5.00.56 Mac Safari quotation PDF preview; generator retained verbatim",
+    "Pricelist mapping engine reserved for Checkpoint C"
   ]
 }

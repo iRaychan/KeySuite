@@ -66,7 +66,7 @@
 #keyStock #stockReceiptRows [name="model"] {min-width:145px}
 #keyStock details.stock-movement-detail {padding:0;border:0}
 #keyStock .stock-movement-detail summary {margin:0}
-@media (max-width:760px){#keyStock .stock-workspace{grid-template-columns:1fr}}
+@media (max-width:760px){#keyStock .stock-workspace{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:480px){#keyStock .stock-detail-metrics{font-size:.8rem;gap:4px}}
 #keyStock .stock-form{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:16px}#keyStock .stock-wide{grid-column:1/-1}#keyStock .stock-tools{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:16px 0}#keyStock .stock-tools>label{min-width:180px;flex:1}#keyStock label{display:block}#keyStock label input,#keyStock label select{display:block;margin-top:6px;width:100%;box-sizing:border-box}#keyStock input[type=checkbox]{display:inline;width:auto;margin-right:6px}#keyStock .stock-message{white-space:pre-wrap;padding:12px 16px;border-radius:10px;background:#edf5fc;margin-bottom:16px}#keyStock .stock-message.error{background:#fff0ee;color:#922}#keyStock .stock-scroll{overflow:auto}#keyStock table{border-collapse:collapse;width:100%}#keyStock th,#keyStock td{text-align:left;padding:12px;border-bottom:1px solid #e3eaf3;vertical-align:top}#keyStock th{background:#eef3f8}#keyStock .stock-link{background:none;border:0;color:#17365d;cursor:pointer;text-align:left;font:inherit;font-weight:700;padding:0}#keyStock .stock-options{display:grid;gap:10px}#keyStock .stock-option{display:grid;grid-template-columns:minmax(150px,1fr) auto auto auto;align-items:center;gap:8px}#keyStock details{padding:14px;border:1px solid #dbe4ee;border-radius:10px}#keyStock summary{cursor:pointer;font-weight:700;margin-bottom:12px}#keyStock .stock-badge{display:inline-block;padding:4px 8px;background:#edf5fc;border-radius:6px;font-size:12px}#keyStock .stock-targets{max-height:240px;overflow:auto;padding:10px;border:1px solid #dbe4ee}#keyStock .stock-targets label{margin:7px}#keyStock small{display:block;color:#64748b;margin-top:5px}#keyStock .stock-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}#keyStock .stock-summary{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0;color:#17365d}@media(max-width:800px){#keyStock .stock-form{grid-template-columns:1fr}#keyStock .stock-option{grid-template-columns:1fr auto auto}#keyStock .stock-option label{grid-column:1/-1}}
 
@@ -100,3 +100,24 @@
   #keyStock .stock-model-row {grid-template-columns:repeat(2,minmax(0,1fr))}
   #keyStock .stock-config-table {min-width:430px}
 }
+#keyStock .stock-browser-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+#keyStock .stock-browser-heading h2{margin:0 0 6px}
+#keyStock .stock-browser-heading p{margin:0;color:#667085}
+#keyStock .stock-browser-heading>span{background:#eef2f6;border-radius:20px;padding:6px 12px;white-space:nowrap;font-size:13px}
+#keyStock .stock-browser-scroll{overflow-x:auto;overscroll-behavior-x:contain}
+#keyStock .stock-browser{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(180px,1fr) minmax(200px,1.1fr) minmax(260px,1.3fr);gap:12px;min-width:838px;align-items:stretch}
+#keyStock .stock-browser>section{background:#f5f6f8;border-radius:14px;padding:14px;min-width:0;max-height:620px;overflow-y:auto;min-height:470px}
+#keyStock .stock-browser h3{margin:4px 0 18px;font-size:17px;line-height:1.4}
+#keyStock .stock-browser-row{display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;width:100%;border:1px solid transparent;border-radius:10px;background:#fff;color:#20242a;padding:16px 12px;margin-bottom:9px;min-height:58px;overflow-wrap:anywhere;cursor:pointer;font:inherit}
+#keyStock .stock-browser-row[aria-pressed=true]{background:#dfe8f5;border-color:#c7d6eb;font-weight:700}
+#keyStock .stock-browser-row[aria-pressed=true]>span:last-child{color:#2465c6}
+#keyStock .stock-browser-row small{display:block;font-weight:400;color:#667085}
+#keyStock .stock-browser :focus-visible{outline:3px solid #2a70d6;outline-offset:2px}
+#keyStock .stock-browser .stock-option-add{width:100%;border:1px solid #cdd4df;border-radius:22px}
+#keyStock .stock-browser button:disabled{opacity:.5;cursor:default}
+#keyStock .stock-browser-note{font-size:13px;color:#667085;line-height:1.6}
+#keyStock .stock-browser-applies{color:#167342;font-size:14px;line-height:1.6}
+#keyStock .stock-browser hr{border:0;border-top:1px solid #e0e5ed;margin:24px 0}
+#keyStock .stock-browser form label{display:grid;gap:8px}
+#keyStock .stock-browser form input{width:100%;box-sizing:border-box}
+#keyStock .stock-browser li{margin-bottom:6px}

@@ -26,6 +26,7 @@ async function fixture() {
   const dir = path.join(__dirname,'../supabase/migrations');
   const migration = fs.readdirSync(dir).find(name => name.endsWith('_keystock_v102_ledger.sql'));
   await db.exec(fs.readFileSync(path.join(dir,migration),'utf8'));
+  if(process.env.KEYSTOCK_TEST_V103==='1')await db.exec(fs.readFileSync(path.join(dir,'20261109231350_keystock_v103_series_options.sql'),'utf8'));
   await as(db);
   return {...f,a,b,before,customer,otherCustomer};
 }

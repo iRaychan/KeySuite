@@ -1,0 +1,1 @@
+PASS: pre-use rollback restores original state; rollback after use refuses without losing data.
