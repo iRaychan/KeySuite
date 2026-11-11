@@ -367,7 +367,13 @@
     if(!row.dataset.v391MasterModel)row.dataset.v391MasterModel=source.v391_master_model||source.v390_master_model||pump.base_model||pump.model||modelInput.value||'';
     if(!row.dataset.v391MasterDescription)row.dataset.v391MasterDescription=source.v391_master_description||source.v390_master_description||descInput.value||'';
 
-    const baseModel=String(row.dataset.v391MasterModel||'').trim(),baseDesc=String(row.dataset.v391MasterDescription||'');
+    let baseModel=String(row.dataset.v391MasterModel||'').trim(),baseDesc=String(row.dataset.v391MasterDescription||'');
+    if(family==='CHC'&&row.dataset.modelManuallyEdited!=='true'){
+      const material=String(source.material||source.variant||pump.keysuite_material||'').toUpperCase();
+      const variant=/CHCN|SS\s*316/.test(material)?'CHCN':/CHCS|SS\s*304(?!\s*\(CAST IRON)/.test(material)?'CHCS':'CHC';
+      baseModel=baseModel.replace(/^(?:CHCS|CHCN|CHC)\b/i,variant);
+      row.dataset.v391MasterModel=baseModel;
+    }
     source.v391_master_model=baseModel;source.v391_master_description=baseDesc;row.dataset.pricingSource=JSON.stringify(source);
 
     const master=masterBrand();
@@ -380,6 +386,7 @@
         if(lines[idx])lines[idx]=`${masterName} ${lines[idx].trim()}`;
         masterDesc=lines.join('\n');
       }
+      masterDesc=masterDesc.replace(/((?:Vertical\s+Multistage|End\s+Suction)\s+Pump\s+Model:\s*)[^\n\r]+/i,`$1${baseModel}`);
       if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==baseModel)modelInput.value=baseModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==masterDesc)descInput.value=masterDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);return;
     }
 
@@ -440,12 +447,16 @@
     // Keep the quotation description's pump model identical to the displayed model.
     // Earlier alias passes independently rewrote the description and could collapse
     // significant punctuation (for example VMS 2-22 became VMS 222).
-    shownDesc=shownDesc.replace(/(Vertical\s+Multistage\s+Pump\s+Model:\s*)[^\n\r]+/i,`$1${shownModel}`);
+    shownDesc=shownDesc.replace(/((?:Vertical\s+Multistage|End\s+Suction)\s+Pump\s+Model:\s*)[^\n\r]+/i,`$1${shownModel}`);
     if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==shownModel)modelInput.value=shownModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==shownDesc)descInput.value=shownDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);
   }
   function calculateWithBrandMargin(source,brandMargin){
     if(source?.manual_override===true)return null;
     const result=calculateBaseWithBrandMargin(source,brandMargin);if(!result)return null;
+    if(String(source?.product_family||'').toUpperCase()==='KEYPLC'){
+      const surcharge=source?.fixed_price?0:num(source?.enclosure_surcharge,0);
+      return {...result,final:result.final+surcharge,unrounded:result.unrounded+surcharge,beforeFuel:result.beforeFuel+surcharge};
+    }
     const pump=['ES','ISO'].includes(source?.product_family);
     const addon=source?.fixed_price?0:num(source?.seal_addon_myr,0)+num(source?.component_addon_myr,0);
     if(pump&&source?.fixed_price){
@@ -818,6 +829,7 @@
     setTimeout(()=>decorateProductDisplay(materialOverride),320);
     setTimeout(()=>decorateProductDisplay(materialOverride),700);
   }
+  window.addEventListener('KEYSUITE_PAGE_CHANGED',event=>{if(event.detail?.page==='productChc')decorateProductDisplaySoon($('productMaterial')?.value||'')});
   function observeProductDisplay(){
     // No always-on Product DOM observer. Known Product actions get a short bounded re-apply only.
     if(state.productDisplayEventsBound)return;state.productDisplayEventsBound=true;

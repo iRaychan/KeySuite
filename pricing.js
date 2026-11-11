@@ -130,7 +130,7 @@
   // guessed, and no zero selling price is substituted.
   function sourceCostOnly(family,id,preferredVariant='',options={}){
     if(String(family).toUpperCase()==='BSW'){const api=window.KeySuiteBSWPricing,identity=api?.identity(id,options),r=api?.record(identity?.base?.model,identity?.variant);if(!r)return null;const variant=identity.variant,book=Object.fromEntries(['USD','RMB','MYR'].map(c=>[c,{[variant]:r['price_'+c.toLowerCase()]}])),candidates=currencyCandidates(book,{},variant,'BSW'),chosen=candidates.reduce((best,c)=>!best||c.baseMyr>best.baseMyr?c:best,null);return chosen?{...chosen,baseMyr:chosen.baseMyr,adjustedBase:chosen.baseMyr,sourceCurrency:chosen.currency,multiplier:chosen.multiplier,sourcePrice:chosen.sourcePrice,availableCandidates:candidates,candidates,pricingContextMissing:true,finalPrice:null}:null}
-    const requested=normalizedFamily(family),code=requested==='CHC'&&String(options.generation_code||options.generation||'G2').toUpperCase()==='G1'?'CHC_G1':requested,wanted=String(id||'').trim().toLowerCase();
+    const requested=normalizedFamily(family),code=requested==='CHC'&&String(options.generation_code||options.generation||'G2').toUpperCase()==='G1'?'CHC_G1':requested,wanted=String(id||'').trim().toLowerCase().replace(/^(?:kvc|kvn|kvd|kvsd)\b/,'kv');
     const pools={CHC_G1:secureData.chcG1Products,CHC_G2:secureData.products,CHC:secureData.products,CR:secureData.crProducts,KV:secureData.kvProducts,BFI:secureData.bfiProducts,BGF:secureData.bgfProducts,BSW:secureData.bswProducts,ES:secureData.esProducts,ISO:secureData.isoProducts,GWS:secureData.gwsProducts,KEYPLC:secureData.keyplcProducts,MANIFOLD:secureData.manifoldProducts,MOTOR:secureData.motorProducts,COUPLING:secureData.couplingProducts};
     const catalogue=code==='ISO'?[window.KeySuiteISO?.findProduct?.(id)].filter(Boolean):(pools[code]||[]),product=catalogue.find(row=>[row?.id,row?.model,row?.base_model].some(value=>String(value||'').replace(/^ISO\s+/i,'').trim().toLowerCase()===wanted.replace(/^iso\s+/,'')));
     if(!product)return null;
@@ -141,7 +141,8 @@
       const key=variant||String(product.material||product.variant||code);book={USD:{[key]:product.price_usd??product.priceUsd},RMB:{[key]:product.price_rmb??product.priceRmb},MYR:{[key]:product.price_myr??product.priceMyr}};variant=key;
     }
     const variants=[...new Set(['USD','RMB','MYR'].flatMap(currency=>Object.keys(book[currency]||{})))];
-    if(!variant||!variants.some(value=>normMaterial(value)===normMaterial(variant)))variant=variants.find(value=>['USD','RMB','MYR'].some(currency=>Number(book[currency]?.[value])>0))||variants[0]||'';
+    if(code==='KV'&&!variant)variant=String(id||'').trim().match(/^(KVC|KVN|KVD|KVSD|KV)\b/i)?.[1]?.toUpperCase()||'KV';
+    if(!variant||!variants.some(value=>normMaterial(value)===normMaterial(variant)))variant=code==='KV'?variant:(variants.find(value=>['USD','RMB','MYR'].some(currency=>Number(book[currency]?.[value])>0))||variants[0]||'');
     const matched=variants.find(value=>normMaterial(value)===normMaterial(variant))||variant,candidates=currencyCandidates(book,rarityBook,matched,code);
     if(!candidates.length)return {family:code,variant:matched,availableCandidates:[],candidates:[],pricingContextMissing:true,finalPrice:null};
     const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null);
@@ -524,12 +525,14 @@
   }
   function kvDescription(model,product={},options={}){
     const bare=options.bareShaft===true||options.keysuite_bare_shaft===true,hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),pole=Number(options.pole??product.pole??2)||2,efficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||'IE3')||'IE3',voltage=Number(options.motor_voltage||415)||415,phase=String(options.motor_phase||'3Ph'),frequency=Number(options.frequency_hz||50)||50,connection=String(options.connection||product.connection||'-');
-    return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${kvMaterialDescription(options.material||options.keysuite_material||'KV')}`].join('\n');
+    const variant=String(options.material||options.keysuite_material||'KV').toUpperCase();
+    const quoteMaterials={KVC:'SS304 (Cast Iron Connection)',KV:'SS304',KVN:'SS316',KVD:'Duplex 2205',KVSD:'Duplex 2507'};
+    return [`B.G.Reich Vertical Multistage Pump Model: ${String(model||product.model||'KV')}`,bare?'(Bare shaft pump only)':`c/w\t${hp>0?(Number.isInteger(hp)?hp:hp.toFixed(2)):'-'}HP ${pole}Pole ${efficiency} Motor (${voltage}V / ${phase} / ${frequency}Hz)`,`Suction & Discharge: ${connection}`,`Material: ${quoteMaterials[variant]||quoteMaterials.KV} / Mechanical Seal`].join('\n');
   }
   function findKvPrice(model,options={}){
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
-    const catalogue=secureData.kvProducts?.length?secureData.kvProducts:(window.KeySuiteKVPriceData?.models||[]),wanted=String(model||'').trim().toLowerCase(),product=catalogue.find(row=>String(row.model||'').trim().toLowerCase()===wanted);if(!product)return null;
-    const material=String(options.material||options.keysuite_material||'KV').toUpperCase(),variant=['KVC','KV','KVN'].includes(material)?material:'KV';
+    const catalogue=secureData.kvProducts?.length?secureData.kvProducts:(window.KeySuiteKVPriceData?.models||[]),rawModel=String(model||'').trim(),wanted=rawModel.replace(/^(?:KVC|KVN|KVSD|KVD|KV)\b/i,'KV').toLowerCase(),product=catalogue.find(row=>String(row.model||'').trim().toLowerCase()===wanted);if(!product)return null;
+    const material=String(options.material||options.keysuite_material||rawModel.match(/^(KVC|KVN|KVSD|KVD|KV)\b/i)?.[1]||'KV').toUpperCase(),variant=['KVC','KV','KVN','KVD','KVSD'].includes(material)?material:'KV';
     const rawCalc=calculatePrice(product.pricesByCurrency||{},variant,cat,'KV',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
     const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
@@ -887,7 +890,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   }
   function esDescription(product,material,options={}){
     const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),sizes=esConnectionSizes(product?.model),isGland=/\bGP\b/i.test(String(material||''));
-    const lines=[`B.G.Reich End Suction Pump Model: ${esModelName(product?.model)}`,`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
+    const lines=[`B.G.Reich End Suction Pump Model: ${String(product?.model||'').trim()}`,`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
 
     if(!isGland&&seal!==ES_DEFAULT_SEAL)lines.push(`Mech Seal Material: ${seal}`);
     if(elastomer!==ES_DEFAULT_ELASTOMER)lines.push(`Elastomer: ${elastomer}`);

@@ -974,7 +974,9 @@ function keysuiteKvMaterialDisplay(){
  try{if(window.parent&&window.parent!==window){const productMode=!!o.product_mode||new URLSearchParams(location.search).get('product')==='1',control=window.parent.document.getElementById(productMode?'kvProductMaterial':'kvPumpMaterial');if(control?.value)raw=control.value}}catch(_){}
  const code=raw.toUpperCase();
  if(code==='KVN')return {casing:'Stainless Steel 316',impeller:'Stainless Steel 316',shaft:'Stainless Steel 316'};
- if(code==='KVC')return {casing:'SS (CI Connection)',impeller:'Stainless Steel',shaft:'Stainless Steel'};
+ if(code==='KVC')return {casing:'SS304 (Cast Iron Connection)',impeller:'Stainless Steel',shaft:'Stainless Steel'};
+ if(code==='KVD')return {casing:'Duplex 2205',impeller:'Duplex 2205',shaft:'Duplex 2205'};
+ if(code==='KVSD')return {casing:'Duplex 2507',impeller:'Duplex 2507',shaft:'Duplex 2507'};
  return {casing:'Stainless Steel 304',impeller:'Stainless Steel 304',shaft:'Stainless Steel 304'};
 }
 function keysuiteKvSealDisplay(){

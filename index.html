@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.62</title>
-  <script>window.KEYSUITE_VERSION='5.00.62';window.KEYSUITE_BUILD='V5.00.62';</script>
+  <title>KeySuite V5.00.63</title>
+  <script>window.KEYSUITE_VERSION='5.00.63';window.KEYSUITE_BUILD='V5.00.63';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -659,7 +659,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.62</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.63</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -675,7 +675,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.62</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.63</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -701,7 +701,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.62</div>
+    <div class="suite-version">KeySuite V5.00.63</div>
   </aside>
 
   <main>
@@ -902,14 +902,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     <section id="selectorKv" class="page">
       <div class="page-title-row"><div><h1>Selector · KV</h1><div class="muted">Enter flow and head to select from the 39 complete KV1 models, review the workbook-derived curves, then continue to Assembly or Quote.</div></div></div>
       <div class="card selector-toolbar">
-        <div><label>Material</label><select id="kvPumpMaterial" data-default-value="KV"><option value="KV" selected>KV</option><option value="KVC">KVC</option><option value="KVN">KVN</option></select></div>
+        <div><label>Material</label><select id="kvPumpMaterial" data-default-value="KV"><option value="KV" selected>KV</option><option value="KVC">KVC</option><option value="KVN">KVN</option><option value="KVD">KVD</option><option value="KVSD">KVSD</option></select></div>
         <div><label>Mechanical Seal</label><select id="kvSealFaces" data-default-value="Car / Sic"><option value="Car / Sic" selected>Carbon V Silicon Carbide (Ca SiC)</option><option value="Sic / Sic">Silicon Carbide V Silicon Carbide (SiC SiC)</option><option value="TC / TC">Tungsten V Tungsten (TC TC)</option></select></div>
         <div><label>Elastomer</label><select id="kvSealElastomer" data-default-value="Viton"><option value="Viton" selected>Viton</option><option value="EPDM">EPDM</option><option value="NBR">NBR</option></select></div>
         <div><label>Connection</label><select id="kvConnectionType" data-default-value="round"><option value="round" selected>Round Flange</option><option value="oval">Oval Flange</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50046&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50046&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50063&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50063&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 
@@ -967,7 +967,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="page-title-row"><div><h1>Product · KV</h1><div class="muted">B.G.Reich KV vertical multistage pump range. Only complete KV1 models from the approved workbook are shown.</div></div></div>
       <div class="card product-toolbar kv-product-toolbar">
         <div><label>Model</label><input id="kvProductModelInput" list="kvProductModelOptions" placeholder="Example: KV 1-20"><datalist id="kvProductModelOptions"></datalist></div>
-        <div><label>Material</label><select id="kvProductMaterial" data-default-value="KV"><option value="KVC">SS304 (Cast Iron Connection)</option><option value="KV" selected>SS304</option><option value="KVN">SS316</option></select></div>
+        <div><label>Material</label><select id="kvProductMaterial" data-default-value="KV"><option value="KVC">SS304 (Cast Iron Connection)</option><option value="KV" selected>SS304</option><option value="KVN">SS316</option><option value="KVD">Duplex 2205</option><option value="KVSD">Duplex 2507</option></select></div>
         <div><label>Mechanical Seal</label><select id="kvProductSeal" data-default-value="Carbon V Silicon Carbide (Ca SiC)"><option selected>Carbon V Silicon Carbide (Ca SiC)</option><option>Silicon Carbide V Silicon Carbide (SiC SiC)</option><option>Tungsten V Tungsten (TC TC)</option></select></div>
         <div><label>O-Ring</label><select id="kvProductElastomer" data-default-value="Viton"><option selected>Viton</option><option>EPDM</option><option>NBR</option></select></div>
         <div><label>Supply</label><label class="default-choice-control"><input id="kvProductBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
@@ -976,7 +976,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><h2>KV Series</h2><div id="kvProductSeriesList" class="product-series-list"></div></div>
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="kvProductSeriesTitle" style="margin:0">KV Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
       </div>
-      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50046" title="KV Product Curve" style="display:none"></iframe>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50063" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -1010,7 +1010,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <button type="button" class="key-module-card" id="productBaseplateEsButton">
           <span class="module-icon">ES</span><h2>ES</h2><p>Baseplate for B.G.Reich End Suction pumpset.</p><span class="module-order">SELECT ES BASEPLATE</span>
         </button>
+        <button type="button" class="key-module-card" id="productBaseplateIsoButton">
+          <span class="module-icon">ISO</span><h2>ISO</h2><p>ISO baseplate compatibility data is not configured.</p><span class="module-order">VIEW ISO STATUS</span>
+        </button>
       </div>
+      <div id="productBaseplateIsoPanel" class="card" hidden><div class="key-back-row"><button class="btn secondary" type="button" id="productBaseplateIsoBack">← Baseplate</button></div><h2>ISO Baseplate</h2><p class="notice">ISO-specific dimensions, compatibility and pricing are not configured. No ISO baseplate can be quoted or added to Assembly yet.</p></div>
       <div id="productBaseplateEsPanel" hidden>
         <div class="key-back-row"><button class="btn secondary" type="button" id="productBaseplateBack">← Baseplate</button></div>
         <div class="card">
@@ -1116,7 +1120,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     <section id="productKeyplc" class="page">
       <div class="page-title-row"><div><h1>Product · KeyPLC Panel</h1><div class="muted">Choose a motor rating and number of pumps, then route the priced control panel to Assembly or Quotation.</div></div></div>
       <div class="card keyplc-product-toolbar"><div><label>Search Motor Rating</label><input id="keyplcProductSearch" placeholder="Example: 4kW"></div></div>
-      <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KeyPLC Panel Models</h2><div id="keyplcProductCount" class="muted"></div></div></div><div class="table-wrap" style="max-height:650px"><table class="keyplc-table"><thead><tr><th>Motor Rating</th><th>Number of Pumps</th><th>Indoor</th><th>Sheltered</th></tr></thead><tbody id="keyplcProductRows"></tbody></table></div></div>
+      <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KeyPLC Panel Models</h2><div id="keyplcProductCount" class="muted"></div></div></div><div class="table-wrap" style="max-height:650px"><table class="keyplc-table"><thead><tr><th>Motor Rating</th><th>Number of Pumps</th><th class="keyplc-type-heading">Indoor</th><th class="keyplc-type-heading">Sheltered</th></tr></thead><tbody id="keyplcProductRows"></tbody></table></div></div>
     </section>
 
     <section id="productManifold" class="page">
@@ -1736,13 +1740,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     <section id="kvPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
-      <div class="page-title-row"><div><h1>KV Price List</h1><div class="muted">Independent KVC, KV and KVN pricing for all 171 complete V1.3 workbook models.</div></div></div>
+      <div class="page-title-row"><div><h1>KV Price List</h1><div class="muted">Independent KVC, KV, KVN, KVD and KVSD pricing for all complete KV models.</div></div></div>
       <div id="kvPriceListMessage" class="auth-message"></div>
       <details class="card pricelist-currency-panel">
         <summary>Currency &amp; Multipliers</summary>
         <div class="pricelist-currency-panel-body">
           <div class="pricelist-settings">
-            <div class="pricelist-currency-setting"><label>KV Variant</label><select id="kvPriceVariant"><option value="KVC">KVC — SS304 / cast iron connection</option><option value="KV" selected>KV — SS304</option><option value="KVN">KVN — SS316</option></select><div class="multiplier-hold-feedback">Independent price books</div></div><div class="pricelist-currency-setting"><label>KV Currency Selection</label><select id="kvPriceCurrency"><option value="USD">USD</option><option value="RMB" selected>RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
+            <div class="pricelist-currency-setting"><label>KV Currency Selection</label><select id="kvPriceCurrency"><option value="USD">USD</option><option value="RMB" selected>RMB</option><option value="MYR">MYR</option></select><div class="multiplier-hold-feedback">&nbsp;</div></div>
             <div class="pricelist-multiplier-lock locked" id="kvMultiplierLock_USD"><label>KV · USD → MYR</label><input id="kvUsdMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
             <div class="pricelist-multiplier-lock locked" id="kvMultiplierLock_RMB"><label>KV · RMB → MYR</label><input id="kvRmbMultiplier" class="multiplier-hold-input" type="number" min="0.0001" step="0.0001" readonly><div class="multiplier-hold-feedback">Hold 3s to edit</div><div class="multiplier-actions"><button class="btn" type="button" data-multiplier-save>Save</button><button class="btn secondary" type="button" data-multiplier-cancel>Cancel</button></div></div>
           </div>
@@ -1751,7 +1755,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       </details>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV Models</h2><div id="kvPriceListCount" class="muted"></div></div><div class="price-list-search"><label>Search Model</label><input id="kvPriceSearch" placeholder="Example: KV 4-20"></div></div>
-        <div class="table-wrap" style="max-height:650px"><table class="pricelist-table"><thead><tr><th>Model</th><th>Motor</th><th>Price</th><th>Rarity</th><th></th></tr></thead><tbody id="kvPriceRows"></tbody></table></div>
+        <div class="table-wrap" style="max-height:650px;overflow-x:auto"><table class="pricelist-table kv-five-variant-table"><thead><tr><th rowspan="2">Model</th><th rowspan="2">Motor</th><th class="group-head" colspan="2">KVC</th><th class="group-head" colspan="2">KV</th><th class="group-head" colspan="2">KVN</th><th class="group-head" colspan="2">KVD</th><th class="group-head" colspan="2">KVSD</th><th rowspan="2">Save</th></tr><tr><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th><th class="sub-head">Price</th><th class="sub-head">Rarity</th></tr></thead><tbody id="kvPriceRows"></tbody></table></div>
       </div>
       <div class="card kv-addon-table" style="margin-top:16px">
         <div class="page-title-row" style="margin-bottom:12px"><div><h2 style="margin:0">KV Material Add-On</h2><div class="muted">Workbook Material options. Ca SiC is the standard material at RM 0.00.</div></div></div>
@@ -2265,27 +2269,27 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="supabase/functions/shared-kv/kv-data.js?v=50060"></script><script src="bsw-data-v50027.js?v=50027"></script>
-<script src="kv-fixes-v50026.js?v=50026"></script>
+<script src="kv-fixes-v50026.js?v=50063"></script>
 <script src="kv-price-data-v50017.js?v=50060"></script>
 <script src="pdf-optimization.js?v=50056"></script>
-<script src="app.js?v=50062"></script>
+<script src="app.js?v=50063"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50060"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50060"></script>
 <script src="manual-price-v50011.js"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50060"></script>
+<script src="pricing.js?v=50063"></script>
 <script src="technical-pdf.js?v=50060"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=50047"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50046"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
-<script src="kv-pricelist-v50017.js?v=50018"></script>
+<script src="kv-pricelist-v50017.js?v=50063"></script>
 <script src="chc-g1-product-data-v41411.js?v=42872"></script>
-<script src="product.js?v=42821"></script>
-<script src="cr-product.js?v=50016"></script>
-<script src="kv-product-v50017.js?v=50046"></script>
+<script src="product.js?v=50063"></script>
+<script src="cr-product.js?v=50063"></script>
+<script src="kv-product-v50017.js?v=50063"></script>
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-curve-v50021.js?v=50026"></script>
 <script src="bgf-v50006.js?v=50030"></script>
@@ -2294,7 +2298,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="roles.js?v=50056"></script>
 <script src="motor.js?v=50056"></script>
 <script src="coupling.js?v=50056"></script>
-<script src="baseplate.js?v=42872"></script>
+<script src="baseplate.js?v=50063"></script>
 <script src="quotation-templates.js?v=409"></script>
 
 <dialog id="quotationTemplateDialog" class="ks-dialog template-dialog">
@@ -2395,13 +2399,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 })();
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
-<script src="kv-product-families-v50027.js?v=50028"></script>
-<script src="v41200-bootstrap.js?v=50062"></script>
+<script src="kv-product-families-v50027.js?v=50063"></script>
+<script src="v41200-bootstrap.js?v=50063"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
-<script src="v50051-version-lock.js?v=50062"></script>
-<link rel="stylesheet" href="keystock-v100.css?v=50062">
-<script src="keystock-v100.js?v=50062"></script>
+<link rel="stylesheet" href="v50063-focused-fixes.css?v=50063">
+<script src="v50051-version-lock.js?v=50063"></script>
+<link rel="stylesheet" href="keystock-v100.css?v=50063">
+<script src="keystock-v100.js?v=50063"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2489,6 +2494,6 @@ document.addEventListener('click',event=>{
 })();
 </script>
 
-<script src="costing-audit-v50032.js?v=50062"></script>
+<script src="costing-audit-v50032.js?v=50063"></script>
 <script src="bsv-catalogue.js?v=50046"></script><script src="bsw-variants-v50036.js"></script><script src="bsw-pricing-v50036.js?v=50046"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>

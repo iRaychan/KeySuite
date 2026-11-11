@@ -1,0 +1,8 @@
+#productKeyplc .keyplc-table th.keyplc-type-heading,
+#productKeyplc .keyplc-table td:nth-child(3),
+#productKeyplc .keyplc-table td:nth-child(4){text-align:center}
+#productKeyplc .keyplc-route-actions{display:flex;justify-content:center;align-items:center;gap:8px;width:100%}
+#productKeyplc .keyplc-surcharge-note{text-align:center;margin-top:6px}
+#kvPriceList .kv-five-variant-table{min-width:1680px}
+#kvPriceList .kv-five-variant-table th.group-head{text-align:center}
+#kvPriceList .kv-five-variant-table .currency-price-input{min-width:145px}

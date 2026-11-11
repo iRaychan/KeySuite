@@ -1,7 +1,7 @@
 /* V5.00.27 — expose every actual KV V1.2 family through KV 600 without inventing models. */
 (()=>{'use strict';
  const natural=(a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true});
- const renameModels=()=>{const prefix=String(document.getElementById('kvProductMaterial')?.value||'KV').toUpperCase();document.querySelectorAll('#kvProductModelGrid h3').forEach(h=>{const next=String(h.textContent||'').replace(/^(?:KVC|KVN|KV)\b/i,prefix);if(h.textContent!==next)h.textContent=next})};
+ const renameModels=()=>{const prefix=String(document.getElementById('kvProductMaterial')?.value||'KV').toUpperCase();document.querySelectorAll('#kvProductModelGrid h3').forEach(h=>{const next=String(h.textContent||'').replace(/^(?:KVC|KVN|KVD|KVSD|KV)\b/i,prefix);if(h.textContent!==next)h.textContent=next})};
  function sync(){
   const host=document.getElementById('kvProductSeriesList'),db=window.KeySuiteKVData;if(!host||!db?.available_families)return;
   const existing=new Set([...host.querySelectorAll('[data-kv-series],[data-kv-unavailable-series]')].map(b=>b.dataset.kvSeries||b.dataset.kvUnavailableSeries));

@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const code=fs.readFileSync(require('path').join(__dirname,'..','pricing.js'),'utf8').replace('  window.KeySuitePricing={','  window.__setPricingData=(x)=>{secureData={...secureData,...x}};\n  window.KeySuitePricing={');
+const customer={id:'c1',pricingCategoryId:'cat1',distanceKm:0},category={id:'cat1',productRules:{KV:{margin:0,normal:0,rare:0,transport:0,currencies:['RMB']},KEYPLC:{margin:0,normal:0,rare:0,transport:0,currencies:['MYR']}}};
+const ctx={window:{KeySuiteApp:{getPricingCustomer:()=>customer},KeySuiteProductFamilies:{get:(x)=>({code:x})}},document:{getElementById:()=>null,querySelectorAll:()=>[]},console,alert:()=>{},CustomEvent:class{}};ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(code,ctx);
+const kv={id:'kv1',model:'KV 1-20',motor_hp:1,motor_kw:.37,pole:2,pricesByCurrency:{USD:{},RMB:{KVN:3000},MYR:{}},rarityByCurrency:{USD:{},RMB:{KVN:'fixed'},MYR:{}}};
+const plc={id:'plc1',model:'3kW',rarity:'fixed',variants:[{pumpQty:2,priceUsd:null,priceRmb:null,priceMyr:9410}]};
+ctx.window.__setPricingData({categories:[category],kvProducts:[kv],keyplcProducts:[plc],productMultipliers:{KV:{USD:5.8,RMB:.65,MYR:1},KEYPLC:{USD:5.8,RMB:.65,MYR:1}}});
+const pricing=ctx.window.KeySuitePricing;
+const found=pricing.findKvPrice('KVN 1-20',{customer,category,material:'KVN'});assert(found);assert.equal(found.calc.sourcePrice,3000);assert.equal(found.calc.baseMyr,1950);assert.equal(found.material,'KVN');
+const source=pricing.sourceCostOnly('KV','KVN 1-20','KVN');assert.equal(source.sourcePrice,3000);assert.equal(source.baseMyr,1950);
+for(const v of ['KVC','KV','KVD','KVSD'])assert.equal(pricing.findKvPrice(`${v} 1-20`,{customer,category,material:v}),null);
+const indoor=pricing.findKeyplcPrice('plc1',2,{customer,category,enclosure:'indoor'}),shelter=pricing.findKeyplcPrice('plc1',2,{customer,category,enclosure:'sheltered'});assert(indoor&&shelter);assert.equal(indoor.calc.finalPrice,9410);assert.equal(shelter.calc.finalPrice,10410);assert.equal(pricing.sourceSnapshot(shelter).enclosure_surcharge,1000);
+assert(pricing.esDescription({model:'ES 80-26'},'CI / SS / SS / MS').includes('Model: ES 80-26'));
+console.log('PASS: KVN source 3000 × .65 = 1950; other variants unpriced; KeyPLC 9410/10410; ES prefix.');
