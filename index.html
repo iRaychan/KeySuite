@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.63</title>
-  <script>window.KEYSUITE_VERSION='5.00.63';window.KEYSUITE_BUILD='V5.00.63';</script>
+  <title>KeySuite V5.00.64</title>
+  <script>window.KEYSUITE_VERSION='5.00.64';window.KEYSUITE_BUILD='V5.00.64';</script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -659,7 +659,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.63</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.64</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -675,7 +675,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.63</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.64</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -701,7 +701,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.63</div>
+    <div class="suite-version">KeySuite V5.00.64</div>
   </aside>
 
   <main>
@@ -909,7 +909,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div><label>Supply</label><label class="default-choice-control"><input id="kvBareShaft" type="checkbox" data-default-checked="false"> Bare Shaft Pump</label></div>
       </div>
       <div class="card selection-curve-shell">
-        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50063&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50063&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
+        <iframe id="selectorKvFrame" src="selector-kv/index.html?v=50064&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" data-src="selector-kv/index.html?v=50064&amp;ks-visible=1&amp;ks-layout=42872&amp;ks-frame=KV" title="KeySelector KV Series" style="width:100%;height:1900px;border:0;display:block"></iframe>
       </div>
     </section>
 
@@ -976,7 +976,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div class="card"><h2>KV Series</h2><div id="kvProductSeriesList" class="product-series-list"></div></div>
         <div class="card"><div class="page-title-row" style="margin-bottom:12px"><div><h2 id="kvProductSeriesTitle" style="margin:0">KV Models</h2><div id="kvProductModelCount" class="muted"></div></div></div><div id="kvProductModelGrid" class="product-model-grid"></div></div>
       </div>
-      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50063" title="KV Product Curve" style="display:none"></iframe>
+      <iframe id="productKvSelectorFrame" src="about:blank" data-src="selector-kv/index.html?product=1&amp;v=50064" title="KV Product Curve" style="display:none"></iframe>
     </section>
 
     <section id="productBfi" class="page">
@@ -1011,14 +1011,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
           <span class="module-icon">ES</span><h2>ES</h2><p>Baseplate for B.G.Reich End Suction pumpset.</p><span class="module-order">SELECT ES BASEPLATE</span>
         </button>
         <button type="button" class="key-module-card" id="productBaseplateIsoButton">
-          <span class="module-icon">ISO</span><h2>ISO</h2><p>ISO baseplate compatibility data is not configured.</p><span class="module-order">VIEW ISO STATUS</span>
+          <span class="module-icon">ISO</span><h2>ISO</h2><p>Enter verified ISO dimensions and use the independent ISO baseplate costing.</p><span class="module-order">SELECT ISO BASEPLATE</span>
         </button>
       </div>
       <div id="productBaseplateIsoPanel" class="card" hidden><div class="key-back-row"><button class="btn secondary" type="button" id="productBaseplateIsoBack">← Baseplate</button></div><h2>ISO Baseplate</h2><p class="notice">ISO-specific dimensions, compatibility and pricing are not configured. No ISO baseplate can be quoted or added to Assembly yet.</p></div>
       <div id="productBaseplateEsPanel" hidden>
         <div class="key-back-row"><button class="btn secondary" type="button" id="productBaseplateBack">← Baseplate</button></div>
         <div class="card">
-          <div class="page-title-row" style="margin-bottom:4px"><div><h2 style="margin:0">ES Baseplate</h2></div><div class="actions"><button class="btn action-assembly" type="button" id="productBaseplateAssembly">Assembly</button><button class="btn action-quote" type="button" id="productBaseplateQuote">Add to Quote</button></div></div>
+          <div class="page-title-row" style="margin-bottom:4px"><div><h2 id="productBaseplateFamilyTitle" style="margin:0">ES Baseplate</h2></div><div class="actions"><button class="btn action-assembly" type="button" id="productBaseplateAssembly">Assembly</button><button class="btn action-quote" type="button" id="productBaseplateQuote">Add to Quote</button></div></div>
           <div class="muted" id="productBaseplateCalcHelp" style="margin-bottom:12px;font-size:12px">Select Pump Series / Pump Model / Motor HP / Pole. Baseplate Size / Length / Width fill automatically; manual changes are highlighted. ES fabrication quantities are fixed.</div>
           <div class="baseplate-es-reference-grid" aria-label="ES Baseplate reference selection">
             <div><label for="productBaseplateEsSeries">Pump Series</label><select id="productBaseplateEsSeries"><option value="">Select</option></select></div>
@@ -1063,7 +1063,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
               <div><label for="productBaseplateCalcL3">Length (mm)</label><input id="productBaseplateCalcL3" data-product-bp-calculator type="number" min="0" step="1"></div>
               <div><label for="productBaseplateCalcW1">Width (mm)</label><input id="productBaseplateCalcW1" data-product-bp-calculator type="number" min="0" step="1"></div>
             </div>
-            <div class="baseplate-fixed-title">ES Fixed Quantities</div>
+            <div class="baseplate-fixed-title" id="productBaseplateFixedTitle">ES Fixed Quantities</div>
             <div class="baseplate-fixed-grid">
               <div><label for="productBaseplateCalcLengthQty">No. of Length</label><input id="productBaseplateCalcLengthQty" type="number" readonly tabindex="-1"></div>
               <div><label for="productBaseplateCalcWidthQty">No. of Width</label><input id="productBaseplateCalcWidthQty" type="number" readonly tabindex="-1"></div>
@@ -1071,7 +1071,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
               <div><label for="productBaseplateCalcBoltQty">Bolt &amp; Nut Qty</label><input id="productBaseplateCalcBoltQty" type="number" readonly tabindex="-1"></div>
             </div>
             <div class="table-wrap" style="margin-top:16px"><table class="baseplate-breakdown"><thead><tr><th>Cost Item</th><th>Cost</th></tr></thead><tbody id="productBaseplateCalcBreakdown"></tbody></table></div>
-            <div class="muted" style="margin-top:12px">Formula: C-channel material uses Length × No. of Length + Width × No. of Width, waste factor, stock price and fixed 6000 mm stock length, rounded upward by the saved Rounding. ES drilling and bolt &amp; nut quantities are fixed from the Baseplate costing settings.</div>
+            <div class="muted" id="productBaseplateFormulaHelp" style="margin-top:12px">Formula: C-channel material uses Length × No. of Length + Width × No. of Width, waste factor, stock price and fixed 6000 mm stock length, rounded upward by the saved Rounding. ES drilling and bolt &amp; nut quantities are fixed from the Baseplate costing settings.</div>
           </div>
         </div>
       </div>
@@ -1944,15 +1944,18 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
       <div class="page-title-row"><div><h1>Baseplate</h1><div class="muted">Choose the pump family / series baseplate costing table.</div></div></div>
       <div class="pricelist-dashboard-grid" style="margin-top:16px">
-        <button type="button" class="key-module-card" data-go="baseplatePriceList">
+        <button type="button" class="key-module-card" data-go="baseplatePriceList" data-baseplate-family="ES">
           <span class="module-icon">ES</span><h2>ES</h2><p>Maintain End Suction baseplate C-channel, labour, fabrication and consumable costing.</p><span class="module-order">OPEN BASEPLATE PRICE LIST</span>
+        </button>
+        <button type="button" class="key-module-card" data-go="baseplatePriceList" data-baseplate-family="ISO">
+          <span class="module-icon">ISO</span><h2>ISO</h2><p>Maintain independent ISO baseplate C-channel, labour, fabrication and consumable costing.</p><span class="module-order">OPEN BASEPLATE PRICE LIST</span>
         </button>
       </div>
     </section>
 
     <section id="baseplatePriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="baseplateSeriesList">← Baseplate</button></div>
-      <div class="page-title-row"><div><h1>Baseplate · ES</h1><div class="muted">Adjustable ES fabrication costing from 010 - Baseplate (Pricelist) - 260813 - V1.1.xlsx.</div></div></div>
+      <div class="page-title-row"><div><h1 id="baseplatePriceFamilyTitle">Baseplate · ES</h1><div class="muted" id="baseplatePriceFamilyHelp">Adjustable ES fabrication costing from 010 - Baseplate (Pricelist) - 260813 - V1.1.xlsx.</div></div></div>
       <div id="baseplatePriceMessage" class="auth-message"></div>
       <div class="card" style="margin-top:16px">
         <div class="page-title-row baseplate-channel-title" style="margin-bottom:12px"><div><h2 style="margin:0">C-Channel Costing</h2><div class="muted">Costing is locked by default. Hold 3 seconds to edit.</div></div><div class="actions"><button class="btn secondary" id="baseplateUnlockChannels" type="button">Hold 3s to Edit</button><button class="btn" id="saveBaseplatePricingChannel" data-baseplate-save type="button">Save Baseplate Costing</button></div></div>
@@ -2269,27 +2272,27 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
 <script src="supabase/functions/shared-kv/kv-data.js?v=50060"></script><script src="bsw-data-v50027.js?v=50027"></script>
-<script src="kv-fixes-v50026.js?v=50063"></script>
+<script src="kv-fixes-v50026.js?v=50064"></script>
 <script src="kv-price-data-v50017.js?v=50060"></script>
 <script src="pdf-optimization.js?v=50056"></script>
-<script src="app.js?v=50063"></script>
+<script src="app.js?v=50064"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50060"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50060"></script>
 <script src="manual-price-v50011.js"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50063"></script>
+<script src="pricing.js?v=50064"></script>
 <script src="technical-pdf.js?v=50060"></script>
 <script src="quotation-references.js?v=409"></script>
 <script src="categories.js?v=50047"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50046"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
-<script src="kv-pricelist-v50017.js?v=50063"></script>
+<script src="kv-pricelist-v50017.js?v=50064"></script>
 <script src="chc-g1-product-data-v41411.js?v=42872"></script>
-<script src="product.js?v=50063"></script>
-<script src="cr-product.js?v=50063"></script>
-<script src="kv-product-v50017.js?v=50063"></script>
+<script src="product.js?v=50064"></script>
+<script src="cr-product.js?v=50064"></script>
+<script src="kv-product-v50017.js?v=50064"></script>
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-curve-v50021.js?v=50026"></script>
 <script src="bgf-v50006.js?v=50030"></script>
@@ -2298,7 +2301,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="roles.js?v=50056"></script>
 <script src="motor.js?v=50056"></script>
 <script src="coupling.js?v=50056"></script>
-<script src="baseplate.js?v=50063"></script>
+<script src="baseplate.js?v=50064"></script>
 <script src="quotation-templates.js?v=409"></script>
 
 <dialog id="quotationTemplateDialog" class="ks-dialog template-dialog">
@@ -2399,14 +2402,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 })();
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
-<script src="kv-product-families-v50027.js?v=50063"></script>
-<script src="v41200-bootstrap.js?v=50063"></script>
+<script src="kv-product-families-v50027.js?v=50064"></script>
+<script src="v41200-bootstrap.js?v=50064"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
-<link rel="stylesheet" href="v50063-focused-fixes.css?v=50063">
-<script src="v50051-version-lock.js?v=50063"></script>
-<link rel="stylesheet" href="keystock-v100.css?v=50063">
-<script src="keystock-v100.js?v=50063"></script>
+<link rel="stylesheet" href="v50063-focused-fixes.css?v=50064">
+<script src="v50051-version-lock.js?v=50064"></script>
+<link rel="stylesheet" href="keystock-v100.css?v=50064">
+<script src="keystock-v100.js?v=50064"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2494,6 +2497,6 @@ document.addEventListener('click',event=>{
 })();
 </script>
 
-<script src="costing-audit-v50032.js?v=50063"></script>
+<script src="costing-audit-v50032.js?v=50064"></script>
 <script src="bsv-catalogue.js?v=50046"></script><script src="bsw-variants-v50036.js"></script><script src="bsw-pricing-v50036.js?v=50046"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>

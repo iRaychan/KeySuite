@@ -683,7 +683,11 @@ function keysuiteCrPresentationContext(){
 }
 function keysuiteCrPresentationAlias(value){
  let out=String(value??''),ctx=keysuiteCrPresentationContext(),target=String(ctx?.sellingSeries||ctx?.masterSeries||'').trim();
- if(target)out=out.replace(/^(?:CRS|CRN|CR)\b/i,target);
+ let material=String(window.keysuiteExportPayload?.keysuite_material||ctx?.material||'').toUpperCase();
+ try{const product=!!window.keysuiteExportPayload?.product_mode||new URLSearchParams(location.search).get('product')==='1';material=String(window.parent?.document?.getElementById(product?'crProductMaterial':'crPumpMaterial')?.value||material).toUpperCase()}catch(_){}
+ const variant=/SS\s*316|^CRN$/.test(material)?'CRN':/SS\s*304|^CRS$/.test(material)&&!/CAST\s*IRON/.test(material)?'CRS':'CR';
+ if(!target||/^(?:CR|CRS|CRN)$/i.test(target))target=variant;
+ out=out.replace(/^(?:CRS|CRN|CR)\b/i,target);
  try{
   const logo=String(ctx?.logo||'').trim(),name=String(ctx?.name||'Brand').trim();
   if(logo){

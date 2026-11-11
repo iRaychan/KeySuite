@@ -358,11 +358,31 @@
   function reapplyQuoteCapacity(row){
     try{window.KeySuiteApp?.syncQuoteCapacityDescription?.(row)}catch(error){console.warn('[KeySuite V4.04.16] Unable to reapply quotation capacity after brand mapping.',error)}
   }
+  function materialModel(family,material,model){
+    const raw=String(model||'').trim(),value=String(material||'').trim().toUpperCase();
+    if(family==='KV'){
+      const prefix=['KVC','KV','KVN','KVD','KVSD'].includes(value)?value:/DUPLEX\s*2507/.test(value)?'KVSD':/DUPLEX\s*2205/.test(value)?'KVD':/SS\s*316/.test(value)?'KVN':/CAST\s*IRON/.test(value)?'KVC':'KV';
+      return raw.replace(/^(?:KVSD|KVD|KVC|KVN|KV)\b/i,prefix);
+    }
+    if(family==='CR'){
+      const prefix=['CR','CRS','CRN'].includes(value)?value:/SS\s*316/.test(value)?'CRN':/SS\s*304/.test(value)&&!/CAST\s*IRON/.test(value)?'CRS':'CR';
+      return raw.replace(/^(?:CRS|CRN|CR)\b/i,prefix);
+    }
+    return raw;
+  }
   function mapRowIdentity(row){
-    const bid=rowBrandId(row),brand=byBrandId(bid);if(!row||!brand||row.dataset.restoredQuotationItem==='true')return;
+    const bid=rowBrandId(row),brand=byBrandId(bid);if(!row||!brand)return;
     const modelInput=row.querySelector('.item-model'),descInput=row.querySelector('.item-description');if(!modelInput||!descInput)return;
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),family=baseFamily(sourceFamily(source,row)||pump.keysuite_product_family||row.dataset.v391Family||'');
     if(!family||family==='MANUAL'||family==='ASSEMBLY')return;
+
+    if(row.dataset.restoredQuotationItem==='true'){
+      if(['KV','CR'].includes(family)&&row.dataset.modelManuallyEdited!=='true'){
+        const corrected=materialModel(family,source.material||source.variant||pump.keysuite_material,modelInput.value);
+        if(corrected!==modelInput.value){const old=modelInput.value;modelInput.value=corrected;if(row.dataset.descriptionManuallyEdited!=='true')descInput.value=descInput.value.replace(old,corrected);}
+      }
+      return;
+    }
 
     if(!row.dataset.v391MasterModel)row.dataset.v391MasterModel=source.v391_master_model||source.v390_master_model||pump.base_model||pump.model||modelInput.value||'';
     if(!row.dataset.v391MasterDescription)row.dataset.v391MasterDescription=source.v391_master_description||source.v390_master_description||descInput.value||'';
@@ -372,6 +392,10 @@
       const material=String(source.material||source.variant||pump.keysuite_material||'').toUpperCase();
       const variant=/CHCN|SS\s*316/.test(material)?'CHCN':/CHCS|SS\s*304(?!\s*\(CAST IRON)/.test(material)?'CHCS':'CHC';
       baseModel=baseModel.replace(/^(?:CHCS|CHCN|CHC)\b/i,variant);
+      row.dataset.v391MasterModel=baseModel;
+    }
+    if(['KV','CR'].includes(family)&&row.dataset.modelManuallyEdited!=='true'){
+      baseModel=materialModel(family,source.material||source.variant||pump.keysuite_material,baseModel);
       row.dataset.v391MasterModel=baseModel;
     }
     source.v391_master_model=baseModel;source.v391_master_description=baseDesc;row.dataset.pricingSource=JSON.stringify(source);

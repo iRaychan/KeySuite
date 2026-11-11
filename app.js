@@ -1737,7 +1737,7 @@ function chcSealDescription(seal='Car/Cer',elastomer='Viton'){
 }
 function chcBaseModelName(model){return String(model||'').trim().replace(/E+$/i,'').trim()}
 function chcEnhancedDisplayModel(model,enhanced=false){const base=chcBaseModelName(model);return enhanced&&base?base+'E':base}
-function chcMaterialModel(model,material){const raw=String(model||'');return material==='SS304'?raw.replace(/^CHC\b/i,'CHCS'):material==='SS316'?raw.replace(/^CHC\b/i,'CHCN'):raw}
+function chcMaterialModel(model,material){const raw=String(model||'');const variant=material==='SS304'?'CHCS':material==='SS316'?'CHCN':'CHC';return raw.replace(/^(?:CHCN|CHCS|CHC|CR)\b/i,variant)}
 function chcAssemblyQuoteItem(p={}){
  const material=p.keysuite_material||$('pumpMaterial')?.value||'SS304 (Cast Iron Connection)';
  const seal=p.keysuite_seal||$('sealFaces')?.value||'Car/Cer';

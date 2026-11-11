@@ -3,6 +3,9 @@
 #productKeyplc .keyplc-table td:nth-child(4){text-align:center}
 #productKeyplc .keyplc-route-actions{display:flex;justify-content:center;align-items:center;gap:8px;width:100%}
 #productKeyplc .keyplc-surcharge-note{text-align:center;margin-top:6px}
+#productKeyplc .keyplc-route-actions .btn{box-sizing:border-box!important;min-width:86px!important;width:86px!important;height:42px!important;min-height:42px!important;padding:0 10px!important;border-radius:8px!important;font-size:12px!important;line-height:1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 86px!important}
 #kvPriceList .kv-five-variant-table{min-width:1680px}
 #kvPriceList .kv-five-variant-table th.group-head{text-align:center}
 #kvPriceList .kv-five-variant-table .currency-price-input{min-width:145px}
+#productBaseplateEsPanel.iso-baseplate-mode .baseplate-es-reference-grid,
+#productBaseplateEsPanel.iso-baseplate-mode #productBaseplateRecommendation{display:none!important}

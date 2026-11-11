@@ -1,7 +1,7 @@
 {
-  "version": "5.00.63",
-  "baseline": "5.00.62 Fixed Brand",
-  "upgrade_supported_from": "5.00.62 Fixed Brand",
+  "version": "5.00.64",
+  "baseline": "5.00.63",
+  "upgrade_supported_from": "5.00.63",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": true,
@@ -13,7 +13,7 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Phase 1 Bugs 001\u2013008 targeted fixes",
-    "KV duplex variant pricing schema prepared, not applied"
+    "Phase 02 variant identity, quotation source, and KeyPLC presentation corrections",
+    "Independent ISO Baseplate price book and review-only database migration"
   ]
 }

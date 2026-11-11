@@ -28,12 +28,16 @@
       oxygenPrice:500,oxygenCoverage:50
     }
   };
-  let settings=clone(DEFAULTS),access=null,bound=false,generalEditing=false,channelEditing=false,holdTimer=null,holdTick=null,holdStarted=0,channelHoldTimer=null,channelHoldTick=null,channelHoldStarted=0,lastEsSignature='',productBaseplateFamily='',productRecommendationCollapsed=true;
+  const ISO_DEFAULTS=clone(DEFAULTS);ISO_DEFAULTS.family='ISO';ISO_DEFAULTS.source='ISO Baseplate independent price book';
+  Object.values(ISO_DEFAULTS.cChannels).forEach(row=>{row.pricePerStock=0;row.labour=0;row.misc=0});
+  ['paintPrice','thinnerPrice','weldingRod','drillingUnitPrice','boltNutUnitPrice','oxygenPrice'].forEach(key=>{ISO_DEFAULTS.general[key]=0});
+  ['l3Members','w1Members','defaultDrillingQty','defaultBoltNutQty'].forEach(key=>{ISO_DEFAULTS.general[key]=0});
+  let esSettings=clone(DEFAULTS),isoSettings=clone(ISO_DEFAULTS),settings=esSettings,priceFamily='ES',access=null,bound=false,generalEditing=false,channelEditing=false,holdTimer=null,holdTick=null,holdStarted=0,channelHoldTimer=null,channelHoldTick=null,channelHoldStarted=0,lastEsSignature='',productBaseplateFamily='',productRecommendationCollapsed=true;
 
   function permissionLevel(key){return window.KeySuitePermissions?.level?.(key)||((String(access?.role||'').toLowerCase()==='owner')?'full':'none')}
   const canEdit=()=>permissionLevel('manage_price_list')==='full';
   function normalize(raw){
-    raw=raw&&typeof raw==='object'?raw:{};const out=clone(DEFAULTS);out.version=2;out.source=DEFAULTS.source;out.family='ES';
+    raw=raw&&typeof raw==='object'?raw:{};const defaults=String(raw.family||'').toUpperCase()==='ISO'?ISO_DEFAULTS:DEFAULTS,out=clone(defaults);out.version=2;out.source=defaults.source;out.family=defaults.family;
     const channels=raw.cChannels||raw.c_channels||{};
     C_CHANNELS.forEach(size=>{const src=channels[size]||{};['pricePerStock','labour','misc'].forEach(k=>{const v=Number(src[k]??src[k.replace(/[A-Z]/g,m=>'_'+m.toLowerCase())]);if(Number.isFinite(v)&&v>=0)out.cChannels[size][k]=v})});
     const general=raw.general||{};
@@ -44,9 +48,10 @@
   }
   function roundUpTo(value,step){value=number(value);step=number(step);return step>0?Math.ceil(value/step)*step:value}
   function calculateCost(input={}){
-    const s=normalize(input.settings||settings),g=s.general,size=normalizeChannel(input.cChannel);
+    const family=String(input.family||input.settings?.family||'ES').toUpperCase(),s=normalize(input.settings||(family==='ISO'?isoSettings:esSettings)),g=s.general,size=normalizeChannel(input.cChannel);
     if(!size)return {available:false,total:0,settings:s};
     const row=s.cChannels[size],l3=Math.max(0,number(input.L3??input.l3)),w1=Math.max(0,number(input.W1??input.w1));
+    if(family==='ISO'&&(!(Number(row.pricePerStock)>0)||!(l3>0&&w1>0&&g.l3Members>0&&g.w1Members>0)))return {available:false,total:0,message:'ISO source price, verified dimensions and fabrication quantities are required.',settings:s};
     const drillingQty=Math.max(0,number(input.drillingQty??input.drilling_qty??g.defaultDrillingQty));
     const boltNutQty=Math.max(0,number(input.boltNutQty??input.bolt_nut_qty??g.defaultBoltNutQty));
     const rawMaterial=((l3*g.l3Members+w1*g.w1Members)*g.wasteFactor*row.pricePerStock)/(g.stockLengthMm||1);
@@ -59,7 +64,7 @@
     if(!result?.available)return {available:false,message:'A valid ES pumpset result is required.'};
     const cChannel=result.baseplate?.cChannel||input.cChannel,L3=result.dimensions?.longitudinal?.L3,W1=result.dimensions?.width?.W1;
     if(!cChannel||!Number.isFinite(Number(L3))||!Number.isFinite(Number(W1)))return {available:false,message:'Baseplate C-channel, L and W are required.'};
-    return calculateCost({cChannel,L3,W1,drillingQty:input.drillingQty,boltNutQty:input.boltNutQty});
+    return calculateCost({settings:esSettings,cChannel,L3,W1,drillingQty:input.drillingQty,boltNutQty:input.boltNutQty});
   }
   function money(v){return `RM ${number(v).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
   function message(text,type='info'){const box=$('baseplatePriceMessage');if(!box)return;box.textContent=text||'';box.className=text?`auth-message show ${type}`:'auth-message'}
@@ -144,7 +149,7 @@
   function stopHold(reset=true){if(holdTimer)clearTimeout(holdTimer);if(holdTick)clearInterval(holdTick);holdTimer=holdTick=null;const b=$('baseplateUnlockGeneral');if(b){b.classList.remove('holding');if(reset&&!generalEditing)b.textContent='Hold 3s to Edit'}}
   function startHold(e){if(!canEdit()||generalEditing)return;if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();stopHold(false);holdStarted=Date.now();const b=$('baseplateUnlockGeneral');b?.classList.add('holding');const tick=()=>{const left=Math.max(0,3000-(Date.now()-holdStarted));if(b)b.textContent=`Edit in ${(left/1000).toFixed(1)}s`};tick();holdTick=setInterval(tick,100);holdTimer=setTimeout(()=>{stopHold(false);setGeneralEditing(true);message('General Adjustable Inputs unlocked. Save Baseplate Costing when finished.','info')},3000)}
   function esResult(){const r=window.KEYSUITE_LAST_ES_MOTOR_BASEPLATE;return r?.available?r:null}
-  function esSignature(r){if(!r)return '';return [r.pump?.model||r.model||'',r.motor?.kw||'',r.baseplate?.cChannel||'',r.dimensions?.longitudinal?.L3||'',r.dimensions?.width?.W1||'',settings.general.defaultDrillingQty,settings.general.defaultBoltNutQty].join('|')}
+  function esSignature(r){if(!r)return '';return [r.pump?.model||r.model||'',r.motor?.kw||'',r.baseplate?.cChannel||'',r.dimensions?.longitudinal?.L3||'',r.dimensions?.width?.W1||'',esSettings.general.defaultDrillingQty,esSettings.general.defaultBoltNutQty].join('|')}
   const CALC_IDS=['baseplateCalcChannel','baseplateCalcL3','baseplateCalcW1','baseplateCalcDrillingQty','baseplateCalcBoltQty'];
   function setCalcDefault(el,value){if(!el)return;el.value=value;el.dataset.defaultValue=String(value??'');delete el.dataset.touched;el.classList.remove('baseplate-calc-modified')}
   function updateCalculatorModifiedState(){CALC_IDS.forEach(id=>{const el=$(id);if(!el)return;const baseline=String(el.dataset.defaultValue??''),current=String(el.value??'');let modified=false;if(baseline!==''){if(el.tagName==='SELECT')modified=current!==baseline;else{const a=Number(current),b=Number(baseline);modified=!(Number.isFinite(a)&&Number.isFinite(b))||Math.abs(a-b)>1e-9}}el.classList.toggle('baseplate-calc-modified',modified)})}
@@ -152,18 +157,18 @@
   function populateCalculator(r,{force=false}={}){
     if(!r?.available){clearCalculator();return}
     const sig=esSignature(r);if(!force&&sig===lastEsSignature)return;lastEsSignature=sig;
-    const values={baseplateCalcChannel:normalizeChannel(r.baseplate?.cChannel)||'',baseplateCalcL3:r.dimensions?.longitudinal?.L3??'',baseplateCalcW1:r.dimensions?.width?.W1??'',baseplateCalcDrillingQty:settings.general.defaultDrillingQty,baseplateCalcBoltQty:settings.general.defaultBoltNutQty};
+    const values={baseplateCalcChannel:normalizeChannel(r.baseplate?.cChannel)||'',baseplateCalcL3:r.dimensions?.longitudinal?.L3??'',baseplateCalcW1:r.dimensions?.width?.W1??'',baseplateCalcDrillingQty:esSettings.general.defaultDrillingQty,baseplateCalcBoltQty:esSettings.general.defaultBoltNutQty};
     Object.entries(values).forEach(([id,value])=>setCalcDefault($(id),value));updateCalculatorModifiedState();
   }
   function renderCalculatorState(){
-    const r=esResult(),content=$('baseplateCalcContent'),empty=$('baseplateCalcEmpty'),help=$('baseplateCalcHelp');if(content)content.hidden=!r;if(empty)empty.hidden=!!r;if(help)help.textContent=r?'Inputs are populated from the selected ES pumpset. You may modify them for costing preview.':'Select an ES pump first. The calculator inputs will populate from the selected ES pumpset.';
-    if(r)populateCalculator(r);else clearCalculator();updateCalculator();
+    const r=priceFamily==='ES'?esResult():null,manual=priceFamily==='ISO',content=$('baseplateCalcContent'),empty=$('baseplateCalcEmpty'),help=$('baseplateCalcHelp');if(content)content.hidden=!r&&!manual;if(empty)empty.hidden=!!r||manual;if(help)help.textContent=manual?'Enter verified ISO Baseplate Size, Length and Width manually for a costing preview.':r?'Inputs are populated from the selected ES pumpset. You may modify them for costing preview.':'Select an ES pump first. The calculator inputs will populate from the selected ES pumpset.';
+    if(r)populateCalculator(r);else if(!manual)clearCalculator();updateCalculator();
   }
   const PRODUCT_CALC_IDS=['productBaseplateCalcChannel','productBaseplateCalcL3','productBaseplateCalcW1'];
   function setProductCalcDefault(el,value){if(!el)return;el.value=value;el.dataset.defaultValue=String(value??'');delete el.dataset.touched;el.classList.remove('baseplate-calc-modified')}
   function updateProductCalculatorModifiedState(){PRODUCT_CALC_IDS.forEach(id=>{const el=$(id);if(!el)return;const baseline=String(el.dataset.defaultValue??''),current=String(el.value??'');let modified=false;if(baseline!==''){if(el.tagName==='SELECT')modified=current!==baseline;else{const a=Number(current),b=Number(baseline);modified=!(Number.isFinite(a)&&Number.isFinite(b))||Math.abs(a-b)>1e-9}}el.classList.toggle('baseplate-calc-modified',modified)})}
   function setProductFixedFields(){
-    const values={productBaseplateCalcLengthQty:settings.general.l3Members,productBaseplateCalcWidthQty:settings.general.w1Members,productBaseplateCalcDrillingQty:settings.general.defaultDrillingQty,productBaseplateCalcBoltQty:settings.general.defaultBoltNutQty};
+    const book=productBaseplateFamily==='ISO'?isoSettings:esSettings,values={productBaseplateCalcLengthQty:book.general.l3Members,productBaseplateCalcWidthQty:book.general.w1Members,productBaseplateCalcDrillingQty:book.general.defaultDrillingQty,productBaseplateCalcBoltQty:book.general.defaultBoltNutQty};
     Object.entries(values).forEach(([id,value])=>{const el=$(id);if(el)el.value=number(value)});
   }
   function clearProductCalculator(){PRODUCT_CALC_IDS.forEach(id=>{const el=$(id);if(el){el.value='';el.dataset.defaultValue='';delete el.dataset.touched;el.classList.remove('baseplate-calc-modified')}});setProductFixedFields()}
@@ -271,56 +276,62 @@
   }
   function productBaseplateConfiguration(){
     const cChannel=normalizeChannel($('productBaseplateCalcChannel')?.value),frame=frameForChannel(cChannel);
-    return {family:'ES',frame,baseplateFrame:frame,cChannel,L3:number($('productBaseplateCalcL3')?.value),W1:number($('productBaseplateCalcW1')?.value),drillingQty:number(settings.general.defaultDrillingQty),boltNutQty:number(settings.general.defaultBoltNutQty),manualFrame:false};
+    const family=productBaseplateFamily==='ISO'?'ISO':'ES',book=family==='ISO'?isoSettings:esSettings;
+    return {family,frame:family==='ES'?frame:0,baseplateFrame:family==='ES'?frame:0,cChannel,L3:number($('productBaseplateCalcL3')?.value),W1:number($('productBaseplateCalcW1')?.value),drillingQty:number(book.general.defaultDrillingQty),boltNutQty:number(book.general.defaultBoltNutQty),manualFrame:family==='ISO'};
   }
   function buildProductBaseplateItem(pricingMode='quotation'){
-    if(!productCalcReady()){alert('Select the Baseplate Size and enter both Length and Width before adding the ES Baseplate.');return}
+    const family=productBaseplateFamily==='ISO'?'ISO':'ES';
+    if(!productCalcReady()){alert(`Select the Baseplate Size and enter both Length and Width before adding the ${family} Baseplate.`);return}
     const config=productBaseplateConfiguration(),found=window.KeySuitePricing?.findBaseplatePrice?.(config,{pricingMode});
-    if(!found){alert('No ES Baseplate price is available for the selected customer. Check the Baseplate costing and Pricing Category.');return}
-    if(window.KeySuitePricing?.ensureQuoteableCalculation&&!window.KeySuitePricing.ensureQuoteableCalculation(found.calc,'ES Baseplate'))return;
+    if(!found){alert(`No ${family} Baseplate price is available for the selected customer. Check the independent ${family} Baseplate costing and Pricing Category.`);return}
+    if(window.KeySuitePricing?.ensureQuoteableCalculation&&!window.KeySuitePricing.ensureQuoteableCalculation(found.calc,`${family} Baseplate`))return;
     const channel=config.cChannel.replace(/ x /g,' × '),length=Number.isInteger(config.L3)?config.L3:Math.round(config.L3*10)/10,width=Number.isInteger(config.W1)?config.W1:Math.round(config.W1*10)/10;
-    return {model:`ES Baseplate ${channel}`,bomDescription:`ES Baseplate ${channel}`,description:`ES Baseplate\nC-Channel: ${channel}\nBaseplate Size: ${length} mm (L) × ${width} mm (W)`,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource:window.KeySuitePricing?.sourceSnapshot?.(found)||{},productFamily:'BASEPLATE',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'baseplate',baseplateData:{...config,defaultFrame:config.frame,configuration:config}};
+    return {model:`${family} Baseplate ${channel}`,bomDescription:`${family} Baseplate ${channel}`,description:`${family} Baseplate\nC-Channel: ${channel}\nBaseplate Size: ${length} mm (L) × ${width} mm (W)`,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource:window.KeySuitePricing?.sourceSnapshot?.(found)||{},productFamily:'BASEPLATE',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'baseplate',baseplateData:{...config,defaultFrame:config.frame,configuration:config}};
   }
   function quoteProductBaseplate(){
-    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.('add the ES Baseplate to the quotation'))return;
+    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add the ${productBaseplateFamily} Baseplate to the quotation`))return;
     const item=buildProductBaseplateItem('quotation');if(!item)return;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)window.KeySuiteApp?.showPage?.('quotation');
   }
   function assembleProductBaseplate(){
-    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.('add the ES Baseplate to Assembly'))return;
+    if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add the ${productBaseplateFamily} Baseplate to Assembly`))return;
     const item=buildProductBaseplateItem('assembly');if(item)window.KeySuiteAssembly?.addItem?.(item,{type:'pumpset',section:'baseplate'});
   }
   function productCalcReady(){
     const channel=normalizeChannel($('productBaseplateCalcChannel')?.value),L3=number($('productBaseplateCalcL3')?.value),W1=number($('productBaseplateCalcW1')?.value);
     return !!channel&&L3>0&&W1>0;
   }
-  function initStandaloneProductCalculator(){setProductFixedFields();renderEsReferenceSelectors();renderProductRecommendation();autoFillProductBaseplate()}
+  function initStandaloneProductCalculator(){setProductFixedFields();if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation();autoFillProductBaseplate()}else{clearProductCalculator();updateProductCalculator()}}
   function updateProductCalculator(){
     updateProductCalculatorModifiedState();setProductFixedFields();
-    const ready=productCalcReady();if($('productBaseplateQuote'))$('productBaseplateQuote').disabled=!ready;if($('productBaseplateAssembly'))$('productBaseplateAssembly').disabled=!ready;
-    if(!ready){if($('productBaseplateCalcBreakdown'))$('productBaseplateCalcBreakdown').innerHTML='';if($('productBaseplateCalcTotal'))$('productBaseplateCalcTotal').textContent='—';return}
-    const calc=calculateCost({settings,cChannel:$('productBaseplateCalcChannel')?.value,L3:$('productBaseplateCalcL3')?.value,W1:$('productBaseplateCalcW1')?.value,drillingQty:settings.general.defaultDrillingQty,boltNutQty:settings.general.defaultBoltNutQty});
+    const ready=productCalcReady();
+    if(!ready){if($('productBaseplateQuote'))$('productBaseplateQuote').disabled=true;if($('productBaseplateAssembly'))$('productBaseplateAssembly').disabled=true;if($('productBaseplateCalcBreakdown'))$('productBaseplateCalcBreakdown').innerHTML='';if($('productBaseplateCalcTotal'))$('productBaseplateCalcTotal').textContent='—';return}
+    const book=productBaseplateFamily==='ISO'?isoSettings:esSettings,calc=calculateCost({settings:book,cChannel:$('productBaseplateCalcChannel')?.value,L3:$('productBaseplateCalcL3')?.value,W1:$('productBaseplateCalcW1')?.value,drillingQty:book.general.defaultDrillingQty,boltNutQty:book.general.defaultBoltNutQty});
+    if($('productBaseplateQuote'))$('productBaseplateQuote').disabled=!calc.available;if($('productBaseplateAssembly'))$('productBaseplateAssembly').disabled=!calc.available;
     if(!calc.available){if($('productBaseplateCalcBreakdown'))$('productBaseplateCalcBreakdown').innerHTML='';if($('productBaseplateCalcTotal'))$('productBaseplateCalcTotal').textContent='—';return}
     const host=$('productBaseplateCalcBreakdown');if(host)host.innerHTML=[['C-Channel Material',calc.material],['Paint',calc.paint],['Thinner',calc.thinner],['Welding Rod',calc.welding],['Drilling',calc.drilling],['Bolt & Nut',calc.boltNut],['Oxygen',calc.oxygen],['Labour',calc.labour],['MISC',calc.misc]].map(([label,value])=>`<tr><td>${esc(label)}</td><td>${money(value)}</td></tr>`).join('');if($('productBaseplateCalcTotal'))$('productBaseplateCalcTotal').textContent=money(calc.total)
   }
   function showProductBaseplateFamily(family){productBaseplateFamily=['ES','ISO'].includes(String(family||'').toUpperCase())?String(family).toUpperCase():'';if(productBaseplateFamily==='ES')setProductRecommendationCollapsed(true);renderProductCalculatorState()}
   function renderProductCalculatorState(){
-    const chooser=$('productBaseplateFamilyChooser'),panel=$('productBaseplateEsPanel'),total=$('productBaseplateCalcTotal'),isEs=productBaseplateFamily==='ES';
-    if(chooser)chooser.hidden=!!productBaseplateFamily;if(panel)panel.hidden=!isEs;if(total)total.hidden=!isEs;if($('productBaseplateIsoPanel'))$('productBaseplateIsoPanel').hidden=productBaseplateFamily!=='ISO';
-    if(!isEs)return;
+    const chooser=$('productBaseplateFamilyChooser'),panel=$('productBaseplateEsPanel'),total=$('productBaseplateCalcTotal'),isEs=productBaseplateFamily==='ES',isIso=productBaseplateFamily==='ISO';
+    if(chooser)chooser.hidden=!!productBaseplateFamily;if(panel)panel.hidden=!productBaseplateFamily;if(total)total.hidden=!productBaseplateFamily;if($('productBaseplateIsoPanel'))$('productBaseplateIsoPanel').hidden=true;
+    panel?.classList.toggle('iso-baseplate-mode',isIso);if($('productBaseplateFamilyTitle'))$('productBaseplateFamilyTitle').textContent=`${productBaseplateFamily} Baseplate`;
+    if($('productBaseplateFixedTitle'))$('productBaseplateFixedTitle').textContent=`${productBaseplateFamily} Fabrication Quantities`;
+    if($('productBaseplateFormulaHelp'))$('productBaseplateFormulaHelp').textContent=`Formula: C-channel material uses Length × No. of Length + Width × No. of Width, waste factor, source price and 6000 mm stock length, rounded upward by the ${productBaseplateFamily} price book. Fabrication quantities come from the same book.`;
+    if(!productBaseplateFamily)return;
     const select=$('productBaseplateCalcChannel');if(select&&!select.options.length)select.innerHTML='<option value="">Select</option>'+C_CHANNELS.map(x=>`<option value="${esc(x)}">${esc(x.replace(/ x /g,' × '))}</option>`).join('');
-    const help=$('productBaseplateCalcHelp');if(help)help.textContent='Select Pump Series / Pump Model / Motor HP / Pole. KeySuite fills Baseplate Size / Length / Width automatically; manual changes are highlighted. ES fabrication quantities stay fixed.';
+    const help=$('productBaseplateCalcHelp');if(help)help.textContent=isEs?'Select Pump Series / Pump Model / Motor HP / Pole. KeySuite fills Baseplate Size / Length / Width automatically; manual changes are highlighted. ES fabrication quantities stay fixed.':'Enter verified ISO Baseplate Size, Length and Width manually. No ES dimensions or compatibility are assumed.';
     initStandaloneProductCalculator();updateProductCalculator();
   }
   function render(){
-    style();renderChannels();const gen=$('baseplateGeneralInputs');if(gen)gen.innerHTML=generalRows();
+    style();renderChannels();const gen=$('baseplateGeneralInputs');if(gen)gen.innerHTML=generalRows();if($('baseplatePriceFamilyTitle'))$('baseplatePriceFamilyTitle').textContent=`Baseplate · ${priceFamily}`;if($('baseplatePriceFamilyHelp'))$('baseplatePriceFamilyHelp').textContent=priceFamily==='ISO'?'Independent ISO fabrication costing. Enter verified prices and quantities; ES prices are not copied.':'Adjustable ES fabrication costing from 010 - Baseplate (Pricelist) - 260813 - V1.1.xlsx.';
     const select=$('baseplateCalcChannel');if(select){const previous=select.value;select.innerHTML='<option value="">Select</option>'+C_CHANNELS.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');if(C_CHANNELS.includes(previous))select.value=previous}
     document.querySelectorAll('[data-baseplate-save]').forEach(save=>save.disabled=!canEdit());renderGeneralLock();renderCalculatorState();renderProductCalculatorState();
   }
   function readUi(){const next=clone(settings);document.querySelectorAll('[data-bp-channel]').forEach(tr=>{const size=tr.dataset.bpChannel;tr.querySelectorAll('[data-bp-channel-field]').forEach(input=>{next.cChannels[size][input.dataset.bpChannelField]=Math.max(0,number(input.value))})});document.querySelectorAll('[data-bp-general]').forEach(input=>{next.general[input.dataset.bpGeneral]=Math.max(0,number(input.value))});return normalize(next)}
   function updateCalculator(){
     updateCalculatorModifiedState();
-    if(!esResult()){if($('baseplateCalcBreakdown'))$('baseplateCalcBreakdown').innerHTML='';if($('baseplateCalcTotal'))$('baseplateCalcTotal').textContent='—';return}
+    if(priceFamily==='ES'&&!esResult()){if($('baseplateCalcBreakdown'))$('baseplateCalcBreakdown').innerHTML='';if($('baseplateCalcTotal'))$('baseplateCalcTotal').textContent='—';return}
     const preview=readUi(),calc=calculateCost({settings:preview,cChannel:$('baseplateCalcChannel')?.value,L3:$('baseplateCalcL3')?.value,W1:$('baseplateCalcW1')?.value,drillingQty:$('baseplateCalcDrillingQty')?.value,boltNutQty:$('baseplateCalcBoltQty')?.value});
     if(!calc.available){if($('baseplateCalcBreakdown'))$('baseplateCalcBreakdown').innerHTML='';if($('baseplateCalcTotal'))$('baseplateCalcTotal').textContent='—';return}
     const host=$('baseplateCalcBreakdown');if(host)host.innerHTML=[['C-Channel Material',calc.material],['Paint',calc.paint],['Thinner',calc.thinner],['Welding Rod',calc.welding],['Drilling',calc.drilling],['Bolt & Nut',calc.boltNut],['Oxygen',calc.oxygen],['Labour',calc.labour],['MISC',calc.misc]].map(([label,value])=>`<tr><td>${esc(label)}</td><td>${money(value)}</td></tr>`).join('');if($('baseplateCalcTotal'))$('baseplateCalcTotal').textContent=money(calc.total)
@@ -329,15 +340,15 @@
     if(!canEdit()){message('Your role is not allowed to maintain Baseplate costing.','error');return}const next=readUi(),g=next.general;
     if(g.wasteFactor<=0||g.materialRounding<=0||g.paintCoverage<=0||g.thinnerCoverage<=0||g.weldingRodCoverage<=0||g.oxygenCoverage<=0){message('Waste Factor, Rounding and all coverage values must be greater than zero.','error');return}
     const client=window.KeySuiteAuth?.getClient?.();if(!client){message('Supabase is not connected.','error');return}const buttons=[...document.querySelectorAll('[data-baseplate-save]')],labels=buttons.map(button=>button.textContent||'Save Baseplate Costing');buttons.forEach(button=>{button.disabled=true;button.textContent='Saving…'});message('Saving Baseplate costing…','info');
-    try{const {data,error}=await client.rpc('keysuite_save_baseplate_costing_v40401',{p_costing:next});if(error)throw error;settings=normalize(data||next);if(window.KEYSUITE_SECURE_DATA)window.KEYSUITE_SECURE_DATA.baseplateCosting=clone(settings);window.KeySuitePricing?.syncPriceListSettings?.({baseplateCosting:clone(settings)});generalEditing=false;channelEditing=false;render();message('ES Baseplate costing saved. New calculations use these values immediately.','info');try{window.dispatchEvent(new CustomEvent('keysuite-baseplate-costing-changed',{detail:{settings:clone(settings)}}))}catch(_){}}
-    catch(error){console.error(error);message(`${error.message||error}. Run V40401N02_SUPABASE_MIGRATION.sql first.`,'error')}
+    try{const family=priceFamily,{data,error}=await client.rpc(family==='ISO'?'keysuite_save_iso_baseplate_costing_v50064':'keysuite_save_baseplate_costing_v40401',{p_costing:next});if(error)throw error;settings=normalize(data||next);if(family==='ISO'){isoSettings=settings;if(window.KEYSUITE_SECURE_DATA)window.KEYSUITE_SECURE_DATA.isoBaseplateCosting=clone(settings)}else{esSettings=settings;if(window.KEYSUITE_SECURE_DATA)window.KEYSUITE_SECURE_DATA.baseplateCosting=clone(settings);window.KeySuitePricing?.syncPriceListSettings?.({baseplateCosting:clone(settings)})}generalEditing=false;channelEditing=false;render();message(`${family} Baseplate costing saved. New calculations use these values immediately.`,'info');try{window.dispatchEvent(new CustomEvent('keysuite-baseplate-costing-changed',{detail:{family,settings:clone(settings)}}))}catch(_){}}
+    catch(error){console.error(error);message(`${error.message||error}. Review and apply the ${priceFamily} Baseplate migration before saving.`,'error')}
     finally{buttons.forEach((button,i)=>{button.disabled=!canEdit();button.textContent=labels[i]||'Save Baseplate Costing'})}
   }
-  function bind(){if(bound)return;bound=true;document.querySelectorAll('[data-baseplate-save]').forEach(button=>button.addEventListener('click',save));const channelUnlock=$('baseplateUnlockChannels');channelUnlock?.addEventListener('pointerdown',startChannelHold);['pointerup','pointerleave','pointercancel'].forEach(n=>channelUnlock?.addEventListener(n,()=>stopChannelHold(true)));channelUnlock?.addEventListener('contextmenu',e=>e.preventDefault());const unlock=$('baseplateUnlockGeneral');unlock?.addEventListener('pointerdown',startHold);['pointerup','pointerleave','pointercancel'].forEach(n=>unlock?.addEventListener(n,()=>stopHold(true)));unlock?.addEventListener('contextmenu',e=>e.preventDefault());document.getElementById('baseplatePriceList')?.addEventListener('input',event=>{if(event.target?.matches?.('[data-bp-general],[data-bp-channel-field],[data-bp-calculator]')){if(event.target.matches('[data-bp-calculator]'))event.target.dataset.touched='1';updateCalculator()}});document.getElementById('baseplatePriceList')?.addEventListener('change',event=>{if(event.target?.matches?.('[data-bp-calculator]')){event.target.dataset.touched='1';updateCalculator()}});document.getElementById('productBaseplate')?.addEventListener('input',event=>{if(event.target?.matches?.('[data-product-bp-calculator]')){event.target.dataset.touched='1';updateProductCalculator()}});document.getElementById('productBaseplate')?.addEventListener('change',event=>{if(event.target?.matches?.('[data-product-bp-calculator]')){event.target.dataset.touched='1';updateProductCalculator()}});$('productBaseplateEsButton')?.addEventListener('click',()=>showProductBaseplateFamily('ES'));$('productBaseplateIsoButton')?.addEventListener('click',()=>showProductBaseplateFamily('ISO'));$('productBaseplateIsoBack')?.addEventListener('click',()=>showProductBaseplateFamily(''));$('productBaseplateBack')?.addEventListener('click',()=>showProductBaseplateFamily(''));$('productBaseplateRecommendationToggle')?.addEventListener('click',()=>setProductRecommendationCollapsed(!productRecommendationCollapsed));$('productBaseplateAssembly')?.addEventListener('click',assembleProductBaseplate);$('productBaseplateQuote')?.addEventListener('click',quoteProductBaseplate);$('productBaseplateEsSeries')?.addEventListener('change',()=>handleProductReferenceChange({seriesChanged:true}));$('productBaseplateEsModel')?.addEventListener('change',()=>handleProductReferenceChange());$('productBaseplateEsMotorHp')?.addEventListener('change',()=>handleProductReferenceChange());$('productBaseplateEsPole')?.addEventListener('change',()=>handleProductReferenceChange({poleChanged:true}))}
-  function init(data,userAccess){access=userAccess||access;settings=normalize(data?.baseplateCosting||settings);bind();render()}
+  function bind(){if(bound)return;bound=true;document.querySelectorAll('[data-baseplate-family]').forEach(button=>button.addEventListener('click',()=>window.KeySuiteBaseplate.setPriceFamily(button.dataset.baseplateFamily)));document.querySelectorAll('[data-baseplate-save]').forEach(button=>button.addEventListener('click',save));const channelUnlock=$('baseplateUnlockChannels');channelUnlock?.addEventListener('pointerdown',startChannelHold);['pointerup','pointerleave','pointercancel'].forEach(n=>channelUnlock?.addEventListener(n,()=>stopChannelHold(true)));channelUnlock?.addEventListener('contextmenu',e=>e.preventDefault());const unlock=$('baseplateUnlockGeneral');unlock?.addEventListener('pointerdown',startHold);['pointerup','pointerleave','pointercancel'].forEach(n=>unlock?.addEventListener(n,()=>stopHold(true)));unlock?.addEventListener('contextmenu',e=>e.preventDefault());document.getElementById('baseplatePriceList')?.addEventListener('input',event=>{if(event.target?.matches?.('[data-bp-general],[data-bp-channel-field],[data-bp-calculator]')){if(event.target.matches('[data-bp-calculator]'))event.target.dataset.touched='1';updateCalculator()}});document.getElementById('baseplatePriceList')?.addEventListener('change',event=>{if(event.target?.matches?.('[data-bp-calculator]')){event.target.dataset.touched='1';updateCalculator()}});document.getElementById('productBaseplate')?.addEventListener('input',event=>{if(event.target?.matches?.('[data-product-bp-calculator]')){event.target.dataset.touched='1';updateProductCalculator()}});document.getElementById('productBaseplate')?.addEventListener('change',event=>{if(event.target?.matches?.('[data-product-bp-calculator]')){event.target.dataset.touched='1';updateProductCalculator()}});$('productBaseplateEsButton')?.addEventListener('click',()=>showProductBaseplateFamily('ES'));$('productBaseplateIsoButton')?.addEventListener('click',()=>showProductBaseplateFamily('ISO'));$('productBaseplateIsoBack')?.addEventListener('click',()=>showProductBaseplateFamily(''));$('productBaseplateBack')?.addEventListener('click',()=>showProductBaseplateFamily(''));$('productBaseplateRecommendationToggle')?.addEventListener('click',()=>setProductRecommendationCollapsed(!productRecommendationCollapsed));$('productBaseplateAssembly')?.addEventListener('click',assembleProductBaseplate);$('productBaseplateQuote')?.addEventListener('click',quoteProductBaseplate);$('productBaseplateEsSeries')?.addEventListener('change',()=>handleProductReferenceChange({seriesChanged:true}));$('productBaseplateEsModel')?.addEventListener('change',()=>handleProductReferenceChange());$('productBaseplateEsMotorHp')?.addEventListener('change',()=>handleProductReferenceChange());$('productBaseplateEsPole')?.addEventListener('change',()=>handleProductReferenceChange({poleChanged:true}))}
+  function init(data,userAccess){access=userAccess||access;esSettings=normalize(data?.baseplateCosting||esSettings);isoSettings=normalize({...ISO_DEFAULTS,...(data?.isoBaseplateCosting||{}),family:'ISO'});settings=priceFamily==='ISO'?isoSettings:esSettings;bind();render()}
   function pageShown(id){if(id==='baseplatePriceList')render();if(id==='productBaseplate'){style();productBaseplateFamily='';setProductRecommendationCollapsed(true);renderProductCalculatorState()}}
   function decoratePumpsetResult(result){if(!result?.available)return result;try{result.baseplateCost=calculateForPumpset(result)}catch(_){}return result}
   document.addEventListener('KEYSUITE_MOTOR_BASEPLATE_RESULT',event=>{const result=event?.detail?.result;if(result?.available){decoratePumpsetResult(result);window.KEYSUITE_LAST_ES_BASEPLATE_COST=result.baseplateCost;populateCalculator(result,{force:true});renderCalculatorState()}});
   document.addEventListener('KEYSUITE_V40205_READY',()=>{if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation()}});
-  window.KeySuiteBaseplate={getProductConfiguration:productBaseplateConfiguration,init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,getSettings:()=>clone(settings),defaults:()=>clone(DEFAULTS)};
+  window.KeySuiteBaseplate={getProductConfiguration:productBaseplateConfiguration,init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,getSettings:family=>clone(String(family||'ES').toUpperCase()==='ISO'?isoSettings:esSettings),defaults:()=>clone(DEFAULTS),setPriceFamily:family=>{priceFamily=String(family).toUpperCase()==='ISO'?'ISO':'ES';settings=priceFamily==='ISO'?isoSettings:esSettings;generalEditing=false;channelEditing=false;clearCalculator();render()}};
 })();

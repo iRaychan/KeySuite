@@ -195,7 +195,7 @@
     }
     const setting=settings.data?.[0]||{};
     const parseJson=value=>{if(!value)return{};if(typeof value==='object')return value;try{return JSON.parse(value)}catch(_){return{}}};
-    const baseplateCosting=parseJson(setting.baseplate_costing);
+    const baseplateCosting=parseJson(setting.baseplate_costing),isoBaseplateCosting=parseJson(setting.iso_baseplate_costing);
     const chcG2UsdMultiplier=Number(setting.chc_g2_usd_multiplier??setting.chc_usd_multiplier??setting.usd_multiplier??5.8);
     const chcG2RmbMultiplier=Number(setting.chc_g2_rmb_multiplier??setting.chc_rmb_multiplier??setting.rmb_multiplier??.65);
     const chcG1UsdMultiplier=Number(setting.chc_g1_usd_multiplier??chcG2UsdMultiplier);
@@ -230,7 +230,7 @@
       version:'3.1',release_date:'2026-08-07',currency:setting.currency||'MYR',
       usd_multiplier:chcUsdMultiplier,rmb_multiplier:chcRmbMultiplier,myr_multiplier:1,
       productMultipliers:{...Object.fromEntries(['BSV','BSW'].map(f=>[f,{USD:Number(setting[f.toLowerCase()+'_usd_multiplier']??chcUsdMultiplier),RMB:Number(setting[f.toLowerCase()+'_rmb_multiplier']??chcRmbMultiplier),MYR:1}])),CHC:{USD:chcG2UsdMultiplier,RMB:chcG2RmbMultiplier,MYR:1},CHC_G1:{USD:chcG1UsdMultiplier,RMB:chcG1RmbMultiplier,MYR:1},CHC_G2:{USD:chcG2UsdMultiplier,RMB:chcG2RmbMultiplier,MYR:1},CR:{USD:crUsdMultiplier,RMB:crRmbMultiplier,MYR:1},KV:{USD:kvUsdMultiplier,RMB:kvRmbMultiplier,MYR:1},BFI:{USD:bfiUsdMultiplier,RMB:bfiRmbMultiplier,MYR:1},ES:{USD:esUsdMultiplier,RMB:esRmbMultiplier,MYR:1},ISO:{USD:isoUsdMultiplier,RMB:isoRmbMultiplier,MYR:1},GWS:{USD:gwsUsdMultiplier,RMB:gwsRmbMultiplier,MYR:1},KEYPLC:{USD:keyplcUsdMultiplier,RMB:keyplcRmbMultiplier,MYR:1},MANIFOLD:{USD:manifoldUsdMultiplier,RMB:manifoldRmbMultiplier,MYR:1},MOTOR:{USD:motorUsdMultiplier,RMB:motorRmbMultiplier,MYR:1},COUPLING:{USD:couplingUsdMultiplier,RMB:couplingRmbMultiplier,MYR:1},BASEPLATE:{USD:1,RMB:1,MYR:1}},
-      fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),fuel_efficiency:Number(setting.fuel_efficiency??6.3),return_journey:setting.return_journey!==false,baseplateCosting:baseplateCosting,keylabConfig:parseJson(setting.keylab_config),customerPricing:null,customerPricingRows:normalizedCustomerRows,
+      fuel_price:Number(setting.fuel_price??2),fuel_base_price:Number(setting.fuel_base_price??2),fuel_efficiency:Number(setting.fuel_efficiency??6.3),return_journey:setting.return_journey!==false,baseplateCosting:baseplateCosting,isoBaseplateCosting:isoBaseplateCosting,keylabConfig:parseJson(setting.keylab_config),customerPricing:null,customerPricingRows:normalizedCustomerRows,
       companies:(companies.data||[]).map(c=>({id:c.id,name:c.company_name,category:c.pricing_category,delivery_distance:Number(c.delivery_distance||0),phone:c.company_phone,term_days:c.term_days,address:c.address,tin:c.tin_number,business_registration_no:c.business_registration_no,sst_no:c.sst_no,msic_code:c.msic_code,business_activities:c.business_activities})),
       users:(users.data||[]).map(u=>({id:u.id,company_id:u.company_id,source_company_id:u.source_company_id,prefix:u.prefix,name:u.full_name,phone:u.phone,email:u.email})),
       categories:(categories.data||[]).map(c=>{
