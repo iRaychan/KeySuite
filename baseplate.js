@@ -173,7 +173,7 @@
   }
   function clearProductCalculator(){PRODUCT_CALC_IDS.forEach(id=>{const el=$(id);if(el){el.value='';el.dataset.defaultValue='';delete el.dataset.touched;el.classList.remove('baseplate-calc-modified')}});setProductFixedFields()}
   function esReferenceData(){return window.KeySuiteMotorBaseplateV40205?.data||window.KeySuiteMotorBaseplateDataV40205||{}}
-  function esDimensionMap(){return esReferenceData()?.es?.dimensions||{}}
+  function esDimensionMap(){return productBaseplateFamily==='ISO'?{}:esReferenceData()?.es?.dimensions||{}}
   function frameForChannel(channel){
     const wanted=normalizeChannel(channel),frames=esReferenceData()?.baseplate?.frames||{};
     const match=Object.entries(frames).find(([,row])=>normalizeChannel(row?.cChannel)===wanted);
@@ -182,6 +182,7 @@
   function normalizeEsReferenceModel(value){return String(value||'').replace(/^ES\s+/i,'').trim()}
   function naturalModelSort(a,b){return String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'})}
   function esReferenceModels(){
+    if(productBaseplateFamily==='ISO')return [...new Set((window.KEYSUITE_SECURE_DATA?.isoProducts||[]).map(row=>normalizeEsReferenceModel(row.model.replace(/^ISO\s+/i,''))).filter(Boolean))].sort(naturalModelSort);
     const dims=esDimensionMap(),fromDims=Object.keys(dims||{}),fromSecure=(window.KEYSUITE_SECURE_DATA?.esProducts||[]).map(row=>normalizeEsReferenceModel(row.model)).filter(Boolean);
     const hasDims=fromDims.length>0,rows=[...new Set([...fromDims,...fromSecure])].filter(model=>!hasDims||dims[model]||dims[normalizeEsReferenceModel(model)]).sort(naturalModelSort);
     return rows;
@@ -206,7 +207,7 @@
     const oldSeries=String(seriesEl.value||''),oldModel=seriesChanged?'':normalizeEsReferenceModel(modelEl.value),oldHp=String(hpEl.value||'');
     const series=fillSelect(seriesEl,esReferenceSeries(),oldSeries,'Select',v=>v);
     const models=series?esReferenceModels().filter(model=>esSeriesFromModel(model)===series):[];
-    fillSelect(modelEl,models,oldModel,series?'Select Pump Model':'Select Series First',model=>`ES ${model}`);modelEl.disabled=!series;
+    fillSelect(modelEl,models,oldModel,series?'Select Pump Model':'Select Series First',model=>`${productBaseplateFamily} ${model}`);modelEl.disabled=!series;
     const hps=motorHpValuesForPole(pole),hpAvailable=!oldHp||hps.map(String).includes(oldHp);
     fillSelect(hpEl,hps,oldHp,'Select',hp=>`${Number.isInteger(hp)?hp:Math.round(hp*100)/100} HP`);
     if(oldHp&&!hpAvailable){
@@ -255,14 +256,14 @@
   }
   function handleProductReferenceChange(options={}){
     if(options.seriesChanged||options.poleChanged)renderEsReferenceSelectors(options);else renderProductRecommendation();
-    const result=autoFillProductBaseplate();
+    const result=productBaseplateFamily==='ISO'?(updateProductCalculator(),null):autoFillProductBaseplate();
     if(result&&!result.available){const host=$('productBaseplateRecommendationCurrent'),ref=productReferenceSelection();if(host&&ref.model&&ref.hp>0)host.textContent=`ES ${ref.model} · Motor ${ref.hp} HP · ${ref.pole} Pole → ${result.message||'Automatic Baseplate dimensions are unavailable. Please select Size / Length / Width manually.'}`}
   }
   function renderProductRecommendation(){
     document.querySelectorAll('#productBaseplate [data-bp-rule]').forEach(row=>row.classList.remove('is-recommended'));
     const host=$('productBaseplateRecommendationCurrent');if(!host)return;const ref=productReferenceSelection();
     if(!ref.model){host.textContent='Select Pump Series and Pump Model, then choose Motor HP to show the recommended Baseplate Size.';return}
-    if(!(ref.shaft>0)){host.textContent=`ES ${ref.model}: pump shaft data is unavailable. Select the Baseplate Size manually.`;return}
+    if(!(ref.shaft>0)){host.textContent=`${productBaseplateFamily} ${ref.model}: verified pump shaft and dimensions are unavailable. Select Baseplate Size, Length and Width manually.`;return}
     if(!(ref.hp>0)){host.textContent=`ES ${ref.model} · Shaft ${ref.shaft} mm · ${ref.pole} Pole → Select Motor HP to show the recommended Baseplate Size.`;return}
     const rec=recommendationFor(ref.shaft,ref.hp),hp=Number.isInteger(ref.hp)?String(ref.hp):String(Math.round(ref.hp*10)/10);
     if(!rec?.size){host.textContent=`ES ${ref.model} · Shaft ${ref.shaft} mm · Motor ${hp} HP · ${ref.pole} Pole → Manual Selection Required (above 420 HP).`;return}
@@ -301,7 +302,7 @@
     const channel=normalizeChannel($('productBaseplateCalcChannel')?.value),L3=number($('productBaseplateCalcL3')?.value),W1=number($('productBaseplateCalcW1')?.value);
     return !!channel&&L3>0&&W1>0;
   }
-  function initStandaloneProductCalculator(){setProductFixedFields();if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation();autoFillProductBaseplate()}else{clearProductCalculator();updateProductCalculator()}}
+  function initStandaloneProductCalculator(){setProductFixedFields();if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation();autoFillProductBaseplate()}else{renderEsReferenceSelectors();clearProductCalculator();renderProductRecommendation();updateProductCalculator()}}
   function updateProductCalculator(){
     updateProductCalculatorModifiedState();setProductFixedFields();
     const ready=productCalcReady();
@@ -315,12 +316,12 @@
   function renderProductCalculatorState(){
     const chooser=$('productBaseplateFamilyChooser'),panel=$('productBaseplateEsPanel'),total=$('productBaseplateCalcTotal'),isEs=productBaseplateFamily==='ES',isIso=productBaseplateFamily==='ISO';
     if(chooser)chooser.hidden=!!productBaseplateFamily;if(panel)panel.hidden=!productBaseplateFamily;if(total)total.hidden=!productBaseplateFamily;if($('productBaseplateIsoPanel'))$('productBaseplateIsoPanel').hidden=true;
-    panel?.classList.toggle('iso-baseplate-mode',isIso);if($('productBaseplateFamilyTitle'))$('productBaseplateFamilyTitle').textContent=`${productBaseplateFamily} Baseplate`;
+    panel?.classList.toggle('iso-baseplate-mode',false);if($('productBaseplateFamilyTitle'))$('productBaseplateFamilyTitle').textContent=`${productBaseplateFamily} Baseplate`;
     if($('productBaseplateFixedTitle'))$('productBaseplateFixedTitle').textContent=`${productBaseplateFamily} Fabrication Quantities`;
     if($('productBaseplateFormulaHelp'))$('productBaseplateFormulaHelp').textContent=`Formula: C-channel material uses Length × No. of Length + Width × No. of Width, waste factor, source price and 6000 mm stock length, rounded upward by the ${productBaseplateFamily} price book. Fabrication quantities come from the same book.`;
     if(!productBaseplateFamily)return;
     const select=$('productBaseplateCalcChannel');if(select&&!select.options.length)select.innerHTML='<option value="">Select</option>'+C_CHANNELS.map(x=>`<option value="${esc(x)}">${esc(x.replace(/ x /g,' × '))}</option>`).join('');
-    const help=$('productBaseplateCalcHelp');if(help)help.textContent=isEs?'Select Pump Series / Pump Model / Motor HP / Pole. KeySuite fills Baseplate Size / Length / Width automatically; manual changes are highlighted. ES fabrication quantities stay fixed.':'Enter verified ISO Baseplate Size, Length and Width manually. No ES dimensions or compatibility are assumed.';
+    const help=$('productBaseplateCalcHelp');if(help)help.textContent=isEs?'Select Pump Series / Pump Model / Motor HP / Pole. KeySuite fills Baseplate Size / Length / Width automatically; manual changes are highlighted. ES fabrication quantities stay fixed.':'Select ISO Pump Series / Pump Model / Motor HP / Pole, then enter verified ISO Baseplate Size, Length and Width. ISO costing remains independent.';
     initStandaloneProductCalculator();updateProductCalculator();
   }
   function render(){

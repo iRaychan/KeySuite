@@ -1814,7 +1814,8 @@ async function routeEsSelection(p={},route='quotation'){
  const capacity=esSelectionCapacity(p),pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
  const pumpDescription=String(pricedDescription||'').trim();
- const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource,pumpData:p,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
+ const selectedBrand=window.KeySuiteV40001?.brandContext?.(p.keysuite_brand_id||window.KeySuiteV40001?.state?.selectedBrandId,'ES');
+ const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource,pumpData:p,brandId:p.keysuite_brand_id||selectedBrand?.id,brand:p.keysuite_brand_name||selectedBrand?.name,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
  if(target==='assembly'){await window.KeySuiteAssembly?.addItem?.(pumpItem,{type:'pumpset',section:'pump',replacePumpset:true});return}
  if(bare){
    const description=[capacity?capacityLine(capacity):'',pumpDescription].filter(Boolean).join('\n');

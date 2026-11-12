@@ -903,7 +903,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),description=esDescription(product,material,{seal,elastomer});
     if(!found||quoteBlockReason(found.calc)){void window.KeySuiteManualPrice.offer({model:product.model,description,productFamily:'ES',pricingSource:{product_family:'ES',product_id:product.id,material,variant:material,seal_material:seal,elastomer}},quoteBlockReason(found?.calc));return;}
     const {variant,calc}=found;
-    const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const item={model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
+    const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const brand=window.KeySuiteV40001?.brandContext?.(window.KeySuiteV40001?.state?.selectedBrandId,'ES');const item={model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,brandId:brand?.id,brand:brand?.name,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
     if(route==='assembly'){window.KeySuiteAssembly?.addItem?.(item);return}
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.({...item,productFamily:'ES'});if(row)showPage('quotation');

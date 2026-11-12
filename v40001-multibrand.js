@@ -561,8 +561,9 @@
     if(state.appWrapped||!window.KeySuiteApp)return; state.appWrapped=true;
     const original=window.KeySuiteApp.addExternalQuoteItem?.bind(window.KeySuiteApp);
     if(original)window.KeySuiteApp.addExternalQuoteItem=data=>{
-      const explicitBrand=String(data?.brand??data?.brandName??'').trim();
-      const selected=byBrandId(state.selectedBrandId)||masterBrand();
+      const explicitBrand=String(data?.brand??data?.brandName??data?.pumpData?.keysuite_brand_name??data?.pricingSource?.v391_brand_name??'').trim();
+      const explicitId=String(data?.brandId??data?.pumpData?.keysuite_brand_id??data?.pricingSource?.v391_brand_id??'').trim();
+      const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||byBrandId(state.selectedBrandId)||masterBrand();
       const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
       const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
       const copy={...(data||{})}; if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};

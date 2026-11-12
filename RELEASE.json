@@ -1,7 +1,7 @@
 {
-  "version": "5.00.64",
-  "baseline": "5.00.63",
-  "upgrade_supported_from": "5.00.63",
+  "version": "5.00.65",
+  "baseline": "5.00.64",
+  "upgrade_supported_from": "5.00.64",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": true,
@@ -13,7 +13,6 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Phase 02 variant identity, quotation source, and KeyPLC presentation corrections",
-    "Independent ISO Baseplate price book and review-only database migration"
+    "Five targeted Phase 01 bug fixes: Back navigation, ISO Baseplate workflow, CR/KV model prefixes, ES quotation brand handoff, BSW 80F30-2 motor power"
   ]
 }
