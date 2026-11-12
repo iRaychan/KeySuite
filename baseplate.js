@@ -182,12 +182,12 @@
   function normalizeEsReferenceModel(value){return String(value||'').replace(/^ES\s+/i,'').trim()}
   function naturalModelSort(a,b){return String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'})}
   function esReferenceModels(){
-    if(productBaseplateFamily==='ISO')return [...new Set((window.KEYSUITE_SECURE_DATA?.isoProducts||[]).map(row=>normalizeEsReferenceModel(row.model.replace(/^ISO\s+/i,''))).filter(Boolean))].sort(naturalModelSort);
+    if(productBaseplateFamily==='ISO')return [...new Set([...(window.KEYSUITE_SECURE_DATA?.isoProducts||[]),...(window.KEYSUITE_ISO_PRODUCTS||[])].map(row=>String(row?.model||'').replace(/^ISO\s+/i,'').trim()).filter(model=>/^\d+-\d+-\d+[A-Za-z]?$/.test(model)))].sort(naturalModelSort);
     const dims=esDimensionMap(),fromDims=Object.keys(dims||{}),fromSecure=(window.KEYSUITE_SECURE_DATA?.esProducts||[]).map(row=>normalizeEsReferenceModel(row.model)).filter(Boolean);
     const hasDims=fromDims.length>0,rows=[...new Set([...fromDims,...fromSecure])].filter(model=>!hasDims||dims[model]||dims[normalizeEsReferenceModel(model)]).sort(naturalModelSort);
     return rows;
   }
-  function esSeriesFromModel(model){const hit=normalizeEsReferenceModel(model).match(/^(\d+)/);return hit?hit[1]:''}
+  function esSeriesFromModel(model){const hit=normalizeEsReferenceModel(model).match(productBaseplateFamily==='ISO'?/^\d+-(\d+)-\d+/:/^(\d+)/);return hit?hit[1]:''}
   function esReferenceSeries(){return [...new Set(esReferenceModels().map(esSeriesFromModel).filter(Boolean))].sort((a,b)=>Number(a)-Number(b))}
   function motorHpValuesForPole(pole){
     pole=Number(pole)||2;const secure=(window.KEYSUITE_SECURE_DATA?.motorProducts||[]).filter(row=>Number(row.pole)===pole).map(row=>number(row.hp)).filter(hp=>hp>0);
@@ -351,5 +351,5 @@
   function decoratePumpsetResult(result){if(!result?.available)return result;try{result.baseplateCost=calculateForPumpset(result)}catch(_){}return result}
   document.addEventListener('KEYSUITE_MOTOR_BASEPLATE_RESULT',event=>{const result=event?.detail?.result;if(result?.available){decoratePumpsetResult(result);window.KEYSUITE_LAST_ES_BASEPLATE_COST=result.baseplateCost;populateCalculator(result,{force:true});renderCalculatorState()}});
   document.addEventListener('KEYSUITE_V40205_READY',()=>{if(productBaseplateFamily==='ES'){renderEsReferenceSelectors();renderProductRecommendation()}});
-  window.KeySuiteBaseplate={getProductConfiguration:productBaseplateConfiguration,init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,getSettings:family=>clone(String(family||'ES').toUpperCase()==='ISO'?isoSettings:esSettings),defaults:()=>clone(DEFAULTS),setPriceFamily:family=>{priceFamily=String(family).toUpperCase()==='ISO'?'ISO':'ES';settings=priceFamily==='ISO'?isoSettings:esSettings;generalEditing=false;channelEditing=false;clearCalculator();render()}};
+  window.KeySuiteBaseplate={getProductConfiguration:productBaseplateConfiguration,init,pageShown,render,calculateCost,calculateForPumpset,decoratePumpsetResult,backToChooser:()=>{if(!productBaseplateFamily)return false;showProductBaseplateFamily('');return true},getSettings:family=>clone(String(family||'ES').toUpperCase()==='ISO'?isoSettings:esSettings),defaults:()=>clone(DEFAULTS),setPriceFamily:family=>{priceFamily=String(family).toUpperCase()==='ISO'?'ISO':'ES';settings=priceFamily==='ISO'?isoSettings:esSettings;generalEditing=false;channelEditing=false;clearCalculator();render()}};
 })();

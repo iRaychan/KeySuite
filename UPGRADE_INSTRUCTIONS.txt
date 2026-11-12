@@ -1,0 +1,2 @@
+KeySuite V5.00.66 upgrade from V5.00.65 only.
+Back up the current V5.00.65 application files. Replace only the included files, preserving their paths. Clear the application cache/service worker so versioned assets reload. Verify the four Phase 02 fixes before production release. No Supabase migration or data change is required. This package has not been deployed.

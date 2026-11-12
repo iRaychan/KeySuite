@@ -1,10 +1,10 @@
 {
-  "version": "5.00.65",
-  "baseline": "5.00.64",
-  "upgrade_supported_from": "5.00.64",
+  "version": "5.00.66",
+  "baseline": "5.00.65",
+  "upgrade_supported_from": "5.00.65",
   "release_status": "review",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,6 +13,6 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Five targeted Phase 01 bug fixes: Back navigation, ISO Baseplate workflow, CR/KV model prefixes, ES quotation brand handoff, BSW 80F30-2 motor power"
+    "Four targeted Phase 02 fixes: ES/ISO Baseplate Back navigation, ISO catalogue series, CR material-specific prefix stability, selected quotation brand"
   ]
 }

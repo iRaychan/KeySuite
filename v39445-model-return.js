@@ -37,6 +37,7 @@ function goBackPage(){
   // Product remains active behind the Curve. Close it before reading page history.
   if(isInlineProductCurve(dlg))return closeProductCurveThroughDialog(dlg);
   const current=activePage();
+  if(current==='productBaseplate'&&window.KeySuiteBaseplate?.backToChooser?.())return;
   if(current==='selectorIso'&&read()?.kind==='quick'&&read()?.family==='ISO')return returnQuick();
   if(current==='keyStock'&&window.KeyStock?.back?.())return;
   let stack=readPageStack(),target='';while(stack.length&&!target){const candidate=stack.pop();if(candidate&&candidate!==current&&validInternalPage(candidate))target=candidate}savePageStack(stack);if(current==='quotation')saveQuotationSelectionOrigin('');if(!target&&current==='keyStock')return window.KeyStock?.resetTab?.();

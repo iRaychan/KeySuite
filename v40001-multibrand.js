@@ -308,10 +308,11 @@
     if(scopeEnforced()){if(!target)return null;brandId=target.brandId;fam=baseFamily(target.family);if(!productGroup)group=normalizeProductGroup(target.family)||fam;}
     if(!customerAllowsProduct(brandId,group,fam))return null;
     const brand=byBrandId(brandId)||(scopeEnforced()?null:masterBrand());
-    const material=fam==='CHC'?String(materialOverride||currentChcMaterial()||'SS304 (Cast Iron Connection)').trim():'';
+    const material=fam==='CHC'?String(materialOverride||currentChcMaterial()||'SS304 (Cast Iron Connection)').trim():fam==='CR'?String(materialOverride||document.getElementById('crProductMaterial')?.value||'CR').trim():'';
     const masterSeries=fam==='CHC'?chcMasterSeriesFromMaterial(material):fam;
     const map=familyMapping(brand?.id,fam,masterSeries,group);
-    const sellingSeries=isMasterBrand(brand)?(fam==='CHC'?masterSeries:fam):String(map?.selling_series||map?.master_series||masterSeries||fam);
+    const crSeries=fam==='CR'?materialModel('CR',material,'CR'):fam;
+    const sellingSeries=isMasterBrand(brand)?(fam==='CHC'?masterSeries:crSeries):String(map?.selling_series||map?.master_series||masterSeries||fam);
     const brandSeries=brandSeriesFor(brand,group);
     const generation=generationForGroup(group),priceGroup=priceGroupFor(group);
     return brand?{id:String(brand.id),name:String(brand.brand_name||''),key:String(brand.brand_key||''),logo:String(brand.logo_data||''),countryOfOrigin:String(brand.country_of_origin||''),family:fam,productGroup:group,productGroupLabel:productGroupLabel(group),generation,priceGroup,brandSeries,sellingSeries,masterSeries:String(map?.master_series||masterSeries||''),material,templateId:String(brand.quotation_template_id||'')}:null;
@@ -563,10 +564,11 @@
     if(original)window.KeySuiteApp.addExternalQuoteItem=data=>{
       const explicitBrand=String(data?.brand??data?.brandName??data?.pumpData?.keysuite_brand_name??data?.pricingSource?.v391_brand_name??'').trim();
       const explicitId=String(data?.brandId??data?.pumpData?.keysuite_brand_id??data?.pricingSource?.v391_brand_id??'').trim();
-      const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||byBrandId(state.selectedBrandId)||masterBrand();
-      const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
       const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
-      const copy={...(data||{})}; if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
+      const selectedProductBrand=family&&baseFamily(family)===baseFamily(state.selectedFamily)&&!data?.manualItem&&!data?.manualBrandOverride&&!data?.brandManuallyEdited&&!data?.descriptionManuallyEdited?byBrandId(state.selectedBrandId):null;
+      const selected=selectedProductBrand||byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||byBrandId(state.selectedBrandId)||masterBrand();
+      const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
+      const copy={...(data||{})};if(chosenBrand&&!copy.descriptionManuallyEdited){copy.brand=chosenBrand.brand_name;copy.brandName=chosenBrand.brand_name;copy.brandId=chosenBrand.id}if(copy.pumpData&&chosenBrand)copy.pumpData={...copy.pumpData,keysuite_brand_id:chosenBrand.id,keysuite_brand_name:chosenBrand.brand_name};if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
       const row=original(copy);
       if(row){
         if(chosenBrand)stampRowBrand(row,chosenBrand.id,family,{force:true});
