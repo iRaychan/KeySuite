@@ -1689,10 +1689,21 @@ function run(){
  renderSelected();
 }
 function keykvHandleMotorOptionChange(){
+ const base=selectionState.models?.[selectionState.selectedIndex||0];
+ const available=window.parent?.KEYSUITE_BSW_VARIANTS?.[base?.model];
+ const variant=(motorPhase.value==='1Ph'?'M':'T')+(keysuiteBswFloatEnabled()?'A':'');
+ if(base&&available&&available[variant]==null){motorPhase.value=selectionState.motorPhase||'3Ph';const switchBox=document.getElementById('bswFloatSwitch');if(switchBox)switchBox.checked=selectionState.floatSwitch===true;alert('This BSW model has no '+variant+' variant in the verified pricelist.');return}
  updateMotorVoltageRange();
  selectionState={...selectionState,motorEffClass:'IE1',motorPhase:motorPhase.value,motorVoltage:+motorVoltage.value,floatSwitch:keysuiteBswFloatEnabled()};
  const productMode=new URLSearchParams(location.search).get('product')==='1';
- if(productMode&&selectionState.models.length){renderSelected();return;}
+ if(productMode&&selectionState.models.length){
+  renderSelected();
+  const base=selectionState.models[selectionState.selectedIndex||0];
+  const shown=keysuiteBswConfiguredModel(base.model,motorPhase.value,keysuiteBswFloatEnabled());
+  window.keysuiteExportPayload={...(window.keysuiteExportPayload||{}),quotation_model:shown,display_model:shown,motor_phase:motorPhase.value,motor_voltage:Number(motorVoltage.value),float_switch:keysuiteBswFloatEnabled()};
+  window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BSW',model:base.model,display_model:shown,phase:motorPhase.value,flowM3h:selectionState.q,headM:selectionState.h,valid:true,message:'Motor phase updated.'},'*');
+  return;
+ }
  run();
 }
 motorPhase.addEventListener("change",keykvHandleMotorOptionChange);

@@ -1,6 +1,6 @@
-/* KeySuite V5.00.68 Service Worker. */
-const CACHE='keysuite-v50068-keystock';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50068"></script>';
+/* KeySuite V5.00.69 Service Worker. */
+const CACHE='keysuite-v50069-keystock';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50069"></script>';
 const SHELL=[
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',
  './bsw-variants-v50036.js','./bsw-pricing-v50036.js','./customer-remarks-v50036.js','./product-audit-v50036.js','./v50037-version-lock.js',
@@ -15,6 +15,7 @@ SHELL.push('./bgf-curve-v50021.js','./selector-bgf/index.html','./bgf-data-v5002
 SHELL.push('./selector-bsw/index.html','./bsw-data-v50027.js','./selector-bsw-data-v50027.js','./bsw-selector-v50027.js','./bsw-v50027.js','./costing-audit-v50032.js','./v50032-bugfixes.css','./v50035-version-lock.js','./v50033-actions.css','./v50033-series-registry.js');
 SHELL[SHELL.indexOf('./v42875-version-lock.js')]='./v50035-version-lock.js';
 SHELL.push('./v50063-focused-fixes.css','./v50051-version-lock.js','./product-family-registry-v50047.js','./RELEASE.json');
+SHELL.push('./g-data-v50068.js','./g-pdf-v50068.js','./g-series-v50068.js','./assets/v50068/g-dimension.png','./selector-bgf/bgreich-logo.png');
 SHELL.push('./pump-pdf-report.html','./technical-pdf.js','./selector-iso/iso-pumpset-dimension.png');
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>undefined)))});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('keysuite-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});

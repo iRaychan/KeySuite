@@ -1,62 +1,18 @@
-/* G technical report: three pages, workbook Pg 2 and Pg 3 data. */
-(()=>{'use strict';
-let loading;
-function jsPdf(){
- if(window.jspdf?.jsPDF)return Promise.resolve(window.jspdf.jsPDF);
- if(!loading)loading=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='vendor/jspdf-2.5.2.umd.min.js';s.onload=()=>resolve(window.jspdf.jsPDF);s.onerror=reject;document.head.appendChild(s)});
- return loading;
-}
+/* G Series three-page technical PDF. Data: G Pg 2/Pg 3 and IE1 2 Pole motor workbook. */
+(()=>{'use strict';let loading;
+function jsPdf(){if(window.jspdf?.jsPDF)return Promise.resolve(window.jspdf.jsPDF);if(!loading)loading=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='vendor/jspdf-2.5.2.umd.min.js';s.onload=()=>resolve(window.jspdf.jsPDF);s.onerror=reject;document.head.appendChild(s)});return loading}
 function image(path){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=path})}
-function line(doc,label,value,x,y){doc.setFont('helvetica','normal');doc.text(String(label),x,y);doc.setFont('helvetica','bold');doc.text(String(value??'—'),x+42,y)}
-function heading(doc,title,n){
- doc.setFillColor(15,98,156);doc.rect(0,0,210,21,'F');doc.setFont('helvetica','bold');doc.setTextColor(255);doc.setFontSize(15);doc.text('B.G.Reich  |  G Series',15,14);
- doc.setTextColor(32,53,66);doc.setFontSize(16);doc.text(title,15,34);
- doc.setDrawColor(210,226,235);doc.line(15,40,195,40);
- doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('B.G.Reich reserves the right to make modifications without notice.',15,282);doc.text('Page '+n+' of 3',180,282);
-}
-function curve(doc,p){
- if(!p.curve?.length){doc.setFontSize(12);doc.text('Performance curve data is not supplied for this model.',20,105);return}
- const points=p.curve, x0=30,y0=200,w=150,h=105;
- const qmax=Math.max(...points.map(v=>v.q)),hmax=Math.max(...points.map(v=>v.h))*1.1;
- doc.setDrawColor(120);doc.line(x0,y0,x0+w,y0);doc.line(x0,y0,x0,y0-h);
- doc.setFontSize(9);doc.text('Flow (m3/h)',x0+w-23,y0+8);doc.text('Head (m)',x0-14,y0-h-3);
- doc.setDrawColor(15,98,156);doc.setLineWidth(.65);
- for(let i=1;i<points.length;i++)doc.line(x0+points[i-1].q/qmax*w,y0-points[i-1].h/hmax*h,x0+points[i].q/qmax*w,y0-points[i].h/hmax*h);
- doc.setLineWidth(.2);doc.setFontSize(8);doc.text('Source: G Data row '+p.row+'; only supplied points are plotted.',30,218);
-}
-async function open(p){
- const JS=await jsPdf(),doc=new JS({unit:'mm',format:'a4'});
- heading(doc,'Performance Summary · '+p.model,1);
- doc.setFontSize(11);line(doc,'Model',p.model,18,55);line(doc,'Motor',p.hp+' HP · '+p.phase,18,65);line(doc,'Speed',p.speed+' rpm',18,75);line(doc,'Connection',p.inlet+' × '+p.outlet,18,85);
- curve(doc,p);
- doc.addPage();heading(doc,'Operating and Technical Data · '+p.model,2);
- doc.setFontSize(10);doc.setTextColor(32,53,66);
- doc.setFont('helvetica','bold');doc.text('Operating Data',18,52);
- line(doc,'Application','—',18,62);line(doc,'Location','—',18,70);line(doc,'Fluid','Water, Clean',18,78);
- if(p.base==='G32-10-2'){line(doc,'Capacity','4.9 L/s (sheet example)',18,86);line(doc,'Pressure','20 m (sheet example)',18,94)}
- line(doc,'Density','0.9983 kg/dm3',18,102);line(doc,'Temperature','20 C',18,110);line(doc,'Kin. viscosity','1.005 mm2/s',18,118);
- line(doc,'Origin','Malaysia',107,62);line(doc,'Manufacture','China',107,70);
- doc.setFont('helvetica','bold');doc.text('Pump',18,134);
- line(doc,'Brand','B.G.Reich',18,144);line(doc,'Type','Close-coupled',18,152);line(doc,'Model',p.model,18,160);line(doc,'Speed',p.speed+' rpm',18,168);
- line(doc,'Casing','Cast Iron',18,176);line(doc,'Impeller','Stainless Steel',18,184);line(doc,'Shaft','Stainless Steel',18,192);line(doc,'Shaft Seal','Mechanical Seal',18,200);
- line(doc,'Impeller type','Closed',107,144);line(doc,'Bearing','Ball',107,152);
- if(p.base==='G32-10-2'){line(doc,'Efficiency','54.12 % (example)',107,160);line(doc,'Brake HP','0.8 HP (example)',107,168)}
- doc.setFont('helvetica','bold');doc.text('Motor · IE1 2 Pole',18,216);
- line(doc,'Model',p.motor.model,18,226);line(doc,'Rated power',p.hp+' HP',18,234);line(doc,'Speed',p.motor.speed+' rpm',18,242);
- line(doc,'FL Amp',p.phase==='1Ph'?p.motor.amp1:p.motor.amp3,18,250);line(doc,'Frequency','50 Hz',18,258);line(doc,'Voltage / phase',p.phase==='1Ph'?'240 V / 1 Ph':'415 V / 3 Ph',18,266);
- line(doc,'Motor brand','B.G.Reich',107,218);line(doc,'Motor type','TEFC',107,226);
- const eff=p.phase==='1Ph'?p.motor.efficiency1:p.motor.efficiency3,pf=p.phase==='1Ph'?p.motor.pf1:p.motor.pf3;
- line(doc,'Motor efficiency',typeof eff==='number'?eff+' %':'—',107,234);line(doc,'Power factor',typeof pf==='number'?pf:'—',107,242);
- line(doc,'Protection','IP 44',107,250);line(doc,'Insulation','Class B',107,258);
- line(doc,'Weight',p.weight+' kg',107,266);
- doc.addPage();heading(doc,'Dimension · '+p.model,3);
- const im=await image('assets/v50068/g-dimension.png');
- doc.addImage(im,'PNG',16,51,178,93);
- doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Table Dimensions',18,159);
- const dims=[['L',p.dimensions.L+' mm'],['L1',p.dimensions.L1+' mm'],['A',p.dimensions.A+' mm'],['B',p.dimensions.B+' mm'],['H',p.dimensions.H+' mm'],['H1',p.dimensions.H1+' mm'],['Inlet',p.inlet],['Outlet',p.outlet],['Weight',p.weight+' kg']];
- dims.forEach(([k,v],i)=>line(doc,k,v,i<5?18:108,171+(i<5?i:i-5)*13));
- doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('* Approximate dimension and weight. Drawing from G workbook, Pg 3 G Dimension.',18,245);
- doc.save('G_'+p.model+'.pdf');
-}
-window.KeySuiteGPdf={open};
-})();
+const safe=v=>v===null||v===undefined||v===''||v==='-'?'—':String(v),fmt=(v,unit='')=>v===undefined||v===null||v==='-'?'—':`${v}${unit}`;
+function header(doc,logo,title,model,page){doc.setTextColor(17,55,76);if(logo)doc.addImage(logo.src,'PNG',16,12,43,13);else{doc.setFont('helvetica','bold');doc.setFontSize(15);doc.text('B.G.REICH',16,22)}doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('G Series · '+model,194,18,{align:'right'});doc.setDrawColor(8,96,155);doc.setLineWidth(.8);doc.line(16,30,194,30);doc.setFontSize(16);doc.text(title,16,41);doc.setFontSize(8);doc.setTextColor(89,111,128);doc.text('B.G.Reich reserves the right to make modifications without notice.',16,282);doc.text(`${page} / 3`,194,282,{align:'right'})}
+function tableSection(doc,title,rows,y){doc.setFillColor(247,217,228);doc.setDrawColor(113,128,141);doc.rect(16,y,178,9,'FD');doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(33,52,66);doc.text(title,19,y+6);y+=9;doc.setFontSize(8.2);for(const [a,b,c,d] of rows){doc.setDrawColor(178,193,201);doc.rect(16,y,178,7.2);doc.line(53,y,53,y+7.2);doc.line(105,y,105,y+7.2);doc.line(145,y,145,y+7.2);doc.setFont('helvetica','normal');doc.text(safe(a),18,y+4.8);doc.text(safe(c),107,y+4.8);doc.setFont('helvetica','bold');doc.text(doc.splitTextToSize(safe(b),49)[0],55,y+4.8);doc.text(doc.splitTextToSize(safe(d),46)[0],147,y+4.8);y+=7.2}return y+4}
+function chart(doc,points,key,label,x,y,w,h,duties=[]){const pts=points.filter(v=>Number.isFinite(Number(v[key])));if(pts.length<2)return false;const qmax=Math.max(...pts.map(v=>v.q)),vmax=Math.max(...pts.map(v=>Number(v[key])))*1.12||1;doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(26,57,75);doc.text(label,x,y-3);doc.setDrawColor(204,218,226);doc.rect(x,y,w,h);doc.setDrawColor(10,100,162);doc.setLineWidth(.45);for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i];doc.line(x+a.q/qmax*w,y+h-Number(a[key])/vmax*h,x+b.q/qmax*w,y+h-Number(b[key])/vmax*h)}doc.setLineWidth(.2);if(key==='h'){doc.setFillColor(226,29,72);for(const d of duties){if(d.q<0||d.q>qmax)continue;let idx=pts.findIndex(v=>v.q>=d.q);if(idx<1)idx=1;const a=pts[idx-1],b=pts[idx],value=Number(a.h)+(Number(b.h)-Number(a.h))*(d.q-a.q)/(b.q-a.q);doc.circle(x+d.q/qmax*w,y+h-value/vmax*h,1.5,'F')}}doc.setFont('helvetica','normal');doc.setFontSize(7);doc.text('Flow (m³/h)',x+w,y+h+4,{align:'right'});return true}
+async function open(p,opts={}){const JS=await jsPdf(),doc=new JS({unit:'mm',format:'a4'}),logo=await image('selector-bgf/bgreich-logo.png').catch(()=>null),dims=p.dimensions||{},motor=p.motor||{},is3=p.phase==='3Ph',phase=is3?'3 Phase':'1 Phase',voltage=is3?'415 V':'240 V',amp=is3?motor.amp3:motor.amp1,eff=is3?motor.efficiency3:motor.efficiency1,pf=is3?motor.pf3:motor.pf1,points=p.curve||[],duties=opts.duties||[];
+header(doc,logo,'PERFORMANCE CURVES',p.model,1);doc.setFont('helvetica','normal');doc.setTextColor(35,55,70);doc.setFontSize(10);doc.text(`${p.hp} HP  |  ${p.kw} kW  |  ${p.speed} rpm  |  ${phase}`,16,49);
+if(points.length){chart(doc,points,'h','Head versus Flow',21,65,168,83,duties);chart(doc,points,'eff','Efficiency versus Flow',21,168,77,37);chart(doc,points,'power','Shaft Power versus Flow',112,168,77,37);chart(doc,points,'npsh','NPSHr versus Flow',21,222,168,29);doc.setFontSize(8);doc.text('Performance points: G workbook G Data, model '+p.base,21,263)}else{doc.setFontSize(11);doc.text('No verified performance curve is supplied for this model.',20,88);doc.setFontSize(9);doc.text(`Pump: ${p.model}   Motor: ${safe(motor.model)}   Connections: ${p.inlet} × ${p.outlet}`,20,100)}
+doc.addPage();header(doc,logo,'TECHNICAL DATA',p.model,2);let y=49;
+y=tableSection(doc,'Operating Data',[['Application','—','Capacity',duties[0]?fmt(duties[0].q,' m³/h'):'—'],['Location','—','Pressure',duties[0]?fmt(duties[0].h,' m'):'—'],['Fluid','Water, Clean','Temperature','20 °C'],['Density','0.9983 kg/dm³','Kin. Viscosity','1.005 mm²/s']],y);
+y=tableSection(doc,'Pump',[['Brand','B.G.Reich','Country of Origin','Malaysia'],['Type','Close-coupled','Country of Manufacture','China'],['Model',p.model,'Suction Size',p.inlet],['Speed',fmt(p.speed,' rpm'),'Discharge Size',p.outlet],['Casing','Cast Iron','Impeller Type','Closed'],['Impeller','Stainless Steel','Shaft','Stainless Steel'],['Shaft Seal','Mechanical Seal','Bearing Type','Ball']],y);
+y=tableSection(doc,'Motor',[['Brand','B.G.Reich','Type','TEFC'],['Model',motor.model,'Rated Power',fmt(p.hp,' HP')],['Speed',fmt(motor.speed,' rpm'),'Rated FL Amp',fmt(amp,' Amp')],['Frequency','50 Hz','Rated Voltage',voltage],['Phase',phase,'Efficiency 100%',fmt(eff,' %')],['Power Factor 100%',pf,'Protection','IP 44'],['Insulation Class','Class B','Country of Manufacture','China']],y);
+y=tableSection(doc,'Pumpset',[['Length',fmt(dims.L,' mm'),'Width',fmt(dims.B,' mm')],['Height',fmt(dims.H,' mm'),'Weight',fmt(p.weight,' kg')]],y);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text('* Approximate dimension & weight',16,269);
+doc.addPage();header(doc,logo,'DIMENSION',p.model,3);const drawing=await image('assets/v50068/g-dimension.png');const width=178,height=width*drawing.naturalHeight/drawing.naturalWidth;doc.addImage(drawing.src,'PNG',16,51,width,height);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('Table Dimensions',16,154);tableSection(doc,'Dimensions',[['L',fmt(dims.L,' mm'),'H1',fmt(dims.H1,' mm')],['L1',fmt(dims.L1,' mm'),'Inlet',p.inlet],['A',fmt(dims.A,' mm'),'Outlet',p.outlet],['B',fmt(dims.B,' mm'),'Weight',fmt(p.weight,' kg')],['H',fmt(dims.H,' mm'),'','']],160);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text('* Approximate dimension & weight · Drawing from G workbook, Pg 3 G Dimension.',16,225);doc.save('G_'+p.model+'.pdf')}
+window.KeySuiteGPdf={open};})();
