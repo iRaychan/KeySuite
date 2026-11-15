@@ -1811,11 +1811,18 @@ async function routeEsSelection(p={},route='quotation'){
    const capacity=esSelectionCapacity(p);
    void window.KeySuiteManualPrice.offer({model:p.quotation_model||p.model,description:[capacity?capacityLine(capacity):'',description,!bare?`Motor: ${p.motor_hp||'-'}HP ${p.pole||2}Pole ${p.motor_efficiency_class||'IE3'}`:''].filter(Boolean).join('\n'),pumpData:p,productFamily:'ES',pricingSource:bare?{product_family:'ES',product_id:id,material,variant:material,seal_material:p.keysuite_seal,elastomer:p.keysuite_elastomer}:{}},window.KeySuitePricing.quoteBlockReason(found?.calc));return;
  }
- const capacity=esSelectionCapacity(p),pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
+ const capacity=esSelectionCapacity(p);
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
  const pumpDescription=String(pricedDescription||'').trim();
  const selectedBrand=window.KeySuiteV40001?.brandContext?.(p.keysuite_brand_id||window.KeySuiteV40001?.state?.selectedBrandId,'ES');
- const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc?.finalPrice||0),pricingSource,pumpData:p,brandId:p.keysuite_brand_id||selectedBrand?.id,brand:p.keysuite_brand_name||selectedBrand?.name,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
+ const sellingBrandId=p.keysuite_brand_id||selectedBrand?.id,sellingBrandName=p.keysuite_brand_name||selectedBrand?.name;
+ let pricedPump=found,pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
+ if(pricingMode==='assembly'&&sellingBrandId&&pricingSource){
+   const brandedSource={...pricingSource,v391_brand_id:sellingBrandId,v391_brand_name:sellingBrandName||'',assembly_brand_margin_enabled:true};
+   pricedPump=window.KeySuitePricing?.applyAssemblyBrandMargin?.(found,brandedSource,found.customer)||found;
+   pricingSource={...brandedSource,...window.KeySuitePricing.sourceSnapshot(pricedPump)};
+ }
+ const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(pricedPump.calc?.finalPrice||0),pricingSource,pumpData:p,brandId:sellingBrandId,brand:sellingBrandName,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
  if(target==='assembly'){await window.KeySuiteAssembly?.addItem?.(pumpItem,{type:'pumpset',section:'pump',replacePumpset:true});return}
  if(bare){
    const description=[capacity?capacityLine(capacity):'',pumpDescription].filter(Boolean).join('\n');
@@ -1948,7 +1955,8 @@ window.addEventListener('message',function(event){
  const applySelectedSellingBrand=()=>{
    try{
      const brandApi=window.KeySuiteV391,ctx=brandApi?.brandContext?.();
-     if(ctx?.id)brandApi.stampRowBrand?.(row,ctx.id,'CHC',{force:true});
+     const sellingId=String(p.keysuite_selling_brand_id||ctx?.id||'');
+     if(sellingId)brandApi?.stampRowBrand?.(row,sellingId,'CHC',{force:true});
    }catch(error){console.warn('[KeySuite V4.15.10] Selling Brand quote handoff skipped.',error)}
  };
  applySelectedSellingBrand();
@@ -2481,7 +2489,7 @@ $('startProject')?.addEventListener('input',()=>syncProjectFields('dashboard'));
 $('project')?.addEventListener('input',()=>syncProjectFields('quotation'));
 
 syncOwnerKeyVisibility();newQuote();refreshAll();updateQuotationStateUi();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=50048');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=50067');
 
 
 // Two-line popup editor for Project and Delivery.

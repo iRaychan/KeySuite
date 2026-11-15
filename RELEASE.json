@@ -1,7 +1,7 @@
 {
-  "version": "5.00.66",
-  "baseline": "5.00.65",
-  "upgrade_supported_from": "5.00.65",
+  "version": "5.00.67",
+  "baseline": "5.00.66",
+  "upgrade_supported_from": "5.00.66",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,6 +13,10 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Four targeted Phase 02 fixes: ES/ISO Baseplate Back navigation, ISO catalogue series, CR material-specific prefix stability, selected quotation brand"
+    "Bug 001: preserve O.K.Pump VMS selling identity while pricing from CHC G1",
+    "Bug 002: apply customer Brand Margin to newly branded Assembly items"
+  ],
+  "known_issues": [
+    "Bug 003: CR material model may revert from CRS/CRN to CR; root cause pending"
   ]
 }

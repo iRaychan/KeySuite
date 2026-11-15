@@ -91,6 +91,13 @@
   }
   function sendG1(model,action){
     const payload=directG1Payload(model);if(!payload)return;
+    // Pin the Product selling identity before Quotation changes pages/customer context.
+    const brands=window.KeySuiteV391,context=brands?.brandContext?.();
+    if(action==='add'&&(!context?.id||context.family!=='CHC'||context.productGroup!=='CHC_G1')){alert('The selected selling brand is unavailable. Select the Brand and series again before quoting.');return;}
+    if(context?.id&&context.family==='CHC'&&context.productGroup==='CHC_G1'){
+      payload.keysuite_selling_brand_id=context.id;
+      payload.keysuite_selling_model=brands.resolveChcIdentity?.(context.id,'CHC_G1',payload.model,payload.keysuite_material)?.sellingModel||'';
+    }
     window.postMessage({type:'KEYSUITE_ADD_SELECTION',route:action==='add'?'quotation':action,payload},'*');
   }
   function ensureEsFrame(){const frame=$('productEsSelectorFrame');if(frame&&frame.src==='about:blank'){esFrameReady=false;frame.src=frame.dataset.src}return frame}
