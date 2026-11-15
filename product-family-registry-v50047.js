@@ -4,7 +4,7 @@
   if (window.KeySuiteProductFamilies) return;
   const families = Object.freeze([
     { code: 'BASEPLATE', label: 'Baseplate' }, { code: 'BFI', label: 'BFI' },
-    { code: 'BGF', label: 'BGF' }, { code: 'BSV', label: 'BSV' },
+    { code: 'BGF', label: 'BGF' }, { code: 'G', label: 'G Series' }, { code: 'BSV', label: 'BSV' },
     { code: 'BSW', label: 'BSW' },
     { code: 'CHC_G1', label: 'CHC G1', baseFamily: 'CHC', generation: 'G1' },
     { code: 'CHC_G2', label: 'CHC G2', baseFamily: 'CHC', generation: 'G2', legacyCodes: ['CHC'] },

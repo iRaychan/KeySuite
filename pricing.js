@@ -131,7 +131,7 @@
   function sourceCostOnly(family,id,preferredVariant='',options={}){
     if(String(family).toUpperCase()==='BSW'){const api=window.KeySuiteBSWPricing,identity=api?.identity(id,options),r=api?.record(identity?.base?.model,identity?.variant);if(!r)return null;const variant=identity.variant,book=Object.fromEntries(['USD','RMB','MYR'].map(c=>[c,{[variant]:r['price_'+c.toLowerCase()]}])),candidates=currencyCandidates(book,{},variant,'BSW'),chosen=candidates.reduce((best,c)=>!best||c.baseMyr>best.baseMyr?c:best,null);return chosen?{...chosen,baseMyr:chosen.baseMyr,adjustedBase:chosen.baseMyr,sourceCurrency:chosen.currency,multiplier:chosen.multiplier,sourcePrice:chosen.sourcePrice,availableCandidates:candidates,candidates,pricingContextMissing:true,finalPrice:null}:null}
     const requested=normalizedFamily(family),code=requested==='CHC'&&String(options.generation_code||options.generation||'G2').toUpperCase()==='G1'?'CHC_G1':requested,wanted=String(id||'').trim().toLowerCase().replace(/^(?:kvc|kvn|kvd|kvsd)\b/,'kv');
-    const pools={CHC_G1:secureData.chcG1Products,CHC_G2:secureData.products,CHC:secureData.products,CR:secureData.crProducts,KV:secureData.kvProducts,BFI:secureData.bfiProducts,BGF:secureData.bgfProducts,BSW:secureData.bswProducts,ES:secureData.esProducts,ISO:secureData.isoProducts,GWS:secureData.gwsProducts,KEYPLC:secureData.keyplcProducts,MANIFOLD:secureData.manifoldProducts,MOTOR:secureData.motorProducts,COUPLING:secureData.couplingProducts};
+    const pools={CHC_G1:secureData.chcG1Products,CHC_G2:secureData.products,CHC:secureData.products,CR:secureData.crProducts,KV:secureData.kvProducts,BFI:secureData.bfiProducts,BGF:secureData.bgfProducts,G:secureData.gProducts,BSW:secureData.bswProducts,ES:secureData.esProducts,ISO:secureData.isoProducts,GWS:secureData.gwsProducts,KEYPLC:secureData.keyplcProducts,MANIFOLD:secureData.manifoldProducts,MOTOR:secureData.motorProducts,COUPLING:secureData.couplingProducts};
     const catalogue=code==='ISO'?[window.KeySuiteISO?.findProduct?.(id)].filter(Boolean):(pools[code]||[]),product=catalogue.find(row=>[row?.id,row?.model,row?.base_model].some(value=>String(value||'').replace(/^ISO\s+/i,'').trim().toLowerCase()===wanted.replace(/^iso\s+/,'')));
     if(!product)return null;
     let book=product.pricesByCurrency||{},rarityBook=product.rarityByCurrency||{},variant=String(preferredVariant||options.material||options.keysuite_material||'').trim();
@@ -610,6 +610,28 @@
     const calc=calculatePrice(book,'BGF',cat,'BGF',{...options,customer,rarityBook:rarity});
     return calc?{product,material:'BGF',variant:'BGF',calc,category:cat,customer,family:'BGF'}:null;
   }
+  function findGPrice(model,options={}){
+    const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);
+    const product=(window.KeySuiteG?.models?.()||secureData.gProducts||[]).find(p=>[p.id,p.model].some(v=>String(v).toLowerCase()===String(model).toLowerCase()));
+    if(!product||!customer||!cat)return null;
+    const variant=product.phase==='1Ph'?'M':'T',book={},rarity={};
+    for(const cur of ['USD','RMB','MYR']){book[cur]={[variant]:Number(product['price_'+cur.toLowerCase()]||0)};rarity[cur]={[variant]:product['rarity_'+cur.toLowerCase()]||'many'}}
+    const calc=calculatePrice(book,variant,cat,'G',{...options,customer,rarityBook:rarity});
+    return calc?{product,material:variant,variant,calc,category:cat,customer,family:'G'}:null;
+  }
+  function gPriceProblem(model,found){
+    const customer=quotationCustomer(),cat=categoryForCustomer(customer);
+    const product=(window.KeySuiteG?.models?.()||secureData.gProducts||[]).find(p=>p.id===model||p.model===model);
+    if(!product)return 'G model not found.';
+    if(!customer)return 'Select a quotation pricing customer.';
+    if(found?.calc?.fixedPrice)return Number(found.calc.finalPrice)>0?'':'Invalid G fixed price.';
+    if(!cat?.productRules?.G)return 'The assigned pricing category has no G pricing rule.';
+    const rule=categoryRule(cat,'G');
+    if(!rule.currencies?.some(c=>Number(product['price_'+c.toLowerCase()])>0))return 'No positive G source price is saved in the enabled currencies.';
+    if(!(rule.margin>0))return 'G category margin is missing or 0%.';
+    if(!found?.calc||!(found.calc.finalPrice>0))return 'G price cannot be calculated with current settings.';
+    return quoteBlockReason(found.calc);
+  }
   function findGwsPrice(model,pressure,options={}){
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer)return null;
     const wanted=String(model||'').toLowerCase(),product=(secureData.gwsProducts||[]).find(p=>String(p.id).toLowerCase()===wanted||String(p.model).toLowerCase()===wanted);if(!product)return null;
@@ -655,6 +677,7 @@
     if(family==='BSW')return window.KeySuiteBSW?.findPrice?.(source.technical_model||source.model||source.product_id,{...options,customer,category:cat,pricingMode,variant:source.variant||source.material});
     if(family==='ISO')return window.KeySuiteISO?.findPrice(source.product_id,source.material,{...options,customer,category:cat,pricingMode,sealType:source.seal_type,seal:source.seal_material,elastomer:source.elastomer});
     if(family==='BGF')return findBgfPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
+    if(family==='G')return findGPrice(source.product_id||source.model,{...options,customer,category:cat,pricingMode});
     if(family==='BFI')return findBfiPrice(source.product_id||source.model,source.motor_phase||source.variant||'3Ph',{...options,customer,category:cat,pricingMode,material:source.pump_material||source.material_variant||source.material,bareShaft:source.bare_shaft===true,motor_hp:source.motor_hp?Number(source.motor_hp):undefined,pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class});
     if(family==='GWS')return findGwsPrice(source.product_id||source.model,null,{...options,customer,category:cat,pricingMode});
     if(family==='ES')return findEsPrice(source.product_id,source.variant||source.material,{...options,customer,category:cat,pricingMode,sealType:source.seal_type,seal:source.seal_material,elastomer:source.elastomer});
@@ -982,5 +1005,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,sourceCostOnly,repriceSource,applyAssemblyBrandMargin,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,gPriceProblem,findGPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,sourceCostOnly,repriceSource,applyAssemblyBrandMargin,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();
