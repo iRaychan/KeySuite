@@ -128,8 +128,11 @@
       if(!can('use_selector')&&!quickBridge)return false;
       return !scopeEnforced()||allowedFamilies().includes(family);
     }
-    if(id==='productG')return can('use_product')&&(brandApi()?.state?.brands||[]).some(brand=>
-      brand.active!==false&&isMasterBrand(brand)&&brandApi()?.brandFamilies?.(brand).some(item=>item.page===id&&isBrandSeriesAllowed(brand.id,item.productGroup||item.family)));
+    if(id==='productG'||id==='productGCurve'){
+      const quick=id==='productGCurve'&&window.KeySuiteG?.curveOrigin?.()==='dashboard'&&can('use_quick_selection');
+      return (can('use_product')||quick)&&(brandApi()?.state?.brands||[]).some(brand=>
+        brand.active!==false&&isMasterBrand(brand)&&brandApi()?.brandFamilies?.(brand).some(item=>item.page==='productG'&&isBrandSeriesAllowed(brand.id,item.productGroup||item.family)));
+    }
     if(Object.prototype.hasOwnProperty.call(PRODUCT_PAGE_FAMILY,id)){
       if(!can('use_product'))return false;
       return !scopeEnforced()||allowedFamilies().includes(PRODUCT_PAGE_FAMILY[id]);

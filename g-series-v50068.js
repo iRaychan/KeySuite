@@ -9,46 +9,85 @@ function description(p){return `B.G.Reich Close-Coupled Pump Model: ${p.model}
 c/w ${p.hp}HP 2Pole Motor (${p.phase==='1Ph'?'240V / 1Ph':'415V / 3Ph'} / 50Hz)
 Suction & Discharge: ${p.inlet} x ${p.outlet}
 Material: CI / SS / SS / Mechanical Seal`}
-function message(s,error=false){let el=$('gQuoteMessage');if(el){el.textContent=s||'';el.className=s?'auth-message show '+(error?'error':'info'):'auth-message'}}
-function quote(p){
+function message(s,error=false){for(const el of [$('gQuoteMessage'),$('gCurveMessage')].filter(Boolean)){el.textContent=s||'';el.className=s?'auth-message show '+(error?'error':'info'):'auth-message'}}
+function payload(p,conditions={}){return {family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,motor_kw:p.kw,motor_hp:p.hp,pole:p.pole,motor_voltage:p.phase==='1Ph'?240:415,suction:p.inlet,discharge:p.outlet,weight_kg:p.weight,dimensions:p.dimensions,reference_speed_rpm:p.speed,motor_rated_speed_rpm:p.motor?.speed,...conditions}}
+function quote(p,conditions){
  const api=window.KeySuitePricing,found=api?.findGPrice?.(p.id),problem=api?.gPriceProblem?.(p.id,found);
  if(problem){
-  void window.KeySuiteManualPrice?.offer?.({model:p.model,brand:'B.G.Reich',description:description(p),productFamily:'G',pricingSource:{product_family:'G',product_id:p.id,model:p.model,variant:p.phase}},problem);
+  void window.KeySuiteManualPrice?.offer?.({model:p.model,brand:'B.G.Reich',description:description(p),productFamily:'G',pumpData:payload(p,conditions),pricingSource:{product_family:'G',product_id:p.id,model:p.model,variant:p.phase}},problem);
   return;
  }
- const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:{family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,weight_kg:p.weight,dimensions:p.dimensions}};
+ const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions)};
  const added=window.KeySuiteApp?.addExternalQuoteItem?.(item);
  if(added){document.querySelector('[data-page="quotation"]')?.click();message('')}
  else message('The quotation item could not be added.',true);
 }
-let selected=null,duties=[];
 function cost(p){
  const api=window.KeySuitePricing,found=api?.findGPrice?.(p.id),source=found?api.sourceSnapshot(found):{product_family:'G',product_id:p.id,model:p.model,variant:p.phase==='1Ph'?'M':'T'};
  window.KeySuiteCostingAudit?.open?.({model:p.model,description:description(p),qty:1,productFamily:'G',pricingSource:source,unitPrice:found?.calc?.finalPrice},p.model+' Costing Audit');
 }
-async function assembly(p){
+async function assembly(p,conditions){
  const api=window.KeySuitePricing,found=api?.findGPrice?.(p.id,{pricingMode:'assembly'}),problem=api?.gPriceProblem?.(p.id,found);
  if(problem){message(problem,true);return}
- const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:{family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,weight_kg:p.weight,dimensions:p.dimensions},assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset'};
+ const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions),assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset'};
  if(!window.KeySuiteAssembly?.addItem){message('Assembly is unavailable.',true);return}
- await window.KeySuiteAssembly.addItem(item,{type:'pumpset',section:'pump',replacePumpset:true});message(p.model+' added to Assembly.');
+ try{
+  if(await window.KeySuiteAssembly.addItem(item,{type:'system',section:'pumpset'}))message(p.model+' added to Assembly.');
+ }catch(error){message(error.message||'Assembly could not be opened.',true)}
 }
+let group='All G';
+const hasCurve=p=>window.KeySuiteGPerformance.hasCurve(p);
 function renderProduct(){
- for(const body of [$('gProductRows'),$('gSelectorRows')].filter(Boolean)){body.innerHTML='';
- for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><button type="button" class="g-model-link" data-g-details>${esc(p.model)}</button></td><td>${esc(p.kw)} kW / ${esc(p.hp)} HP</td><td>${esc(p.phase)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td class="g-action-cell"><button type="button" class="btn keysuite-cost-button product-action-button" data-g-cost>Cost</button></td><td class="g-action-cell">${p.curve?.length?'<button type="button" class="btn secondary product-action-button" data-g-curve>Curve</button>':''}</td><td class="g-action-cell"><button type="button" class="btn action-quote product-action-button" data-g-quote>Quote</button></td>`;
- tr.querySelector('[data-g-details]').onclick=()=>showCurve(p);tr.querySelector('[data-g-cost]')?.addEventListener('click',()=>cost(p));tr.querySelector('[data-g-curve]')?.addEventListener('click',()=>showCurve(p));tr.querySelector('[data-g-quote]').onclick=()=>quote(p);body.appendChild(tr)}
- }}
-function svgChart(points,key,label,large=false){const valid=(points||[]).filter(x=>Number.isFinite(Number(x[key]))&&Number.isFinite(Number(x.q))),w=640,h=large?300:170;if(valid.length<2)return '';
- const maxQ=Math.max(...valid.map(x=>Number(x.q))),maxY=Math.max(...valid.map(x=>Number(x[key])))*1.12||1;
- const xy=p=>[45+Number(p.q)/maxQ*(w-75),h-35-Number(p[key])/maxY*(h-65)];const path=valid.map((p,i)=>(i?'L':'M')+xy(p).map(x=>x.toFixed(1)).join(' ')).join(' ');
- const markers=large?duties.filter(d=>Number.isFinite(d.q)&&d.q>=0&&d.q<=maxQ).map((d,i)=>{let idx=valid.findIndex(v=>v.q>=d.q);if(idx<1)idx=1;const a=valid[idx-1],b=valid[idx],v=Number(a[key])+(Number(b[key])-Number(a[key]))*(d.q-a.q)/(b.q-a.q),[x,y]=xy({q:d.q,[key]:v});return `<circle cx="${x}" cy="${y}" r="5" fill="#e11d48"/><text x="${x+7}" y="${y-7}" font-size="12">D${i+1}</text>`}).join(''):'';
- return `<path d="M45 20V${h-35}H${w-25}" stroke="#8194a4" fill="none"/><path d="${path}" stroke="#0869a6" stroke-width="3" fill="none"/>${markers}<text x="${w-120}" y="${h-9}" font-size="12">Flow (m³/h)</text><text x="49" y="16" font-size="12">${label}</text>`}
-function renderDuties(){const el=$('gDutyPoints');el.innerHTML=duties.map((d,i)=>`<div class="g-duty-point"><strong>D${i+1}</strong><span>${esc(d.q)} m³/h</span><span>${esc(d.h)} m</span><button type="button" data-remove="${i}">×</button></div>`).join('');el.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{duties.splice(Number(b.dataset.remove),1);renderDuties();plot()})}
-function plot(){if(!selected)return;const q=Number($('gDutyFlow').value),h=Number($('gDutyHead').value);if(q>0&&h>0){duties[0]={q,h};renderDuties()}$('gCurveSvg').innerHTML=selected.curve?.length?svgChart(selected.curve,'h','Head (m)',true):'<text x="40" y="90">No verified performance curve supplied for this model.</text>';$('gDutyResult').textContent=duties.length?`D1: ${duties[0].q} m³/h @ ${duties[0].h} m`:'Enter Flow and Head to plot D1.'}
-function syncSelected(){const p=selected;if(!p)return;$('gCurveTitle').textContent=p.model;$('gModelSpecs').textContent=`${p.kw} kW / ${p.hp} HP · ${p.inlet} × ${p.outlet} · ${p.phase}`;$('gPhase').value=p.phase;$('gVoltage').textContent=p.phase==='1Ph'?'240 V':'415 V';$('gRpm').textContent=`${Math.round(p.speed*Number($('gSpeed').value||50)/50)} RPM`;
- $('gCurveSvg').innerHTML=p.curve?.length?svgChart(p.curve,'h','Head (m)',true):'<text x="40" y="90">No verified performance curve supplied for this model.</text>';$('gSecondaryCharts').innerHTML=[['eff','Efficiency (%)'],['power','Shaft Power (kW)'],['npsh','NPSHr (m)']].filter(([key])=>p.curve?.some(v=>Number.isFinite(Number(v[key])))).map(([key,label])=>`<div><h3>${label}</h3><svg viewBox="0 0 640 170">${svgChart(p.curve,key,label)}</svg></div>`).join('');$('gAlternatives').innerHTML=rows.filter(v=>v.curve?.length&&v.model!==p.model).map(v=>`<button class="btn secondary" data-alt="${v.model}">${v.model}</button>`).join(' ');$('gAlternatives').querySelectorAll('[data-alt]').forEach(b=>b.onclick=()=>showCurve(model(b.dataset.alt),false));plot()}
-function showCurve(p,open=true){if(!p)return;selected=p;syncSelected();if(open&&!$('gCurveDialog').open)$('gCurveDialog').showModal()}
-function setupCurve(){const d=$('gCurveDialog');if(!d)return;d.querySelector('[data-g-back]').onclick=()=>d.close();d.querySelector('[data-g-cost]').onclick=()=>cost(selected);d.querySelector('[data-g-pdf]').onclick=()=>window.KeySuiteGPdf?.open(selected,{duties});d.querySelector('[data-g-quote]').onclick=()=>quote(selected);d.querySelector('[data-g-assembly]').onclick=()=>assembly(selected);d.querySelector('[data-g-plot]').onclick=plot;d.querySelector('[data-g-add-duty]').onclick=()=>{if(duties.length>=6)return;const q=Number($('gDutyFlow').value),h=Number($('gDutyHead').value);if(q>0&&h>0){duties.push({q,h});renderDuties();plot()}};$('gPhase').onchange=()=>{const next=rows.find(v=>v.base===selected.base&&v.phase===$('gPhase').value);if(next)showCurve(next,false);else $('gPhase').value=selected.phase};$('gSpeed').oninput=syncSelected}
+ const grid=$('gProductGrid'),groups=$('gProductGroups');
+ if(!grid||!groups)return;
+ groups.replaceChildren();
+ for(const name of ['All G','G25','G32']){
+  const button=document.createElement('button');
+  button.type='button';button.className='product-series-button'+(group===name?' active':'');
+  button.setAttribute('aria-pressed',String(group===name));button.textContent=name;
+  button.onclick=()=>{group=name;renderProduct();groups.querySelector('[aria-pressed="true"]')?.focus()};
+  groups.append(button);
+ }
+ const phase=$('gProductPhase').value,query=$('gProductSearch').value.trim().toLowerCase();
+ const filtered=rows.filter(p=>p.phase===phase&&(group==='All G'||p.model.startsWith(group))&&p.model.toLowerCase().includes(query));
+ $('gProductCount').textContent=filtered.length+' model'+(filtered.length===1?'':'s');
+ grid.replaceChildren();
+ for(const p of filtered){
+  const row=document.createElement('div');
+  row.className='product-model-row g-product-row';
+  row.innerHTML=`<div><h3>${esc(p.model)}</h3><div class="muted">${esc(p.kw)} kW / ${esc(p.hp)} HP · ${esc(p.phase)} · ${esc(p.inlet)} × ${esc(p.outlet)}</div></div>
+   <div class="product-model-actions g-product-actions">
+    <button type="button" class="btn keysuite-cost-button product-action-button" data-g-cost>Cost</button>
+    <div class="g-curve-slot">${hasCurve(p)?'<button type="button" class="btn secondary product-action-button" data-g-curve>Curve</button>':''}</div>
+    <button type="button" class="btn action-assembly product-action-button" data-g-assembly>Assembly</button>
+    <button type="button" class="btn action-quote product-action-button" data-g-quote>Quote</button>
+   </div>`;
+  row.querySelector('[data-g-cost]').onclick=()=>cost(p);
+  if(hasCurve(p))row.querySelector('[data-g-curve]').onclick=()=>openCurve(p.model);
+  row.querySelector('[data-g-assembly]').onclick=()=>assembly(p);
+  row.querySelector('[data-g-quote]').onclick=()=>quote(p);
+  grid.append(row);
+ }
+}
+function renderSelector(){
+ const body=$('gSelectorRows');if(!body)return;
+ body.replaceChildren();
+ for(const p of rows){
+  const row=document.createElement('tr');
+  row.innerHTML=`<td>${esc(p.model)}</td><td>${esc(p.kw)} kW / ${esc(p.hp)} HP</td><td>${esc(p.phase)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td>
+   <td class="g-action-cell"><button class="btn keysuite-cost-button" data-g-cost>Cost</button></td>
+   <td class="g-action-cell">${hasCurve(p)?'<button class="btn secondary" data-g-curve>Curve</button>':''}</td>
+   <td class="g-action-cell"><button class="btn action-quote" data-g-quote>Quote</button></td>`;
+  row.querySelector('[data-g-cost]').onclick=()=>cost(p);
+  if(hasCurve(p))row.querySelector('[data-g-curve]').onclick=()=>openCurve(p.model,{origin:'selectorG'});
+  row.querySelector('[data-g-quote]').onclick=()=>quote(p);
+  body.append(row);
+ }
+}
+function openCurve(name,options){
+ const p=model(name);
+ return hasCurve(p)&&window.KeySuiteGPerformance.open(p,options);
+}
 function renderPrices(){
  const body=$('gPriceRows');if(!body)return;body.innerHTML='';
  const c=currency(),field='price_'+c.toLowerCase(),rf='rarity_'+c.toLowerCase();
@@ -98,9 +137,14 @@ function renderPrices(){
 function init(data,a){
  access=a||{};const fromDb=new Map((data?.gProducts||[]).map(p=>[p.id,p]));
  rows=source.map(p=>({...p,...fromDb.get(p.id)}));
- renderProduct();renderPrices();
+ renderProduct();renderSelector();renderPrices();
  if(!fromDb.size)$('gPriceListMessage').textContent='G database rows are not installed. Apply the V5.00.68 migration before saving prices.';
 }
-document.addEventListener('DOMContentLoaded',()=>{renderProduct();renderPrices();setupCurve()});
-window.KeySuiteG={init,renderPrices,models:()=>rows,description,quoteModel(name){const p=model(name);if(p)quote(p)}};
+document.addEventListener('DOMContentLoaded',()=>{
+ $('gProductSearch')?.addEventListener('input',renderProduct);
+ $('gProductPhase')?.addEventListener('change',renderProduct);
+ renderProduct();renderSelector();renderPrices();
+});
+window.KeySuiteG={init,renderPrices,models:()=>rows,description,openCurve,cost,quote,assembly,message,
+ curveOrigin:()=>window.KeySuiteGPerformance.origin(),quoteModel(name){const p=model(name);if(p)quote(p)}};
 })();

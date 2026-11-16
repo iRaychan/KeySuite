@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.71</title>
+  <title>KeySuite V5.00.72</title>
   <script src="release-version.js?v=50071"></script>
   <link rel="manifest" href="manifest.json">
   <style>
@@ -311,7 +311,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     .quotation-title-line{display:flex;align-items:end;gap:22px;flex:1}.quotation-title-line h1{margin:0}.quotation-title-line .quote-number-field{min-width:260px}.quote-head{align-items:end}.quote-top-controls{margin-left:auto}.es-matrix-table{min-width:1450px}.es-matrix-table input{min-width:105px}
 
     .pricelist-currency-panel{padding:0!important;overflow:hidden}.pricelist-currency-panel>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:800;color:var(--navy);display:flex;align-items:center;justify-content:space-between;background:#f8fafc}.pricelist-currency-panel>summary::-webkit-details-marker{display:none}.pricelist-currency-panel>summary:after{content:"▾";font-size:16px;transition:transform .2s}.pricelist-currency-panel[open]>summary:after{transform:rotate(180deg)}.pricelist-currency-panel-body{padding:0 18px 18px}.keyplc-product-toolbar{display:grid;grid-template-columns:minmax(220px,420px);gap:14px}.keyplc-table th,.keyplc-table td{white-space:nowrap}.keyplc-table select{min-width:112px}.keyplc-route-actions{justify-content:flex-start;flex-wrap:nowrap}.keyplc-route-actions .btn{min-width:72px}.keyplc-surcharge-note{font-size:11px;color:var(--muted);margin-top:5px}.assembly-item-option{display:flex;align-items:center;gap:8px;margin-top:7px}.assembly-item-option label{margin:0;font-size:11px}.assembly-item-option select{min-width:190px;padding:6px 8px}.assembly-keyplc-options{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:7px;margin-top:7px}.assembly-keyplc-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-keyplc-options .assembly-item-option select{min-width:0;width:100%}.assembly-motor-options{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:7px;margin-top:7px}.assembly-motor-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-motor-options .assembly-item-option select{min-width:0;width:100%}
-    #productG .pricelist-table,#selectorG .pricelist-table{min-width:760px}#productG .pricelist-table th:nth-last-child(-n+3),#selectorG .pricelist-table th:nth-last-child(-n+3){width:79px;text-align:center}#productG .g-action-cell,#selectorG .g-action-cell{width:79px;min-width:79px;text-align:center;white-space:nowrap}#productG .g-action-cell .btn,#selectorG .g-action-cell .btn{width:72px;min-width:72px;padding:7px 10px!important;font-size:12px;white-space:nowrap}#productBgf .bgf-product-actions{display:grid;grid-template-columns:repeat(2,72px);justify-content:end;gap:7px}#productBgf .bgf-product-actions [data-bgf-quote]{grid-column:2}#productEs .es-product-actions{justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}.product-model-actions [data-product-assembly],.route-actions [data-es-assembly],.route-actions [data-gws-assembly],.route-actions [data-keyplc-assembly]{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}
+    #selectorG .pricelist-table{min-width:760px}#selectorG .pricelist-table th:nth-last-child(-n+3){width:79px;text-align:center}#selectorG .g-action-cell{width:79px;min-width:79px;text-align:center;white-space:nowrap}#selectorG .g-action-cell .btn{width:72px;min-width:72px;padding:7px 10px!important;font-size:12px;white-space:nowrap}#productBgf .bgf-product-actions{display:grid;grid-template-columns:repeat(2,72px);justify-content:end;gap:7px}#productBgf .bgf-product-actions [data-bgf-quote]{grid-column:2}#productEs .es-product-actions{justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}.product-model-actions [data-product-assembly],.route-actions [data-es-assembly],.route-actions [data-gws-assembly],.route-actions [data-keyplc-assembly]{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}
     .product-model-actions [data-product-add],.route-actions [data-es-quote],.route-actions [data-gws-quote],.route-actions [data-keyplc-quote]{background:#16a34a!important;border-color:#15803d!important;color:#fff!important}
 
 
@@ -654,14 +654,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     #kvProductSeriesList>button.active,#kvProductSeriesList>button:hover,#bswProductSeriesList>button.active,#bswProductSeriesList>button:hover{background:#eef6ff;border-color:#93c5fd}
     @media(max-width:1000px){#kvProductSeriesList>button,#bswProductSeriesList>button{flex:0 0 auto;width:auto;white-space:nowrap}}
   </style>
-<script src="v50033-series-registry.js"></script>
-<style>
-.g-curve-dialog{position:fixed;inset:4% 2%;width:96%;max-width:none;height:92%;max-height:none;margin:auto;padding:0;border:0;border-radius:12px;background:#eef5f9;color:#163b52;box-shadow:0 10px 40px #172f4a55}.g-curve-dialog::backdrop{background:#122f4dbb}.g-curve-header{background:#fff;border-bottom:4px solid #086aa4;padding:14px 24px;display:flex;align-items:center;gap:20px}.g-curve-header h2{margin:0}.g-curve-header strong{font-size:25px;letter-spacing:2px}.g-curve-actions{margin-left:auto;display:flex;gap:8px}.g-curve-actions .btn{min-width:90px}.g-curve-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;padding:20px;overflow:auto;height:calc(100% - 83px)}.g-duty,.g-model-hero,.g-chart-main,.g-secondary-charts>div,.g-alternatives{background:#fff;border:1px solid #d7e4eb;border-radius:14px;padding:16px}.g-duty{height:max-content}.g-duty label{display:block;font-weight:600;margin:14px 0}.g-duty input,.g-duty select{display:block;width:100%;padding:10px;border:1px solid #cbd9e2;border-radius:7px}.g-duty h3{display:flex;justify-content:space-between}.g-model-hero h2{font-size:32px;margin:3px 0}.g-charts{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:14px 0}.g-chart-main svg,.g-secondary-charts svg{width:100%;background:#fafcff;border:1px solid #dce6ed;border-radius:9px}.g-secondary-charts{display:grid;gap:10px}.g-secondary-charts svg{height:135px}.g-alternatives{margin-bottom:18px}.g-model-link{background:none;border:0;padding:0;font:inherit;font-weight:700;color:#173c5d;cursor:pointer}.g-model-link:hover{text-decoration:underline}.g-duty-point{display:flex;gap:10px;padding:8px;border:1px solid #e0e9ee;border-radius:6px;margin:5px 0}.g-duty-point button{margin-left:auto}
-</style></head>
+<link rel="stylesheet" href="g-performance-v50072.css">
+<script src="v50033-series-registry.js?v=50072"></script>
+</head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.71</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.72</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -677,7 +676,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.71</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.72</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -703,7 +702,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.71</div>
+    <div class="suite-version">KeySuite V5.00.72</div>
   </aside>
 
   <main>
@@ -1826,8 +1825,17 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     </section>
     <section id="productG" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · G Series</h1><div class="muted">Close-coupled pumps · M and T phase variants</div></div></div>
-      <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Phase</th><th>Suction × Discharge</th><th>Cost</th><th>Curve</th><th>Quote</th></tr></thead><tbody id="gProductRows"></tbody></table></div><p id="gQuoteMessage" role="status"></p></div>
+      <div class="card product-toolbar g-product-toolbar">
+        <div><label for="gProductSearch">Model Search</label><input id="gProductSearch" placeholder="Example: G32-10-2"></div>
+        <div><label for="gProductPhase">Supply</label><select id="gProductPhase"><option value="3Ph">3 Phase</option><option value="1Ph">1 Phase</option></select></div>
+      </div>
+      <div class="product-layout">
+        <div class="card"><h2>G Series</h2><div id="gProductGroups" class="product-series-list"></div></div>
+        <div class="card"><div class="page-title-row"><div><h2>G Models</h2><div id="gProductCount" class="muted"></div></div></div><div id="gProductGrid" class="product-model-grid"></div></div>
+      </div>
+      <p id="gQuoteMessage" role="status"></p>
     </section>
+    <section id="productGCurve" class="page"></section>
     <section id="gPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
       <div class="page-title-row"><div><h1>G Series Price List</h1><div class="muted">G workbook M and T columns remain separate. Source values are 0 until Owner sets prices.</div></div></div>
@@ -1846,7 +1854,6 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <div class="card" style="margin-top:16px"><div class="page-title-row" style="margin-bottom:12px"><h2>G Models</h2><div id="gPriceListCount" class="muted"></div></div>
         <div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>1 Phase · Price / Rarity</th><th>3 Phase · Price / Rarity</th><th></th></tr></thead><tbody id="gPriceRows"></tbody></table></div></div>
     </section>
-    <dialog id="gCurveDialog" class="g-curve-dialog"><div class="g-curve-header"><button type="button" class="btn secondary" data-g-back>← Back</button><div><strong>B.G.REICH</strong><h2>G Series</h2></div><div class="g-curve-actions"><button class="btn" data-g-cost>Cost</button><button class="btn" data-g-pdf>PDF</button><button class="btn" data-g-assembly>Assembly</button><button class="btn action-quote" data-g-quote>Quote</button></div></div><div class="g-curve-grid"><aside class="g-duty"><h3>Required Duty <button class="btn" data-g-plot>Plot</button></h3><label>Flow (m³/h)<input type="number" min="0" step="any" id="gDutyFlow"></label><label>Head (m)<input type="number" min="0" step="any" id="gDutyHead"></label><h3>Multiple Duty Points</h3><div id="gDutyPoints"></div><button class="btn secondary" data-g-add-duty>+ Duty Point</button><label>Operating Speed (Hz)<input type="number" id="gSpeed" value="50" min="1" max="50" step="any"></label><div>Calculated Speed <strong id="gRpm">2900 RPM</strong></div><label>Motor Efficiency <select id="gEfficiency"><option>IE1</option></select></label><label>Motor Phase <select id="gPhase"><option value="1Ph">1 Phase</option><option value="3Ph">3 Phase</option></select></label><div>Motor Voltage <strong id="gVoltage"></strong></div></aside><div class="g-performance"><div class="g-model-hero"><small>SELECTED G PUMP</small><h2 id="gCurveTitle"></h2><p id="gModelSpecs"></p><div id="gDutyResult"></div></div><div class="g-charts"><div class="g-chart-main"><h3>Pump Curve · 50.0 Hz</h3><svg id="gCurveSvg" viewBox="0 0 640 300"></svg></div><div class="g-secondary-charts" id="gSecondaryCharts"></div></div><div class="g-alternatives"><h3>Alternative Models</h3><p>Only G models with verified curve data are available for performance comparison.</p><div id="gAlternatives"></div></div></div></div></dialog>
     <section id="productBsv" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · BSV</h1><div class="muted">BSV V1.0 submersible pump catalogue</div></div></div>
       <div class="card product-toolbar bsw-product-toolbar">
@@ -2339,7 +2346,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-curve-v50021.js?v=50026"></script>
 <script src="bgf-v50006.js?v=50071"></script>
-<script src="g-data-v50068.js?v=50071"></script><script src="g-pdf-v50068.js?v=50071"></script><script src="g-series-v50068.js?v=50071"></script>
+<script src="g-data-v50068.js?v=50072"></script>
+<script src="g-performance-v50072.js"></script>
+<script src="g-pdf-v50068.js?v=50072"></script>
+<script src="g-series-v50068.js?v=50072"></script>
 <script src="bsw-v50027.js?v=50030"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=50071"></script>

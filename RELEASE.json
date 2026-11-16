@@ -1,10 +1,10 @@
 {
-  "version": "5.00.71",
-  "baseline": "5.00.70",
-  "upgrade_supported_from": "5.00.70",
+  "version": "5.00.72",
+  "baseline": "5.00.71",
+  "upgrade_supported_from": "5.00.71",
   "release_status": "review",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,9 +13,10 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Shared B.G.Reich navigation and role registry",
-    "Paired G price rows",
-    "Independent BGF/G currency multipliers"
+    "BFI-style G product catalogue with phase and model group filters",
+    "Permission-aware G and BSV entries in Dashboard Quick Pump Selection",
+    "Full-page G engineering curves with verified performance and duty plotting",
+    "Three-page G engineering PDF"
   ],
   "known_issues": []
 }

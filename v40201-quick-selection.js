@@ -29,9 +29,8 @@ const isKeylargo=b=>norm(b?.brand_key).toLowerCase()==='keylargo';
 const isMaster=b=>String(b?.brand_type||'').toLowerCase()==='master'||norm(b?.brand_key).toLowerCase()==='b.g.reich'||norm(b?.brand_name).toLowerCase()==='b.g.reich';
 const brands=()=>{const rows=((api()?.state?.brands)||[]).filter(b=>b&&b.active!==false&&!isKeylargo(b));return window.brandDisplayOrder?.(rows)||rows.sort((a,b)=>window.compareBrandPriority(a,b))};
 const visibleBrands=()=>{
-  const all=brands();
-  if(!accountScopeReady())return [];
-  return all.filter(b=>['CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSW','ES','ISO','MOTOR'].some(group=>accountAllows(b.id,hydraulicFamily(group)||group,group)));
+  const visibleIds=new Set(entries().map(e=>String(e.brand.id)));
+  return brands().filter(b=>visibleIds.has(String(b.id)));
 };
 const mappings=()=>((api()?.state?.mappings)||[]).filter(m=>m&&m.active!==false);
 const masterSeries=()=> 'CHC';
@@ -43,10 +42,10 @@ function mapFor(brandId,family,series='',productGroup=''){
 }
 function seriesFor(brand,family,productGroup=''){if(family==='CHC'){const ms='CHC';if(isMaster(brand))return ms;const m=mapFor(brand.id,family,ms,productGroup);return norm(m?.selling_series)||norm(m?.master_series)||ms}if(isMaster(brand))return family;const m=mapFor(brand.id,family,family,productGroup);return norm(m?.selling_series)||norm(m?.master_series)||family}
 function brandSeriesFor(brand,family,productGroup=''){const group=normalizeGroup(productGroup||family);return norm(api()?.brandSeriesFor?.(brand,group))||norm(api()?.brandContext?.(brand?.id,family,'',group)?.brandSeries)||seriesFor(brand,family,group)}
-function visibleSeriesLabel(entry,peers=[]){const label=brandSeriesFor(entry?.brand,entry?.family,entry?.productGroup),sameBrandChc=(Array.isArray(peers)?peers:[]).filter(x=>String(x?.brand?.id)===String(entry?.brand?.id)&&x?.family==='CHC');return entry?.family==='CHC'&&sameBrandChc.length===1?label.replace(/\s+C(?:4|6)$/i,'').trim():label}
+function visibleSeriesLabel(entry,peers=[]){const label=entry?.label||brandSeriesFor(entry?.brand,entry?.family,entry?.productGroup),sameBrandChc=(Array.isArray(peers)?peers:[]).filter(x=>String(x?.brand?.id)===String(entry?.brand?.id)&&x?.family==='CHC');return entry?.family==='CHC'&&sameBrandChc.length===1?label.replace(/\s+C(?:4|6)$/i,'').trim():label}
 const keyOf=(brandId,family)=>`${brandId}|${upper(family)}`;
 function entries(){
-  if(window.KeySuiteHydraulicRegistry)return brands().flatMap(b=>window.KeySuiteHydraulicRegistry.forBrand(b).map(r=>({brand:b,family:r.family,productGroup:r.group,key:keyOf(b.id,r.group)}))).filter(e=>accountScopeReady()&&accountAllows(e.brand.id,e.family,e.productGroup));
+  if(window.KeySuiteHydraulicRegistry)return brands().flatMap(b=>window.KeySuiteHydraulicRegistry.forBrand(b).map(r=>({brand:b,label:r.label,family:r.family,productGroup:r.group,key:keyOf(b.id,r.group)}))).filter(e=>accountScopeReady()&&accountAllows(e.brand.id,e.family,e.productGroup));
   const out=[];
   brands().forEach(b=>{
     if(isMaster(b)){
@@ -406,7 +405,19 @@ function waitChcViewportReady(value,requestId){
 function sendOnce(value,msg){const x=ensureFrame(value);try{x?.contentWindow?.postMessage(msg,'*');return true}catch(_){return false}}
 function clearFamilyTimer(){if(state.familyTimer){clearTimeout(state.familyTimer);state.familyTimer=null}}
 function cancelPending(){clearFamilyTimer();state.queue=[];state.currentEntry=null;state.currentFamily=null;state.pending=null}
-async function processNext(requestId){if(state.pending?.requestId!==requestId)return;clearFamilyTimer();const e=state.queue.shift();if(!e){state.currentEntry=null;state.currentFamily=null;renderResults(true);return}state.currentEntry=e;state.currentFamily=e.family;const key=entryKey(e),status=$('ksDutyStatus');if(status)status.textContent=`Checking ${visibleSeriesLabel(e,customerPriceScope().entries)}…`;const ready=await waitFrameReady(e,requestId);if(state.pending?.requestId!==requestId)return;if(!ready){state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selector unavailable'};state.currentEntry=null;state.currentFamily=null;processNext(requestId);return}const req=state.pending,enhanced=enhancedEligible(e)&&Array.isArray(req.enhancedKeys)&&req.enhancedKeys.includes(e.key);const sent=sendOnce(e,{type:'KEYSUITE_DASHBOARD_SELECT',requestId:req.requestId,flowM3h:req.flowM3h,headM:req.headM,rawFlow:req.rawFlow,rawHead:req.rawHead,rawFlowText:req.rawFlowText,rawHeadText:req.rawHeadText,flowUnit:req.flowUnit,headUnit:req.headUnit,quickSelection:true,enhanced,includeColdItems:req.includeColdItems===true});if(!sent){state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selector unavailable'};state.currentEntry=null;state.currentFamily=null;processNext(requestId);return}state.familyTimer=setTimeout(()=>{if(state.pending?.requestId!==requestId||entryKey(state.currentEntry)!==key)return;state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selection timeout'};state.currentEntry=null;state.currentFamily=null;processNext(requestId)},6500)}
+async function processNext(requestId){if(state.pending?.requestId!==requestId)return;clearFamilyTimer();const e=state.queue.shift();if(!e){state.currentEntry=null;state.currentFamily=null;renderResults(true);return}state.currentEntry=e;state.currentFamily=e.family;const key=entryKey(e),status=$('ksDutyStatus');if(status)status.textContent=`Checking ${visibleSeriesLabel(e,customerPriceScope().entries)}…`;if(e.family==='G'||e.family==='BSV'){
+  const req=state.pending;
+  // BSV has catalogue specifications but no verified hydraulic dataset in this build.
+  const results=e.family==='G'?window.KeySuiteGPerformance?.dutyMatches(window.KeySuiteG?.models()||[],req.flowM3h,req.headM)||[]:[];
+  const candidates=results.map(p=>({model:p.model,motor_kw:p.kw,pole:p.pole,motor_efficiency_class:'IE1',
+    price_available:!window.KeySuitePricing?.gPriceProblem?.(p.id,window.KeySuitePricing?.findGPrice?.(p.id))}));
+  const data=candidates.length?applyDashboardStockPriority(e,{...candidates[0],alternatives:candidates.slice(1)},req.includeColdItems):null;
+  state.responded[key]=true;
+  state.results[key]={suitable:!!data,data};
+  state.currentEntry=null;state.currentFamily=null;
+  renderResults(false);processNext(requestId);return;
+}
+const ready=await waitFrameReady(e,requestId);if(state.pending?.requestId!==requestId)return;if(!ready){state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selector unavailable'};state.currentEntry=null;state.currentFamily=null;processNext(requestId);return}const req=state.pending,enhanced=enhancedEligible(e)&&Array.isArray(req.enhancedKeys)&&req.enhancedKeys.includes(e.key);const sent=sendOnce(e,{type:'KEYSUITE_DASHBOARD_SELECT',requestId:req.requestId,flowM3h:req.flowM3h,headM:req.headM,rawFlow:req.rawFlow,rawHead:req.rawHead,rawFlowText:req.rawFlowText,rawHeadText:req.rawHeadText,flowUnit:req.flowUnit,headUnit:req.headUnit,quickSelection:true,enhanced,includeColdItems:req.includeColdItems===true});if(!sent){state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selector unavailable'};state.currentEntry=null;state.currentFamily=null;processNext(requestId);return}state.familyTimer=setTimeout(()=>{if(state.pending?.requestId!==requestId||entryKey(state.currentEntry)!==key)return;state.responded[key]=true;state.results[key]={suitable:false,data:null,error:'Selection timeout'};state.currentEntry=null;state.currentFamily=null;processNext(requestId)},6500)}
 function runSelected(){if(!canQuick())return;if(!api()?.state?.coreReady){renderBrandState();const st=$('ksDutyStatus');if(st)st.textContent='Brand data must load before Quick Pump Selection.';return}if(!state.prefLoaded){loadPreference();return}syncChecks();const selected=selectedEntries(),flow=$('ksDashFlow'),head=$('ksDashHead'),fu=$('ksDashFlowUnit'),hu=$('ksDashHeadUnit'),status=$('ksDutyStatus'),host=$('ksV39442Results');cancelPending();state.results={};state.responded={};if(host)host.innerHTML='';const q=flowToM3h(flow?.value,fu?.value||'m3h'),h=headToM(head?.value,hu?.value||'m');if(!(q>0&&h>0)){if(status)status.textContent='Enter Flow and Head.';return}if(!selected.length){if(status)status.textContent='Select at least one Brand / Series.';return}syncEnhancedChecks();syncColdItemCheck();const req={requestId:944000000+(++state.requestId),flowM3h:q,headM:h,rawFlow:Number(flow?.value),rawHead:Number(head?.value),rawFlowText:String(flow?.value??'').trim(),rawHeadText:String(head?.value??'').trim(),flowUnit:fu?.value||'m3h',headUnit:hu?.value||'m',entries:selected.map(e=>e.key),enhancedKeys:[...state.enhancedKeys],includeColdItems:state.includeColdItems};state.pending=req;state.queue=[...selected];if(status)status.textContent='Checking selected pump series…';processNext(req.requestId)}
 
 function modelButton(e,data,defaultEff='IE3'){const b=document.createElement('button');b.type='button';b.className='ks39442-model';const enhanced=enhancedEligible(e)&&!!data?.enhanced,cold=String(data?.stock_status||'').toLowerCase()==='cold';b.innerHTML=`<span class="ks39442-model-name"><b>${esc(enhancedAliasModel(data?.model,e,enhanced))}</b>${enhanced?'<span class="ks405-enhanced-tag">Enhanced</span>':''}${cold?'<span class="ks405-enhanced-tag">Cold Item</span>':''}</span><span class="ks39442-value">${kw(data?.motor_kw)}</span><span class="ks39442-value">${poleFrom(data)}</span><span class="ks39442-value">${esc(effClass(data,defaultEff))}</span>`;b.onclick=()=>openCurve(e,data);return b}
@@ -423,6 +434,13 @@ function pinFrameContext(fr,ctx){
   return false;
 }
 async function openCurve(e,data){
+  if(e.family==='G'){
+    const req=state.pending;
+    if(req&&data&&canQuick()&&accountAllows(e.brand.id,e.family,e.productGroup)){
+      window.KeySuiteG?.openCurve(data.model,{origin:'dashboard',duty:{q:req.flowM3h,h:req.headM}});
+    }
+    return;
+  }
   const req=state.pending;if(!req||!data)return;const page=e.family==='CHC'?'selector':({ES:'selectorEs',BFI:'selectorBfi',CR:'selectorCr',KV:'selectorKv',BGF:'selectorBgf',BSW:'selectorBsw',ISO:'selectorIso'}[e.family]),family=upper(e.family),wantedModel=String(data.model||'');
   try{api()?.setSelectedBrand?.(e.brand.id,e.family,page,e.productGroup||e.family)}catch(_){}
   if(e.family==='CHC'){window.KeySuiteCHCSelection?.setGeneration?.(chcGeneration(e));const mat=$('pumpMaterial');if(mat){mat.value=DEFAULT_CHC_MATERIAL;mat.dispatchEvent(new Event('change',{bubbles:true}))}}
