@@ -79,13 +79,17 @@
       optimizationUrl:new URL('pdf-optimization.js?v=42510',location.href).href,
       leftDimensions:dimensions(['L','L1','A','B','H'].map(key=>[key,measure(d[key],' mm')])),
       rightDimensions:dimensions([['H1',measure(d.H1,' mm')],['Inlet',model.inlet],['Outlet',model.outlet],['Weight',measure(model.weight,' kG')]])
-    });
+    }).replace(/<img class="(?:brand-logo|tds-logo)"/g, tag =>
+      tag.replace('<img ', '<img data-keysuite-preserve-original '));
   }
   function open(model, options={}) {
     const duty=options.duties?.[0];
     const payload={model:model.model, raw_flow:duty?.q, raw_head:duty?.h, flow_m3h:duty?.q, head_m:duty?.h};
     const filename=options.filename||window.KeySuitePumpPdfNames.productFromPayload(payload);
-    window.KeySuiteBFIReport.open(window,build(model,{...options,filename}),filename);
+    window.KeySuiteTechnicalPdf.openReport(
+      window, build(model,{...options,filename}), filename, filename,
+      {preserveReportIdentity:true}
+    );
   }
   window.KeySuiteGPdf={open,build};
 })();

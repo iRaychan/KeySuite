@@ -1,5 +1,5 @@
 /* KeySuite V5.00.74 Service Worker. */
-const CACHE='keysuite-v50074-keystock';
+const CACHE='keysuite-v50074-gpdf';
 const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50074"></script>';
 const SHELL=[
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',
@@ -19,6 +19,7 @@ SHELL.push('./g-data-v50068.js','./g-pdf-v50068.js','./g-series-v50068.js','./as
 SHELL.push('./g-performance-v50072.js','./g-performance-v50072.css','./supabase/functions/shared-bfi/bfi-selector-core.js');
 SHELL.push('./bfi-curve-layout.css','./bfi-curve-view.js','./bfi-report-template.js');
 SHELL.push('./pump-pdf-report.html','./technical-pdf.js','./selector-iso/iso-pumpset-dimension.png');
+SHELL.push('./technical-pdf.js?v=50074-gpdf','./g-pdf-v50068.js?v=50074-gpdf');
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>undefined)))});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('keysuite-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
 function stripRuntime(html){return String(html||'').replace(/<script[^>]+src=["'][^"']*v\d+-bootstrap\.js[^"']*["'][^>]*><\/script>/gi,'')}

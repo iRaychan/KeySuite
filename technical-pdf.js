@@ -23,7 +23,7 @@
     return true;
   }
 
-  function openReport(source, html, filename, title) {
+  function openReport(source, html, filename, title, {preserveReportIdentity = false} = {}) {
     const names = window.KeySuitePumpPdfNames;
     const ticket = names?.ticket?.(filename);
     const pending = reserved.get(source);
@@ -40,7 +40,7 @@
       source.alert('Allow pop-ups for KeySuite, then click PDF again.');
       return;
     }
-    const brand = window.KeySuiteSelectorBrand;
+    const brand = preserveReportIdentity ? null : window.KeySuiteSelectorBrand;
     const chc = /\/selector(?:-g1)?\//i.test(sourceUrl.pathname);
     const printTitle = String(filename || title || 'Pump').replace(/\.pdf$/i, '');
     let initialPrint = true;
