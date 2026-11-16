@@ -1,7 +1,7 @@
 {
-  "version": "5.00.69",
-  "baseline": "5.00.68",
-  "upgrade_supported_from": "5.00.68",
+  "version": "5.00.70",
+  "baseline": "5.00.69",
+  "upgrade_supported_from": "5.00.69",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,12 +13,14 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "G navigation and sorted B.G.Reich series",
-    "G product table and model-specific curve page",
-    "BSW phase identity synchronization",
-    "G three-page technical PDF styling and source mapping"
+    "Fix broken G script references and A-Z Product navigation",
+    "Align fixed Cost, conditional Curve and Quote columns for all G rows",
+    "Preserve G quotation phase and pricing source",
+    "Use release manifest generated runtime version in sidebar, dashboard and metadata"
   ],
   "known_issues": [
-    "Bug 003: CR material model may revert from CRS/CRN to CR; root cause pending"
+    "Live site still displays V5.00.67 until a separate approved deployment",
+    "G source workbook provides curves for G32-10-2M/T only; source prices are zero until set",
+    "Authenticated quotation and saved-price checks need staging verification"
   ]
 }

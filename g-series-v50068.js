@@ -16,7 +16,7 @@ function quote(p){
   void window.KeySuiteManualPrice?.offer?.({model:p.model,brand:'B.G.Reich',description:description(p),productFamily:'G',pricingSource:{product_family:'G',product_id:p.id,model:p.model,variant:p.phase}},problem);
   return;
  }
- const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:{family:'G',model:p.model,base_model:p.base,weight_kg:p.weight,dimensions:p.dimensions}};
+ const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:{family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,weight_kg:p.weight,dimensions:p.dimensions}};
  const added=window.KeySuiteApp?.addExternalQuoteItem?.(item);
  if(added){document.querySelector('[data-page="quotation"]')?.click();message('')}
  else message('The quotation item could not be added.',true);
@@ -35,7 +35,7 @@ async function assembly(p){
 }
 function renderProduct(){
  for(const body of [$('gProductRows'),$('gSelectorRows')].filter(Boolean)){body.innerHTML='';
- for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><button type="button" class="g-model-link" data-g-details>${esc(p.model)}</button></td><td>${esc(p.kw)} kW / ${esc(p.hp)} HP</td><td>${esc(p.phase)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td><span class="product-model-actions bgf-product-actions"><button class="btn keysuite-cost-button" data-g-cost>Cost</button>${p.curve?.length?'<button class="btn secondary" data-g-curve>Curve</button>':''}<button class="btn action-quote" data-g-quote>Quote</button></span></td>`;
+ for(const p of rows){const tr=document.createElement('tr');tr.innerHTML=`<td><button type="button" class="g-model-link" data-g-details>${esc(p.model)}</button></td><td>${esc(p.kw)} kW / ${esc(p.hp)} HP</td><td>${esc(p.phase)}</td><td>${esc(p.inlet)} × ${esc(p.outlet)}</td><td class="g-action-cell"><button type="button" class="btn keysuite-cost-button product-action-button" data-g-cost>Cost</button></td><td class="g-action-cell">${p.curve?.length?'<button type="button" class="btn secondary product-action-button" data-g-curve>Curve</button>':''}</td><td class="g-action-cell"><button type="button" class="btn action-quote product-action-button" data-g-quote>Quote</button></td>`;
  tr.querySelector('[data-g-details]').onclick=()=>showCurve(p);tr.querySelector('[data-g-cost]')?.addEventListener('click',()=>cost(p));tr.querySelector('[data-g-curve]')?.addEventListener('click',()=>showCurve(p));tr.querySelector('[data-g-quote]').onclick=()=>quote(p);body.appendChild(tr)}
  }}
 function svgChart(points,key,label,large=false){const valid=(points||[]).filter(x=>Number.isFinite(Number(x[key]))&&Number.isFinite(Number(x.q))),w=640,h=large?300:170;if(valid.length<2)return '';

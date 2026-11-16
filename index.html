@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.69</title>
-  <script>window.KEYSUITE_VERSION='5.00.69';window.KEYSUITE_BUILD='V5.00.69';</script>
+  <title>KeySuite V5.00.70</title>
+  <script src="release-version.js?v=50070"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -311,7 +311,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     .quotation-title-line{display:flex;align-items:end;gap:22px;flex:1}.quotation-title-line h1{margin:0}.quotation-title-line .quote-number-field{min-width:260px}.quote-head{align-items:end}.quote-top-controls{margin-left:auto}.es-matrix-table{min-width:1450px}.es-matrix-table input{min-width:105px}
 
     .pricelist-currency-panel{padding:0!important;overflow:hidden}.pricelist-currency-panel>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:800;color:var(--navy);display:flex;align-items:center;justify-content:space-between;background:#f8fafc}.pricelist-currency-panel>summary::-webkit-details-marker{display:none}.pricelist-currency-panel>summary:after{content:"▾";font-size:16px;transition:transform .2s}.pricelist-currency-panel[open]>summary:after{transform:rotate(180deg)}.pricelist-currency-panel-body{padding:0 18px 18px}.keyplc-product-toolbar{display:grid;grid-template-columns:minmax(220px,420px);gap:14px}.keyplc-table th,.keyplc-table td{white-space:nowrap}.keyplc-table select{min-width:112px}.keyplc-route-actions{justify-content:flex-start;flex-wrap:nowrap}.keyplc-route-actions .btn{min-width:72px}.keyplc-surcharge-note{font-size:11px;color:var(--muted);margin-top:5px}.assembly-item-option{display:flex;align-items:center;gap:8px;margin-top:7px}.assembly-item-option label{margin:0;font-size:11px}.assembly-item-option select{min-width:190px;padding:6px 8px}.assembly-keyplc-options{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:7px;margin-top:7px}.assembly-keyplc-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-keyplc-options .assembly-item-option select{min-width:0;width:100%}.assembly-motor-options{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:7px;margin-top:7px}.assembly-motor-options .assembly-item-option{display:grid;gap:3px;margin:0}.assembly-motor-options .assembly-item-option select{min-width:0;width:100%}
-    #productBgf .bgf-product-actions{display:grid;grid-template-columns:repeat(2,72px);justify-content:end;gap:7px}#productBgf .bgf-product-actions [data-bgf-quote]{grid-column:2}#productEs .es-product-actions{justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}.product-model-actions [data-product-assembly],.route-actions [data-es-assembly],.route-actions [data-gws-assembly],.route-actions [data-keyplc-assembly]{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}
+    #productG .pricelist-table,#selectorG .pricelist-table{min-width:760px}#productG .pricelist-table th:nth-last-child(-n+3),#selectorG .pricelist-table th:nth-last-child(-n+3){width:79px;text-align:center}#productG .g-action-cell,#selectorG .g-action-cell{width:79px;min-width:79px;text-align:center;white-space:nowrap}#productG .g-action-cell .btn,#selectorG .g-action-cell .btn{width:72px;min-width:72px;padding:7px 10px!important;font-size:12px;white-space:nowrap}#productBgf .bgf-product-actions{display:grid;grid-template-columns:repeat(2,72px);justify-content:end;gap:7px}#productBgf .bgf-product-actions [data-bgf-quote]{grid-column:2}#productEs .es-product-actions{justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}.product-model-actions [data-product-assembly],.route-actions [data-es-assembly],.route-actions [data-gws-assembly],.route-actions [data-keyplc-assembly]{background:#f59e0b!important;border-color:#d97706!important;color:#fff!important}
     .product-model-actions [data-product-add],.route-actions [data-es-quote],.route-actions [data-gws-quote],.route-actions [data-keyplc-quote]{background:#16a34a!important;border-color:#15803d!important;color:#fff!important}
 
 
@@ -661,7 +661,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.69</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.70</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -677,7 +677,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.69</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.70</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -687,7 +687,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       </div>
       <div class="nav-group" data-nav-group="productMenu">
         <button type="button" class="nav-toggle" data-nav-toggle="productMenu"><span>Product</span><span class="nav-chevron">⌄</span></button>
-        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productBfi">BFI</button><button data-page="productBgf">BGF</button><button data-page="productBsw">BSW</button><button data-page="productBsv">BSV</button><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productEs">ES</button><button data-page="productG">G</button><button data-page="productIso">ISO</button><button data-page="productKv">KV</button><button data-page="productMotor">Motor</button></div></details></div></div>
+        <div class="nav-submenu"><div class="v391-brand-tree"><details class="v391-direct-brand-root v391-bgreich-root"><summary>B.G.Reich</summary><div class="v391-bgreich-list"><button data-page="productBfi">BFI</button><button data-page="productBgf">BGF</button><button data-page="productBsv">BSV</button><button data-page="productBsw">BSW</button><button data-page="productChc" data-generation="G1">CHC C4</button><button data-page="productChc" data-generation="G2">CHC C6</button><button data-page="productCr">CR</button><button data-page="productEs">ES</button><button data-page="productG">G</button><button data-page="productIso">ISO</button><button data-page="productKv">KV</button><button data-page="productMotor">Motor</button></div></details></div></div>
       </div>
       <button data-page="keyLab">KeyLab</button>
       <button data-page="quotation">Quotation</button>
@@ -703,7 +703,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.69</div>
+    <div class="suite-version">KeySuite V5.00.70</div>
   </aside>
 
   <main>
@@ -1811,11 +1811,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 
     <section id="selectorG" class="page">
       <div class="page-title-row"><div><h1>Selector · G Series</h1><div class="muted">Select a G close-coupled pump. A curve is shown only for G32-10-2.</div></div></div>
-      <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Phase</th><th>Suction × Discharge</th><th></th></tr></thead><tbody id="gSelectorRows"></tbody></table></div></div>
+      <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Phase</th><th>Suction × Discharge</th><th>Cost</th><th>Curve</th><th>Quote</th></tr></thead><tbody id="gSelectorRows"></tbody></table></div></div>
     </section>
     <section id="productG" class="page">
       <div class="page-title-row"><div><h1>B.G.Reich · G Series</h1><div class="muted">Close-coupled pumps · M and T phase variants</div></div></div>
-      <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Phase</th><th>Suction × Discharge</th><th></th></tr></thead><tbody id="gProductRows"></tbody></table></div><p id="gQuoteMessage" role="status"></p></div>
+      <div class="card"><div class="table-wrap"><table class="pricelist-table"><thead><tr><th>Model</th><th>Power</th><th>Phase</th><th>Suction × Discharge</th><th>Cost</th><th>Curve</th><th>Quote</th></tr></thead><tbody id="gProductRows"></tbody></table></div><p id="gQuoteMessage" role="status"></p></div>
     </section>
     <section id="gPriceList" class="page">
       <div class="key-back-row"><button class="btn secondary" type="button" data-go="priceListDashboard">← Price List</button></div>
@@ -2317,7 +2317,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bfi-v42302.js?v=42821"></script>
 <script src="bgf-curve-v50021.js?v=50026"></script>
 <script src="bgf-v50006.js?v=50030"></script>
-<script src="g-data-v50069.js?v=50069"></script><script src="g-pdf-v50069.js?v=50069"></script><script src="g-series-v50069.js?v=50069"></script>
+<script src="g-data-v50068.js?v=50070"></script><script src="g-pdf-v50068.js?v=50070"></script><script src="g-series-v50068.js?v=50070"></script>
 <script src="bsw-v50027.js?v=50030"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=50056"></script>
@@ -2425,11 +2425,11 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50026"></script>
 <script src="kv-product-families-v50027.js?v=50069"></script>
-<script src="v41200-bootstrap.js?v=50069"></script>
+<script src="v41200-bootstrap.js?v=50070"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
 <link rel="stylesheet" href="v50063-focused-fixes.css?v=50069">
-<script src="v50051-version-lock.js?v=50069"></script>
+<script src="v50051-version-lock.js?v=50070"></script>
 <link rel="stylesheet" href="keystock-v100.css?v=50069">
 <script src="keystock-v100.js?v=50069"></script>
 
