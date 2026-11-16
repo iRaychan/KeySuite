@@ -23,6 +23,14 @@
 .g-extra-duty .btn{padding:4px 6px}
 .g-value{padding:10px;margin-top:8px;background:#f5f9fb;border:1px solid #d9e5ec;border-radius:8px}
 .g-value strong{color:#086298}
+#productGCurve :is(.g-duty-title h3,.g-duty-details summary,.g-value){color:#213746}
+.g-duty-title .g-enhanced{display:inline-flex;align-items:center;gap:4px;margin:0 0 0 auto;font-size:12px;white-space:nowrap}
+.g-enhanced input{width:auto;margin:0}
+.g-speed-note{margin:4px 0 0;font-size:12px}
+.g-selected-badge{display:inline-block;margin-top:5px;padding:3px 9px;border-radius:14px;background:#e3f5ea;color:#17633e;font-weight:700;font-size:11px}
+.g-selected details{margin-top:4px}
+.g-selected summary{cursor:pointer;color:#24506b}
+#gDutyLabel{padding:7px;background:#fff;border:1px solid #d9e5ec;border-radius:6px}
 .g-performance-main,#gSecondaryCharts{display:grid;gap:12px;min-width:0}
 .g-selected>div:last-child{text-align:right}
 .g-selected small,.g-metrics small{display:block;color:#526a7b}

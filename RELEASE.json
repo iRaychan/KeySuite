@@ -1,7 +1,7 @@
 {
-  "version": "5.00.72",
-  "baseline": "5.00.71",
-  "upgrade_supported_from": "5.00.71",
+  "version": "5.00.73",
+  "baseline": "5.00.72",
+  "upgrade_supported_from": "5.00.72",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,10 +13,9 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "BFI-style G product catalogue with phase and model group filters",
-    "Permission-aware G and BSV entries in Dashboard Quick Pump Selection",
-    "Full-page G engineering curves with verified performance and duty plotting",
-    "Three-page G engineering PDF"
+    "Shared BFI polynomial fitting for G performance curves",
+    "Automatic BEP-based rated duty for G and BFI Product curves",
+    "G three-page engineering report using the BFI print and filename workflow"
   ],
   "known_issues": []
 }

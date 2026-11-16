@@ -315,7 +315,7 @@ body.product-frame main{display:block;max-width:none;padding:8px}body.product-fr
 </div>
 </main>
 <script src="../supabase/functions/shared-bfi/bfi-data.js?v=42314"></script>
-<script src="../supabase/functions/shared-bfi/bfi-selector-core.js?v=42510"></script>
+<script src="../supabase/functions/shared-bfi/bfi-selector-core.js?v=50073"></script>
 <script src="../v40205-motor-baseplate-data.js?v=42605"></script>
 <script>
 const DB=globalThis.KeySuiteBFIData;if(!DB)throw new Error('KeySuite canonical BFI data failed to load.');
@@ -1780,18 +1780,31 @@ alternatives.innerHTML='';
   const model=DB.models.find(m=>String(m.model).toLowerCase()===requested.toLowerCase());if(!model)return null;
   productModelName=model.model;
   const curve=DB.curves[model.series];if(!curve)return null;
-  let idx=0,max=-Infinity;(curve.efficiency||[]).forEach((v,i)=>{if(Number(v)>max){max=Number(v);idx=i}});
-  const seriesFlow=Number((String(model.model).match(/^BFI\s+(\d+)/i)||[])[1]||0);
-  let q=seriesFlow>0?seriesFlow:Number(curve.flow?.[idx]??curve.flow?.[Math.floor((curve.flow?.length||1)/2)]??0);if(!(q>0))q=Math.max(.1,Number(curve.flow?.find(v=>Number(v)>0)||.1));
   const phases=Array.isArray(model.phases)&&model.phases.length?model.phases:['3Ph'];const requestedPhase=opts.phase||(explicit3?'3Ph':'');const phase=phases.includes(requestedPhase)?requestedPhase:(phases.includes('3Ph')?'3Ph':phases[0]);
   const enhanced=(opts.enhanced===true||explicitEnhanced||new URLSearchParams(location.search).get('enhanced')==='1')&&phase==='3Ph';
-  let evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50);if(!evaluated){q=(Number(curve.flow?.[0]||0)+Number(curve.flow?.[curve.flow.length-1]||1))/2;evaluated=enhanced?evaluateEnhancedModel(model,q,0):evaluateModel(model,q,0,50)}if(!evaluated)return null;
-  const h=Math.max(1,Math.floor(Number(evaluated.predHead)||0)),selectedEval=(enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,50))||evaluated,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:50,motorEffClass=keysuiteBfiMotorEffForPhase(phase);
+  const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:50;
+  const rated=productRatedDuty(model,hz,enhanced);
+  if(!rated)return null;
+  const {q,h}=rated;
+  const selectedEval=enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,hz);
+  if(!selectedEval)return null;
+  const motorEffClass=keysuiteBfiMotorEffForPhase(phase);
   selectionState={q,h,hz,selectionHz:hz,curveHz:hz,rawFlow:Math.round(q),rawHead:Math.round(h),rawFlowText:String(Math.round(q)),rawHeadText:String(Math.round(h)),flowUnit:'m3h',headUnit:'m',motorEffClass,motorPhase:phase,motorVoltage:(phase==='1Ph'?240:415),models:[selectedEval],selectedIndex:0,productMode:true,enhanced};
   if(motorPhase)motorPhase.value=phase;if(document.getElementById('pumpMaterial'))document.getElementById('pumpMaterial').value=keybfiMaterialCode(opts.material);if(enhancedMode)enhancedMode.checked=enhanced;updateEnhancedModeUI();
   const material=keybfiMaterialCode(opts.material),displayModel=keybfiMaterialModelName(keybfiPhaseModelName(model.model,phase,enhanced),material);
   window.keysuiteExportPayload={quotation_model:displayModel,base_model:model.model,keysuite_material:material,material_variant:material==='SS316'?'BFIN':'BFI',keysuite_seal:opts.seal||'Car/Cer',keysuite_elastomer:opts.elastomer||'Viton',keysuite_connection_type:'threaded',keysuite_bare_shaft:false,product_mode:true,enhanced};
   syncControlsFromState();renderAlternatives();renderSelected();const payload=currentSelection();window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'BFI',model:model.model,display_model:displayModel,phase,flowM3h:q,headM:h,enhanced,valid:true,message:'Curve loaded. Enter Flow + Head to set a duty point.'},'*');return payload;
+ }
+ function productRatedDuty(model,hz,enhanced){
+  if(!model)return null;
+  const curve=DB.curves[model.series];
+  if(!curve)return null;
+  const mix=KEYSUITE_BFI_CORE.parseImpellerMix(model),ratio=hz/DB.base_hz;
+  const fits=enhanced?keychcEnhancedCurveData(model):{
+   headFit:KEYSUITE_BFI_CORE.fitMixedHeadCurve(curve,mix,ratio),
+   effFit:KEYSUITE_BFI_CORE.fitMixedEfficiencyCurve(curve,mix,ratio)
+  };
+  return KEYSUITE_BFI_CORE.ratedDuty(fits?.headFit,fits?.effFit);
  }
  function applyProductDuty(flowM3h,headM,meta={}){
   const modelName=keybfiBaseModelName(String(productModelName||window.keysuiteExportPayload?.base_model||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||''));
@@ -1807,6 +1820,12 @@ alternatives.innerHTML='';
  function applyProductDutyFromInputs(){
   const rawFlowText=String(flowInput.value??'').trim(),rawHeadText=String(headInput.value??'').trim(),rawFlow=Number(rawFlowText),rawHead=Number(rawHeadText),flowUnit=flowUnitInput.value,headUnit=headUnitInput.value;
   const q=flowToM3h(rawFlow,flowUnit),h=headToM(rawHead,headUnit),hz=Number(hzHidden?.value||selectionState.curveHz||selectionState.hz||50);
+  if(!rawFlowText&&!rawHeadText){
+   const model=DB.models.find(m=>String(m.model).toLowerCase()===productModelName.toLowerCase());
+   const rated=productRatedDuty(model,hz,keychcEnhancedEnabled());
+   if(!rated){alert('A BEP-based rated duty is unavailable for this model and speed.');return null}
+   return applyProductDuty(rated.q,rated.h,{flowUnit:'m3h',headUnit:'m',hz});
+  }
   if(!(q>0&&h>0)){alert('Enter a valid Flow and Head.');return null}
   return applyProductDuty(q,h,{rawFlow,rawHead,rawFlowText,rawHeadText,flowUnit,headUnit,hz});
  }

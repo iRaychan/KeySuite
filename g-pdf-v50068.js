@@ -1,127 +1,94 @@
-/* G Series three-page technical PDF. Data: G Pg 2/Pg 3 and IE1 2 Pole motor workbook. */
-(()=>{'use strict';let loading;
-function jsPdf(){if(window.jspdf?.jsPDF)return Promise.resolve(window.jspdf.jsPDF);if(!loading)loading=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='vendor/jspdf-2.5.2.umd.min.js';s.onload=()=>resolve(window.jspdf.jsPDF);s.onerror=reject;document.head.appendChild(s)});return loading}
-function image(path){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=path})}
-function loadInputs(){
- return Promise.all([jsPdf(),image('selector-bgf/bgreich-logo.png'),image('assets/v50068/g-dimension.png')]);
-}
-const fmt=(v,u='')=>v==null||v===''||v==='-'?'-':String(v)+u;
-const round=(v,n=2)=>Number.isFinite(v)?Number(v.toFixed(n)):null;
-function text(doc,value,x,y,size=9,bold=false,align='left'){
- doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(25,58,77);
- doc.text(String(value),x,y,{align});
-}
-function fit(doc,img,x,y,w,h){
- const ratio=img.naturalWidth/img.naturalHeight,width=Math.min(w,h*ratio),height=width/ratio;
- doc.addImage(img.src,'PNG',x+(w-width)/2,y+(h-height)/2,width,height);
-}
-function header(doc,logo,label,p,page){
- fit(doc,logo,15,9,48,15);
- text(doc,label,195,16,13,true,'right');
- text(doc,page===1?p.hp+' HP '+p.pole+'P · '+(p.phase==='3Ph'?'3 Phase':'1 Phase'):p.model,195,23,9,true,'right');
- doc.setDrawColor(25,58,77);doc.setLineWidth(.3);doc.line(15,28,195,28);
- text(doc,'B.G.Reich reserves the right to make modifications without notice.',105,287,8,false,'center');
- text(doc,page+' / 3',195,287,8,false,'right');
-}
-function section(doc,label,rows,y){
- const h=6.65;
- doc.setFillColor(249,219,228);doc.setDrawColor(154,164,173);doc.setLineWidth(.2);
- doc.rect(15,y,180,7.3,'FD');text(doc,label,105,y+5,10,true,'center');y+=7.3;
- for(const row of rows){
-  doc.setDrawColor(175,185,193);doc.rect(15,y,180,h);
-  for(const x of [61,106,153])doc.line(x,y,x,y+h);
-  row.forEach((value,i)=>text(doc,value===''?'':fmt(value),[17,63,108,155][i],y+4.45,8.1));
-  y+=h;
- }
- return y+4;
-}
-function vectorChart(doc,p,field,hz,duties,y){
- const {points,markers,xTicks,yTicks}=window.KeySuiteGPerformance.chart(p,field.key,hz,duties);
- const left=38,right=193,top=y+4,bottom=y+40;
- text(doc,field.unit+(field.key==='npsh'&&hz!==50?' - 50 Hz reference':''),15,y+1,9,true);
- if(points.length<2){text(doc,'Curve data unavailable.',left,y+18);return}
- const x=v=>left+v/xTicks.at(-1)*(right-left),v=z=>bottom-z/yTicks.at(-1)*(bottom-top);
- doc.setDrawColor(218,229,237);doc.setLineWidth(.15);
- for(const tick of xTicks){doc.line(x(tick),top,x(tick),bottom);text(doc,round(tick,3),x(tick),bottom+3.5,7,false,'center')}
- for(const tick of yTicks){doc.line(left,v(tick),right,v(tick));text(doc,round(tick,3),left-2,v(tick)+.8,7,false,'right')}
- doc.setDrawColor(123,147,166);doc.line(left,top,left,bottom);doc.line(left,bottom,right,bottom);
- text(doc,'Flow (m³/h)',(left+right)/2,bottom+7,7.5,false,'center');
- doc.setDrawColor(8,102,166);doc.setLineWidth(.45);
- for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i];doc.line(x(a.x),v(a.y),x(b.x),v(b.y))}
- for(const pt of markers){
-  doc.setFillColor(...(pt.label==='BEP'?[0,113,64]:[208,39,75]));
-  doc.circle(x(pt.x),v(pt.y),.9,'F');
-  const flip=x(pt.x)>171;
-  text(doc,pt.label,x(pt.x)+(flip?-1.7:1.7),v(pt.y)-1.8,7,true,flip?'right':'left');
- }
-}
-function technical(doc,p,hz,duties){
- const perf=window.KeySuiteGPerformance,d1=duties[0],m=p.motor||{},d=p.dimensions||{},three=p.phase==='3Ph';
- const atDuty=key=>d1&&(key!=='npsh'||hz===50)?round(perf.valueAt(perf.chartPoints(p,key,hz),d1.q)):null;
- let y=34;
- y=section(doc,'Operating Data',[
-  ['Application','-','Location','-'],
-  ['Fluid','Water, Clean','Capacity at D1',fmt(d1&&round(d1.q),' m³/h')],
-  ['Density','0.9983 kg/dm³','Head at D1',fmt(d1&&round(d1.h),' m')],
-  ['Kin. Viscosity','1.005 mm²/s','Temperature','20 °C'],
-  ['Curve Basis',hz===50?'Guaranteed reference':'Speed-adjusted estimate','Plotted Speed',fmt(Math.round(p.speed*hz/50),' rpm')]
- ],y);
- y=section(doc,'Pump',[
-  ['Brand','B.G.Reich','Country of Origin','Malaysia'],
-  ['Type','Close-coupled','Country of Manufacture','China'],
-  ['Model',p.model,'Suction Size',p.inlet],
-  ['Guaranteed Curve Speed',fmt(p.speed,' rpm'),'Discharge Size',p.outlet],
-  ['Casing','Cast Iron','Efficiency at D1 Flow',fmt(atDuty('eff'),' %')],
-  ['Impeller','Stainless Steel','Shaft Power at D1 Flow',fmt(atDuty('power'),' kW')],
-  ['Shaft','Stainless Steel','NPSHr at D1 Flow',fmt(atDuty('npsh'),' m')],
-  ['Shaft Seal','Mechanical Seal','Impeller Type','Closed'],
-  ['Bearing Type','Ball','','']
- ],y);
- y=section(doc,'Motor',[
-  ['Brand','B.G.Reich','Country of Origin','Malaysia'],
-  ['Type','TEFC','Country of Manufacture','China'],
-  ['Model',m.model,'Efficiency Class','IE1'],
-  ['Rated Power',p.hp+' HP / '+p.kw+' kW','Efficiency at 100%',fmt(three?m.efficiency3:m.efficiency1,' %')],
-  ['Motor Rated Speed',fmt(m.speed,' rpm'),'Power Factor at 100%',fmt(three?m.pf3:m.pf1)],
-  ['Rated FL Amp',fmt(three?m.amp3:m.amp1,' A'),'Protection','IP 44'],
-  ['Rated Voltage',three?'415 V':'240 V','Insulation Class','Class B'],
-  ['Phase',three?'3 Phase':'1 Phase','Rated Frequency','50 Hz']
- ],y);
- y=section(doc,'Pumpset',[
-  ['Length',fmt(d.L,' mm'),'Weight',fmt(p.weight,' kg')],
-  ['Width',fmt(d.B,' mm'),'Height',fmt(d.H,' mm')]
- ],y);
- text(doc,'* Approximate dimension and weight',15,y+1,8);
-}
-function build(JS,p,{hz=50,duties=[]}={},logo,drawing){
- const doc=new JS({unit:'mm',format:'a4',compress:true});
- doc.setProperties({title:'G Series - '+p.model,subject:'B.G.Reich engineering data'});
- header(doc,logo,p.model,p,1);
- const d1=duties[0],speed=Math.round(p.speed*hz/50);
- text(doc,d1?round(d1.q)+' m³/h @ '+round(d1.h)+' m':'Performance Curves',105,39,14,true,'center');
- text(doc,hz===50?'Guaranteed reference: 50 Hz / '+p.speed+' rpm':'Estimated: '+hz+' Hz / '+speed+' rpm. Guaranteed reference: '+p.speed+' rpm.',105,46,9,false,'center');
- window.KeySuiteGPerformance.fields.forEach((field,i)=>vectorChart(doc,p,field,hz,duties,55+i*54));
- doc.addPage();
- header(doc,logo,'TECHNICAL DATA',p,2);
- technical(doc,p,hz,duties);
- doc.addPage();
- header(doc,logo,'DIMENSION',p,3);
- text(doc,'Dimension',105,42,16,true,'center');
- fit(doc,drawing,16,48,178,129);
- const d=p.dimensions||{};
- const y=section(doc,'Table Dimensions',[
-  ['L',fmt(d.L,' mm'),'L1',fmt(d.L1,' mm')],
-  ['A',fmt(d.A,' mm'),'B',fmt(d.B,' mm')],
-  ['H',fmt(d.H,' mm'),'H1',fmt(d.H1,' mm')],
-  ['Suction',p.inlet,'Discharge',p.outlet],
-  ['Weight',fmt(p.weight,' kg'),'','']
- ],184);
- text(doc,'* Approximate dimension and weight',15,y+2,8);
- return doc;
-}
-async function open(p,options){
- const [JS,logo,drawing]=await loadInputs();
- build(JS,p,options,logo,drawing).save('G_'+p.model+'.pdf');
-}
-window.KeySuiteGPdf={open,build};
+/* G engineering report, printed through the same report host as BFI. */
+(() => {
+  'use strict';
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  })[character]);
+  const number = (value, decimals=2) => Number.isFinite(value) ? Number(value.toFixed(decimals)) : null;
+  const measure = (value, unit='') => value == null || value === '' || value === '-' ? '–' : value+unit;
+  const table = (label, rows) => `<table><colgroup><col><col><col><col></colgroup><thead><tr><th colspan="4">${label}</th></tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>').join('')}</tbody></table>`;
+  const phase = model => model.phase==='3Ph'?'3 Phase':'1 Phase';
+  const footer = '<footer>B.G.Reich reserves the right to make modifications without notice.</footer>';
+  function header(model, heading='') {
+    return `<header><img src="selector-bgf/bgreich-logo.png" alt="B.G.REICH"><div><strong>${escape(model.model)}</strong><small>${escape(heading||`${model.hp} HP ${model.pole}P · ${phase(model)}`)}</small></div></header>`;
+  }
+  function technical(p, hz, duty, results) {
+    const m=p.motor||{}, d=p.dimensions||{}, three=p.phase==='3Ph';
+    const g=window.KeySuiteGPerformance;
+    return table('Operating Data', [
+      ['Application','–','Rated Capacity',measure(number(duty?.q),' m³/h')],
+      ['Location','–','Rated Head / Pressure',measure(number(duty?.h),' m')],
+      ['Fluid','Water, Clean','Temperature','20 °C'],
+      ['Density','0.9983 kg/dm³','Kin. Viscosity','1.005 mm²/s'],
+      ['Curve Basis',hz===50?'Guaranteed reference':'Speed-adjusted estimate','Plotted Speed',measure(Math.round(p.speed*hz/50),' rpm')]
+    ])+table('Pump', [
+      ['Brand','B.G.Reich','Country of Origin','Malaysia'],
+      ['Type','Close-coupled','Country of Manufacture','China'],
+      ['Model',p.model,'Suction Size',p.inlet],
+      ['Guaranteed Curve Speed',measure(p.speed,' rpm'),'Discharge Size',p.outlet],
+      ['Casing','Cast Iron','Pump Efficiency',measure(number(results.eff,1),' %')],
+      ['Impeller','Stainless Steel','Brake HP',measure(number(g.toHP(results.power)),' HP')],
+      ['Shaft','Stainless Steel','NPSHr',measure(number(results.npsh),' m')],
+      ['Shaft Seal','Mechanical Seal','Impeller Type','Closed'],
+      ['Bearing Type','Ball','','']
+    ])+table('Motor', [
+      ['Brand','B.G.Reich','Country of Origin','Malaysia'],
+      ['Type','TEFC','Country of Manufacture','China'],
+      ['Model',measure(m.model),'Efficiency Class','IE1'],
+      ['Rated Power',p.hp+' HP / '+p.kw+' kW','Efficiency at 100%',measure(three?m.efficiency3:m.efficiency1,' %')],
+      ['Motor Rated Speed',measure(m.speed,' rpm'),'Power Factor at 100%',measure(three?m.pf3:m.pf1)],
+      ['Rated FL Amp',measure(three?m.amp3:m.amp1,' A'),'Protection','IP 44'],
+      ['Rated Voltage',three?'415 V':'240 V','Insulation Class','Class B'],
+      ['Phase',phase(p),'Rated Frequency','50 Hz']
+    ])+table('Pumpset', [
+      ['Length',measure(d.L,' mm'),'Weight',measure(p.weight,' kg')],
+      ['Width',measure(d.B,' mm'),'Height',measure(d.H,' mm')]
+    ])+'<p class="note">* Approximate dimension and weight</p>';
+  }
+  function build(model, {hz=50,duties=[],performance={}}={}) {
+    const g=window.KeySuiteGPerformance, d=model.dimensions||{}, duty=duties[0];
+    const charts=g.fields.map(field=>{
+      const display=field.key==='power'?{...field,unit:'Shaft Power (HP)'}:field;
+      return `<section class="chart"><b>${display.unit}</b>${g.svg(model,display,hz,duties,false,true)}</section>`;
+    }).join('');
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escape(model.model)}</title><style>
+      @page{size:A4;margin:8mm}*{box-sizing:border-box}
+      body{margin:0;font:10pt Arial,sans-serif;color:#162b37;background:#fff}
+      .sheet{width:194mm;height:280mm;margin:0 auto;padding:3mm 5mm;position:relative;break-after:page;page-break-after:always}
+      .sheet:last-of-type{break-after:auto;page-break-after:auto}
+      header{display:flex;justify-content:space-between;align-items:center;padding-bottom:3mm;border-bottom:1px solid #244354}
+      header img{width:50mm;height:15mm;object-fit:contain}header div{text-align:right}header strong{display:block;font-size:15pt}header small{display:block;margin-top:1mm}
+      h1{text-align:center;margin:4mm 0 1mm;font-size:15pt}.rated{color:#b51f32}.basis{text-align:center;margin:0 0 3mm;font-size:9pt}
+      .chart{border:1px solid #a6b7c2;padding:1mm 2mm;margin-bottom:2mm;font-size:8.5pt}
+      svg{display:block;width:100%;height:49mm}svg text{font:11px Arial,sans-serif;fill:#40586a}
+      .g-grid{stroke:#dce6ee}.g-axis{stroke:#8da3b4;fill:none}.g-line{stroke:#0868a6;stroke-width:2.4;fill:none}
+      .g-point,.g-point-label{fill:#b51f32}.g-bep,.g-bep-label{fill:#137943}
+      table{border-collapse:collapse;width:100%;margin:3mm 0 0;table-layout:fixed;font-size:8.7pt}
+      td,th{border:1px solid #96a0aa;padding:1.6mm 2mm}th{background:#f9dbe4;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .note{font-size:8.5pt}.drawing{width:100%;height:130mm;object-fit:contain;margin:3mm 0}
+      footer{position:absolute;bottom:3mm;left:5mm;right:5mm;text-align:center;font-size:8pt;color:#40586a}
+      @media screen{body{background:#edf1f5}.sheet{background:white;margin:12px auto}}
+    </style></head><body>
+      <article class="sheet">${header(model)}<h1 class="rated">${duty?`${number(duty.q)} m³/h @ ${number(duty.h)} Mtr`:'Performance Curves'}</h1>
+      <p class="basis">${hz===50?`Guaranteed reference · 50 Hz · ${model.speed} rpm`:`Speed-adjusted estimate · ${hz} Hz · ${Math.round(model.speed*hz/50)} rpm`}</p>${charts}${footer}</article>
+      <article class="sheet">${header(model,'Technical Data')}${technical(model,hz,duty,performance)}${footer}</article>
+      <article class="sheet">${header(model,'Dimension')}<h1>Dimension</h1>
+      <img class="drawing" src="assets/v50068/g-dimension.png" alt="G Series dimension drawing">
+      ${table('Table Dimensions',[
+        ['L',measure(d.L,' mm'),'L1',measure(d.L1,' mm')],
+        ['A',measure(d.A,' mm'),'B',measure(d.B,' mm')],
+        ['H',measure(d.H,' mm'),'H1',measure(d.H1,' mm')],
+        ['Suction',model.inlet,'Discharge',model.outlet],
+        ['Weight',measure(model.weight,' kg'),'','']
+      ])}<p class="note">* Approximate dimension and weight</p>${footer}</article>
+      <script>window.onload=async()=>{await Promise.all([...document.images].map(image=>image.decode()));window.print()};<\/script>
+    </body></html>`;
+  }
+  function open(model, options={}) {
+    const duty=options.duties?.[0];
+    const payload={model:model.model, raw_flow:duty?.q, raw_head:duty?.h, flow_m3h:duty?.q, head_m:duty?.h};
+    const filename=options.filename||window.KeySuitePumpPdfNames.productFromPayload(payload);
+    window.KeySuiteTechnicalPdf.openReport(window,build(model,options),filename,filename);
+  }
+  window.KeySuiteGPdf={open,build};
 })();

@@ -1399,7 +1399,17 @@ function exportPumpDataSheet(row,filename){
  try{pumpData=JSON.parse(raw)}catch(e){alert('Unable to read the saved pump data.');return}
  const family=String(pumpData?.family||pumpData?.product||pumpData?.pumpData?.type||'').toUpperCase(),source=String(pumpData?.source||'').toUpperCase();
  const resolved=/KEYSELECTOR-ES/.test(source)||family==='ES'?'ES':family||(/KEYSUITE-KV/.test(source)?'KV':/KEYSUITE-CR/.test(source)?'CR':'CHC');
- if(resolved==='G'){const found=window.KeySuiteG?.models?.().find(p=>p.model===pumpData.model);if(found){window.KeySuiteGPdf?.open(found);return}alert('G model is not available.');return}  const frameId={ES:'selectorEsFrame',ISO:'selectorIsoFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame',BFI:'selectorBfiFrame'}[resolved]||'selectorFrame',frame=$(frameId);
+ if(resolved==='G'){
+  const model=window.KeySuiteG?.models?.().find(p=>p.model===pumpData.model);
+  if(!model){alert('G model is not available.');return}
+  const hz=Number(pumpData.frequency_hz)||50;
+  const q=Number(pumpData.flow_m3h),h=Number(pumpData.head_m);
+  const duties=Array.isArray(pumpData.duty_points)&&pumpData.duty_points[0]?pumpData.duty_points:q>0&&h>0?[{q,h}]:[];
+  const performance=window.KeySuiteGPerformance.dutyPerformance(model,hz,duties[0]);
+  window.KeySuiteGPdf.open(model,{hz,duties,performance,filename});
+  return;
+ }
+ const frameId={ES:'selectorEsFrame',ISO:'selectorIsoFrame',KV:'selectorKvFrame',CR:'selectorCrFrame',BGF:'selectorBgfFrame',BSW:'selectorBswFrame',BFI:'selectorBfiFrame'}[resolved]||'selectorFrame',frame=$(frameId);
  if(!frame||!frame.contentWindow||frame.getAttribute('src')==='about:blank'){alert(`${resolved} pump selector is not ready.`);return}
  if(!window.KeySuiteTechnicalPdf?.reserve(frame.contentWindow))return;
  const internalModel=pumpPdfInternalModelHeading(pumpData),metadataTitle=pumpPdfMetadataTitle(pumpData),exportPayload={...pumpData,keysuite_pdf_model_heading:internalModel,keysuite_display_model:internalModel,display_model:internalModel,quotation_model:internalModel,keysuite_pdf_metadata_title:metadataTitle,pdf_metadata_title:metadataTitle};

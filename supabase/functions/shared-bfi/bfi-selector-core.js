@@ -122,13 +122,26 @@ function modelComparator(a,b){
   const vr=rank(A.variant)-rank(B.variant);if(vr)return vr;
   return A.raw.localeCompare(B.raw,undefined,{numeric:true,sensitivity:'base'});
 }
-function bepInfo(candidate,dutyQ){
-  if(!candidate?.effFit||!(dutyQ>0))return {flow:NaN,eff:NaN,delta:Infinity,group:4};
-  const fit=candidate.effFit,min=Number(fit.min),max=Number(fit.max);let bestFlow=NaN,bestEff=-Infinity;
+function bestEfficiency(fit){
+  if(!fit)return {flow:NaN,eff:NaN};
+  const min=Number(fit.min),max=Number(fit.max);let bestFlow=NaN,bestEff=-Infinity;
   for(let i=0;i<=240;i++){
     const q=min+(max-min)*i/240,e=fitValue(fit,q);
     if(Number.isFinite(e)&&e>bestEff){bestEff=e;bestFlow=q}
   }
+  return {flow:bestFlow,eff:bestEff};
+}
+function ratedDuty(headFit,effFit){
+  const best=bestEfficiency(effFit);
+  if(!(best.eff>0)||!headFit)return null;
+  const q=Math.round(best.flow);
+  if(!(q>0&&q>=headFit.min&&q<=headFit.max&&q>=effFit.min&&q<=effFit.max))return null;
+  const h=Math.floor(fitValue(headFit,q));
+  return h>0?{q,h}:null;
+}
+function bepInfo(candidate,dutyQ){
+  if(!candidate?.effFit||!(dutyQ>0))return {flow:NaN,eff:NaN,delta:Infinity,group:4};
+  const {flow:bestFlow,eff:bestEff}=bestEfficiency(candidate.effFit);
   const delta=(Number.isFinite(bestFlow)&&dutyQ>0)?bestFlow/dutyQ-1:Infinity;let group=4;
   if(Number.isFinite(delta)){
     if(delta>=-.05-1e-12&&delta<=.03+1e-12)group=1;
@@ -167,7 +180,7 @@ function sampleFit(fit,count=90){
 }
 
 g.KeySuiteBFICore=Object.freeze({
-  VERSION,select,evaluateModel,mostSuitableCompare,bepInfo,modelComparator,
+  VERSION,select,evaluateModel,mostSuitableCompare,bepInfo,bestEfficiency,ratedDuty,modelComparator,
   parseImpellerMix,fitMixedHeadCurve,fitMixedEfficiencyCurve,fitCurve,fitValue,polyfit,sampleFit
 });
 })(globalThis);
