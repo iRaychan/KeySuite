@@ -1,7 +1,7 @@
 {
-  "version": "5.00.73",
-  "baseline": "5.00.72",
-  "upgrade_supported_from": "5.00.72",
+  "version": "5.00.74",
+  "baseline": "5.00.73",
+  "upgrade_supported_from": "5.00.73",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,9 +13,9 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Shared BFI polynomial fitting for G performance curves",
-    "Automatic BEP-based rated duty for G and BFI Product curves",
-    "G three-page engineering report using the BFI print and filename workflow"
+    "G engineering curves share BFI layout, duty rows, and numerical markers",
+    "G engineering PDF uses the shared BFI three-page report template",
+    "G technical data follows the workbook and the drawing is printed at 80% scale"
   ],
-  "known_issues": []
+  "known_issues": ["G Series ISO 9906 Grade 3B is not declared pending conformity evidence."]
 }
