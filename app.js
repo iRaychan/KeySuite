@@ -2489,7 +2489,7 @@ $('startProject')?.addEventListener('input',()=>syncProjectFields('dashboard'));
 $('project')?.addEventListener('input',()=>syncProjectFields('quotation'));
 
 syncOwnerKeyVisibility();newQuote();refreshAll();updateQuotationStateUi();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=50067');
+if('serviceWorker' in navigator)navigator.serviceWorker.register(`sw.js?v=${window.KEYSUITE_VERSION.replaceAll('.','')}`);
 
 
 // Two-line popup editor for Project and Delivery.

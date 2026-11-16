@@ -126,16 +126,10 @@
       }
       const master=String(brand.brand_type||'').toLowerCase()==='master'||brandKey==='b.g.reich'||brandName==='b.g.reich';
       if(master){
-        [
-          ['CHC_G1','CHC'],
-          ['CHC_G2','CHC'],
-          ['CR','CR'],
-          ['BFI','BFI'],
-          ['BGF','BGF'],
-          ['ES','ES'],
-          ['ISO','ISO'],
-          ['MOTOR','MOTOR']
-        ].forEach(([group,family])=>out.push({brand,family,productGroup:group,key:`${brand.id}|${group}`,series:String(api?.brandSeriesFor?.(brand,group)||({CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',BFI:'BFI',ES:'End Suction',MOTOR:'Motor'}[group]||family))}));
+        (api?.brandFamilies?.(brand)||[]).forEach(item=>{
+          const group=item.productGroup||item.family;
+          out.push({brand,family:item.family,productGroup:group,key:`${brand.id}|${group}`,series:item.label});
+        });
         return;
       }
       const seen=new Set();
@@ -156,7 +150,12 @@
     const keys=[];
     document.querySelectorAll('#roleSelectionScopeGrid .role-selection-brand').forEach(group=>{
       const all=group.querySelector('input[data-selection-brand-all]');
-      if(all?.checked){keys.push(String(all.dataset.selectionBrandAll||''));return}
+      if(all?.checked){
+        keys.push(String(all.dataset.selectionBrandAll||''));
+        const g=group.querySelector('[data-selection-scope-key$="|G"]:checked');
+        if(g)keys.push(g.dataset.selectionScopeKey);
+        return;
+      }
       group.querySelectorAll('input[data-selection-scope-key]:checked').forEach(input=>keys.push(String(input.dataset.selectionScopeKey||'')));
     });
     return {keys:[...new Set(keys.filter(Boolean))]};
@@ -175,18 +174,18 @@
     grid.innerHTML=brands.map(brand=>{
       const brandId=String(brand.id),allKey=`${brandId}|*`,allSelected=selected.has(allKey),mine=entries.filter(entry=>String(entry.brand.id)===brandId);
       const seriesHtml=mine.length
-        ?mine.map(entry=>`<label><input type="checkbox" data-selection-scope-key="${esc(entry.key)}" data-selection-brand-id="${esc(brandId)}" ${(allSelected||entrySelected(entry))?'checked':''} ${(allSelected||!ownerCanAssign)?'disabled':''}> <span>${esc(entry.series||entry.family)}</span></label>`).join('')
+        ?mine.map(entry=>`<label><input type="checkbox" data-selection-scope-key="${esc(entry.key)}" data-selection-brand-id="${esc(brandId)}" ${((allSelected&&(entry.productGroup!=='G'||String(user?.role).toLowerCase()==='owner'))||entrySelected(entry))?'checked':''} ${(!ownerCanAssign)?'disabled':''}> <span>${esc(entry.series||entry.family)}</span></label>`).join('')
         :'<div class="role-note role-selection-no-series">No Series mapped yet. Authorize <b>All Products / Series</b> to keep this Brand available when Series are added later.</div>';
       return `<div class="role-selection-brand" data-selection-brand-group="${esc(brandId)}"><label class="role-selection-brand-all"><input type="checkbox" data-selection-brand-all="${esc(allKey)}" ${allSelected?'checked':''} ${ownerCanAssign?'':'disabled'}> <b>${esc(brand.brand_name||'Brand')}</b><span>All Products / Series</span></label><div class="role-selection-series-list">${seriesHtml}</div></div>`;
     }).join('');
     if(!ownerCanAssign)grid.insertAdjacentHTML('afterbegin','<div class="role-note" style="grid-column:1/-1"><b>Owner assigned:</b> Brand / Series visibility is read-only for non-Owner role managers.</div>');
     grid.querySelectorAll('input[data-selection-brand-all]').forEach(input=>input.addEventListener('change',()=>{
       const group=input.closest('.role-selection-brand');
-      group?.querySelectorAll('input[data-selection-scope-key]').forEach(series=>{series.checked=input.checked;series.disabled=input.checked});
+      group?.querySelectorAll('input[data-selection-scope-key]').forEach(series=>{series.checked=input.checked;});
     }));
     grid.querySelectorAll('input[data-selection-scope-key]').forEach(input=>input.addEventListener('change',()=>{
       const group=input.closest('.role-selection-brand'),all=group?.querySelector('input[data-selection-brand-all]');
-      if(all){const series=[...group.querySelectorAll('input[data-selection-scope-key]')];all.indeterminate=!all.checked&&series.some(item=>item.checked)&&series.some(item=>!item.checked)}
+      if(all){all.checked=false;const series=[...group.querySelectorAll('input[data-selection-scope-key]')];all.indeterminate=!all.checked&&series.some(item=>item.checked)&&series.some(item=>!item.checked)}
     }));
     updateSelectionScopeNote();
   }

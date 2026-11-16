@@ -151,6 +151,7 @@
   }
   function buildEffectiveMultipliers(book=state.baseMultipliers){
     const out={}; Object.entries(book||{}).forEach(([family,rates])=>{
+      if(['BGF','G'].includes(family)){out[family]={...rates};return}
       out[family]={...rates,USD:effectiveRate(rates?.USD,'USD'),RMB:effectiveRate(rates?.RMB,'RMB'),MYR:num(rates?.MYR,1)||1};
     }); return out;
   }
@@ -163,7 +164,7 @@
   function pumpDataOfRow(row){try{return JSON.parse(row?.dataset?.pumpData||'{}')}catch(_){return {}}}
   function sourceFamily(source,row=null){return String(source?.product_family||source?.family||source?.productFamily||row?.dataset?.productFamily||'').toUpperCase()}
   function inferFamilyFromPage(page=''){
-    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productBsv:'BSV',productBsw:'BSW',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorBsw:'BSW',selectorEs:'ES',selectorIso:'ISO'};
+    const map={productChc:'CHC',productCr:'CR',productKv:'KV',productBfi:'BFI',productBgf:'BGF',productG:'G',productBsv:'BSV',productBsw:'BSW',productIso:'ISO',productEs:'ES',productMotor:'MOTOR',productGws:'GWS',productKeyplc:'KEYPLC',productManifold:'MANIFOLD',productCoupling:'COUPLING',productBaseplate:'BASEPLATE',selector:'CHC',selectorCr:'CR',selectorKv:'KV',selectorBfi:'BFI',selectorBgf:'BGF',selectorBsw:'BSW',selectorEs:'ES',selectorIso:'ISO'};
     return map[page]||'';
   }
   function inferSeries(model,source={}){
@@ -873,7 +874,8 @@
       {label:'BGF',family:'BGF',productGroup:'BGF',page:'productBgf'},
       {label:'BSV',family:'BSV',productGroup:'BSV',page:'productBsv'},
       {label:'BSW',family:'BSW',productGroup:'BSW',page:'productBsw'},
-      {label:'End Suction',family:'ES',page:'productEs'},
+      {label:'ES',family:'ES',page:'productEs'},
+      {label:'G',family:'G',productGroup:'G',page:'productG'},
       {label:'ISO',family:'ISO',page:'productIso'},
       {label:'Motor',family:'MOTOR',page:'productMotor'}
     ],
@@ -893,9 +895,9 @@
       const group=f.productGroup||f.family;
       // V4.15.14: visible Left Panel name follows the saved Brand Series.
       // Engineering family / Price Group remains the routing source of truth.
-      const savedLabel=brandSeriesFor(brand,group);
+      const savedLabel=isMasterBrand(brand)?f.label:brandSeriesFor(brand,group);
       return {...f,label:String(savedLabel||f.label||productGroupLabel(group)).trim()};
-    });
+    }).sort((a,b)=>a.label.localeCompare(b.label,'en',{numeric:true}));
     // Price Group is now the commercial identity; base family only controls
     // which Product engine/page is used.
     const groups=new Set();state.mappings.filter(m=>m.active!==false&&String(m.brand_id)===String(brand.id)).forEach(m=>groups.add(normalizeProductGroup(m.master_family)));
@@ -910,6 +912,7 @@
   }
   function visibleFamilyLabel(item,peers=[]){
     const label=String(item?.label||productGroupLabel(item?.productGroup||item?.family)||'').trim();
+    if(isMasterBrand(item?.brand))return label;
     if(baseFamily(item?.productGroup||item?.family)!=='CHC')return label;
     const chcCount=(Array.isArray(peers)?peers:[]).filter(x=>baseFamily(x?.productGroup||x?.family)==='CHC').length;
     return chcCount===1?label.replace(/\s+C(?:4|6)$/i,'').trim():label;
@@ -948,7 +951,11 @@
         if(!keyAllowed.length&&!gwsAllowed)host.innerHTML='<div class="muted" style="padding:8px 10px">No Product Brand / Series is assigned to this user and selected Customer.</div>';
         return;
       }
-      allowed.forEach(item=>{const btn=document.createElement('button');btn.type='button';btn.className='v391-family-btn';const peers=allowed.filter(x=>String(x.brand?.id)===String(item.brand?.id));btn.textContent=visibleFamilyLabel(item,peers);btn.dataset.brandId=item.brand.id;btn.dataset.family=item.family;btn.dataset.page=item.page;if(item.generation)btn.dataset.generation=item.generation;const genOk=!item.generation||productChcGeneration()===item.generation;if(String(state.selectedBrandId)===String(item.brand.id)&&String(state.selectedFamily)===item.family&&genOk)btn.classList.add('active');btn.onclick=()=>{if(!setSelectedBrand(item.brand.id,item.family,item.page,item.productGroup||item.family))return;if(item.generation)activateChcGeneration(item.generation);document.querySelectorAll('.v391-family-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');window.KeySuiteApp?.showPage?.(item.page);postBrandContext(item.page);decorateProductDisplaySoon()};host.appendChild(btn)});
+      const masterHost=document.createElement('details');
+      masterHost.className='v391-direct-brand-root v391-bgreich-root';
+      masterHost.innerHTML='<summary>B.G.Reich</summary><div class="v391-bgreich-list"></div>';
+      if(allowed.some(item=>isMasterBrand(item.brand)))host.appendChild(masterHost);
+      allowed.forEach(item=>{const btn=document.createElement('button');btn.type='button';btn.className='v391-family-btn';const peers=allowed.filter(x=>String(x.brand?.id)===String(item.brand?.id));btn.textContent=visibleFamilyLabel(item,peers);btn.dataset.brandId=item.brand.id;btn.dataset.family=item.family;btn.dataset.page=item.page;if(item.generation)btn.dataset.generation=item.generation;const genOk=!item.generation||productChcGeneration()===item.generation;if(String(state.selectedBrandId)===String(item.brand.id)&&String(state.selectedFamily)===item.family&&genOk)btn.classList.add('active');btn.onclick=()=>{if(!setSelectedBrand(item.brand.id,item.family,item.page,item.productGroup||item.family))return;if(item.generation)activateChcGeneration(item.generation);document.querySelectorAll('.v391-family-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');window.KeySuiteApp?.showPage?.(item.page);postBrandContext(item.page);decorateProductDisplaySoon()};(isMasterBrand(item.brand)?masterHost.lastElementChild:host).appendChild(btn)});
       return;
     }
     // V4.04.21 Product hierarchy: Keylargo, B.G.Reich and TESK are first-class top-level groups.
@@ -958,7 +965,7 @@
     const navBrands=navigationCommercialBrands();
     const bg=navBrands.find(b=>String(b.brand_key||'').toLowerCase()==='b.g.reich'||String(b.brand_name||'').toLowerCase()==='b.g.reich')||null;
     const tesk=navBrands.find(b=>String(b.brand_key||'').toLowerCase()==='tesk'||String(b.brand_name||'').toLowerCase()==='tesk')||null;
-    const addFamilyButtons=(host,b,families)=>{if(!host||!b)return;const eligible=families.filter(f=>authority()?.isBrandSeriesAllowed?.(b.id,f.productGroup||f.family)&&customerAllowsProduct(b.id,f.productGroup||f.family,f.family));eligible.forEach(f=>{const btn=document.createElement('button');btn.type='button';btn.className='v391-family-btn';btn.textContent=visibleFamilyLabel(f,eligible);btn.dataset.brandId=b.id;btn.dataset.family=f.family;btn.dataset.page=f.page;if(f.generation)btn.dataset.generation=f.generation;const genOk=!f.generation||productChcGeneration()===f.generation;if(String(state.selectedBrandId)===String(b.id)&&String(state.selectedFamily)===f.family&&genOk)btn.classList.add('active');btn.onclick=()=>{setSelectedBrand(b.id,f.family,f.page,f.productGroup||f.family);if(f.generation)activateChcGeneration(f.generation);document.querySelectorAll('.v391-family-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');window.KeySuiteApp?.showPage?.(f.page);postBrandContext(f.page);decorateProductDisplaySoon();};host.appendChild(btn)});};
+    const addFamilyButtons=(host,b,families)=>{if(!host||!b)return;const eligible=families.filter(f=>authority()?.isBrandSeriesAllowed?.(b.id,f.productGroup||f.family)&&customerAllowsProduct(b.id,f.productGroup||f.family,f.family));eligible.forEach(f=>{const btn=document.createElement('button');btn.type='button';btn.className='v391-family-btn';btn.textContent=visibleFamilyLabel({...f,brand:b},eligible);btn.dataset.brandId=b.id;btn.dataset.family=f.family;btn.dataset.page=f.page;if(f.generation)btn.dataset.generation=f.generation;const genOk=!f.generation||productChcGeneration()===f.generation;if(String(state.selectedBrandId)===String(b.id)&&String(state.selectedFamily)===f.family&&genOk)btn.classList.add('active');btn.onclick=()=>{setSelectedBrand(b.id,f.family,f.page,f.productGroup||f.family);if(f.generation)activateChcGeneration(f.generation);document.querySelectorAll('.v391-family-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');window.KeySuiteApp?.showPage?.(f.page);postBrandContext(f.page);decorateProductDisplaySoon();};host.appendChild(btn)});};
     if(bg)addFamilyButtons(bgHost,bg,brandFamilies(bg));else tree.querySelector('.v391-bgreich-root')?.remove();
     if(tesk&&brandFamilies(tesk).length)addFamilyButtons(teskHost,tesk,brandFamilies(tesk));else tree.querySelector('.v391-tesk-root')?.remove();
     // V4.13: GWS is a first-class expandable left-panel group below TESK.
@@ -1330,6 +1337,6 @@
     let appTries=0;const waitApp=()=>{appTries++;if(window.KeySuiteApp&&window.KeySuitePricing){wrapPricing();wrapApp();observeQuote();observeProductDisplay();bindSelectionDefaults();addCustomerBrandSection();bindMaterialContext();if(state.coreReady){renderProductTree();decorateProductDisplay()}return}if(appTries<60)setTimeout(waitApp,250);else console.warn('KeySuite V4.01: pricing/app wrappers were not ready; Brand navigation remains available.');};waitApp();
   }
 
-  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,resolveChcIdentity,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
+  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,brandFamilies,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,resolveChcIdentity,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

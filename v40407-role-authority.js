@@ -88,6 +88,7 @@
   function isBrandSeriesAllowed(brandId,family){
     if(!scopeEnforced())return true;
     const bid=norm(brandId),requested=normalizeProductGroup(family),fam=familyOf(requested)||requested,set=scopeSet();
+    if(requested==='G'&&role()!=='owner')return set.has(keyOf(bid,'G'));
     if(set.has(brandAllKey(bid)))return true;
     if(requested&&set.has(keyOf(bid,requested)))return true;
     // Backward compatibility: an older CHC scope authorizes both C4/G1 and C6/G2 until the Owner resaves it.
@@ -100,7 +101,7 @@
     const requested=normalizeProductGroup(family),fam=familyOf(requested)||requested;
     if(!scopeEnforced())return {brandId:norm(brandId),family:requested||fam};
     const keys=scopeKeys(),bid=norm(brandId),all=brandAllKey(bid);
-    if(bid&&requested&&keys.includes(all))return {brandId:bid,family:requested};
+    if(bid&&requested&&keys.includes(all)&&isBrandSeriesAllowed(bid,requested))return {brandId:bid,family:requested};
     if(bid&&requested&&isBrandSeriesAllowed(bid,requested)){
       if(keys.includes(keyOf(bid,requested)))return {brandId:bid,family:requested};
       if((requested==='CHC_G1'||requested==='CHC_G2')&&keys.includes(keyOf(bid,'CHC')))return {brandId:bid,family:requested};
@@ -127,6 +128,8 @@
       if(!can('use_selector')&&!quickBridge)return false;
       return !scopeEnforced()||allowedFamilies().includes(family);
     }
+    if(id==='productG')return can('use_product')&&(brandApi()?.state?.brands||[]).some(brand=>
+      brand.active!==false&&isMasterBrand(brand)&&brandApi()?.brandFamilies?.(brand).some(item=>item.page===id&&isBrandSeriesAllowed(brand.id,item.productGroup||item.family)));
     if(Object.prototype.hasOwnProperty.call(PRODUCT_PAGE_FAMILY,id)){
       if(!can('use_product'))return false;
       return !scopeEnforced()||allowedFamilies().includes(PRODUCT_PAGE_FAMILY[id]);

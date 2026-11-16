@@ -56,6 +56,6 @@ async function save(product,tr,cur){
  catch(error){console.error(error);message(error?.message||'BGF price could not be saved.','error')}
  finally{button.disabled=false;button.textContent='Save'}
 }
-function init(data,nextAccess){access=nextAccess||{};const loaded=(data?.bgfProducts||[]).map(normalize),byId=new Map(loaded.map(row=>[row.id,row]));rows=FALLBACK.map(base=>normalize({...base,...(byId.get(base.id)||{})}));$('bgfPriceCurrency')?.addEventListener('change',render);render();if(!loaded.length)message(`BGF database rows are not installed. Apply the V5.00.06 migration. Prices in ${SOURCE} are blank and remain unpriced.`,'info');else message(`Verified against ${SOURCE}. Blank source prices remain 0 and are not quotable.`,'info')}
+function init(data,nextAccess){access=nextAccess||{};const loaded=(data?.bgfProducts||[]).map(normalize),byId=new Map(loaded.map(row=>[row.id,row]));rows=FALLBACK.map(base=>normalize({...base,...(byId.get(base.id)||{})}));render();if(!loaded.length)message(`BGF database rows are not installed. Apply the V5.00.06 migration. Prices in ${SOURCE} are blank and remain unpriced.`,'info');else message(`Verified against ${SOURCE}. Blank source prices remain 0 and are not quotable.`,'info')}
 window.KeySuiteBGF={version:'5.00.26',init,render,description,source:SOURCE,models:()=>rows.map(row=>({...row})),routeSelection,quoteModel:(model,duty={})=>{const row=rows.find(p=>String(p.model).toUpperCase()===String(model||'').toUpperCase());return row?quote(row,duty):false}};
 })();

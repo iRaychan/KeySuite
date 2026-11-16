@@ -52,28 +52,55 @@ function setupCurve(){const d=$('gCurveDialog');if(!d)return;d.querySelector('[d
 function renderPrices(){
  const body=$('gPriceRows');if(!body)return;body.innerHTML='';
  const c=currency(),field='price_'+c.toLowerCase(),rf='rarity_'+c.toLowerCase();
+ const owner=String(access.role).toLowerCase()==='owner';
+ const pairs=new Map();
  for(const p of rows){
+  if(!pairs.has(p.base))pairs.set(p.base,{});
+  pairs.get(p.base)[p.phase]=p;
+ }
+ for(const [base,pair] of pairs){
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><b>${esc(p.base)}</b></td><td>${esc(p.model)}</td><td>${esc(p.phase)}</td><td><div class="currency-price-input"><span>${c}</span><input type="number" min="0" step="0.01" data-price value="${Number(p[field]||0)}" ${access.role==='owner'?'':'disabled'}></div></td><td><select data-rarity ${access.role==='owner'?'':'disabled'}><option value="many">Many</option><option value="common">Common</option><option value="rare">Rare</option><option value="fixed">Fixed</option></select></td><td><button class="btn" type="button" data-save ${access.role==='owner'?'':'hidden'}>Save</button></td>`;
-  tr.querySelector('[data-rarity]').value=p[rf]||'many';
-  tr.querySelector('[data-save]').onclick=async()=>{
-   const client=window.KeySuiteAuth?.getClient?.(),price=Number(tr.querySelector('[data-price]').value),rarity=tr.querySelector('[data-rarity]').value;
-   if(!client||!Number.isFinite(price)||price<0)return;
-   const {data,error}=await client.from('ks_products_g').update({[field]:price,[rf]:rarity,updated_at:new Date().toISOString()}).eq('id',p.id).select('id').maybeSingle();
-   const note=$('gPriceListMessage');note.textContent=error?.message||(!data?.id?'Owner permission or G migration is required.':p.model+' price saved.');
-   if(data?.id){p[field]=price;p[rf]=rarity;window.KEYSUITE_SECURE_DATA.gProducts=rows}
+  const phases=['1Ph','3Ph'],lock=owner?'':'disabled';
+  const cell=phase=>pair[phase]?`<div class="bfi-price-pair"><div class="currency-price-input"><span>${c}</span><input type="number" min="0" step="0.01" data-price="${phase}" value="${Number(pair[phase][field]||0)}" aria-label="${esc(base)} ${phase} ${c} price" ${lock}></div><select aria-label="${esc(base)} ${phase} rarity" data-rarity="${phase}" ${lock}><option value="many">Many</option><option value="common">Common</option><option value="rare">Rare</option><option value="fixed">Fixed</option></select></div>`:'<span class="muted">N/A</span>';
+  tr.innerHTML=`<td><b>${esc(base)}</b></td>${phases.map(phase=>`<td>${cell(phase)}</td>`).join('')}<td>${owner&&phases.every(phase=>pair[phase])?'<button class="btn" type="button" data-save>Save</button>':''}</td>`;
+  for(const phase of phases){
+   const select=tr.querySelector(`[data-rarity="${phase}"]`);
+   if(select)select.value=pair[phase][rf]||'many';
+  }
+  const button=tr.querySelector('[data-save]');
+  if(button)button.onclick=async()=>{
+   const client=window.KeySuiteAuth?.getClient?.(),note=$('gPriceListMessage');
+   if(!client||button.disabled)return;
+   const entries=phases.map(phase=>({
+    price:Number(tr.querySelector(`[data-price="${phase}"]`).value),
+    rarity:tr.querySelector(`[data-rarity="${phase}"]`).value
+   }));
+   const report=(text,error)=>{note.textContent=text;note.className='auth-message show '+(error?'error':'info')};
+   if(entries.some(entry=>!Number.isFinite(entry.price)||entry.price<0)){report('Enter valid non-negative phase prices.',true);return}
+   button.disabled=true;
+   try{
+    const [single,three]=entries;
+    const {error}=await client.rpc('keysuite_save_g_price_pair_v50071',{
+     p_base_model:base,p_currency:c,p_price_1ph:single.price,p_price_3ph:three.price,
+     p_rarity_1ph:single.rarity,p_rarity_3ph:three.rarity
+    });
+    if(error)throw error;
+    for(const [i,phase] of phases.entries())Object.assign(pair[phase],{[field]:entries[i].price,[rf]:entries[i].rarity});
+    if(window.KEYSUITE_SECURE_DATA)window.KEYSUITE_SECURE_DATA.gProducts=rows;
+    report(base+' prices saved.',false);
+   }catch(error){report(error.message||String(error),true)}
+   finally{button.disabled=false}
   };
   body.appendChild(tr);
  }
- $('gPriceListCount').textContent=`${rows.length} variants · ${c} · ${rows.filter(p=>Number(p[field])>0).length} priced`;
+ $('gPriceListCount').textContent=`${pairs.size} models · ${c}`;
 }
 function init(data,a){
  access=a||{};const fromDb=new Map((data?.gProducts||[]).map(p=>[p.id,p]));
  rows=source.map(p=>({...p,...fromDb.get(p.id)}));
- $('gPriceCurrency')?.addEventListener('change',renderPrices);
  renderProduct();renderPrices();
  if(!fromDb.size)$('gPriceListMessage').textContent='G database rows are not installed. Apply the V5.00.68 migration before saving prices.';
 }
 document.addEventListener('DOMContentLoaded',()=>{renderProduct();renderPrices();setupCurve()});
-window.KeySuiteG={init,models:()=>rows,description,quoteModel(name){const p=model(name);if(p)quote(p)}};
+window.KeySuiteG={init,renderPrices,models:()=>rows,description,quoteModel(name){const p=model(name);if(p)quote(p)}};
 })();

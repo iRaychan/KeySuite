@@ -12,6 +12,8 @@
   const el=id=>document.getElementById(id);
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const permissionLevel=()=>window.KeySuitePermissions?.level?.('manage_price_list',String(access?.role||window.KEYSUITE_ACCESS?.role||'viewer').toLowerCase())||'none';
+  const managedRates=prefix=>['bgf','g'].includes(prefix);
+  const canEditMultiplier=prefix=>isOwner()&&(!managedRates(prefix)||String(access?.role).toLowerCase()==='owner');
   const canView=()=>permissionLevel()!=='none';
   const isOwner=()=>permissionLevel()==='full';
   const chcG2Products=()=>secureData.products||[];
@@ -24,7 +26,7 @@
   const validRarity=value=>['common','many','rare','fixed'].includes(String(value||'').toLowerCase())?String(value).toLowerCase():'common';
   const currencyStorageKey=prefix=>prefix==='chc'?`ks_chc_${selectedChcGeneration.toLowerCase()}_price_currency`:`ks_${prefix}_price_currency`;
   const currentCurrency=prefix=>validCurrency(el(`${prefix}PriceCurrency`)?.value||localStorage.getItem(currencyStorageKey(prefix))||(prefix==='chc'&&selectedChcGeneration==='G2'?localStorage.getItem('ks_chc_price_currency'):'')||'USD');
-  const familyCode=prefix=>{const family=String(prefix||'chc').toUpperCase();return ['CHC','BFI','BSV','BSW','ES','ISO','GWS','KEYPLC'].includes(family)?family:'CHC'};
+  const familyCode=prefix=>{const family=String(prefix||'chc').toUpperCase();return ['CHC','BFI','BGF','G','BSV','BSW','ES','ISO','GWS','KEYPLC'].includes(family)?family:'CHC'};
   const multiplierFamilyCode=prefix=>prefix==='chc'?(selectedChcGeneration==='G1'?'CHC_G1':'CHC_G2'):familyCode(prefix);
   const multiplierFamilyLabel=prefix=>prefix==='chc'?`CHC ${selectedChcGeneration}`:familyCode(prefix);
   const multiplierStateKey=(prefix,currency)=>prefix==='chc'?`chc:${selectedChcGeneration}:${currency}`:`${prefix}:${currency}`;
@@ -264,7 +266,7 @@
 
   function renderSettings(prefix){
     const select=el(`${prefix}PriceCurrency`);
-    if(select){const fallback=prefix==='chc'&&selectedChcGeneration==='G2'?localStorage.getItem('ks_chc_price_currency'):'';const saved=validCurrency(localStorage.getItem(currencyStorageKey(prefix))||fallback||(prefix==='bsw'?'RMB':'USD'));select.value=saved}
+    if(select){const fallback=prefix==='chc'&&selectedChcGeneration==='G2'?localStorage.getItem('ks_chc_price_currency'):'';const saved=validCurrency(localStorage.getItem(currencyStorageKey(prefix))||fallback||(managedRates(prefix)?'MYR':prefix==='bsw'?'RMB':'USD'));select.value=saved}
     renderMultiplierInputs(prefix);
   }
 
@@ -275,7 +277,7 @@
   }
 
   async function saveMultiplier(prefix,currency){
-    if(!isOwner()){message(prefix,'Your role is not allowed to maintain Price List settings.','error');return}
+    if(!canEditMultiplier(prefix)){message(prefix,'Your role is not allowed to maintain Price List settings.','error');return}
     const key=multiplierStateKey(prefix,currency);
     if(!unlockedMultipliers.has(key))return;
     let value;
@@ -288,12 +290,12 @@
         ? await client.rpc('keysuite_save_bfi_multiplier_v42302',{p_currency:currency,p_multiplier:value})
         : (family==='CHC_G1'||family==='CHC_G2')
           ? await client.rpc('keysuite_save_chc_generation_multiplier_v42502',{p_generation:selectedChcGeneration,p_currency:currency,p_multiplier:value})
-          : await client.rpc(['BSV','BSW'].includes(family)?'keysuite_save_submersible_multiplier_v50044':'keysuite_save_product_pricelist_multiplier_v119',{p_product_code:family,p_currency:currency,p_multiplier:value});
+          : await client.rpc(managedRates(prefix)?'keysuite_save_bgf_g_multiplier_v50071':['BSV','BSW'].includes(family)?'keysuite_save_submersible_multiplier_v50044':'keysuite_save_product_pricelist_multiplier_v119',{p_product_code:family,p_currency:currency,p_multiplier:value});
       const {data,error}=result;if(error)throw error;
       const saved=Array.isArray(data)?data[0]:data||{};
       secureData.productMultipliers=secureData.productMultipliers||{};
       if(family==='BFI')secureData.productMultipliers[family]={...ratesFor(prefix),[currency]:value,MYR:1};
-      else secureData.productMultipliers[family]={USD:Number(saved.usd_multiplier??ratesFor(prefix).USD),RMB:Number(saved.rmb_multiplier??ratesFor(prefix).RMB),MYR:1};
+      else secureData.productMultipliers[family]={USD:Number(saved.usd_multiplier??(currency==='USD'?value:ratesFor(prefix).USD)),RMB:Number(saved.rmb_multiplier??(currency==='RMB'?value:ratesFor(prefix).RMB)),MYR:1};
       if(family==='CHC_G2')secureData.productMultipliers.CHC={...secureData.productMultipliers.CHC_G2};
       if(window.KEYSUITE_SECURE_DATA)window.KEYSUITE_SECURE_DATA.productMultipliers=secureData.productMultipliers;
       originalMultiplierValues.delete(key);setMultiplierUnlocked(prefix,currency,false);renderMultiplierInputs(prefix);
@@ -312,7 +314,7 @@
   }
 
   function beginMultiplierUnlock(prefix,currency){
-    const key=multiplierStateKey(prefix,currency);if(!isOwner()||unlockedMultipliers.has(key))return;
+    const key=multiplierStateKey(prefix,currency);if(!canEditMultiplier(prefix)||unlockedMultipliers.has(key))return;
     const input=el(multiplierInputId(prefix,currency));
     originalMultiplierValues.set(key,input?.value||ratesFor(prefix)[currency]);
     setMultiplierUnlocked(prefix,currency,true);
@@ -492,11 +494,16 @@
     esTableWrap?.addEventListener('scroll',()=>{if(syncingEsScroll||!esTopScroll)return;syncingEsScroll=true;esTopScroll.scrollLeft=esTableWrap.scrollLeft;requestAnimationFrame(()=>syncingEsScroll=false)});
     window.addEventListener('resize',syncEsScrollWidth);
     bindCurrency('chc',renderChcRows);bindCurrency('es',renderEsRows);bindCurrency('bsv',()=>window.KeySuiteBSV?.renderPrices());bindCurrency('bsw',()=>window.KeySuiteBSWPricing?.render());bindCurrency('iso',()=>window.KeySuiteISO?.renderPrices?.());bindCurrency('gws',renderGwsRows);bindCurrency('keyplc',renderKeyplcRows);
+    bindCurrency('bgf',()=>window.KeySuiteBGF?.render());
+    bindCurrency('g',()=>window.KeySuiteG?.renderPrices());
     document.querySelectorAll('.pricelist-multiplier-lock').forEach(bindMultiplierGroup);
     window.addEventListener('keysuite-price-list-rendered',applyAuthorityMode);
   }
 
   function applyAuthorityMode(){
+    for(const prefix of ['bgf','g']){
+      document.querySelectorAll(`#${prefix}PriceList .multiplier-hold-input`).forEach(input=>input.disabled=!canEditMultiplier(prefix));
+    }
     const editable=isOwner();
     ['chcPriceList','bfiPriceList','esPriceList','isoPriceList','gwsPriceList','keyplcPriceList'].forEach(pageId=>{
       const page=el(pageId);if(!page)return;
@@ -529,7 +536,7 @@
 
   function render(){
     if(!canView())return;
-    renderSettings('chc');renderSettings('bfi');renderSettings('es');renderSettings('iso');renderSettings('bsv');renderSettings('bsw');renderSettings('gws');renderSettings('keyplc');renderChcRows();renderChcSealAddons();renderEsRows();window.KeySuiteISO?.renderPrices?.();renderGwsRows();renderKeyplcRows();applyAuthorityMode();applyChcGenerationMode();
+    renderSettings('chc');renderSettings('bfi');renderSettings('bgf');renderSettings('g');renderSettings('es');renderSettings('iso');renderSettings('bsv');renderSettings('bsw');renderSettings('gws');renderSettings('keyplc');renderChcRows();renderChcSealAddons();renderEsRows();window.KeySuiteISO?.renderPrices?.();renderGwsRows();renderKeyplcRows();applyAuthorityMode();applyChcGenerationMode();
     const notice=el('priceListAccessNotice');if(notice)notice.innerHTML=`Signed in as <b>${esc(access?.display_name||access?.email||'user')}</b>. Each product family keeps its own USD/RMB rates. CHC/GWS rarity is stored per currency; ES and KeyPLC rarity is stored once per model.${isOwner()?'':' View-only access.'}`;
   }
 
