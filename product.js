@@ -49,8 +49,15 @@
   function options(){return {material:$('productMaterial')?.value||'SS304 (Cast Iron Connection)',seal:$('productSeal')?.value||'Car/Cer',elastomer:$('productElastomer')?.value||'Viton',connection:$('productConnection')?.value||'round',bare:!!$('productBareShaft')?.checked,hz:50}}
   function postToFrame(frame,message){try{frame.contentWindow.postMessage(message,'*')}catch(error){console.error('Unable to contact CHC product frame.',error)}}
   function send(model,action){
+    const opts=options();
+    let sellingBrandId='';
+    if(selectedChcGeneration==='G1'&&action==='add'){
+      const context=window.KeySuiteV391?.brandContext?.(undefined,'CHC',opts.material,'CHC_G1');
+      if(!context?.id){alert('Select the selling brand and C4 series again before quoting.');return;}
+      sellingBrandId=context.id;
+    }
     const frame=ensureFrame();if(!frame)return;
-    const message={type:'KEYSUITE_PRODUCT_MODEL',model,action,options:options()};
+    const message={type:'KEYSUITE_PRODUCT_MODEL',model,action,options:opts,sellingBrandId};
     if(frameReady){queued=null;postToFrame(frame,message)}else queued=message;
   }
 

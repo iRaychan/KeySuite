@@ -1947,7 +1947,10 @@ alternatives.innerHTML='';
   if(msg.type==='KEYSUITE_PRODUCT_ACTION'){if(!productFrame)return;if(msg.action==='export')setTimeout(()=>exportPDF(msg.filename),60);else if(msg.action==='assembly')send('assembly');else if(msg.action==='quotation')send('quotation');return;}
   if(msg.type==='KEYSUITE_PRODUCT_MODEL'){
    const payload=prepareProductModel(msg.model,msg.options||{});if(!payload){if(productFrame){try{window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'CHC',model:String(msg.model||''),valid:false,error:'MODEL_NOT_FOUND'},'*')}catch(_){}}else alert('This CHC model could not be loaded.');return}
-   if(['add','assembly'].includes(msg.action))window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload},'*');
+   if(['add','assembly'].includes(msg.action)){
+    if(msg.action==='add'&&msg.sellingBrandId)payload.keysuite_selling_brand_id=msg.sellingBrandId;
+    window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload},'*');
+   }
    else if(msg.action==='export')setTimeout(()=>exportPDF(msg.filename),120);return;
   }
   if(msg.type==='KEYSUITE_REQUEST_SELECTION'){const data=currentSelection();window.parent?.postMessage(data?{type:'KEYSUITE_ADD_SELECTION',payload:data,route:msg.route||'quotation'}:{type:'KEYSUITE_SELECTION_EMPTY'},'*');return}

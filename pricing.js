@@ -725,6 +725,7 @@
     let beforeFuelTotal=0,transportTotal=0,maxFuelCharge=0;
     for(const component of components||[]){
       const qty=Math.max(0,Number(component?.qty||0)),calc=component?.calc||{},fixed=calc.fixedPrice===true;
+      if(!qty)continue;
       const beforeFuel=Number(fixed?calc.finalPrice:(calc.beforeFuel??calc.unroundedPrice??calc.finalPrice)||0);
       beforeFuelTotal+=qty*Math.max(0,beforeFuel);transportTotal+=qty*Math.max(0,Number(calc.transport)||0);maxFuelCharge=Math.max(maxFuelCharge,Math.max(0,Number(calc.fuelCharge)||0));
     }
@@ -785,7 +786,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     }
     const fuelCharge=roots.reduce((max,row)=>Math.max(max,row.fuelCharge),0),fuelSharePerBom=bomCount>0?fuelCharge/bomCount:0,rows={},transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
     let total=0;
-    for(const row of roots){const unitBeforeFuel=row.qty>0?row.beforeFuelLine/row.qty:0,fuelSharePerUnit=row.qty>0?fuelSharePerBom/row.qty:0,unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit),lineTotal=row.qty*unitPrice;rows[row.id]={...row,unitBeforeFuel,fuelShare:fuelSharePerBom,fuelSharePerUnit,unitPrice,lineTotal};total+=lineTotal}
+    for(const row of roots){const unitBeforeFuel=row.qty>0?row.beforeFuelLine/row.qty:0,fuelShare=row.qty>0?fuelSharePerBom:0,fuelSharePerUnit=row.qty>0?fuelShare/row.qty:0,unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit),lineTotal=row.qty*unitPrice;rows[row.id]={...row,unitBeforeFuel,fuelShare,fuelSharePerUnit,unitPrice,lineTotal};total+=lineTotal}
     return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule:'VISIBLE_BOM_EQUAL_FUEL_SHARE_ROUND_EACH_UNIT'};
   }
 

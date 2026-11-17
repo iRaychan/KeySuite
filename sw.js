@@ -1,5 +1,5 @@
-/* KeySuite V5.00.74 Service Worker. */
-const CACHE='keysuite-v50074-gpdf';
+/* KeySuite V5.00.75 Service Worker. */
+const CACHE='keysuite-v50075';
 const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50074"></script>';
 const SHELL=[
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',

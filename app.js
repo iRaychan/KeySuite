@@ -1895,6 +1895,10 @@ window.addEventListener('message',function(event){
  }
  if(!canEditQuotation(true))return;
  if(!ensureQuotationPricingContext('add a pump to the quotation'))return;
+ const brandApi=window.KeySuiteV391;
+ const pinnedBrandId=event.origin===location.origin&&event.source===$('productSelectorFrame')?.contentWindow
+   ? p.keysuite_selling_brand_id : '';
+ const sellingId=String(pinnedBrandId||brandApi?.brandContext?.()?.id||'');
  showPage('quotation');
  const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);
  if(selectedCustomer){refreshQuotationContacts();$('payment').value=formatCustomerTerms(selectedCustomer);}
@@ -1950,7 +1954,14 @@ window.addEventListener('message',function(event){
    `Material: ${materialLine}`
  ].filter(Boolean);
  const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
- if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){void window.KeySuiteManualPrice.offer({model:itemModel,description:lines.join('\n'),pumpData:p,productFamily:'CHC'},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;}
+ if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){
+   const context=pinnedBrandId?brandApi?.brandContext?.(sellingId,'CHC',material,p.keysuite_product_group_code):null;
+   const sellingModel=context&&brandApi.resolveChcIdentity?.(sellingId,p.keysuite_product_group_code,displayQuotationModel,material)?.sellingModel;
+   const model=sellingModel?[sellingModel,modelDutyText].filter(Boolean).join(' — '):itemModel;
+   const description=context?brandedQuotationDescription(lines.join('\n').replace(`Pump Model: ${displayQuotationModel}`,()=>`Pump Model: ${sellingModel||displayQuotationModel}`),context.name):lines.join('\n');
+   const pumpData=context?{...p,keysuite_brand_id:sellingId,keysuite_brand_name:context.name,quotation_model:sellingModel||displayQuotationModel}:p;
+   void window.KeySuiteManualPrice.offer({model,description,pumpData,productFamily:'CHC',...(context?{brandId:sellingId,brand:context.name}:null)},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;
+ }
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
@@ -1959,13 +1970,10 @@ window.addEventListener('message',function(event){
    row.querySelector('.item-price').value=Number(pricedSelection.calc.finalPrice||0).toFixed(2);row.dataset.pricingSource=JSON.stringify(window.KeySuitePricing?.sourceSnapshot?.(pricedSelection)||{});
  }else if(window.KeySuitePricing?.applyPriceToQuoteRow)window.KeySuitePricing.applyPriceToQuoteRow(row,quotationModel,{seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class});
  // V4.15.10: pricing above intentionally uses the technical/source CHC identity.
- // After pricing, hand the finished quote row to the currently selected Selling Brand.
- // This is required for OEM: source B.G.Reich / CHC stays internal, while quotation
- // becomes unbranded and uses the mapped Selling Sub Series (for example VMS).
+ // A Product C4 request carries the selling brand captured at the click.
+ // The technical CHC identity above remains the authority for source pricing.
  const applySelectedSellingBrand=()=>{
    try{
-     const brandApi=window.KeySuiteV391,ctx=brandApi?.brandContext?.();
-     const sellingId=String(p.keysuite_selling_brand_id||ctx?.id||'');
      if(sellingId)brandApi?.stampRowBrand?.(row,sellingId,'CHC',{force:true});
    }catch(error){console.warn('[KeySuite V4.15.10] Selling Brand quote handoff skipped.',error)}
  };

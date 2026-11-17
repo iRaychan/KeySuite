@@ -79,6 +79,15 @@ function consolidatedPricing(d=current,mode='assembly'){
 }
 function total(d=current){return Number(consolidatedPricing(d)?.total??componentDisplayedTotal(d))}
 function quoteUnitPrice(d=current){const value=Number(d?.quote_unit_price);return d?.quote_price_manual&&Number.isFinite(value)?Math.max(0,value):total(d)}
+function auditBomPricing(d){
+ const pricing=consolidatedPricing(d);
+ const rows=(d?.items||[]).map(item=>{
+   const calculated=pricing?.rows?.[item.id],qty=Number(item.qty||0);
+   const unitPrice=calculated?.unitPrice??Number(item.unitPrice||0);
+   return {model:item.bomDescription||item.model,qty,unitPrice,lineTotal:qty*unitPrice,fuelShare:calculated?.fuelShare??null};
+ });
+ return {rows,total:pricing?.total??componentDisplayedTotal(d),usedStoredPrices:!pricing&&rows.length>0};
+}
 function syncQuoteUnitPrice(d=current){if(!d)return;if(!d.quote_price_manual)d.quote_unit_price=total(d)}
 function sourceCostAvailable(item){
  const source=sourceObject(item),currency=String(source.source_currency||source.currency||'').toUpperCase(),sourcePrice=Number(source.source_price??source.sourcePrice??0);
@@ -712,5 +721,5 @@ document.addEventListener('DOMContentLoaded',()=>{
  preview?.addEventListener('dblclick',openDescriptionEditor);preview?.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openDescriptionEditor()}});
  $('saveAssemblyDescriptionPopup')?.addEventListener('click',()=>{current.description_manual=true;current.description=normalizeDescriptionIndentation(popup.value);main.value=current.description;renderDescriptionPreview();scheduleAutoSave(100)})
 });
-window.KeySuiteAssembly={open,addItem,routeItem,toSystem,toQuotation,quotePumpsetSelection,pageShown,resetForNewQuotation,refreshPricing,getCurrentDraft:()=>current?JSON.parse(JSON.stringify(current)):null,getCurrentPumpsetContext:()=>type==='pumpset'&&current?pumpsetCouplingContext(current.items||[]):{},isCurrentCouplingSuppressed:()=>!!current?.auto_suppressed?.coupling,getCurrentCouplingItems:()=>({auto:autoCouplingItems(current).map(item=>JSON.parse(JSON.stringify(item))),manual:manualCouplingItems(current).map(item=>JSON.parse(JSON.stringify(item)))}),formatPumpsetDescription:completedPumpsetDescription,refreshAutomaticPanel:()=>{if(current){syncAutomaticComponents(current);render();scheduleAutoSave(100)}}};
+window.KeySuiteAssembly={open,addItem,routeItem,toSystem,toQuotation,quotePumpsetSelection,pageShown,resetForNewQuotation,refreshPricing,auditBomPricing,getCurrentDraft:()=>current?JSON.parse(JSON.stringify(current)):null,getCurrentPumpsetContext:()=>type==='pumpset'&&current?pumpsetCouplingContext(current.items||[]):{},isCurrentCouplingSuppressed:()=>!!current?.auto_suppressed?.coupling,getCurrentCouplingItems:()=>({auto:autoCouplingItems(current).map(item=>JSON.parse(JSON.stringify(item))),manual:manualCouplingItems(current).map(item=>JSON.parse(JSON.stringify(item)))}),formatPumpsetDescription:completedPumpsetDescription,refreshAutomaticPanel:()=>{if(current){syncAutomaticComponents(current);render();scheduleAutoSave(100)}}};
 })();
