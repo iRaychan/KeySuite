@@ -1948,8 +1948,7 @@ alternatives.innerHTML='';
   if(msg.type==='KEYSUITE_PRODUCT_MODEL'){
    const payload=prepareProductModel(msg.model,msg.options||{});if(!payload){if(productFrame){try{window.parent?.postMessage({type:'KEYSUITE_PRODUCT_CURVE_STATE',family:'CHC',model:String(msg.model||''),valid:false,error:'MODEL_NOT_FOUND'},'*')}catch(_){}}else alert('This CHC model could not be loaded.');return}
    if(['add','assembly'].includes(msg.action)){
-    if(msg.action==='add'&&msg.sellingBrandId)payload.keysuite_selling_brand_id=msg.sellingBrandId;
-    window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload},'*');
+    window.parent?.postMessage({type:'KEYSUITE_ADD_SELECTION',route:msg.action==='add'?'quotation':msg.action,payload,quoteRequestId:msg.quoteRequestId},'*');
    }
    else if(msg.action==='export')setTimeout(()=>exportPDF(msg.filename),120);return;
   }

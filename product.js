@@ -48,16 +48,27 @@
   function ensureFrame(){const frame=$('productSelectorFrame');if(!frame)return frame;const wanted=selectedChcGeneration==='G1'?(frame.dataset.g1Src||'selector-g1/product.html?product=1&v=42314'):(frame.dataset.g2Src||frame.dataset.src||'selector/product.html?product=1&v=42314');const current=frame.getAttribute('src')||'about:blank';if(current==='about:blank'||(!current.includes(wanted.split('?')[0]))){frameReady=false;queued=null;frame.src=wanted}return frame}
   function options(){return {material:$('productMaterial')?.value||'SS304 (Cast Iron Connection)',seal:$('productSeal')?.value||'Car/Cer',elastomer:$('productElastomer')?.value||'Viton',connection:$('productConnection')?.value||'round',bare:!!$('productBareShaft')?.checked,hz:50}}
   function postToFrame(frame,message){try{frame.contentWindow.postMessage(message,'*')}catch(error){console.error('Unable to contact CHC product frame.',error)}}
+  let pendingC4Quote=null;
+  function consumeC4Quote(event, payload){
+    if(event.origin!==location.origin||event.source!==$('productSelectorFrame')?.contentWindow||
+       event.data.route!=='quotation'||String(payload.generation_code||'')!=='G1')return null;
+    const request=pendingC4Quote;
+    if(!request||String(payload.base_model||payload.model||'').trim().toUpperCase()!==request.model.toUpperCase())return null;
+    if(event.data.quoteRequestId!==request.id)return null;
+    pendingC4Quote=null;
+    return request.context;
+  }
   function send(model,action){
     const opts=options();
-    let sellingBrandId='';
+    let quoteRequestId='';
     if(selectedChcGeneration==='G1'&&action==='add'){
       const context=window.KeySuiteV391?.brandContext?.(undefined,'CHC',opts.material,'CHC_G1');
       if(!context?.id){alert('Select the selling brand and C4 series again before quoting.');return;}
-      sellingBrandId=context.id;
+      quoteRequestId=crypto.randomUUID();
+      pendingC4Quote={id:quoteRequestId,model,context};
     }
     const frame=ensureFrame();if(!frame)return;
-    const message={type:'KEYSUITE_PRODUCT_MODEL',model,action,options:opts,sellingBrandId};
+    const message={type:'KEYSUITE_PRODUCT_MODEL',model,action,options:opts,quoteRequestId};
     if(frameReady){queued=null;postToFrame(frame,message)}else queued=message;
   }
 
@@ -243,5 +254,5 @@
     bindStaticDefaults();
     $('closeProductCurve')?.addEventListener('click',()=>$('productCurveDialog')?.close());['esProductMaterial','esProductSealType','esProductSealMaterial','esProductElastomer'].forEach(id=>{const el=$(id);if(el){bindDefaultState(el);el.addEventListener('change',()=>{if(id==='esProductSealType')esProductSealSync();if(currentCurveFamily==='ES'&&currentCurveModel)sendEsProduct(currentCurveModel,'view')})}});esProductSealSync();$('esProductSearch')?.addEventListener('input',renderEs);$('gwsProductSeries')?.addEventListener('change',()=>{if($('gwsProductModel'))$('gwsProductModel').value='ALL';renderGws()});$('gwsProductModel')?.addEventListener('change',renderGws);$('keyplcProductSearch')?.addEventListener('input',renderKeyplc);
   });
-  window.KeySuiteProduct={pageShown,render,refreshCatalogue,setChcGeneration,getChcGeneration,captureCurveReturnState,restoreCurveReturnState};
+  window.KeySuiteProduct={pageShown,render,refreshCatalogue,setChcGeneration,getChcGeneration,captureCurveReturnState,restoreCurveReturnState,consumeC4Quote};
 })();

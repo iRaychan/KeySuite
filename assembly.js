@@ -81,12 +81,14 @@ function total(d=current){return Number(consolidatedPricing(d)?.total??component
 function quoteUnitPrice(d=current){const value=Number(d?.quote_unit_price);return d?.quote_price_manual&&Number.isFinite(value)?Math.max(0,value):total(d)}
 function auditBomPricing(d){
  const pricing=consolidatedPricing(d);
+ const customer=customers().find(row=>String(row.id)===String(d?.customer_id||quoteCustomerId()));
  const rows=(d?.items||[]).map(item=>{
    const calculated=pricing?.rows?.[item.id],qty=Number(item.qty||0);
    const unitPrice=calculated?.unitPrice??Number(item.unitPrice||0);
-   return {model:item.bomDescription||item.model,qty,unitPrice,lineTotal:qty*unitPrice,fuelShare:calculated?.fuelShare??null};
+   return {model:item.bomDescription||item.model,qty,unitPrice,lineTotal:calculated?.lineTotal??qty*unitPrice,
+     unitBeforeFuel:calculated?.unitBeforeFuel??null,fuelShare:calculated?.fuelShare??null,fuelSharePerUnit:calculated?.fuelSharePerUnit??null};
  });
- return {rows,total:pricing?.total??componentDisplayedTotal(d),usedStoredPrices:!pricing&&rows.length>0};
+ return {rows,total:pricing?.total??componentDisplayedTotal(d),fuelCharge:pricing?.fuelCharge,customer,usedStoredPrices:!pricing&&rows.length>0};
 }
 function syncQuoteUnitPrice(d=current){if(!d)return;if(!d.quote_price_manual)d.quote_unit_price=total(d)}
 function sourceCostAvailable(item){

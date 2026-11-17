@@ -784,7 +784,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
       const result=priceAssemblyForDisplay([item],options);if(result.error)return result;
       const qty=Math.max(0,Number(item?.qty||0));roots.push({id:item?.id||'',model:item?.model||'',qty,beforeFuelLine:Number(result.source?.before_fuel_total||0),fuelCharge:Number(result.fuelCharge||0),transportTotal:Number(result.transportTotal||0)});
     }
-    const fuelCharge=roots.reduce((max,row)=>Math.max(max,row.fuelCharge),0),fuelSharePerBom=bomCount>0?fuelCharge/bomCount:0,rows={},transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
+    const fuelCharge=roots.reduce((max,row)=>row.qty>0?Math.max(max,row.fuelCharge):max,0),fuelSharePerBom=bomCount>0?fuelCharge/bomCount:0,rows={},transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
     let total=0;
     for(const row of roots){const unitBeforeFuel=row.qty>0?row.beforeFuelLine/row.qty:0,fuelShare=row.qty>0?fuelSharePerBom:0,fuelSharePerUnit=row.qty>0?fuelShare/row.qty:0,unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit),lineTotal=row.qty*unitPrice;rows[row.id]={...row,unitBeforeFuel,fuelShare,fuelSharePerUnit,unitPrice,lineTotal};total+=lineTotal}
     return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule:'VISIBLE_BOM_EQUAL_FUEL_SHARE_ROUND_EACH_UNIT'};

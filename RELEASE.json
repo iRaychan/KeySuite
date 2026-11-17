@@ -1,7 +1,7 @@
 {
-  "version": "5.00.75",
-  "baseline": "5.00.74",
-  "upgrade_supported_from": "5.00.74",
+  "version": "5.00.76",
+  "baseline": "5.00.75",
+  "upgrade_supported_from": "5.00.75",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,9 +13,8 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Product C4 quotations carry the selected selling brand through the hydraulic selector handoff.",
-    "Assembly Cost reports the same quantity, unit price and line total as the BOM and compares its total with the saved or overridden quotation price.",
-    "Zero-quantity components do not contribute fuel charges."
+    "Product C4 Quote correlates hydraulic replies with the selling identity captured in the parent application.",
+    "Assembly Cost applies the draft customer and BOM brand-margin rules and shows the fuel, rounding and line-total reconciliation."
   ],
   "known_issues": ["G Series ISO 9906 Grade 3B is not declared pending conformity evidence."]
 }

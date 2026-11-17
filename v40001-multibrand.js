@@ -1297,8 +1297,7 @@
           customerAllowsProduct(current.id,f.productGroup||f.family,f.family)
         );
         const same=families.find(f=>
-          String(f.family||'').toUpperCase()===String(state.selectedFamily||'').toUpperCase()&&
-          customerAllowsProduct(current.id,state.selectedProductGroup||f.productGroup||f.family,f.family)
+          normalizeProductGroup(f.productGroup||f.family)===normalizeProductGroup(state.selectedProductGroup||state.selectedFamily)
         )||families[0];
         if(same){
           state.selectedBrandId=String(current.id);state.selectedFamily=same.family;state.selectedProductGroup=same.productGroup||same.family;
@@ -1312,7 +1311,16 @@
     }
     renderProductTree();renderSelectorTree();decorateProductDisplaySoon();
   }
-  window.addEventListener('KEYSUITE_AUTHORITY_CHANGED',()=>{if(state.coreReady&&scopeEnforced()){const target=resolveAuthorityTarget(state.selectedBrandId,state.selectedFamily);state.selectedBrandId=target?.brandId||'';state.selectedFamily=target?.family||'';if(target)postBrandContext(familyPage(target.family)||null)}refreshNavigationForCustomer();});
+  window.addEventListener('KEYSUITE_AUTHORITY_CHANGED',()=>{
+    if(state.coreReady&&scopeEnforced()){
+      const target=resolveAuthorityTarget(state.selectedBrandId,state.selectedProductGroup||state.selectedFamily);
+      state.selectedBrandId=target?.brandId||'';
+      state.selectedFamily=baseFamily(target?.family||'');
+      state.selectedProductGroup=normalizeProductGroup(target?.family||'');
+      if(target)postBrandContext(familyPage(target.family)||null);
+    }
+    refreshNavigationForCustomer();
+  });
   window.addEventListener('KEYSUITE_DASHBOARD_CUSTOMER_CHANGED',event=>{
     const cid=String(event?.detail?.customerId||navigationCustomerId()||'');
     refreshNavigationForCustomer();

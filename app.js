@@ -1896,9 +1896,9 @@ window.addEventListener('message',function(event){
  if(!canEditQuotation(true))return;
  if(!ensureQuotationPricingContext('add a pump to the quotation'))return;
  const brandApi=window.KeySuiteV391;
- const pinnedBrandId=event.origin===location.origin&&event.source===$('productSelectorFrame')?.contentWindow
-   ? p.keysuite_selling_brand_id : '';
- const sellingId=String(pinnedBrandId||brandApi?.brandContext?.()?.id||'');
+ const pinnedContext=window.KeySuiteProduct?.consumeC4Quote?.(event,p);
+ if(event.data.quoteRequestId&&!pinnedContext)return;
+ const sellingId=String(pinnedContext?.id||brandApi?.brandContext?.()?.id||'');
  showPage('quotation');
  const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);
  if(selectedCustomer){refreshQuotationContacts();$('payment').value=formatCustomerTerms(selectedCustomer);}
@@ -1914,6 +1914,10 @@ window.addEventListener('message',function(event){
  const connectionSelect=$('connectionType');
  const ovalOption=connectionSelect.querySelector('option[value="oval"]');
  const quotationModel=chcMaterialModel(rawModel,material),displayQuotationModel=chcMaterialModel(rawDisplayModel,material);
+ const sellingModel=pinnedContext
+   ? brandApi?.resolveChcIdentity?.(sellingId,'CHC_G1',displayQuotationModel,material)?.sellingModel
+     || brandApi?.displayModelAlias?.(displayQuotationModel,pinnedContext) || displayQuotationModel
+   : displayQuotationModel;
  const rawConnection=String(p.connection||'');
  const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
  const connectionDN=Number((dnMatch[0]||'').match(/\d+/)?.[0]||0);
@@ -1945,7 +1949,7 @@ window.addEventListener('message',function(event){
  const materialLine=`${material} / ${chcSealDescription(seal,elastomer)}`;
  const dutyText=hasDutyPoint(p)?quotationDutyText(p):'';
  const modelDutyText=dutyText;
- const itemModel=[displayQuotationModel,modelDutyText].filter(Boolean).join(' — ');
+ const itemModel=[sellingModel,modelDutyText].filter(Boolean).join(' — ');
  const lines=[
    dutyText?`Capacity: ${dutyText}`:'',
    `B.G.Reich Vertical Multistage Pump Model: ${displayQuotationModel||'-'}`,
@@ -1953,19 +1957,24 @@ window.addEventListener('message',function(event){
    `Suction & Discharge: ${suctionDischarge}`,
    `Material: ${materialLine}`
  ].filter(Boolean);
+ const masterDescription=lines.join('\n');
+ const description=pinnedContext
+   ? brandedQuotationDescription(masterDescription.replace(`Pump Model: ${displayQuotationModel}`,()=>`Pump Model: ${sellingModel}`),pinnedContext.name)
+   : masterDescription;
  const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
  if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){
-   const context=pinnedBrandId?brandApi?.brandContext?.(sellingId,'CHC',material,p.keysuite_product_group_code):null;
-   const sellingModel=context&&brandApi.resolveChcIdentity?.(sellingId,p.keysuite_product_group_code,displayQuotationModel,material)?.sellingModel;
-   const model=sellingModel?[sellingModel,modelDutyText].filter(Boolean).join(' — '):itemModel;
-   const description=context?brandedQuotationDescription(lines.join('\n').replace(`Pump Model: ${displayQuotationModel}`,()=>`Pump Model: ${sellingModel||displayQuotationModel}`),context.name):lines.join('\n');
-   const pumpData=context?{...p,keysuite_brand_id:sellingId,keysuite_brand_name:context.name,quotation_model:sellingModel||displayQuotationModel}:p;
-   void window.KeySuiteManualPrice.offer({model,description,pumpData,productFamily:'CHC',...(context?{brandId:sellingId,brand:context.name}:null)},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;
+   const pumpData=pinnedContext?{...p,keysuite_brand_id:sellingId,keysuite_brand_name:pinnedContext.name,quotation_model:sellingModel}:p;
+   void window.KeySuiteManualPrice.offer({model:itemModel,description,pumpData,productFamily:'CHC',...(pinnedContext?{brandId:sellingId,brand:pinnedContext.name}:null)},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;
  }
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
- row.querySelector('.item-model').value=itemModel;row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=lines.join('\n');hydrateQuoteItemCapacity(row);row.dataset.pumpData=JSON.stringify({...p,generation_code:p.generation_code,keysuite_generation_code:p.keysuite_generation_code,keysuite_product_group_code:p.keysuite_product_group_code,keysuite_price_group_code:p.keysuite_price_group_code,quotation_model:quotationModel,display_model:displayQuotationModel,quotation_duty:dutyText,keysuite_material:material,keysuite_seal:seal,keysuite_elastomer:elastomer,keysuite_connection_type:connectionType,keysuite_bare_shaft:bare,keysuite_supply_mode:bare?'BARE':'COMPLETE'});
+ if(pinnedContext){
+   row.dataset.v391BrandId=sellingId;
+   row.dataset.v391MasterModel=displayQuotationModel;
+   row.dataset.v391MasterDescription=masterDescription;
+ }
+ row.querySelector('.item-model').value=itemModel;row.querySelector('.item-qty').value=1;row.querySelector('.item-description').value=description;hydrateQuoteItemCapacity(row);row.dataset.pumpData=JSON.stringify({...p,generation_code:p.generation_code,keysuite_generation_code:p.keysuite_generation_code,keysuite_product_group_code:p.keysuite_product_group_code,keysuite_price_group_code:p.keysuite_price_group_code,quotation_model:pinnedContext?sellingModel:quotationModel,display_model:displayQuotationModel,quotation_duty:dutyText,keysuite_material:material,keysuite_seal:seal,keysuite_elastomer:elastomer,keysuite_connection_type:connectionType,keysuite_bare_shaft:bare,keysuite_supply_mode:bare?'BARE':'COMPLETE'});
  if(bare){
    row.querySelector('.item-price').value=Number(pricedSelection.calc.finalPrice||0).toFixed(2);row.dataset.pricingSource=JSON.stringify(window.KeySuitePricing?.sourceSnapshot?.(pricedSelection)||{});
  }else if(window.KeySuitePricing?.applyPriceToQuoteRow)window.KeySuitePricing.applyPriceToQuoteRow(row,quotationModel,{seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class});
