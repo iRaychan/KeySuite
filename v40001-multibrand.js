@@ -286,8 +286,17 @@
   function currentMasterSeries(family){return String(family||'').toUpperCase()==='CHC'?chcMasterSeriesFromMaterial(currentChcMaterial()):String(family||'').toUpperCase();}
   function marginKey(cid,bid){return `${String(cid)}::${String(bid)}`}
   function customerBrandMargin(cid,bid){
-    const key=marginKey(cid,bid); if(state.customerMargins.has(key))return num(state.customerMargins.get(key),0);
-    return 0;
+    const key=marginKey(cid,bid);
+    if(!state.customerMargins.has(key))return 0;
+    const configured=state.customerMargins.get(key);
+    return (typeof configured==='number'||typeof configured==='string'&&configured.trim())?Number(configured):NaN;
+  }
+  function defaultPricingBrand(family){
+    const code=baseFamily(family);
+    if(code==='GWS')return brandByKey('gws')?.id||GWS_SCOPE_ID;
+    if(BUILTIN_FAMILIES.keylargo.some(entry=>entry.family===code))return brandByKey('keylargo')?.id||KEYLARGO_SCOPE_ID;
+    if(BUILTIN_FAMILIES['b.g.reich'].some(entry=>entry.family===code))return brandByKey('b.g.reich')?.id||masterBrand()?.id;
+    return '';
   }
   function rowBrandId(row){
     const source=sourceOfRow(row),pump=pumpDataOfRow(row);
@@ -477,7 +486,7 @@
     if(row.dataset.modelManuallyEdited!=='true'&&modelInput.value!==shownModel)modelInput.value=shownModel;if(row.dataset.descriptionManuallyEdited!=='true'&&descInput.value!==shownDesc)descInput.value=shownDesc;if(row.dataset.descriptionManuallyEdited!=='true'&&row.dataset.modelManuallyEdited!=='true')reapplyQuoteCapacity(row);
   }
   function calculateWithBrandMargin(source,brandMargin){
-    if(source?.manual_override===true)return null;
+    if(source?.manual_override===true||!Number.isFinite(brandMargin)||brandMargin<0||brandMargin>=1)return null;
     const result=calculateBaseWithBrandMargin(source,brandMargin);if(!result)return null;
     if(String(source?.product_family||'').toUpperCase()==='KEYPLC'){
       const surcharge=source?.fixed_price?0:num(source?.enclosure_surcharge,0);
@@ -495,11 +504,11 @@
     const base=num(source?.base_myr,NaN)+num(source?.motor_source_adjustment,0);if(!(base>0))return null;
     const safe=v=>{v=num(v,0);return v>=0&&v<1?v:0};
     const rarity=String(source?.rarity||'many').toLowerCase();
-    if(rarity==='fixed'||source?.fixed_price===true){const final=num(source?.calculated_price,base);return {withTransport:final,afterBrand:final,unrounded:final,final}}
+    if(rarity==='fixed'||source?.fixed_price===true){const final=base/(1-brandMargin);return {adjustedBase:base,withTransport:final,afterBrand:final,unrounded:final,final}}
     // V5.00.34 Phase 05: Brand Margin uses KeySuite's established gross-margin
     // recovery semantics, but it belongs immediately after converted source MYR.
     // Fixed Trimming and Transport therefore remain outside its calculation base.
-    const afterBrand=brandMargin>0&&brandMargin<1?base/(1-brandMargin):base;
+    const afterBrand=base/(1-brandMargin);
     const marginPrice=afterBrand/(1-safe(source?.margin));
     const afterNormal=(rarity==='common'||rarity==='rare')?marginPrice/(1-safe(source?.normal)):marginPrice;
     const afterRare=rarity==='rare'?afterNormal/(1-safe(source?.rare)):afterNormal;
@@ -516,6 +525,7 @@
     const replacementSource=motorReplacement.replacementMotorPricingSource||motorReplacement.replacement_motor_pricing_source;
     if(includedSource&&replacementSource){
       const included=calculateWithBrandMargin(includedSource,brandMargin),replacement=calculateWithBrandMargin(replacementSource,brandMargin);
+      if(!included||!replacement)return null;
       const replacementUnrounded=Math.max(0,baseResult.final-included.final+replacement.final);
       return {...baseResult,motorIncludedFinal:included.final,motorReplacementFinal:replacement.final,unrounded:replacementUnrounded,final:roundUp10(replacementUnrounded)};
     }
@@ -528,8 +538,24 @@
   function applyBrandMargin(row,{resetBase=false}={}){
     if(!row||state.applyingMargin||row.dataset.restoredQuotationItem==='true'||window.KeySuiteApp?.isQuotationSealed?.())return;const price=row.querySelector('.item-price');if(!price)return;
     const bid=rowBrandId(row);if(!bid)return;const source=sourceOfRow(row);if(source.manual_override===true||source.quotation_manual_unit_price!=null)return;const cid=quoteCustomerId(),margin=customerBrandMargin(cid,bid);
+    if(source.carried_final_price===true||String(source.product_family).toUpperCase()==='ASSEMBLY')return;
+    const invalidMessage='Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.';
+    if(!Number.isFinite(margin)||margin<0||margin>=1){row.dataset.pricingValidationError=invalidMessage;return;}
+    if(row.dataset.pricingValidationError===invalidMessage)delete row.dataset.pricingValidationError;
+    if(String(source.pricing_brand_id||'')===String(bid)&&String(source.customer_id||'')===String(cid)&&source.brand_margin===margin)return;
     state.applyingMargin=true;
     try{
+      const pricing=window.KeySuitePricing;
+      const customer=window.KeySuiteApp?.getPricingCustomer?.();
+      const category=window.KEYSUITE_SECURE_DATA?.categories?.find(cat=>String(cat.id)===String(customer?.pricingCategoryId));
+      const found=source.product_family&&pricing?.repriceSource?.({...source,v391_brand_id:bid},'quotation',{customer,category});
+      if(found?.calc&&Number(found.calc.finalPrice)>0&&!pricing.quoteBlockReason(found.calc)){
+        price.value=found.calc.finalPrice.toFixed(2);
+        const refreshed=JSON.stringify({...source,...pricing.sourceSnapshot(found)});
+        price.dispatchEvent(new Event('input',{bubbles:true}));
+        row.dataset.pricingSource=refreshed;
+        return;
+      }
       const adjusted=calculateWithBrandMargin(source,margin);
       if(adjusted){
         price.value=adjusted.final.toFixed(2);source.brand_margin=margin;source.adjusted_base_myr=adjusted.adjustedBase;source.after_brand_margin_price=adjusted.afterBrand;source.margin_price=adjusted.marginPrice;source.after_normal=adjusted.afterNormal;source.after_rare=adjusted.afterRare;source.with_trimming=adjusted.withTrimming;source.with_transport=adjusted.withTransport;source.after_commission=adjusted.afterCommission;source.after_set_discount=adjusted.afterSetDiscount;source.before_fuel=adjusted.beforeFuel;source.unrounded_price=adjusted.unrounded;source.calculated_price=adjusted.final;row.dataset.pricingSource=JSON.stringify(source);
@@ -567,7 +593,7 @@
       const explicitId=String(data?.brandId??data?.pumpData?.keysuite_brand_id??data?.pricingSource?.v391_brand_id??'').trim();
       const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
       const selectedProductBrand=family&&baseFamily(family)===baseFamily(state.selectedFamily)&&!data?.manualItem&&!data?.manualBrandOverride&&!data?.brandManuallyEdited&&!data?.descriptionManuallyEdited?byBrandId(state.selectedBrandId):null;
-      const selected=selectedProductBrand||byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||byBrandId(state.selectedBrandId)||masterBrand();
+      const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||selectedProductBrand||byBrandId(defaultPricingBrand(family))||byBrandId(state.selectedBrandId)||masterBrand();
       const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
       const copy={...(data||{})};if(chosenBrand&&!copy.descriptionManuallyEdited){copy.brand=chosenBrand.brand_name;copy.brandName=chosenBrand.brand_name;copy.brandId=chosenBrand.id}if(copy.pumpData&&chosenBrand)copy.pumpData={...copy.pumpData,keysuite_brand_id:chosenBrand.id,keysuite_brand_name:chosenBrand.brand_name};if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
       const row=original(copy);
@@ -1266,7 +1292,7 @@
         const [settingsR,marginsR]=optional;
         if(settingsR.status==='fulfilled'&&!settingsR.value?.error){const s0=settingsR.value?.data||{};state.general={usdActual:num(s0.general_usd_actual,4.5),usdBased:num(s0.general_usd_based,4.5),rmbActual:num(s0.general_rmb_actual,.65),rmbBased:num(s0.general_rmb_based,.65),fuelPrice:num(s0.fuel_price,2),fuelBasePrice:num(s0.fuel_base_price,2),fuelEfficiency:num(s0.fuel_efficiency,6.3),returnJourney:s0.return_journey??true}}
         state.assignments=new Map();
-        if(marginsR.status==='fulfilled'&&!marginsR.value?.error)state.customerMargins=new Map((marginsR.value?.data||[]).map(x=>[marginKey(x.customer_id,x.brand_id),num(x.margin,0)]));
+        if(marginsR.status==='fulfilled'&&!marginsR.value?.error)state.customerMargins=new Map((marginsR.value?.data||[]).map(x=>[marginKey(x.customer_id,x.brand_id),x.margin]));
         if(!Object.keys(state.baseMultipliers).length)state.baseMultipliers=clone(window.KEYSUITE_SECURE_DATA?.productMultipliers||{});
         try{applyEffectiveRates()}catch(e){console.warn('KeySuite V3.9.4.4.11 effective rate refresh skipped:',e)}
         renderGeneral();renderBrands();addCustomerBrandSection();renderProductTree();renderSelectorTree();restoreSavedRows();repairQuotationBrands();hideOldFuel();postBrandContext();decorateProductDisplay();
@@ -1345,6 +1371,6 @@
     let appTries=0;const waitApp=()=>{appTries++;if(window.KeySuiteApp&&window.KeySuitePricing){wrapPricing();wrapApp();observeQuote();observeProductDisplay();bindSelectionDefaults();addCustomerBrandSection();bindMaterialContext();if(state.coreReady){renderProductTree();decorateProductDisplay()}return}if(appTries<60)setTimeout(waitApp,250);else console.warn('KeySuite V4.01: pricing/app wrappers were not ready; Brand navigation remains available.');};waitApp();
   }
 
-  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,brandFamilies,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,resolveChcIdentity,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
+  window.KeySuiteV391={version:VERSION,state,effectiveRate,roundUp01,roundUp10,calculateWithBrandMargin,customerBrandMargin,defaultPricingBrand,loadData,waitForBrands,setSelectedBrand,brandContext,brandSeriesFor,brandFamilies,customerAllowsProduct,stampRowBrand,applyAllRows,decorateProductDisplay,chcMasterSeriesFromMaterial,resolveChcIdentity,currentChcMaterial,currentMasterSeries,renderProductTree,renderSelectorTree,repairBrandUi,repairQuotationBrands,clearSelectorPresentationContext,postBrandContext,displayModelAlias};window.KeySuiteV40001=window.KeySuiteV391;window.KeySuiteV392=window.KeySuiteV391;window.KeySuiteV393=window.KeySuiteV391;window.KeySuiteV3941=window.KeySuiteV391;window.KeySuiteV3942=window.KeySuiteV391;window.KeySuiteV3943=window.KeySuiteV391;window.KeySuiteV3944=window.KeySuiteV391;window.KeySuiteV39443=window.KeySuiteV391;window.KeySuiteV39444=window.KeySuiteV391;window.KeySuiteV39445=window.KeySuiteV391;window.KeySuiteV39446=window.KeySuiteV391;window.KeySuiteV39449=window.KeySuiteV391;window.KeySuiteV394410=window.KeySuiteV391;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

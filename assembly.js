@@ -18,7 +18,7 @@ function quoteCustomerId(){return window.KeySuiteApp?.getPricingCustomerId?.()||
 function quoteSessionId(){return window.KeySuiteApp?.getQuotationSessionId?.()||'quotation-session'}
 function blank(t=type){return {id:uid(),assembly_type:t,model_item:'',description:'',description_manual:false,name:t==='system'?'New System':'New Pumpset',customer_id:quoteCustomerId(),quote_session_id:quoteSessionId(),status:'draft',quote_qty:1,quote_unit_price:null,quote_price_manual:false,display_capacity:false,capacity_value:'',capacity_unit:'m³/hr',head_value:'',head_unit:'Mtr',coupling_mode:'flexible',coupling_error:'',auto_suppressed:{manifold:false,tank:false,coupling:false},items:[],created_at:new Date().toISOString(),updated_at:new Date().toISOString()}}
 function sourceObject(item){const raw=item?.pricingSource;if(!raw)return {};if(typeof raw==='object')return raw;try{return JSON.parse(raw)}catch(_){return {}}}
-function assemblyMarginReason(items=[]){for(const item of items||[]){const reason=window.KeySuitePricing?.pricingSourceMarginBlockReason?.(item?.pricingSource||item||{});if(reason)return `${reason}${item?.model||item?.bomDescription?`\n\nItem: ${item.model||item.bomDescription}`:''}`}return ''}
+function assemblyMarginReason(items=[]){const pricing=window.KeySuitePricing;for(const item of pricing?.flattenAssemblyItems?.(items,1,[],true)||items){const reason=pricing?.pricingSourceMarginBlockReason?.(item);if(reason)return `${reason}${item?.model||item?.bomDescription?`\n\nItem: ${item.model||item.bomDescription}`:''}`}return ''}
 function blockAssemblyMargin(items=[]){const reason=assemblyMarginReason(items);if(!reason)return false;alert(reason);return true}
 function quoteMetaFromItems(items=[]){for(const item of items||[]){const meta=sourceObject(item).assembly_quote;if(meta&&typeof meta==='object')return meta}return null}
 function quoteMeta(d){return {qty:Math.max(.01,Number(d?.quote_qty||1)),unitPrice:Number.isFinite(Number(d?.quote_unit_price))?Math.max(0,Number(d.quote_unit_price)):null,manual:!!d?.quote_price_manual,descriptionManual:!!d?.description_manual,displayCapacity:!!d?.display_capacity,capacityValue:String(d?.capacity_value||''),capacityUnit:String(d?.capacity_unit||'m³/hr'),headValue:String(d?.head_value||''),headUnit:String(d?.head_unit||'Mtr'),couplingMode:String(d?.coupling_mode||'flexible'),couplingError:String(d?.coupling_error||''),autoSuppressed:{manifold:!!d?.auto_suppressed?.manifold,tank:!!d?.auto_suppressed?.tank,coupling:!!d?.auto_suppressed?.coupling}}}
@@ -697,7 +697,7 @@ function refreshPricing(){
    for(const item of draft.items||[]){
      if(item.couplingData){item.couplingData._assemblySyncKey='';item.couplingData._assemblyErrorKey=''}
      const source=sourceObject(item);if(!source.product_family)continue;
-     const base=pricing.repriceSource(source,'assembly',{customer});const found=pricing.applyAssemblyBrandMargin?.(base,source,customer)||base;if(!found?.calc)continue;
+     const found=pricing.repriceSource(source,'assembly',{customer});if(!found?.calc||found.calc.brandMarginError)continue;
      const nextPrice=Number(found.calc.finalPrice||0);if(Math.abs(nextPrice-Number(item.unitPrice||0))>.001||String(source.pricing_mode||'')!=='assembly')changed=true;
      item.unitPrice=nextPrice;item.pricingSource={...source,...(pricing.sourceSnapshot?.(found)||{}),pricing_mode:'assembly'};
    }

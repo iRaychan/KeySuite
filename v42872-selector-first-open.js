@@ -19,6 +19,7 @@
   const isActive=page=>section(page)?.classList.contains('active');
   const generation=value=>String(value||'').toUpperCase()==='G1'?'G1':'G2';
   const expectedChcPath=value=>generation(value)==='G1'?'selector-g1/index.html':'selector/index.html';
+  const persistentSelector=page=>page==='selectorCr'||page==='selectorKv';
 
   function notifyResize(target){
     try{target?.contentWindow?.dispatchEvent(new Event('resize'))}catch(_){}
@@ -179,6 +180,24 @@
   }
   function schedule(page){
     if(!targets[page])return false;
+    if(persistentSelector(page)){
+      const target=frame(page);
+      if(!target||!isActive(page))return false;
+      // Keep the existing document and its state. An interrupted first-open
+      // callback must never leave the selector hidden on the next visit.
+      target.style.display='block';
+      target.style.width='100%';
+      reveal(target);
+      const token=++sequences[page];
+      requestAnimationFrame(()=>{
+        if(token!==sequences[page]||!isActive(page))return;
+        restoreNativeChildLayout(target);
+        void target.offsetWidth;
+        notifyResize(target);
+        window.dispatchEvent(new CustomEvent(targets[page].readyEvent,{detail:{frameId:target.id,src:target.getAttribute('src')||''}}));
+      });
+      return true;
+    }
     if(!isMacSafari)return stabilizeDesktop(page);
     const token=++sequences[page],target=frame(page);
     if(target)keepMacFrameLayoutActive(target);

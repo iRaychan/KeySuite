@@ -1,7 +1,7 @@
 {
-  "version": "5.00.77",
-  "baseline": "5.00.76",
-  "upgrade_supported_from": "5.00.76",
+  "version": "5.00.78",
+  "baseline": "5.00.77",
+  "upgrade_supported_from": "5.00.77",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,8 +13,8 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "C4 Assembly preserves selling-brand identity separately from its CHC source pricelist.",
-    "B.G.Reich ES Pumpsets resolve Brand Margin for the pump and motor independently."
+    "Run the configured Brand Margin stage in shared product and BOM pricing, with explicit zero-rate audits and exact final-price quotation handoff.",
+    "Keep ES, CR and KV selector documents mounted across navigation and restore their visible layouts on return."
   ],
   "known_issues": ["G Series ISO 9906 Grade 3B is not declared pending conformity evidence."]
 }

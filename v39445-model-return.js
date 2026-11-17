@@ -5,7 +5,7 @@ if(window.top!==window.self||window.__KEYSUITE_V40413_MODEL_RETURN__)return;
 window.__KEYSUITE_V40413_MODEL_RETURN__=true;
 const $=id=>document.getElementById(id);
 const STORE='keysuite-v39445-model-return',PAGE_STORE='keysuite-v40413-page-history',QUOTE_ORIGIN_STORE='keysuite-v42910-quotation-selection-origin';
-const SELECTION_PAGES=new Set(['selector','selectorCr','selectorBfi','selectorEs','selectorIso']);
+const SELECTION_PAGES=new Set(['selector','selectorCr','selectorKv','selectorBfi','selectorEs','selectorIso']);
 let memory=null,suppressNextPageHistory=false,quotationSelectionOrigin='';
 function icon(){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5"></path><path d="M4 12h10a6 6 0 0 1 6 6"></path></svg>'}
 function injectStyle(){if($('ks39445ReturnStyle'))return;const s=document.createElement('style');s.id='ks39445ReturnStyle';s.textContent=`

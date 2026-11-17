@@ -97,7 +97,7 @@
     const rule=categoryRule(cat,family),company=companyFactors(mode,cat,family,customer),level=normalizeRarity(rarity),pricingMode=normalizePricingMode(mode);
     const selected=rule.currencies||[];if(!selected.length)return `${familyLabel(family)} · ${pricingMode==='assembly'?'Assembly':'Quotation'} = No Price List Currency selected → Price unavailable`;const sourceText=selected.length===1?(selected[0]==='MYR'?'MYR':`${selected[0]} × ${selected[0]} rate`):`Highest of ${selected.map(v=>v==='MYR'?'MYR':`(${v} × ${v} rate)`).join(', ')}`;
     if(level==='fixed')return `${familyLabel(family)} Fixed · ${pricingMode==='assembly'?'Assembly':'Quotation'} = ${sourceText} → Fixed final selling price (no Margin / Normal / Rare / Transport / Commission / Set Discount / Final Discount / Fuel / RM10 rounding)`;
-    const parts=[sourceText,'÷ (1 − Margin)'];
+    const parts=[sourceText,'÷ (1 − Brand Margin)','÷ (1 − Margin)'];
     if(level==='common'||level==='rare')parts.push('÷ (1 − Normal)');if(level==='rare')parts.push('÷ (1 − Rare)');if(['ES','ISO'].includes(normalizedFamily(family)))parts.push('+ Trimming');parts.push('+ Transport');if(company.includeCommission)parts.push('÷ (1 − Customer Commission)');if(pricingMode==='quotation'&&company.includeSetDiscount)parts.push('÷ (1 − Customer Set Discount)');if(company.includeFinalDiscount)parts.push('÷ (1 − Customer Final Discount)');if(company.includeFuelCharge)parts.push('+ Fuel Charge');parts.push('Round up to RM10');
     return `${familyLabel(family)} ${rarityLabel(level)} · ${pricingMode==='assembly'?'Assembly':'Quotation'} = ${parts.join(' → ')}`;
   }
@@ -149,25 +149,51 @@
     return {family:code,variant:matched,rarity:chosen.rarity,availableCandidates:candidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,adjustedBase:chosen.baseMyr,motorSourceAdjustment:0,pricingContextMissing:true,finalPrice:null};
   }
 
+  function selectedPricingBrand(family,options={}){
+    const api=window.KeySuiteV391,code=normalizedFamily(family);
+    const group=options.keysuite_product_group_code||options.assembly_selling_product_group||family;
+    const explicit=options.v391_brand_id||options.keysuite_brand_id||options.sellingBrand?.id;
+    if(explicit)return explicit;
+    const active=api?.state?.selectedFamily,activeGroup=api?.state?.selectedProductGroup;
+    if(options.useSelectedBrand===false||!active)return '';
+    const matches=normalizedFamily(active)===code||/^CHC_G[12]$/.test(code)&&active==='CHC'&&(!activeGroup||normalizedFamily(activeGroup)===code);
+    return matches?api.brandContext?.(api.state.selectedBrandId,active,'',group)?.id||'':'';
+  }
+  function resolvePricingBrand(family,options={}){
+    return selectedPricingBrand(family,options)||window.KeySuiteV391?.defaultPricingBrand?.(family)||'';
+  }
+  function brandMarginStage(base,rate){
+    if(!Number.isFinite(rate)||rate<0||rate>=1)return null;
+    const afterBrand=base/(1-rate);
+    return Number.isFinite(afterBrand)?afterBrand:null;
+  }
   function calculatePrice(priceBook,variant,cat=category(),family='CHC',options={}){
-    // V4.20.01: a Price List row marked Fixed is customer/category independent.
-    // Detect Fixed BEFORE applying Category currency filters. This makes the same
-    // Fixed selling price available to every customer even when their category
-    // has no USD/RMB/MYR currency ticked. Normal/Many/Rare pricing still follows
-    // the customer's Pricing Category and selected currencies exactly as before.
+    // A Fixed price still bypasses category pricing and downstream charges.
+    // Detect Fixed before applying category currency filters.
+    // Brand Margin applies to the converted source in both pricing modes.
+    // Normal/Many/Rare pricing still follows the category's selected currencies.
+    
     const allCandidates=currencyCandidates(priceBook,options.rarityBook||{},variant,family);if(!allCandidates.length)return null;
     const pricingMode=normalizePricingMode(options.pricingMode),requested=String(options.rarity||'').toLowerCase();
+    const priceContext=context(options),sellingBrandId=selectedPricingBrand(family,options);
+    const pricingBrandId=sellingBrandId||window.KeySuiteV391?.defaultPricingBrand?.(family)||'';
+    const configuredRate=window.KeySuiteV391?.customerBrandMargin?.(priceContext.customer?.id,pricingBrandId)??0;
+    const brandMarginError='Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.';
+    if(brandMarginStage(1,configuredRate)==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
     const fixedCandidates=requested==='fixed'?allCandidates:allCandidates.filter(row=>row.rarity==='fixed');
     if(fixedCandidates.length){
-      const chosen=fixedCandidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),priceContext=context(options),finalPrice=chosen.baseMyr;
-      return {family,variant,rarity:'fixed',pricingMode,fixedPrice:true,candidates:fixedCandidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
+      const chosen=fixedCandidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),finalPrice=brandMarginStage(chosen.baseMyr,configuredRate);
+      if(finalPrice==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
+      return {family,variant,rarity:'fixed',pricingMode,fixedPrice:true,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase:chosen.baseMyr,afterBrand:finalPrice,candidates:fixedCandidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
     }
     if(!cat)return null;
     const rule=categoryRule(cat,family),allowed=new Set(rule.currencies||[]);if(!allowed.size)return null;
     const candidates=allCandidates.filter(row=>allowed.has(row.currency)||options.convertedSource===true);if(!candidates.length)return null;
-    const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),priceContext=context(options),company=companyFactors(pricingMode,cat,family,priceContext.customer),rarity=normalizeRarity(options.rarity||chosen.rarity),fixedPrice=false;
+    const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),company=companyFactors(pricingMode,cat,family,priceContext.customer),rarity=normalizeRarity(options.rarity||chosen.rarity),fixedPrice=false;
     const adjustedBase=Number.isFinite(options.sourceCostAdjustmentMyr)?Math.max(0,chosen.baseMyr+options.sourceCostAdjustmentMyr):chosen.baseMyr;
-    const marginPrice=adjustedBase/Math.max(.0001,1-rule.margin);
+    const afterBrand=brandMarginStage(adjustedBase,configuredRate);
+    if(afterBrand==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
+    const marginPrice=afterBrand/Math.max(.0001,1-rule.margin);
     const afterNormal=(rarity==='common'||rarity==='rare')?marginPrice/Math.max(.0001,1-rule.normal):marginPrice;
     const afterRare=rarity==='rare'?afterNormal/Math.max(.0001,1-rule.rare):afterNormal;
     const trimming=['ES','ISO'].includes(normalizedFamily(family))?Math.max(0,Number(rule.trimming)||0):0;
@@ -179,7 +205,7 @@
     const journeyMultiplier=priceContext.returnJourney?2:1;
     const fuelCharge=company.includeFuelCharge?(priceContext.distanceKm*journeyMultiplier/priceContext.fuelEfficiency)*Math.max(priceContext.fuelPrice-priceContext.fuelBasePrice,0):0;
     const unroundedPrice=beforeFuel+fuelCharge,finalPrice=roundUp10(unroundedPrice);
-    return {family,variant,rarity,pricingMode,fixedPrice:false,availableCandidates:allCandidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,trimming,withTrimming,transport:rule.transport,commission:company.commission,setDiscount:company.setDiscount,finalDiscount:company.finalDiscount,includeCommission:company.includeCommission,includeSetDiscount:company.includeSetDiscount,includeFinalDiscount:company.includeFinalDiscount,includeFuelCharge:company.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice};
+    return {family,variant,rarity,pricingMode,fixedPrice:false,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase,afterBrand,availableCandidates:allCandidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,trimming,withTrimming,transport:rule.transport,commission:company.commission,setDiscount:company.setDiscount,finalDiscount:company.finalDiscount,includeCommission:company.includeCommission,includeSetDiscount:company.includeSetDiscount,includeFinalDiscount:company.includeFinalDiscount,includeFuelCharge:company.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice};
   }
 
   function calculate(sourceOrBook,material='CHC',cat=category(),options={}){
@@ -195,6 +221,7 @@
   }
 
   function quoteBlockReason(calc){
+    if(calc?.brandMarginError)return calc.brandMarginError;
     if(calc?.componentPricingError)return String(calc.componentPricingError);
     if(calc?.motorPricingError)return String(calc.motorPricingError);
     if(calc?.snapshotFallback&&Number(calc.beforeFuel)>0)return '';
@@ -218,7 +245,9 @@
       }
       return '';
     }
-    const customer=quotationCustomer(),cat=(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||categoryForCustomer(customer)||category();
+    const customer=quotationCustomer(),invalid=pricingSourceBrandMarginError(source,customer);
+    if(invalid)return invalid;
+    const cat=(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||categoryForCustomer(customer)||category();
     const rule=cat?categoryRule(cat,family):null;
     const multiplier=Number(source.currency_multiplier??source.multiplier??1),sourcePrice=Number(source.source_price??0);
     const baseMyr=Number(source.base_myr??source.baseMyr??(sourcePrice*multiplier));
@@ -246,9 +275,16 @@
     if(family==='ASSEMBLY'&&(source.carried_final_price===true||String(source.pricing_mode||'').toLowerCase()==='carried_final'))return '';
     const nested=source.assembly_items||source.items||[];if(nested.length){for(const entry of nested){const reason=pricingSourceMarginBlockReason(entry);if(reason)return reason}if(family==='ASSEMBLY'||family==='MANUAL'||!family)return ''}
     if(source.manual_override===true||!family||family==='MANUAL')return '';
+    const invalid=pricingSourceBrandMarginError(source,quotationCustomer());
+    if(invalid)return invalid;
     if(source.fixed_price===true||normalizeRarity(source.rarity)==='fixed')return '';
     const customer=quotationCustomer(),cat=categoryForCustomer(customer)||(secureData.categories||[]).find(row=>String(row.id)===String(source.category_id||''))||category(),rule=cat?categoryRule(cat,family):null,margin=Number(rule?.margin??source.margin??0);
     return margin>0?'':'Margin is blank or 0%. Please update the Category Pricing Rule before adding this item.';
+  }
+  function pricingSourceBrandMarginError(source,customer){
+    const id=resolvePricingBrand(source.product_family||source.family,{...source,useSelectedBrand:false});
+    const rate=window.KeySuiteV391?.customerBrandMargin?.(customer?.id||source.customer_id,id)??0;
+    return brandMarginStage(1,rate)==null?'Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.':'';
   }
 
   function variants(includeUnpriced=false){
@@ -407,7 +443,7 @@
     return (secureData.motorProducts||[]).find(product=>motorMatchesSpec(product,normalized)&&currencyCandidates(motorProductPriceBook(product),motorProductRarityBook(product),'MOTOR','MOTOR').length)||null;
   }
   function applyPumpMotorReplacement(calc,options={},defaultEfficiency='IE3'){
-    if(!calc)return calc;
+    if(!calc||calc.brandMarginError)return calc;
     const bareShaft=options.bareShaft===true||options.keysuite_bare_shaft===true;
     const selected=String(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultEfficiency).toUpperCase(),included=String(defaultEfficiency||'IE3').toUpperCase();if(!bareShaft&&selected===included){const product=exactPricedMotor({hp:options.motor_hp??options.motorHp,kw:options.motor_kw??options.motorKw,pole:options.pole||2,efficiency:included}),candidates=product?currencyCandidates(motorProductPriceBook(product),motorProductRarityBook(product),'MOTOR','MOTOR'):[];return {...calc,motorDetails:{included:true,efficiency:included,hp:options.motor_hp??options.motorHp,kw:options.motor_kw??options.motorKw,pole:options.pole||2,model:product?.model||'',id:product?.id||'',candidates,adjustment:0,missing:!product}};}
     const hp=Number(options.motor_hp??options.motorHp),kw=Number(options.motor_kw??options.motorKw),pole=Number(options.pole||2)||2,customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if((!(hp>0)&&!(kw>0))||!customer||!cat)return null;
@@ -654,7 +690,7 @@
     return {product:{id:`BASEPLATE-${family}`,model:label},material:'BASEPLATE',variant:family,calc,category:cat,customer,family:'BASEPLATE',sourceExtra:{configuration:{...config,family},raw_cost_myr:Number(raw.total),baseplate_frame:frame,source_price_book:`${family} Baseplate`}};
   }
 
-  function sourceSnapshot(found){return {fixed_price:!!found.calc.fixedPrice,component_addon_myr:found.calc.componentAddon??null,component_details:found.calc.componentDetails||[],motor_details:found.calc.motorDetails||null,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:typeof found.variant==='string'?found.variant:found.variant?.material||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,motor_source_adjustment:found.calc.motorSourceAdjustment||0,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,trimming:found.calc.trimming||0,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,margin_price:found.calc.marginPrice,after_normal:found.calc.afterNormal,after_rare:found.calc.afterRare,with_trimming:found.calc.withTrimming,with_transport:found.calc.withTransport,after_commission:found.calc.afterCommission,after_set_discount:found.calc.afterSetDiscount,before_fuel:found.calc.componentBaseBeforeFuel??found.calc.beforeFuel,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
+  function sourceSnapshot(found){return {fixed_price:!!found.calc.fixedPrice,pricing_brand_id:found.calc.pricingBrandId||'',...(found.calc.sellingBrandId?{v391_brand_id:found.calc.sellingBrandId}:{}),brand_margin:found.calc.brandMargin,brand_margin_error:found.calc.brandMarginError,adjusted_base_myr:found.calc.adjustedBase,after_brand_margin_price:found.calc.afterBrand,component_addon_myr:found.calc.componentAddon??null,component_details:found.calc.componentDetails||[],motor_details:found.calc.motorDetails||null,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:typeof found.variant==='string'?found.variant:found.variant?.material||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,motor_source_adjustment:found.calc.motorSourceAdjustment||0,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,trimming:found.calc.trimming||0,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,margin_price:found.calc.marginPrice,after_normal:found.calc.afterNormal,after_rare:found.calc.afterRare,with_trimming:found.calc.withTrimming,with_transport:found.calc.withTransport,after_commission:found.calc.afterCommission,after_set_discount:found.calc.afterSetDiscount,before_fuel:found.calc.componentBaseBeforeFuel??found.calc.beforeFuel,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
   function assemblySellingBrand(brand,group){
     if(!brand?.id)return {};
     return {v391_brand_id:brand.id,v391_brand_name:brand.name||'',
@@ -663,18 +699,16 @@
 
   // Use the component's recorded selling identity, including an explicit 0% rate.
   function applyAssemblyBrandMargin(found,source={},customer=found?.customer){
-    if(!found?.calc||source.assembly_brand_margin_enabled!==true||!source.v391_brand_id||source.manual_override===true)return found;
-    const brands=window.KeySuiteV391,margin=brands?.customerBrandMargin?.(customer?.id||source.customer_id,source.v391_brand_id);
-    if(!Number.isFinite(Number(margin))||!brands?.calculateWithBrandMargin)return found;
-    const context=assemblySellingBrand({id:source.v391_brand_id,name:source.v391_brand_name},source.assembly_selling_product_group);
-    if(Number(margin)===0||found.calc.fixedPrice)return {...found,calc:{...found.calc,brandMargin:0},sourceExtra:{...found.sourceExtra,...context,brand_margin:0}};
-    const adjusted=brands.calculateWithBrandMargin(sourceSnapshot(found),Number(margin));
-    if(!adjusted)return found;
-    return {...found,calc:{...found.calc,adjustedBase:adjusted.adjustedBase,brandMargin:Number(margin),afterBrand:adjusted.afterBrand,marginPrice:adjusted.marginPrice,afterNormal:adjusted.afterNormal,afterRare:adjusted.afterRare,withTrimming:adjusted.withTrimming,withTransport:adjusted.withTransport,afterCommission:adjusted.afterCommission,afterSetDiscount:adjusted.afterSetDiscount,beforeFuel:adjusted.beforeFuel+Number(found.calc.componentAddon||0),componentBaseBeforeFuel:adjusted.beforeFuel,unroundedPrice:adjusted.unrounded,finalPrice:adjusted.final},sourceExtra:{...found.sourceExtra,...context,brand_margin:Number(margin),after_brand_margin_price:adjusted.afterBrand}};
+    if(!found?.calc||!source.v391_brand_id||source.manual_override===true)return found;
+    const identity=assemblySellingBrand({id:source.v391_brand_id,name:source.v391_brand_name},source.assembly_selling_product_group);
+    const priced=String(found.calc.pricingBrandId)===String(source.v391_brand_id)?found:
+      repriceSource({...sourceSnapshot(found),...source},found.calc.pricingMode,{customer,category:found.category});
+    return priced?{...priced,sourceExtra:{...priced.sourceExtra,...identity}}:null;
   }
 
 
   function repriceSource(source={},mode='quotation',options={}){
+    options={...options,useSelectedBrand:false,v391_brand_id:source.v391_brand_id||source.keysuite_brand_id||options.v391_brand_id};
     const pricingMode=normalizePricingMode(mode),customer=options.customer||customersList().find(row=>String(row.id)===String(source.customer_id||''))||quotationCustomer(),cat=options.category||secureData.categories.find(row=>String(row.id)===String(source.category_id||''))||categoryForCustomer(customer);if(!customer||!cat)return null;
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
     if(family==='CR'){const material=source.material||source.variant||'CR',base=source.technical_model||String(source.price_model||source.model||'').replace(/^CR[SN]\b/i,'CR'),model=material==='CR'?base:base.replace(/^CR\b/i,material);return findCrPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Car / Sic',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
@@ -707,23 +741,28 @@
     if(typeof source!=='string')return source;
     try{return JSON.parse(source)||{}}catch(_){return {}}
   }
+  function componentPricingSource(item){
+    const source=assemblyItemSource(item);
+    const brandId=source.v391_brand_id||item?.brandId||item?.pumpData?.keysuite_brand_id;
+    return brandId?{...source,v391_brand_id:brandId,v391_brand_name:source.v391_brand_name||item.brand||item.pumpData?.keysuite_brand_name}:source;
+  }
   function esPumpsetMotorBrand(items){
     const pumps=items.filter(item=>String(assemblyItemSource(item).product_family).toUpperCase()==='ES'&&Number(item.qty??1)>0);
     const brandIds=new Set(pumps.map(item=>{
-      const source=assemblyItemSource(item);
-      return source.assembly_brand_margin_enabled===true?source.v391_brand_id:'';
+      const source=componentPricingSource(item);
+      return resolvePricingBrand('ES',{...source,useSelectedBrand:false});
     }));
     if(brandIds.size!==1)return {};
     const [id]=brandIds;
-    const brand=window.KeySuiteV391?.state?.brands?.find(row=>String(row.id)===String(id)&&String(row.brand_key).toLowerCase()==='b.g.reich');
+    const brand=window.KeySuiteV391?.state?.brands?.find(row=>String(row.id)===String(id));
     return brand?assemblySellingBrand({id:brand.id,name:brand.brand_name},'MOTOR'):{};
   }
   function flattenAssemblyItems(items=[],multiplier=1,result=[],resolveBomBrands=false,motorBrand={}){
     if(resolveBomBrands)motorBrand={...motorBrand,...esPumpsetMotorBrand(items)};
     for(const item of items||[]){
-      const source=assemblyItemSource(item);
+      const source=componentPricingSource(item);
       const qty=Math.max(0,Number(item?.qty??1))*Math.max(0,Number(multiplier)||0),nested=source.assembly_items||source.items||[];
-      if(nested.length){flattenAssemblyItems(nested.map(entry=>({id:entry?.id,model:entry?.model,qty:entry?.qty??1,unitPrice:entry?.unitPrice,pricingSource:entry?.pricingSource||entry?.pricing_source||entry?.source||entry})),qty,result,resolveBomBrands);continue}
+      if(nested.length){flattenAssemblyItems(nested.map(entry=>({...entry,qty:entry?.qty??1,pricingSource:entry?.pricingSource||entry?.pricing_source||entry?.source||entry})),qty,result,resolveBomBrands);continue}
       const useMotorBrand=resolveBomBrands&&String(source.product_family).toUpperCase()==='MOTOR'&&!source.v391_brand_id;
       result.push({...item,qty,pricingSource:useMotorBrand?{...source,...motorBrand}:source});
     }
@@ -733,8 +772,18 @@
   function calculationFromSnapshot(item={},source={},cat,customer,mode='quotation'){
     const pricingMode=normalizePricingMode(mode);
     const family=String(source.product_family||source.family||'').toUpperCase(),fixed=source.fixed_price===true||normalizeRarity(source.rarity)==='fixed';
+    const brandMarginError=pricingSourceBrandMarginError(source,customer);
+    if(brandMarginError)return {family,pricingMode,brandMarginError,finalPrice:null};
+    const pricingBrandId=resolvePricingBrand(family,{...source,useSelectedBrand:false});
+    const brandMargin=window.KeySuiteV391?.customerBrandMargin?.(customer.id,pricingBrandId)??0;
     const storedFuel=Math.max(0,Number(source.fuel_charge)||0),storedUnrounded=Number(source.unrounded_price),storedFinal=Math.max(0,Number(source.calculated_price??item.unitPrice)||0);
-    if(fixed)return {family,variant:source.variant||source.material||'',rarity:'fixed',pricingMode,fixedPrice:true,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,beforeFuel:storedFinal,fuelCharge:0,unroundedPrice:storedFinal,finalPrice:storedFinal,snapshotFallback:true};
+    if(fixed){
+      const adjustedBase=Number(source.base_myr)||storedFinal*(1-Number(source.brand_margin||0));
+      const afterBrand=brandMarginStage(adjustedBase,brandMargin);
+      if(afterBrand==null)return {family,pricingMode,brandMarginError:'Cannot apply Brand Margin without a usable component cost. Reselect the BOM item.',finalPrice:null};
+      const finalPrice=afterBrand+Number(source.component_addon_myr||0);
+      return {family,brandMargin,pricingBrandId,adjustedBase,afterBrand,variant:source.variant||source.material||'',rarity:'fixed',pricingMode,fixedPrice:true,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,beforeFuel:finalPrice,fuelCharge:0,unroundedPrice:finalPrice,finalPrice,snapshotFallback:true};
+    }
     let withTransport=(Number.isFinite(storedUnrounded)&&storedUnrounded>0?storedUnrounded-storedFuel:storedFinal-storedFuel);if(!(withTransport>0))return null;
     if(source.include_final_discount===true)withTransport*=Math.max(.0001,1-Number(source.final_discount||0));
     if(source.include_set_discount===true)withTransport*=Math.max(.0001,1-Number(source.set_discount||0));
@@ -742,7 +791,20 @@
     const factors=companyFactors(pricingMode,cat,family,customer),afterCommission=factors.includeCommission?withTransport/Math.max(.0001,1-factors.commission):withTransport;
     const afterSetDiscount=factors.includeSetDiscount?afterCommission/Math.max(.0001,1-factors.setDiscount):afterCommission,beforeFuel=factors.includeFinalDiscount?afterSetDiscount/Math.max(.0001,1-factors.finalDiscount):afterSetDiscount;
     const priceContext=context({customer}),journeyMultiplier=priceContext.returnJourney?2:1,fuelCharge=factors.includeFuelCharge?(priceContext.distanceKm*journeyMultiplier/priceContext.fuelEfficiency)*Math.max(priceContext.fuelPrice-priceContext.fuelBasePrice,0):0,unroundedPrice=beforeFuel+fuelCharge;
-    return {family,variant:source.variant||source.material||'',rarity:normalizeRarity(source.rarity),pricingMode,fixedPrice:false,transport:Number(source.transport||0),commission:factors.commission,setDiscount:factors.setDiscount,finalDiscount:factors.finalDiscount,includeCommission:factors.includeCommission,includeSetDiscount:factors.includeSetDiscount,includeFinalDiscount:factors.includeFinalDiscount,includeFuelCharge:factors.includeFuelCharge,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice:roundUp10(unroundedPrice),snapshotFallback:true};
+    const base=Number(source.base_myr)+Number(source.motor_source_adjustment||0),afterBrand=brandMarginStage(base,brandMargin);
+    if(brandMargin!==Number(source.brand_margin??0)){
+      const adjusted=window.KeySuiteV391?.calculateWithBrandMargin?.({...source,commission:factors.commission,set_discount:factors.setDiscount,final_discount:factors.finalDiscount,include_commission:factors.includeCommission,include_set_discount:factors.includeSetDiscount,include_final_discount:factors.includeFinalDiscount,include_fuel_charge:factors.includeFuelCharge,fuel_charge:fuelCharge},brandMargin);
+      if(!adjusted)return {family,pricingMode,brandMarginError:'Cannot apply Brand Margin without a usable component cost. Reselect the BOM item.',finalPrice:null};
+      return {...adjusted,family,pricingMode,brandMargin,pricingBrandId,baseMyr:Number(source.base_myr),motorSourceAdjustment:Number(source.motor_source_adjustment||0),beforeFuel:adjusted.unrounded-fuelCharge,unroundedPrice:adjusted.unrounded,finalPrice:adjusted.final,snapshotFallback:true,...factors};
+    }
+    return {family,brandMargin,pricingBrandId,baseMyr:Number.isFinite(base)?Number(source.base_myr):null,adjustedBase:Number.isFinite(base)?base:null,afterBrand,variant:source.variant||source.material||'',rarity:normalizeRarity(source.rarity),pricingMode,fixedPrice:false,transport:Number(source.transport||0),commission:factors.commission,setDiscount:factors.setDiscount,finalDiscount:factors.finalDiscount,includeCommission:factors.includeCommission,includeSetDiscount:factors.includeSetDiscount,includeFinalDiscount:factors.includeFinalDiscount,includeFuelCharge:factors.includeFuelCharge,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice:roundUp10(unroundedPrice),snapshotFallback:true};
+  }
+  function repriceAssemblyLeaf(item,mode,{customer,category}){
+    const source=componentPricingSource(item);
+    const found=repriceSource(source,mode,{customer,category});
+    if(found)return found;
+    const calc=customer&&category&&calculationFromSnapshot(item,source,category,customer,mode);
+    return calc?{product:{id:source.product_id||item.id||'',model:item.model||''},material:source.material||source.variant||'',variant:source.variant||source.material||'',calc,category,customer,family:source.product_family,sourceExtra:{snapshot_fallback:true}}:null;
   }
 
   function consolidateAssemblyPricing(components=[]){
@@ -759,15 +821,14 @@
 
   function priceAssemblyForQuotation(items=[],options={}){
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return {error:'Select a quotation customer with a Pricing Category first.',total:0,items:[]};
-    const priced=[],components=[],leaves=flattenAssemblyItems(items);
+    const priced=[],components=[],leaves=flattenAssemblyItems(items,1,[],true);
     const displayedComponentTotal=leaves.reduce((sum,item)=>sum+Math.max(0,Number(item?.qty||0))*Math.max(0,Number(item?.unitPrice||0)),0);
     for(const item of leaves){
       const source=typeof item?.pricingSource==='string'?(()=>{try{return JSON.parse(item.pricingSource)}catch(_){return {}}})():item?.pricingSource||{};
       if(!source.product_family||String(source.product_family).toUpperCase()==='MANUAL'){
         const qty=Math.max(0,Number(item?.qty||0)),unitPrice=Math.max(0,Number(item?.unitPrice||0));priced.push({id:item?.id||'',model:item?.model||'',qty,unitPrice,pricingSource:{product_family:'MANUAL',pricing_mode:'quotation'}});components.push({qty,calc:{fixedPrice:true,finalPrice:unitPrice,transport:0,fuelCharge:0}});continue;
       }
-      let found=repriceSource(source,'quotation',{...options,customer,category:cat});
-      if(!found){const calc=calculationFromSnapshot(item,source,cat,customer,'quotation');if(calc)found={product:{id:source.product_id||item?.id||'',model:item?.model||''},material:source.material||source.variant||'',variant:source.variant||source.material||'',calc,category:cat,customer,family:String(source.product_family||source.family||''),sourceExtra:{snapshot_fallback:true}}}
+      const found=repriceAssemblyLeaf(item,'quotation',{customer,category:cat});
       if(!found)return {error:`No Quotation price is available for ${item?.model||'a BOM item'}.`,total:0,items:priced};
       const blocked=quoteBlockReason(found.calc);if(blocked)return {error:`${blocked}
 
@@ -790,9 +851,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
       if(!source.product_family||String(source.product_family).toUpperCase()==='MANUAL'){
         const qty=Math.max(0,Number(item?.qty||0)),unitPrice=Math.max(0,Number(item?.unitPrice||0));priced.push({id:item?.id||'',model:item?.model||'',qty,unitPrice,pricingSource:{product_family:'MANUAL',pricing_mode:'assembly'}});components.push({qty,calc:{fixedPrice:true,finalPrice:unitPrice,transport:0,fuelCharge:0}});continue;
       }
-      let found=repriceSource(source,'assembly',{...options,customer,category:cat});
-      if(found)found=applyAssemblyBrandMargin(found,source,customer);
-      if(!found){const calc=calculationFromSnapshot(item,source,cat,customer,'assembly');if(calc)found={product:{id:source.product_id||item?.id||'',model:item?.model||''},material:source.material||source.variant||'',variant:source.variant||source.material||'',calc,category:cat,customer,family:String(source.product_family||source.family||''),sourceExtra:{snapshot_fallback:true}}}
+      const found=repriceAssemblyLeaf(item,'assembly',{customer,category:cat});
       if(!found)return {error:`No Assembly price is available for ${item?.model||'a BOM item'}.`,total:0,items:priced};
       const blocked=quoteBlockReason(found.calc);if(blocked)return {error:`${blocked}\n\nBOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
       const qty=Math.max(0,Number(item?.qty||0)),snapshot={...source,...sourceSnapshot(found),consolidated_fuel_excluded:true};
@@ -835,7 +894,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
       }
       const found=repriceSource(source,'quotation',{customer,category:cat});if(!found)continue;
       const blocked=quoteBlockReason(found.calc);if(blocked){row.dataset.pricingValidationError=blocked;continue}
-      delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);const refreshed=sourceSnapshot(found);if(source.product_family==='ES'){refreshed.seal_material=source.seal_material||ES_DEFAULT_SEAL;refreshed.elastomer=source.elastomer||ES_DEFAULT_ELASTOMER}row.dataset.pricingSource=JSON.stringify(refreshed);
+      delete row.dataset.pricingValidationError;row.querySelector('.item-price').value=found.calc.finalPrice.toFixed(2);const refreshed={...source,...sourceSnapshot(found)};if(source.product_family==='ES'){refreshed.seal_material=source.seal_material||ES_DEFAULT_SEAL;refreshed.elastomer=source.elastomer||ES_DEFAULT_ELASTOMER}row.dataset.pricingSource=JSON.stringify(refreshed);
     }
     if(typeof calcTotal==='function')calcTotal();
   }
@@ -925,7 +984,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const variants=product.variants||[];
     const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
     if(!variant)return null;
-    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material});
+    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,customer,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material});
     return calc?{product,variant,material:variant.material,calc,category:cat,customer,family:'ES',sourceExtra:{seal_type:options.sealType||(/\bGP\b/i.test(variant.material)?'Gland Packing':'Mechanical Seal'),seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
   }
 
@@ -1034,5 +1093,5 @@ ${indent}Wiring for pumps & pressure transmitter within pump skid @ 1 Lot`;
     const row=window.KeySuiteApp?.addExternalQuoteItem?.(item);if(row)showPage('quotation');
   }
 
-  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,gPriceProblem,findGPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,sourceCostOnly,repriceSource,assemblySellingBrand,applyAssemblyBrandMargin,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
+  window.KeySuitePricing={bgfPriceProblem,findBgfPrice,gPriceProblem,findGPrice,init,calculate,calculatePrice,calculateManual,companyFactors,formula,resolveModelRarity,modelStatistics,quoteBlockReason,pricingSourceBlockReason,pricingSourceMarginBlockReason,ensureQuoteableCalculation,sourceSnapshot,sourceCostOnly,repriceSource,repriceAssemblyLeaf,assemblySellingBrand,applyAssemblyBrandMargin,flattenAssemblyItems,consolidateAssemblyPricing,priceAssemblyForDisplay,priceAssemblyRowsForDisplay,priceAssemblyForQuotation,findPrice,chcPriceProblem,findCrPrice,crSealAddon,crMaterialDescription,crDescription,findKvPrice,kvMaterialDescription,kvDescription,findBfiPrice,bfiPriceStatus,bfiPriceProblem,findGwsPrice,findAutoGwsTank,findKeyplcPrice,applyPriceToQuoteRow,refreshQuotePrices,addGwsToQuotation,addEs,esDescription,addKeyplc,keyplcDescription,keyplcTitle,normalizePanelType,findEsPrice,findBaseplatePrice,buildChcAssemblyItem,buildCrAssemblyItem,buildKvAssemblyItem,buildGwsAssemblyItem,chcSealAddon,chcSealDescription,normalizeChcSealFaces,selectCustomer,refreshCustomers,hasPricingContext,syncPriceListSettings,render:()=>{renderSummary();renderTable()}};
 })();

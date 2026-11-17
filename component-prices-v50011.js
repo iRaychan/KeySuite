@@ -70,7 +70,7 @@
  }
  function apply(calc,family,model,options={}){
    const pump=Object.hasOwn(shaftModels,family);
-   if(!calc||(calc.fixedPrice&&!pump))return calc;
+   if(!calc||calc.brandMarginError||(calc.fixedPrice&&!pump))return calc;
    const result=additions(family,model,options);
    const base=Number(calc.componentBasePrice??calc.finalPrice??0);
    const beforeFuel=Number(calc.componentBaseBeforeFuel??calc.beforeFuel??base);

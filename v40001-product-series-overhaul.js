@@ -28,7 +28,6 @@
 
   let inlineOpen=false;
   let selectionEsOpen=false;
-  let selectionEsHome=null;
   let selectionBfiOpen=false;
   let selectionBfiHome=null;
   let selectionIsoOpen=false;
@@ -486,23 +485,18 @@
 
   function prepareSelectionEsFrame(frame=$('selectorEsFrame')){try{const doc=frame?.contentDocument;if(!doc?.body)return false;doc.getElementById('ksV42841SelectionEsFit')?.remove();doc.getElementById('ksV42840SelectionEsFit')?.remove();doc.body.classList.add('product-frame','ks3963-product-es');ensureFrameStyle(doc,'ES');installPdfHooks(frame,'ES',{generic:true});resizeFrame(frame);return true}catch(_){return false}}
   function openSelectionEsPanel(){
-    const frame=$('selectorEsFrame'),dlg=productDialog(),host=$('productCurveHost'),main=mainHost();if(!frame||!dlg||!host||!main)return false;
-    if(selectionBfiOpen)closeSelectionBfiPanel();if(inlineOpen)closeInline(true);if(!selectionEsHome)selectionEsHome=frame.parentNode||$('selectorEs');if(dlg.parentNode!==main)main.appendChild(dlg);
-    document.querySelectorAll('.ks3963-product-curve-open').forEach(el=>el.classList.remove('ks3963-product-curve-open'));
-    ['CHC','CR','BFI','ES','ISO'].forEach(f=>{const productFrame=frameFor(f);if(productFrame)productFrame.style.display='none'});
-    if(frame.parentNode!==host)host.appendChild(frame);frame.style.display='block';frame.style.opacity='1';frame.style.visibility='visible';
-    selectionEsOpen=true;dlg.classList.add('ks3963-inline');dlg.setAttribute('open','');dlg.dataset.ksSelectionEsInline='1';delete dlg.dataset.ks3963Inline;
-    const title=$('productCurveTitle');if(title){title.textContent='Selector · ES';title.dataset.v393MasterText='Selector · ES'}const close=$('closeProductCurve');if(close)close.hidden=true;
-    prepareSelectionEsFrame(frame);setTimeout(()=>{prepareSelectionEsFrame(frame);window.scrollTo({top:0,behavior:'auto'})},0);return true;
+    const frame=$('selectorEsFrame');if(!frame)return false;
+    if(inlineOpen)closeInline(true);
+    selectionEsOpen=true;
+    // Moving an iframe between parents discards its live browsing context.
+    requestAnimationFrame(()=>{if(selectionEsOpen){prepareSelectionEsFrame(frame);frame.contentWindow?.dispatchEvent(new Event('resize'))}});
+    return true;
   }
   function closeSelectionEsPanel(){
-    if(!selectionEsOpen)return false;const frame=$('selectorEsFrame'),dlg=productDialog();selectionEsOpen=false;
-    if(frame&&selectionEsHome&&frame.parentNode!==selectionEsHome)selectionEsHome.appendChild(frame);if(frame)frame.style.display='none';
-    if(dlg?.dataset?.ksSelectionEsInline==='1'){dlg.classList.remove('ks3963-inline');dlg.removeAttribute('open');delete dlg.dataset.ksSelectionEsInline}
-    const close=$('closeProductCurve');if(close)close.hidden=false;return true;
+    const wasOpen=selectionEsOpen;selectionEsOpen=false;return wasOpen;
   }
   function installSelectionEsProductPanel(){
-    const frame=$('selectorEsFrame');if(!frame)return false;if(!selectionEsHome)selectionEsHome=frame.parentNode||$('selectorEs');
+    const frame=$('selectorEsFrame');if(!frame)return false;
     if(frame.dataset.ks42853ProductPanel!=='1'){frame.dataset.ks42853ProductPanel='1';frame.addEventListener('load',()=>setTimeout(()=>prepareSelectionEsFrame(frame),0))}
     prepareSelectionEsFrame(frame);if(document.querySelector('.page.active')?.id==='selectorEs')openSelectionEsPanel();return true;
   }
