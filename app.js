@@ -1824,11 +1824,11 @@ async function routeEsSelection(p={},route='quotation'){
  const capacity=esSelectionCapacity(p);
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
  const pumpDescription=String(pricedDescription||'').trim();
- const selectedBrand=window.KeySuiteV40001?.brandContext?.(p.keysuite_brand_id||window.KeySuiteV40001?.state?.selectedBrandId,'ES');
+ const selectedBrand=window.KeySuiteV40001?.brandContext?.(p.keysuite_brand_id||window.KeySuiteV40001?.state?.selectedBrandId,'ES','','ES');
  const sellingBrandId=p.keysuite_brand_id||selectedBrand?.id,sellingBrandName=p.keysuite_brand_name||selectedBrand?.name;
  let pricedPump=found,pricingSource=window.KeySuitePricing?.sourceSnapshot?.(found)||null;
  if(pricingMode==='assembly'&&sellingBrandId&&pricingSource){
-   const brandedSource={...pricingSource,v391_brand_id:sellingBrandId,v391_brand_name:sellingBrandName||'',assembly_brand_margin_enabled:true};
+   const brandedSource={...pricingSource,...window.KeySuitePricing.assemblySellingBrand({id:sellingBrandId,name:sellingBrandName},'ES')};
    pricedPump=window.KeySuitePricing?.applyAssemblyBrandMargin?.(found,brandedSource,found.customer)||found;
    pricingSource={...brandedSource,...window.KeySuitePricing.sourceSnapshot(pricedPump)};
  }
@@ -1882,10 +1882,20 @@ window.addEventListener('message',function(event){
    p.keysuite_product_group_code=`CHC_${generation}`;
    p.keysuite_price_group_code=`CHC_${generation}`;
  }
+ const brandApi=window.KeySuiteV391;
+ const pinnedContext=event.data.quoteRequestId?window.KeySuiteProduct?.consumeC4Quote?.(event,p):null;
+ if(event.data.quoteRequestId&&!pinnedContext)return;
  if(route==='assembly'){
+   const c4Product=event.origin===location.origin&&event.source===$('productSelectorFrame')?.contentWindow&&p.generation_code==='G1';
+   const selling=pinnedContext||(c4Product?brandApi?.brandContext?.(undefined,'CHC',p.keysuite_material,'CHC_G1'):null);
+   if(c4Product&&!selling?.id){alert('Select the selling brand and C4 series again.');return;}
    const quoteItem=chcAssemblyQuoteItem(p),bare=selectionBareMode(p,$('bareShaft')?.checked);
-   const pricingModel=quoteItem.pricingModel||p.base_model||p.quotation_model||p.model;const item=window.KeySuitePricing?.buildChcAssemblyItem?.(pricingModel,{...p,bareShaft:bare})||{model:quoteItem.model||pricingModel||'CHC Pumpset',qty:1,unitPrice:0,pumpData:p};
-   item.model=quoteItem.model||item.model;item.description=quoteItem.description;item.pumpData={...p,keysuite_bare_shaft:bare,keysuite_supply_mode:bare?'BARE':'COMPLETE'};
+   const pricingModel=quoteItem.pricingModel||p.base_model||p.quotation_model||p.model;
+   const item=window.KeySuitePricing?.buildChcAssemblyItem?.(pricingModel,{...p,bareShaft:bare,sellingBrand:selling})||{model:quoteItem.model||pricingModel||'CHC Pumpset',qty:1,unitPrice:0,pumpData:p};
+   const sellingModel=selling?brandApi?.resolveChcIdentity?.(selling.id,'CHC_G1',quoteItem.model,p.keysuite_material)?.sellingModel:quoteItem.model;
+   item.model=sellingModel||quoteItem.model||item.model;
+   item.description=selling?brandedQuotationDescription(quoteItem.description.replace(`Pump Model: ${quoteItem.model}`,()=>`Pump Model: ${item.model}`),selling.name):quoteItem.description;
+   item.pumpData={...p,keysuite_bare_shaft:bare,keysuite_supply_mode:bare?'BARE':'COMPLETE'};
    if(bare){
      // The CHC resolver now prices bare shaft directly, rather than subtracting a
      // hard-coded IE3 motor from an assembled price.
@@ -1895,9 +1905,6 @@ window.addEventListener('message',function(event){
  }
  if(!canEditQuotation(true))return;
  if(!ensureQuotationPricingContext('add a pump to the quotation'))return;
- const brandApi=window.KeySuiteV391;
- const pinnedContext=window.KeySuiteProduct?.consumeC4Quote?.(event,p);
- if(event.data.quoteRequestId&&!pinnedContext)return;
  const sellingId=String(pinnedContext?.id||brandApi?.brandContext?.()?.id||'');
  showPage('quotation');
  const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);

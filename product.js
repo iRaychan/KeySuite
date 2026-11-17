@@ -51,9 +51,9 @@
   let pendingC4Quote=null;
   function consumeC4Quote(event, payload){
     if(event.origin!==location.origin||event.source!==$('productSelectorFrame')?.contentWindow||
-       event.data.route!=='quotation'||String(payload.generation_code||'')!=='G1')return null;
+       String(payload.generation_code||'')!=='G1')return null;
     const request=pendingC4Quote;
-    if(!request||String(payload.base_model||payload.model||'').trim().toUpperCase()!==request.model.toUpperCase())return null;
+    if(!request||event.data.route!==request.route||String(payload.base_model||payload.model||'').trim().toUpperCase()!==request.model.toUpperCase())return null;
     if(event.data.quoteRequestId!==request.id)return null;
     pendingC4Quote=null;
     return request.context;
@@ -61,11 +61,11 @@
   function send(model,action){
     const opts=options();
     let quoteRequestId='';
-    if(selectedChcGeneration==='G1'&&action==='add'){
+    if(selectedChcGeneration==='G1'&&['add','assembly'].includes(action)){
       const context=window.KeySuiteV391?.brandContext?.(undefined,'CHC',opts.material,'CHC_G1');
-      if(!context?.id){alert('Select the selling brand and C4 series again before quoting.');return;}
+      if(!context?.id){alert('Select the selling brand and C4 series again.');return;}
       quoteRequestId=crypto.randomUUID();
-      pendingC4Quote={id:quoteRequestId,model,context};
+      pendingC4Quote={id:quoteRequestId,model,context,route:action==='add'?'quotation':'assembly'};
     }
     const frame=ensureFrame();if(!frame)return;
     const message={type:'KEYSUITE_PRODUCT_MODEL',model,action,options:opts,quoteRequestId};

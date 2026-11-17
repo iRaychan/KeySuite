@@ -1,7 +1,7 @@
 {
-  "version": "5.00.76",
-  "baseline": "5.00.75",
-  "upgrade_supported_from": "5.00.75",
+  "version": "5.00.77",
+  "baseline": "5.00.76",
+  "upgrade_supported_from": "5.00.76",
   "release_status": "review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,8 +13,8 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Product C4 Quote correlates hydraulic replies with the selling identity captured in the parent application.",
-    "Assembly Cost applies the draft customer and BOM brand-margin rules and shows the fuel, rounding and line-total reconciliation."
+    "C4 Assembly preserves selling-brand identity separately from its CHC source pricelist.",
+    "B.G.Reich ES Pumpsets resolve Brand Margin for the pump and motor independently."
   ],
   "known_issues": ["G Series ISO 9906 Grade 3B is not declared pending conformity evidence."]
 }
