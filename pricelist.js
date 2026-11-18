@@ -30,7 +30,7 @@
   const multiplierFamilyCode=prefix=>prefix==='chc'?(selectedChcGeneration==='G1'?'CHC_G1':'CHC_G2'):familyCode(prefix);
   const multiplierFamilyLabel=prefix=>prefix==='chc'?`CHC ${selectedChcGeneration}`:familyCode(prefix);
   const multiplierStateKey=(prefix,currency)=>prefix==='chc'?`chc:${selectedChcGeneration}:${currency}`:`${prefix}:${currency}`;
-  const ES_MATERIALS=['CI / SS / SS / MS','CI / SS / SS / GP','CI / CI / SS / MS','CI / CI / SS / GP','SS304','SS316'];
+  const ES_MATERIALS=['CI / SS / SS / MS','CI / SS / SS / GP','CI / CI / SS / MS','CI / CI / SS / GP','SS304','SS316','Duplex 2205','Duplex 2507'];
   const esPriceField=currency=>({USD:'priceUsd',RMB:'priceRmb',MYR:'priceMyr'})[validCurrency(currency)];
   const keyplcPriceField=esPriceField;
   const normMaterial=value=>String(value||'').toUpperCase().replace(/[^A-Z0-9]+/g,'');
@@ -411,6 +411,7 @@
     const client=window.KeySuiteAuth?.getClient?.();if(!client){message('es','Supabase is not connected.','error');return}
     const original=button.innerHTML;button.disabled=true;button.textContent='…';message('es','');
     try{
+      if(!esProducts().find(p=>p.id===productId)?.variants?.some(v=>normMaterial(v.material)===normMaterial(material)))throw new Error('This material configuration is not installed in the database. Review OPTIONAL_V50079_ES_DUPLEX.sql before saving.');
       const {error}=await client.rpc('keysuite_save_es_product_price_v205',{p_product_id:productId,p_currency:currency,p_prices:prices,p_rarity:rarity});
       if(error)throw error;
       const product=esProducts().find(item=>item.id===productId);

@@ -455,20 +455,31 @@ async function rpcSaveQuotation(client,payload){
 }
 async function saveQuoteRemote(q,{quiet=false}={}){
  const client=quotationClient();
- if(!client||quotationSyncMode!=='supabase'){const error=new Error('Secure quotation sync is unavailable. Retry the connection before saving this quotation.');error.code='quotation_sync_required';throw error}
+ // History refresh state does not determine whether an authenticated save is available.
+ // A transient history failure must not prevent the session recovery below.
+ if(!client){const error=new Error('Secure quotation connection is unavailable. Your draft is retained; retry after connecting.');error.code='quotation_sync_required';throw error}
  const retryable=error=>{const text=String(error?.message||error||'').toLowerCase();return error?.code==='KEYSUITE_AUTH_TIMEOUT'||/jwt|token|session|auth|timed out|timeout|abort/.test(text)};
  let payload=remoteQuotePayload(q),result;
  for(let attempt=0;attempt<2;attempt++){
   try{await window.KeySuiteAuth?.ensureActiveSession?.({forceRefresh:attempt>0});result=await rpcSaveQuotation(client,payload);if(result.error)throw result.error;break}
   catch(error){if(attempt===0&&retryable(error))continue;throw error}
  }
+ quotationSyncMode='supabase';quotationSyncError='';
  let response=Array.isArray(result.data)?result.data[0]:result.data,numberAdjustedFrom=firstQuoteText(response?.number_adjusted_from,response?.numberAdjustedFrom);
  if(response?.status==='conflict')throw new Error('Quotation reference '+payload.no+' is already used. Choose an unused reference.');
  const savedPayload=response?.status==='saved'?(response.saved||payload):(response||payload),savedNo=canonicalQuotationNumber(savedPayload?.no)||canonicalQuotationNumber(payload.no);
  let saved={...normalizeRemoteQuote(savedPayload),id:payload.id,no:savedNo,saveOperation:response?.operation||'',numberAdjustedFrom};
  // Re-read secure history after a save so remoteStorageId is taken from the actual database row,
  // while the logical quotation ID remains the exact ID of the version that was saved.
- const refreshed=await listRemoteQuotes(client),remote=(refreshed.data||[]).map(normalizeRemoteQuote);
+ let refreshed;
+ try{refreshed=await listRemoteQuotes(client)}catch(error){
+  // The authenticated RPC commits atomically and returns its saved document.
+  // History availability is independent of that commit acknowledgement.
+  if(response?.status!=='saved'||!response.saved||String(savedPayload.id)!==String(payload.id)||!savedNo)throw error;
+  quotationSyncError='Quotation saved securely; history refresh is temporarily unavailable. Retry history refresh.';
+  cacheSecureQuotes([saved,...(secureQuotes||[])]);renderQuotationHistoryNotice();refreshQuotes();return saved;
+ }
+ const remote=(refreshed.data||[]).map(normalizeRemoteQuote);
  const exact=remote.find(item=>String(item.id)===String(payload.id))||remote.find(item=>canonicalQuotationNumber(item.no)===savedNo);
  if(!exact){const error=new Error('The database did not confirm this quotation save. Your draft is retained; please retry.');error.code='quotation_save_unconfirmed';throw error}
  saved={...exact,saveOperation:saved.saveOperation,numberAdjustedFrom:saved.numberAdjustedFrom};cacheSecureQuotes(remote);
@@ -1127,6 +1138,7 @@ function brandedQuotationDescription(description,brand,sourceBrand=''){
  if(index<0)return lines.join('\n');
  const name=String(brand??'').trim();
  let line=lines[index].trimStart();
+ if(name==='-'||!name)line=line.replace(/^[-–—]\s+(?=\S)/,'');
  const candidates=[name,sourceBrand,'B.G.Reich'].map(s=>String(s||'').trim()).filter(s=>s&&s!=='-').sort((a,b)=>b.length-a.length);
  for(const candidate of candidates){
    while(line.toLowerCase().startsWith(candidate.toLowerCase()+' '))line=line.slice(candidate.length).trimStart();
@@ -1602,7 +1614,7 @@ async function saveQuote(options={}){
  const lockedPricingCustomerId=quotationPricingCustomerId||pricingCustomer?.id||$('qCustomer').value;
  const lockedSnapshot=customerSnapshot(existing?.pricingCustomerSnapshot||pricingCustomer)||quotationPricingCustomerSnapshot;
  const q={
-  ...(existing||{}),id:editingQuoteId||newUuid(),companyId:currentCompanyId(),company_id:currentCompanyId(),no:quotationNo,date:isRevisionCopy()?(existing?.date||$('qDate').value):$('qDate').value,revisionDate:isRevisionCopy()?($('qRevisionDate').value||localCalendarDate()):'',originalDate:isRevisionCopy()?(existing?.originalDate||existing?.date||$('qDate').value):$('qDate').value,showRevision:isRevisionCopy(),documentType:$('qDocumentType').value,
+  ...(existing||{}),id:editingQuoteId||quotationSessionId,companyId:currentCompanyId(),company_id:currentCompanyId(),no:quotationNo,date:isRevisionCopy()?(existing?.date||$('qDate').value):$('qDate').value,revisionDate:isRevisionCopy()?($('qRevisionDate').value||localCalendarDate()):'',originalDate:isRevisionCopy()?(existing?.originalDate||existing?.date||$('qDate').value):$('qDate').value,showRevision:isRevisionCopy(),documentType:$('qDocumentType').value,
   customerId:lockedCustomerId,contactIndex:$('qContact').value,printedCompany:$('qPrintedCompany')?.value.trim()||'',printedContact:$('qPrintedContact')?.value.trim()||'',
   pricingCustomerId:lockedPricingCustomerId,pricingCustomerSnapshot:customerSnapshot(lockedSnapshot),status:quotationStatus==='new'?'saved':quotationStatus,
   revisionOf:quotationRevisionOf||existing?.revisionOf||'',revisionRootId:quotationRevisionRootId||existing?.revisionRootId||'',revisionNumber:Number(quotationRevisionNumber||existing?.revisionNumber||0),audit:quotationAudit||existing?.audit||[],

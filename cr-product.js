@@ -37,7 +37,7 @@
   function pageShown(id){if(id==='productCr')render()}
   window.addEventListener('message',event=>{const frame=$('productCrSelectorFrame'),message=event.data||{};if(event.source!==frame?.contentWindow)return;if(message.type==='KEYSUITE_PRODUCT_FRAME_READY'){frameReady=true;if(queued){const next=queued;queued=null;frame.contentWindow.postMessage(next,'*')}}});
   document.addEventListener('input',event=>{if(event.target?.id==='crProductModelInput')renderModels()});
-  document.addEventListener('change',event=>{if(['crProductMaterial','crProductSeal','crProductElastomer','crProductConnection','crProductBareShaft'].includes(event.target?.id)){renderModels();const frame=$('productCrSelectorFrame');if(frameReady&&frame?.contentWindow&&frame.closest('#productCurveHost'))post(String($('productCurveTitle')?.textContent||''),'view')}});
+  document.addEventListener('change',event=>{if(['crProductMaterial','crProductSeal','crProductElastomer','crProductConnection','crProductBareShaft'].includes(event.target?.id)){renderModels();const frame=$('productCrSelectorFrame');if(!window.KeySuiteV394411ProductCurve&&frameReady&&frame?.contentWindow&&frame.closest('#productCurveHost'))post(String($('productCurveTitle')?.textContent||''),'view')}});
   window.KeySuiteCRProduct={version:'4.28.72',render,pageShown,payloadFor,routeSelection};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render,{once:true});else render();
 })();

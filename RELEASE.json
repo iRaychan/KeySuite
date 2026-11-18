@@ -1,8 +1,8 @@
 {
-  "version": "5.00.78",
-  "baseline": "5.00.77",
-  "upgrade_supported_from": "5.00.77",
-  "release_status": "review",
+  "version": "5.00.79",
+  "baseline": "5.00.78",
+  "upgrade_supported_from": "5.00.78",
+  "release_status": "review_candidate",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
   "supabase_data_seed_required": false,
@@ -13,8 +13,16 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Run the configured Brand Margin stage in shared product and BOM pricing, with explicit zero-rate audits and exact final-price quotation handoff.",
-    "Keep ES, CR and KV selector documents mounted across navigation and restore their visible layouts on return."
+    "Recover authenticated quotation saves independently of transient history errors; preserve a stable retry identity.",
+    "Repair Product curve startup, BSW visibility/configuration and CR material presentation.",
+    "Resolve Product costing families from their route and configured selling-series aliases.",
+    "Remove brandless quotation placeholders, expose independent ES duplex configurations and repair BSW table sizing."
   ],
-  "known_issues": ["G Series ISO 9906 Grade 3B is not declared pending conformity evidence."]
+  "known_issues": [
+    "Production quotation writes untested; isolated browser tests use in-memory RPC responses.",
+    "Windows Chrome and Edge unavailable on this Mac.",
+    "All configured production brand/customer/series prices have not been exhaustively verified.",
+    "Missing ES duplex database configurations require separate review/application of the supplied optional script."
+  ],
+  "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql"
 }

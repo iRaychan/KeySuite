@@ -1101,6 +1101,7 @@ function keysuiteCrPresentationContext(){
 }
 function keysuiteCrPresentationAlias(value){
  let out=String(value??''),ctx=keysuiteCrPresentationContext(),target=String(ctx?.sellingSeries||ctx?.masterSeries||'').trim();
+ if(/^(?:CR|CRS|CRN)$/i.test(target)){const material=String(ctx?.material||window.keysuiteExportPayload?.keysuite_material||'CR').toUpperCase();target=material==='CRS'||material==='CRN'?material:'CR'}
  if(target)out=out.replace(/\b(?:CRS|CRN|CR)\b/gi,target);
  try{
   const logo=String(ctx?.logo||'').trim(),name=String(ctx?.name||'Brand').trim();

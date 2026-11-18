@@ -75,7 +75,7 @@
     }
     if(f==='CR'){
       let live='';try{live=norm(frame?.contentWindow?.keysuiteExportPayload?.keysuite_material)}catch(_){}
-      return live||norm($('crProductMaterial')?.value)||norm(pin.material)||'CR';
+      return norm($('crProductMaterial')?.value)||live||norm(pin.material)||'CR';
     }
     if(f==='ES'||f==='ISO'){
       const outer=frame===$('selectorEsFrame')?$('esMaterial'):frame===$('productEsSelectorFrame')?$('esProductMaterial'):frame===$('productIsoSelectorFrame')?$('isoMaterial'):null;
@@ -160,6 +160,12 @@
     }else if(displayModel){
       // Apply only the selling-series alias to an already-final model. Do not rebuild T/E.
       displayModel=aliasModel(displayModel,{...ctx,masterModel:'',displayModel:''});
+    }
+    if(f==='CR'&&masterModel){
+      const material=String(selectedMaterial(f,frame)||'CR').toUpperCase();
+      const variant=/^CRN$|SS\s*316/.test(material)?'CRN':/^CRS$|SS\s*304/.test(material)&&!/CAST\s*IRON/.test(material)?'CRS':'CR';
+      const selling=norm(ctx.sellingSeries);
+      displayModel=masterModel.replace(/^(?:CRN|CRS|CR)\b/i,/^(?:CRN|CRS|CR)$/i.test(selling)||!selling?variant:selling);
     }
     return {
       family:f,id:ctx.id,name:ctx.name,key:ctx.key,logo:effectiveLogo(ctx),countryOfOrigin:ctx.countryOfOrigin,
@@ -568,13 +574,13 @@
     }
   }
   function finalizeFrame({freshModel=false,eventState=null}={}){
-    const f=currentFamily||activeFamily(),fr=frameFor(f);if(!fr)return;try{if(freshModel&&f==='KV')clearFrameModelIdentity(fr);window.KeySuiteSelectorBrand?.refresh?.(fr);const payload=fr.contentWindow?.keysuiteExportPayload||{},selectorModel=norm(fr.contentDocument?.querySelector((f==='ES'||f==='ISO')?'#summary h1':'.selection-model')?.textContent),freshMaster=norm(eventState?.model)||norm(payload.base_model)||norm(payload.model)||norm(payload.quotation_model),freshDisplay=norm(eventState?.display_model)||norm(payload.display_model)||norm(payload.keysuite_display_model)||norm(payload.quotation_model),pin=baseContext(f,fr),master=freshModel?(freshMaster||selectorModel||norm(pin.masterModel)):(norm(pin.masterModel)||freshMaster||selectorModel);let display=freshModel?(freshDisplay||master):(norm(pin.displayModel)||freshDisplay||master);display=display?aliasModel(display,{...pin,masterModel:'',displayModel:''}):aliasModel(master,pin);if(fr.contentWindow)fr.contentWindow.__KEYSUITE_MODEL_PRESENTATION_CONTEXT={...pin,masterModel:master,displayModel:display,pinned:true}}catch(_){}
+    const f=currentFamily||activeFamily(),fr=frameFor(f);if(!fr)return;try{if(freshModel&&(f==='KV'||f==='BSW'))clearFrameModelIdentity(fr);window.KeySuiteSelectorBrand?.refresh?.(fr);const payload=fr.contentWindow?.keysuiteExportPayload||{},selectorModel=norm(fr.contentDocument?.querySelector((f==='ES'||f==='ISO')?'#summary h1':'.selection-model')?.textContent),freshMaster=norm(eventState?.model)||norm(payload.base_model)||norm(payload.model)||norm(payload.quotation_model),freshDisplay=norm(eventState?.display_model)||norm(payload.display_model)||norm(payload.keysuite_display_model)||norm(payload.quotation_model),pin=baseContext(f,fr),master=freshModel?(freshMaster||selectorModel||norm(pin.masterModel)):(norm(pin.masterModel)||freshMaster||selectorModel);let display=freshModel?(freshDisplay||master):(norm(pin.displayModel)||freshDisplay||master);display=display?aliasModel(display,{...pin,masterModel:'',displayModel:''}):aliasModel(master,pin);if(fr.contentWindow)fr.contentWindow.__KEYSUITE_MODEL_PRESENTATION_CONTEXT={...pin,masterModel:master,displayModel:display,pinned:true}}catch(_){}
     installPdfHooks(fr,f);applyScreenIdentity(f,fr);const doc=fr.contentDocument;if(freshModel){window.KeySuiteSelectorBrand?.collapseSummaryForFrame?.(fr);if(lastDuty[f])applyStoredDuty(doc,f);else clearInitialDuty(doc,f)}
     setTimeout(()=>{try{window.KeySuiteSelectorBrand?.refresh?.(fr)}catch(_){}applyScreenIdentity(f,fr);installPdfHooks(fr,f);revealFrame(fr);markVersion();resizeFrame(fr)},0);
     setTimeout(()=>{applyScreenIdentity(f,fr);revealFrame(fr);resizeFrame(fr);markVersion()},100);
   }
   function onMessage(event){
-    const frames=['CHC','CR','KV','BGF','BSW','BFI','ES','ISO'].map(f=>[f,frameFor(f)]),hit=frames.find(([,fr])=>fr&&event.source===fr.contentWindow);if(!hit)return;const [f,fr]=hit,m=event.data||{};if(m.type==='KEYSUITE_PRODUCT_FRAME_READY'){if(inlineOpen&&f===currentFamily)hideFrame(fr);if(f==='KV'&&fr.dataset.kvCurveRequestId)return;setTimeout(()=>{if(inlineOpen&&f===currentFamily)finalizeFrame({freshModel:false});else installPdfHooks(fr,f)},0);return}if(m.type==='KEYSUITE_PRODUCT_CURVE_STATE'){if(f==='KV'&&fr.dataset.kvCurveRequestId&&(String(m.requestId||'')!==fr.dataset.kvCurveRequestId||low(m.model)!==low(fr.dataset.kvCurveModel)))return;currentFamily=f;const fresh=/^Curve loaded\./i.test(String(m.message||''));setTimeout(()=>finalizeFrame({freshModel:fresh,eventState:m}),0)}
+    const frames=['CHC','CR','KV','BGF','BSW','BFI','ES','ISO'].map(f=>[f,frameFor(f)]),hit=frames.find(([,fr])=>fr&&event.source===fr.contentWindow);if(!hit)return;const [f,fr]=hit,m=event.data||{};if(m.type==='KEYSUITE_PRODUCT_FRAME_READY'){if(inlineOpen&&f===currentFamily)hideFrame(fr);if(f==='KV'&&fr.dataset.kvCurveRequestId)return;setTimeout(()=>{if(inlineOpen&&f===currentFamily)finalizeFrame({freshModel:false});else installPdfHooks(fr,f)},0);return}if(m.type==='KEYSUITE_PRODUCT_CURVE_STATE'){if(f==='KV'&&fr.dataset.kvCurveRequestId&&(String(m.requestId||'')!==fr.dataset.kvCurveRequestId||low(m.model)!==low(fr.dataset.kvCurveModel)))return;currentFamily=f;const fresh=/^Curve loaded\./i.test(String(m.message||''))||(f==='BSW'&&m.valid===true);setTimeout(()=>finalizeFrame({freshModel:fresh,eventState:m}),0)}
   }
   function bind(){
     window.addEventListener('message',onMessage,true);window.addEventListener('resize',()=>{if(selectionIsoOpen)resizeFrame($('selectorIsoFrame'));else if(selectionEsOpen)resizeFrame($('selectorEsFrame'));else if(selectionBfiOpen)resizeFrame($('selectorBfiFrame'));else if(inlineOpen)resizeFrame(activeFrame())},{passive:true});window.addEventListener('pageshow',()=>setTimeout(()=>{markVersion();scanGenericSelectorFrames();syncSelectionProductPanels()},0));window.addEventListener('KEYSUITE_PAGE_CHANGED',()=>{if(inlineOpen)closeInline(true);['CHC','CR','BFI','ES','ISO'].forEach(f=>{const frame=frameFor(f);if(frame)frame.style.display='none'});setTimeout(syncSelectionProductPanels,0)});window.addEventListener('KEYSUITE_BRANDS_READY',()=>setTimeout(()=>{markVersion();if(inlineOpen)finalizeFrame();else if(selectionIsoOpen)prepareSelectionIsoFrame();else if(selectionEsOpen)prepareSelectionEsFrame();else if(selectionBfiOpen)prepareSelectionBfiFrame();syncSelectionProductPanels()},0));window.addEventListener('KEYSUITE_V393_BRAND_CONTEXT_CHANGED',()=>setTimeout(()=>{markVersion();if(inlineOpen)finalizeFrame();else if(selectionIsoOpen)prepareSelectionIsoFrame();else if(selectionEsOpen)prepareSelectionEsFrame();else if(selectionBfiOpen)prepareSelectionBfiFrame();syncSelectionProductPanels()},0));
