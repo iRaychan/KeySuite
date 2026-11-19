@@ -38,6 +38,7 @@ function normalizeDescriptionIndentation(value){
  }).join('\n');
 }
 function normalizeItem(item={},assemblyType=type){
+ item=window.KeySuiteCommercialIdentity?.stamp(item)||item;
  const source=sourceObject(item),normalized={...item,description:normalizeDescriptionIndentation(item.description),pricingSource:source,section:item.section||defaultSection(assemblyType,item)};
  if(assemblyType==='system'&&normalized.section==='pumpset'){normalized.autoQty=Math.max(.01,Number(normalized.autoQty??2)||2);if(normalized.bomManual==null)normalized.bomManual=Math.abs(Number(normalized.qty??normalized.autoQty)-normalized.autoQty)>1e-9}
  if(!normalized.keyplcData&&String(source.product_family||'').toUpperCase()==='KEYPLC'){
@@ -167,8 +168,10 @@ function pumpDescriptionParts(item){
  const lines=String(item?.description||'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trimEnd()).filter(Boolean),modelFromItem=String(item?.pumpData?.quotation_model||item?.pumpData?.model||item?.model||'').replace(/^(?:ES|ISO)\s*/i,'').trim();
  const duty=String(item?.pumpData?.quotation_duty||'').trim(),capacity=lines.find(line=>/^Capacity:/i.test(line))||(duty?`Capacity: ${duty}`:'');
  const modelPattern=/^(?:.*?\s+)?(?:ISO )?End Suction Pump Model:/i;
- const brand=String(item?.brand??item?.pumpData?.keysuite_brand_name??'').trim();
+ const identity=window.KeySuiteCommercialIdentity?.forItem(item);
+ const brand=String(identity?.brand??item?.brand??item?.pumpData?.keysuite_brand_name??'').trim();
  let modelLine=lines.find(line=>modelPattern.test(line))||`${brand&&brand!=='-'?brand+' ':''}End Suction Pump Model: ${modelFromItem}`;
+ if(identity)modelLine=window.KeySuiteCommercialIdentity.description(modelLine,identity);
  modelLine=modelLine.replace(/(Model:\s*)(?:(?:ES|ISO)\s*)?/i,iso?'$1':'$1ES ');
  const suction=lines.find(line=>/^Suction\s*x\s*Discharge:/i.test(line))||'';
  const material=lines.find(line=>/^Pump Material:/i.test(line))||'';

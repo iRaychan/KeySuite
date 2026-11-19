@@ -1010,7 +1010,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   }
   function esDescription(product,material,options={}){
     const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),sizes=esConnectionSizes(product?.model),isGland=/\bGP\b/i.test(String(material||''));
-    const lines=[`B.G.Reich End Suction Pump Model: ${String(product?.model||'').trim()}`,`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
+    const lines=[`${window.KeySuiteCommercialIdentity?.cleanBrand(options.commercialIdentity?.brand??options.sellingBrand?.name??'')||''} End Suction Pump Model: ${String(product?.model||'').trim()}`.trim(),`Suction x Discharge: DN${sizes.suction} x DN${sizes.discharge}`,`Pump Material: ${esMaterialDescription(material)}`];
 
     if(!isGland&&seal!==ES_DEFAULT_SEAL)lines.push(`Mech Seal Material: ${seal}`);
     if(elastomer!==ES_DEFAULT_ELASTOMER)lines.push(`Elastomer: ${elastomer}`);

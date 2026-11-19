@@ -181,6 +181,7 @@
   }
   function aliasText(text,s){
     let out=String(text??'');
+    if(window.KeySuiteCommercialIdentity&&s.family!=='CHC')out=window.KeySuiteCommercialIdentity.alias(out,s);
     if(s.masterModel&&s.displayModel)out=replaceModelIdentity(out,s.masterModel,s.displayModel,s.family);
     if(s.sellingSeries){
       if(s.family==='CHC')out=out.replace(/\b(?:CHCS|CHCN|CHC)\b/g,s.sellingSeries);

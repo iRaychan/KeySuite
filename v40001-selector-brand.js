@@ -84,6 +84,7 @@
     return String(ctx?.key || '').toLowerCase() === 'b.g.reich' || String(ctx?.name || '').toLowerCase() === 'b.g.reich';
   }
   function modelAlias(text,ctx=context()){
+    if(window.KeySuiteCommercialIdentity&&String(ctx?.family).toUpperCase()!=='CHC')return window.KeySuiteCommercialIdentity.alias(text,ctx);
     const resolve=api()?.displayModelAlias;
     if(resolve)return resolve(text,ctx);
     let out=String(text??''),family=String(ctx?.family||'').toUpperCase(),target=String(ctx?.sellingSeries||ctx?.masterSeries||'').trim();

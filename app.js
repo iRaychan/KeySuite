@@ -1189,6 +1189,7 @@ function copyQuoteItemToClipboard(item){try{localStorage.setItem(quoteClipboardK
 function readQuoteItemClipboard(){try{const payload=JSON.parse(localStorage.getItem(quoteClipboardKey())||'null');return payload?.item&&typeof payload.item==='object'?structuredClone(payload.item):null}catch(_){return null}}
 function pasteQuoteItem(){if(!canEditQuotation(true))return false;const item=readQuoteItemClipboard();if(!item){alert('No copied quotation item is available for this company account. Open any quotation and press Copy on an item first.');return false}const row=quoteItemRow(item,{restored:true});focusNewQuoteItem(row);renumberQuoteItems();calcTotal();updateQuotationStateUi();return true}
 function quoteItemRow(data={}, {restored=false}={}){
+ if(!restored&&String(data.pricingSource?.product_family||'').toUpperCase()!=='ASSEMBLY')data=window.KeySuiteCommercialIdentity?.stamp(data)||data;
  data={...data,quoteItemId:data.quoteItemId||crypto.randomUUID()};
  if([...document.querySelectorAll('.quote-item')].some(row=>parseQuoteJson(row.dataset.quoteItemPayload)?.quoteItemId===data.quoteItemId))data.quoteItemId=crypto.randomUUID();
  const wrap=document.createElement('div');wrap.className='quote-item collapsed';wrap.draggable=false;wrap.dataset.printAsSet=String(quoteUsesSetPrintLayout(data));const couplingItem=!data.manualItem&&isCouplingQuoteData(data),motorItem=!data.manualItem&&!couplingItem&&isMotorQuoteData(data),noCapacityItem=data.manualItem||!couplingItem&&(motorItem||isNoCapacityQuoteData(data)),family=quoteProductFamily(data);wrap.dataset.quoteKind=couplingItem?'coupling':motorItem?'motor':noCapacityItem?'static':'standard';if(family)wrap.dataset.quoteFamily=family;
@@ -1845,10 +1846,11 @@ async function routeEsSelection(p={},route='quotation'){
  }
  const capacity=esSelectionCapacity(p);
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
- const pumpDescription=String(pricedDescription||'').trim();
+ const commercialIdentity=window.KeySuiteCommercialIdentity.resolve(selectedBrand||{},found.product?.model||p.quotation_model||p.model);
+ const pumpDescription=window.KeySuiteCommercialIdentity.description(pricedDescription,commercialIdentity).trim();
  const pricingSource={...window.KeySuitePricing.sourceSnapshot(found),...window.KeySuitePricing.assemblySellingBrand(selectedBrand,'ES')};
  const pumpData=sellingBrandId?{...p,keysuite_brand_id:sellingBrandId,keysuite_brand_name:sellingBrandName}:p;
- const pumpItem={model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc.finalPrice||0),pricingSource,pumpData,brandId:sellingBrandId,brand:sellingBrandName,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
+ const pumpItem={commercialIdentity,model:found.product?.model||p.quotation_model||p.model||'ES Pump',description:pumpDescription,qty:1,unitPrice:Number(found.calc.finalPrice||0),pricingSource,pumpData,brandId:sellingBrandId,brand:sellingBrandName,productFamily:'ES',assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump',section:'pump',...(capacity||{})};
  if(target==='assembly'){
    const assembly=window.KeySuiteAssembly;
    if(!await assembly?.addItem?.(pumpItem,{type:'pumpset',section:'pump',replacePumpset:true})||bare)return;
