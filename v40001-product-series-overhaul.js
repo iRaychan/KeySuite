@@ -131,6 +131,7 @@
   }
   function aliasModel(model,ctx){
     let out=norm(model);if(!out)return out;
+    if(api()?.displayModelAlias)return api().displayModelAlias(out,ctx);
     const master=norm(ctx.masterSeries)||ctx.family||'',sell=norm(ctx.sellingSeries)||master;
     if(ctx.masterModel&&ctx.displayModel)out=replaceModelIdentity(out,ctx.masterModel,ctx.displayModel,ctx.family);
     if(ctx.family==='CHC'&&sell)out=out.replace(/\b(?:CHCS|CHCN|CHC)\b/g,sell);

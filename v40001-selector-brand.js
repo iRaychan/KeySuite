@@ -13,6 +13,7 @@
   const frameState = new WeakMap();
   let defaultBrandLogo = '';
   const visibleTextMaster = new WeakMap();
+  const visibleTextRendered = new WeakMap();
 
   const escapeRe = value => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const norm = value => String(value ?? '').trim();
@@ -83,9 +84,10 @@
     return String(ctx?.key || '').toLowerCase() === 'b.g.reich' || String(ctx?.name || '').toLowerCase() === 'b.g.reich';
   }
   function modelAlias(text,ctx=context()){
+    const resolve=api()?.displayModelAlias;
+    if(resolve)return resolve(text,ctx);
     let out=String(text??''),family=String(ctx?.family||'').toUpperCase(),target=String(ctx?.sellingSeries||ctx?.masterSeries||'').trim();
     if(family==='CHC'&&target)return out.replace(/\bCHCS\b|\bCHCN\b|\bCHC\b/g,target);
-    if(isMaster(ctx))return out;
     const master=String(ctx?.masterSeries||'').trim();if(master&&target&&master.toUpperCase()!==target.toUpperCase())out=out.replace(new RegExp(`\\b${escapeRe(master)}\\b`,'g'),target);
     return out;
   }
@@ -159,10 +161,11 @@
       const parent=node.parentElement;
       if(!parent||['SCRIPT','STYLE','TEXTAREA'].includes(parent.tagName))return;
       if(parent.closest?.('[data-keysuite-no-brand-alias]'))return;
-      if(!visibleTextMaster.has(node))visibleTextMaster.set(node,node.nodeValue||'');
+      if(!visibleTextMaster.has(node)||node.nodeValue!==visibleTextRendered.get(node))visibleTextMaster.set(node,node.nodeValue||'');
       const masterText=visibleTextMaster.get(node)||'';
       const next=isMaster(ctx)?modelAlias(masterText,ctx):brandAlias(masterText,ctx);
       if(node.nodeValue!==next)node.nodeValue=next;
+      visibleTextRendered.set(node,next);
     });
     // Main selector heading follows the Brand Series (CHC / SVM / VMS), not the material-dependent Sub Series.
     const mainSeries=String(ctx?.brandSeries||ctx?.sellingSeries||ctx?.masterSeries||ctx?.family||'').trim();

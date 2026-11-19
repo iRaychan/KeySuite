@@ -166,11 +166,13 @@ function pumpDescriptionParts(item){
  const iso=String(item?.productFamily||sourceObject(item).product_family||'').toUpperCase()==='ISO';
  const lines=String(item?.description||'').replace(/\r\n?/g,'\n').split('\n').map(line=>line.trimEnd()).filter(Boolean),modelFromItem=String(item?.pumpData?.quotation_model||item?.pumpData?.model||item?.model||'').replace(/^(?:ES|ISO)\s*/i,'').trim();
  const duty=String(item?.pumpData?.quotation_duty||'').trim(),capacity=lines.find(line=>/^Capacity:/i.test(line))||(duty?`Capacity: ${duty}`:'');
- let modelLine=lines.find(line=>/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line))||`B.G.Reich End Suction Pump Model: ${modelFromItem}`;
+ const modelPattern=/^(?:.*?\s+)?(?:ISO )?End Suction Pump Model:/i;
+ const brand=String(item?.brand??item?.pumpData?.keysuite_brand_name??'').trim();
+ let modelLine=lines.find(line=>modelPattern.test(line))||`${brand&&brand!=='-'?brand+' ':''}End Suction Pump Model: ${modelFromItem}`;
  modelLine=modelLine.replace(/(Model:\s*)(?:(?:ES|ISO)\s*)?/i,iso?'$1':'$1ES ');
  const suction=lines.find(line=>/^Suction\s*x\s*Discharge:/i.test(line))||'';
  const material=lines.find(line=>/^Pump Material:/i.test(line))||'';
- const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!/^B\.G\.Reich (?:ISO )?End Suction Pump Model:/i.test(line)&&!/Bare shaft pump only/i.test(line));
+ const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!modelPattern.test(line)&&!/Bare shaft pump only/i.test(line));
  return {capacity,model:modelLine,suction,material,extras};
 }
 function completedPumpsetDescription(d=current){

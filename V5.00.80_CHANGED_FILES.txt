@@ -1,0 +1,16 @@
+RELEASE.json
+V5.00.80_CHANGED_FILES.txt
+V5.00.80_CHANGELOG.md
+V5.00.80_TEST_REPORT.md
+VERSION.txt
+app.js
+assembly.js
+index.html
+manifest.json
+release-version.js
+sw.js
+tests/phase02-server.cjs
+tests/phase02.js
+v40001-multibrand.js
+v40001-product-series-overhaul.js
+v40001-selector-brand.js

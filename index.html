@@ -2257,6 +2257,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <dialog id="itemRemarkDialog" class="ks-dialog">
   <form method="dialog" class="dialog-body item-remark-dialog">
     <div class="page-title-row"><div><h2 style="margin:0">Internal Item Remarks</h2><div class="item-remark-help">For internal records only. These remarks are never included in quotation printouts or PDFs.</div></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></div>
+    <div id="itemRemarkReadOnly" hidden>🔒 Read-only — Item Sealed</div>
     <textarea id="itemRemarkInput" maxlength="4000" placeholder="Enter internal remarks for this quotation item..."></textarea>
     <div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn" id="saveItemRemark" value="default">Save Remarks</button></div>
   </form>

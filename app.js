@@ -871,6 +871,7 @@ function setQuotationEditingLocked(locked){
  const root=$('quotation');if(!root)return;root.classList.toggle('quotation-locked',!!locked);
  root.querySelectorAll('input,select,textarea').forEach(el=>{if(['preparedBy','preparedByDesignation'].includes(el.id))return;el.disabled=!!locked});
  root.querySelectorAll('.remove-quote-item,.duplicate-quote-item,.remark-quote-item,.drag-handle,#addQuoteItem,#pasteQuoteItem,#expandAllItems,#collapseAllItems').forEach(el=>{if(el)el.style.pointerEvents=locked?'none':'';if(el&&'disabled' in el)el.disabled=!!locked});
+ root.querySelectorAll('.remark-quote-item').forEach(el=>{el.disabled=false;el.style.pointerEvents=''});
  if(!locked){
    const revision=isRevisionCopy(),revisionToggle=$('showRevision'),revisionDate=$('qRevisionDate');
    setControlLocked($('quoteNo'),revision,true);
@@ -1090,7 +1091,10 @@ function syncItemRemarkUi(row){
  if(indicator){indicator.title=hasRemark?'This item has internal remarks':'';indicator.setAttribute('aria-label',hasRemark?'Internal remarks exist':'')}
 }
 function openItemRemark(row){
- if(!row||!canEditQuotation(true))return;itemRemarkTarget=row;const input=$('itemRemarkInput'),dialog=$('itemRemarkDialog');if(!input||!dialog)return;
+ if(!row)return;itemRemarkTarget=row;const input=$('itemRemarkInput'),dialog=$('itemRemarkDialog');if(!input||!dialog)return;
+ const readOnly=isQuotationSealed();input.readOnly=readOnly;
+ $('saveItemRemark').disabled=readOnly;$('saveItemRemark').hidden=readOnly;
+ $('itemRemarkReadOnly').hidden=!readOnly;
  input.value=row.dataset.internalRemark||'';dialog.showModal();setTimeout(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)},0);
 }
 function saveItemRemark(){
@@ -1185,6 +1189,8 @@ function copyQuoteItemToClipboard(item){try{localStorage.setItem(quoteClipboardK
 function readQuoteItemClipboard(){try{const payload=JSON.parse(localStorage.getItem(quoteClipboardKey())||'null');return payload?.item&&typeof payload.item==='object'?structuredClone(payload.item):null}catch(_){return null}}
 function pasteQuoteItem(){if(!canEditQuotation(true))return false;const item=readQuoteItemClipboard();if(!item){alert('No copied quotation item is available for this company account. Open any quotation and press Copy on an item first.');return false}const row=quoteItemRow(item,{restored:true});focusNewQuoteItem(row);renumberQuoteItems();calcTotal();updateQuotationStateUi();return true}
 function quoteItemRow(data={}, {restored=false}={}){
+ data={...data,quoteItemId:data.quoteItemId||crypto.randomUUID()};
+ if([...document.querySelectorAll('.quote-item')].some(row=>parseQuoteJson(row.dataset.quoteItemPayload)?.quoteItemId===data.quoteItemId))data.quoteItemId=crypto.randomUUID();
  const wrap=document.createElement('div');wrap.className='quote-item collapsed';wrap.draggable=false;wrap.dataset.printAsSet=String(quoteUsesSetPrintLayout(data));const couplingItem=!data.manualItem&&isCouplingQuoteData(data),motorItem=!data.manualItem&&!couplingItem&&isMotorQuoteData(data),noCapacityItem=data.manualItem||!couplingItem&&(motorItem||isNoCapacityQuoteData(data)),family=quoteProductFamily(data);wrap.dataset.quoteKind=couplingItem?'coupling':motorItem?'motor':noCapacityItem?'static':'standard';if(family)wrap.dataset.quoteFamily=family;
  try{wrap.dataset.quoteItemPayload=JSON.stringify(data)}catch(_){wrap.dataset.quoteItemPayload='{}'}
  if(data.pumpData)wrap.dataset.pumpData=JSON.stringify(data.pumpData);if(data.pricingSource)wrap.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data.couplingData)wrap.dataset.couplingData=JSON.stringify(data.couplingData);if(data.motorData)wrap.dataset.motorData=JSON.stringify(data.motorData);
@@ -1206,7 +1212,7 @@ function quoteItemRow(data={}, {restored=false}={}){
 function readQuoteItemData(r){const brands=JSON.parse(r.dataset.itemBrands||'[]');if(r.dataset.manualItem==='true')return {manualItem:true,productFamily:'MANUAL',model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,brand:r.dataset.manualBrand,...readManualQuoteCapacity(r),qty:Number(r.querySelector('.item-qty').value)||0,unitPrice:Number(r.querySelector('.item-price').value)||0,modelManuallyEdited:true,descriptionManuallyEdited:true};const coupling=r.dataset.quoteKind==='coupling',motor=r.dataset.quoteKind==='motor',staticItem=r.dataset.quoteKind==='static',rawModel=stripQuotationBrand(r.querySelector('.item-model').value.trim()),base={brands,modelManuallyEdited:r.dataset.modelManuallyEdited==='true',model:rawModel,qty:+r.querySelector('.item-qty').value||0,unitPrice:+r.querySelector('.item-price').value||0,internalRemark:String(r.dataset.internalRemark||'').trim(),descriptionManuallyEdited:r.dataset.descriptionManuallyEdited==='true',pumpData:r.dataset.pumpData?JSON.parse(r.dataset.pumpData):null,motorData:r.dataset.motorData?JSON.parse(r.dataset.motorData):null,pricingSource:r.dataset.pricingSource?JSON.parse(r.dataset.pricingSource):null,couplingData:r.dataset.couplingData?JSON.parse(r.dataset.couplingData):null};if(r.dataset.descriptionManuallyEdited==='true'||r.dataset.modelManuallyEdited==='true')return {...base,model:r.querySelector('.item-model').value,description:r.querySelector('.item-description').value,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),...quoteCapacityState(r),...(coupling?{isCoupling:true,productFamily:'COUPLING',shaftInfo:quoteShaftState(r)}:motor?{isMotor:true,productFamily:'MOTOR'}:{})};if(coupling){const shaftInfo=quoteShaftState(r);return {...base,model:normalizeCouplingQuoteModel(base.model,{...base,couplingData:base.couplingData}),isCoupling:true,productFamily:'COUPLING',shaftInfo,description:normalizeDescriptionIndentation(shaftText(r.querySelector('.item-description').value,shaftInfo)).trim()}}if(motor)return {...base,isMotor:true,productFamily:'MOTOR',description:normalizeDescriptionIndentation(normalizeMotorQuotationDescription(r.querySelector('.item-description').value)).trim()};if(staticItem)return {...base,productFamily:r.dataset.quoteFamily||quoteProductFamily(base),description:normalizeDescriptionIndentation(stripCapacityDescription(stripQuotationBrand(r.querySelector('.item-description').value))).trim()};const capacity=quoteCapacityState(r);return {...base,model:splitCapacityModel(rawModel).base,description:normalizeDescriptionIndentation(capacityText(stripQuotationBrand(r.querySelector('.item-description').value),capacity)).trim(),...capacity}}
 function getQuoteItemData(row){
  const item=readQuoteItemData(row);
- return {...item,description:row.querySelector('.item-description').value,
+ return {...parseQuoteJson(row.dataset.quoteItemPayload),...item,internalRemark:String(row.dataset.internalRemark??''),description:row.querySelector('.item-description').value,
    unit:quoteItemUnit(row),
    printAsSet:row.dataset.printAsSet==='true',
    originalQuotationItem:parseQuoteJson(row.dataset.originalQuotationItem),

@@ -322,7 +322,7 @@
     const masterSeries=fam==='CHC'?chcMasterSeriesFromMaterial(material):fam;
     const map=familyMapping(brand?.id,fam,masterSeries,group);
     const crSeries=fam==='CR'?materialModel('CR',material,'CR'):fam;
-    const sellingSeries=isMasterBrand(brand)?(fam==='CHC'?masterSeries:crSeries):String(map?.selling_series||map?.master_series||masterSeries||fam);
+    const sellingSeries=String(map?.selling_series||(isMasterBrand(brand)?(fam==='CHC'?masterSeries:crSeries):map?.master_series||masterSeries||fam));
     const brandSeries=brandSeriesFor(brand,group);
     const generation=generationForGroup(group),priceGroup=priceGroupFor(group);
     return brand?{id:String(brand.id),name:String(brand.brand_name||''),key:String(brand.brand_key||''),logo:String(brand.logo_data||''),countryOfOrigin:String(brand.country_of_origin||''),family:fam,productGroup:group,productGroupLabel:productGroupLabel(group),generation,priceGroup,brandSeries,sellingSeries,masterSeries:String(map?.master_series||masterSeries||''),material,templateId:String(brand.quotation_template_id||'')}:null;
@@ -862,7 +862,6 @@
     let out=String(text??'');if(!ctx)return out;
     const family=String(ctx.family||'').toUpperCase(),target=String(ctx.sellingSeries||ctx.masterSeries||'').trim();
     if(family==='CHC'&&target)return out.replace(/\b(?:CHCS|CHCN|CHC)\b/g,target);
-    if(isMasterBrand(byBrandId(ctx.id)))return out;
     const master=String(ctx.masterSeries||'').trim();if(master&&target&&master.toUpperCase()!==target.toUpperCase()){const re=master.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');out=out.replace(new RegExp(`\\b${re}\\b`,'g'),target);}return out;
   }
   function decorateProductDisplay(materialOverride=''){

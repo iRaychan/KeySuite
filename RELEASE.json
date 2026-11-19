@@ -1,7 +1,7 @@
 {
-  "version": "5.00.79",
-  "baseline": "5.00.78",
-  "upgrade_supported_from": "5.00.78",
+  "version": "5.00.80",
+  "baseline": "5.00.79",
+  "upgrade_supported_from": "5.00.79",
   "release_status": "review_candidate",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
