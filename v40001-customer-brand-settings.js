@@ -46,7 +46,8 @@
     const all=brands();
     if(isOwnerAccount())return window.brandDisplayOrder?.(all)||all;
     if(!accountScopeReady())return [];
-    return window.brandDisplayOrder?.(all.filter(b=>HYDRAULIC_FAMILIES.some(f=>accountAllows(b.id,f))))||all.filter(b=>HYDRAULIC_FAMILIES.some(f=>accountAllows(b.id,f)));
+    const allowed=all.filter(b=>rawEntries().some(e=>String(e.brand.id)===String(b.id)&&accountAllows(b.id,e.family)));
+    return window.brandDisplayOrder?.(allowed)||allowed;
   };
   const byId=id=>priceBrands().find(b=>String(b.id)===String(id))||null;
   const bgReich=()=>brands().find(b=>low(b.brand_key)==='b.g.reich'||low(b.brand_name)==='b.g.reich')||null;
@@ -87,7 +88,7 @@
   function customerName(id){return norm(window.KeySuiteApp?.getCustomerById?.(String(id||''))?.company)||'Selected Customer'}
   function selectedDashboardCustomer(){return String($('startCustomer')?.value||'')}
   function rawEntries(){
-    if(window.KeySuiteHydraulicRegistry)return brands().flatMap(b=>window.KeySuiteHydraulicRegistry.forBrand(b).map(r=>({brand:b,family:r.family,productGroup:r.group,key:keyOf(b.id,r.group==='CHC_G2'?'CHC':r.group)})));
+    if(window.KeySuiteHydraulicRegistry)return brands().flatMap(b=>window.KeySuiteHydraulicRegistry.forBrand(b).map(r=>({brand:b,family:r.family,label:r.label,productGroup:r.group,key:keyOf(b.id,r.group==='CHC_G2'?'CHC':r.group)})));
     const out=[];
     brands().forEach(b=>{
       if(isMaster(b)){
@@ -161,6 +162,13 @@
     out.push({brand:gws,priceGroup:'GWS',family:'TANK',selectionKey:'',key:priceKeyOf(gws.id,'GWS'),label:'GWS Tank'});
     const master=brands().find(isMaster),existing=new Set(out.map(entry=>normalizedPriceGroup(entry.priceGroup)));
     if(master)priceGroups().filter(group=>!existing.has(group)).forEach(group=>out.push({brand:master,priceGroup:group,family:group,selectionKey:group==='ISO'?keyOf(master.id,'ISO'):'',key:priceKeyOf(master.id,group),label:priceGroupLabel(group)}));
+    // Selection eligibility comes from the same commercial registry as Quick Selection.
+    rawEntries().forEach(entry=>{
+      const key=priceKeyOf(entry.brand.id,entry.productGroup||entry.family);
+      let row=out.find(e=>e.key===key);
+      if(!row){row={brand:entry.brand,priceGroup:entry.productGroup||entry.family,key};out.push(row)}
+      row.family=entry.family;row.selectionKey=entry.key;if(entry.label)row.label=entry.label;
+    });
     return out;
   }
   function allPriceEntries(){
@@ -634,7 +642,7 @@
   }
   function isSelectionAllowed(brandId,priceGroup,cid=currentPreferenceCustomerId()){
     const group=normalizedPriceGroup(priceGroup);
-    if(!['CHC_G1','CHC_G2','CR','KV','BFI','BGF','BSW','ES','ISO'].includes(group))return false;
+    if(!rawEntries().some(e=>String(e.brand.id)===String(brandId)&&normalizedPriceGroup(e.productGroup||e.family)===group))return false;
     if(isPriceAllowed(brandId,group,cid)!==true)return false;
     const pref=cache.get(String(cid));if(!pref)return false;
     const selectionKey=group==='CHC_G1'?keyOf(brandId,'CHC_G1'):group==='CHC_G2'?keyOf(brandId,'CHC'):group==='CR'?keyOf(brandId,'CR'):group==='KV'?keyOf(brandId,'KV'):group==='BFI'?keyOf(brandId,'BFI'):keyOf(brandId,group);

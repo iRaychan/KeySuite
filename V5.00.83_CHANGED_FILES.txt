@@ -1,0 +1,15 @@
+RELEASE.json
+V5.00.83_CHANGED_FILES.txt
+V5.00.83_CHANGELOG.md
+V5.00.83_ROOT_CAUSES.md
+V5.00.83_TEST_REPORT.md
+VERSION.txt
+assembly.js
+index.html
+manifest.json
+release-version.js
+sw.js
+tests/v50082/RESULTS.json
+tests/v50083.cjs
+v40001-customer-brand-settings.js
+v50033-series-registry.js

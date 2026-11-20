@@ -1,0 +1,40 @@
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');
+const {JSDOM}=require('jsdom'),root=path.resolve(__dirname,'..');
+const dom=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'https://isolated.invalid',runScripts:'outside-only'}),w=dom.window;
+w.KEYSUITE_ACCESS={role:'owner',company_id:'test',email:'owner@test.invalid'};w.KEYSUITE_PROFILE=w.KEYSUITE_ACCESS;
+w.compareBrandPriority=(a,b)=>a.brand_name.localeCompare(b.brand_name);w.CSS={escape:x=>x};w.alert=()=>{};
+const run=s=>vm.runInContext(s,dom.getInternalVMContext()),read=n=>fs.readFileSync(path.join(root,n),'utf8');
+const load=n=>run(read(n));const plain=x=>JSON.parse(JSON.stringify(x));
+// Prevent page startup; exercise actual functions with an in-memory RPC transport only.
+Object.defineProperty(w.document,'readyState',{value:'loading'});w.document.addEventListener=()=>{};
+w.KeySuiteV391={state:{brands:[{id:'bg',brand_key:'b.g.reich',brand_name:'B.G.Reich',brand_type:'master'}],mappings:[]},brandFamilies:()=>[{family:'G',productGroup:'G',label:'G Series'},{family:'BGF',productGroup:'BGF',label:'BGF'},{family:'FUTURE',productGroup:'FUTURE',label:'Future commercial series'}]};
+let saved={keys:['bg|BGF'],price_keys:['bg|G','bg|BGF','bg|FUTURE']};
+w.KeySuiteAuth={getClient:()=>({rpc:async(name,args)=>{if(name.includes('save_'))saved=plain(args.p_selection);return {data:plain(saved),error:null}}})};
+w.localStorage.clear();load('product-family-registry-v50047.js');load('v50033-series-registry.js');
+run(read('v40001-customer-brand-settings.js').replace('window.KeySuiteV40001CustomerBrandSettings={','window.__pref={rawEntries,rawPriceEntries,saveSelectionOnly,cache};window.KeySuiteV40001CustomerBrandSettings={'));
+async function main(){
+ const api=w.KeySuiteV40001CustomerBrandSettings;
+ assert(w.__pref.rawPriceEntries().some(e=>e.key==='bg|G'&&e.selectionKey==='bg|G'));
+ assert(w.__pref.rawEntries().some(e=>e.productGroup==='FUTURE'));
+ await api.loadPreference('customer');assert.equal(api.isSelectionAllowed('bg','G','customer'),false);
+ const host=w.document.createElement('div');host.innerHTML='<input type="checkbox" data-v41506-selection-key="bg|G" checked><input type="checkbox" data-v41506-selection-key="bg|BGF" checked>';
+ await w.__pref.saveSelectionOnly('customer',host);await api.loadPreference('customer',{force:true});assert.equal(api.isSelectionAllowed('bg','G','customer'),true);assert(saved.keys.includes('bg|BGF'));
+ host.firstChild.checked=false;await w.__pref.saveSelectionOnly('customer',host);await api.loadPreference('customer',{force:true});assert.equal(api.isSelectionAllowed('bg','G','customer'),false);assert(saved.keys.includes('bg|BGF'));assert.deepEqual(saved.price_keys,['bg|G','bg|BGF','bg|FUTURE']);
+ console.log('PASS centralized G/future discovery, checkbox save/reload, selection and price gates, existing BGF preference');
+ load('assembly.js');run(read('assembly.js').replace('window.KeySuiteAssembly={','window.__asm={syncAutomaticComponents,normalize,quoteMeta,restoreCoupling,set:d=>{current=d;type="pumpset";drafts=[d];loaded=true}};window.KeySuiteAssembly={'));
+ w.KeySuiteCoupling={contextFromItems:items=>({pumpCount:items.filter(i=>i.section==='pump').length,motorCount:items.filter(i=>i.section==='motor').length,motorRpm:2900,motorShaft:55,pumpShaft:45,motorTorque:123}),configureAssemblyItem:item=>{item.model='Sized coupling';item.unitPrice=100;return {config:{type:'pin_bush'}}}};
+ w.KeySuitePricing={findBaseplatePrice:()=>({product:{model:'ES Baseplate'},calc:{finalPrice:200}})};
+ const fresh=()=>({id:'test',assembly_type:'pumpset',items:[{id:'p',section:'pump',model:'ES 65-26',qty:1,unitPrice:1000,pumpData:{product:'ES',baseplate_detail:{frame:125},pumpset_dimension:{}}},{id:'m',section:'motor',model:'3BM50-2',qty:1,unitPrice:500,motorData:{hp:50,pole:2,eff:'IE3'}}]});
+ const d=fresh();w.__asm.syncAutomaticComponents(d);assert.equal(d.items.filter(i=>i.section==='coupling').length,1);assert.equal(d.items.filter(i=>i.section==='baseplate').length,1);
+ for(let i=0;i<4;i++)w.__asm.syncAutomaticComponents(d);assert.equal(d.items.length,4);
+ d.auto_suppressed={coupling:true,baseplate:true};d.items=d.items.filter(i=>['pump','motor'].includes(i.section));w.__asm.syncAutomaticComponents(d);assert.equal(d.items.length,2);
+ assert.equal(w.__asm.quoteMeta(d).autoSuppressed.baseplate,true);assert.equal(w.__asm.normalize(plain(d)).auto_suppressed.baseplate,true);
+ d.auto_suppressed.coupling=false;w.__asm.syncAutomaticComponents(d);assert.equal(d.items.length,3);assert(!d.items.some(i=>i.section==='baseplate'));
+ d.auto_suppressed.baseplate=false;w.__asm.syncAutomaticComponents(d);assert.equal(d.items.length,4);
+ const legacy=fresh();legacy.auto_suppressed={coupling:true,baseplate:true};w.__asm.syncAutomaticComponents(legacy);assert.equal(legacy.items.length,2);
+ const partial=fresh();partial.items.pop();partial.auto_suppressed={baseplate:true};w.__asm.syncAutomaticComponents(partial);assert.equal(partial.items.length,1);
+ console.log('PASS fresh Pump/Motor automatic accessories, repeated sync no duplicates, explicit removal, restore independently, persistence metadata, ambiguous legacy flags retained, partial pump-only');
+ dom.window.close();
+}
+main().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});
