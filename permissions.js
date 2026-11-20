@@ -46,9 +46,11 @@
   }
   function currentRole(){return validRole(window.KEYSUITE_ACCESS?.role||window.KEYSUITE_PROFILE?.role||'viewer')||'viewer'}
   function level(key,role=currentRole()){const r=validRole(role)||'viewer';return normalize(matrix[r]?.[key]??DEFAULTS[r]?.[key]??'none')}
+  function quotationLevel(role=currentRole()){const v=level('view_quotations',role);return ['all','full'].includes(v)?'full':['own','assigned'].includes(v)?'own':'none'}
+  function canViewQuotation(quote,email,companyId=''){if(!quote)return false;const company=String(quote.companyId||quote.company_id||'');if(companyId&&company&&company!==String(companyId))return false;const access=quotationLevel();if(access==='none')return false;const creator=String(quote.createdByEmail||quote.created_by_email||quote.createdBy||quote.preparedByEmail||'').trim().toLowerCase();return access==='full'||!!email&&creator===String(email).trim().toLowerCase()}
   function can(key,role=currentRole()){return level(key,role)!=='none'}
   function atLeast(key,accepted,role=currentRole()){const allowed=Array.isArray(accepted)?accepted:[accepted];return allowed.map(normalize).includes(level(key,role))}
   function snapshot(){return structuredClone(matrix)}
-  const api={ROLES:[...roles],BASE_ROLES:[...BASE_ROLES],DEFAULTS,merge,setMatrix:merge,currentRole,level,can,atLeast,snapshot,validRole};
+  const api={ROLES:[...roles],BASE_ROLES:[...BASE_ROLES],DEFAULTS,quotationLevel,canViewQuotation,merge,setMatrix:merge,currentRole,level,can,atLeast,snapshot,validRole};
   window.KeySuitePermissions=api;
 })();

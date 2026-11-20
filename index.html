@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
   <title>KeySuite V5.00.79</title>
-  <script src="release-version.js?v=50079"></script>
+  <script src="release-version.js?v=50082"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -845,6 +845,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
               <div style="grid-column:1/-1"><label for="quotationAssignedSaveName">Quotation Assigned Save Name</label><input id="quotationAssignedSaveName"></div>
               <div><label>Terms (days)</label><input id="customerTerms" type="number" min="0" step="1" inputmode="numeric" placeholder="Example: 60"></div>
               <div><label>&nbsp;</label><label class="template-check" style="height:42px;align-items:center"><input id="customerPdc" type="checkbox"> PDC</label></div>
+              <div style="grid-column:1/-1;display:grid;justify-items:start;gap:10px" id="customerPaymentOptions">
+                <label class="template-check"><input type="checkbox" data-customer-term="cash"> Cash</label>
+                <label class="template-check"><input type="checkbox" data-customer-term="advised"> To be advised</label>
+                <label class="template-check"><input type="checkbox" data-customer-term="usual"> As usual</label>
+                <label class="template-check"><input type="checkbox" data-customer-term="custom"> Custom Terms</label>
+                <div id="customerCustomTermsWrap" hidden style="width:100%"><label for="customerCustomTerms">Custom Terms</label><input id="customerCustomTerms" type="text" placeholder="Enter payment terms"></div>
+              </div>
               <div class="span-2"><label>Default Quotation Template</label><select id="customerDefaultQuotationTemplate"><option value="">Use company default template</option></select></div>
               <div><label>TIN Number</label><input id="tinNumber"></div>
               <div><label>Business Registration No.</label><input id="brnNumber"></div>
@@ -1438,6 +1445,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
             <h2 style="margin:0">Categories</h2>
             <div class="category-list-title-actions"><button class="btn secondary" id="categorySortDirection" type="button" title="Category A to Z" aria-label="Categories are fixed A to Z">A→Z</button></div>
           </div>
+          <div style="display:flex;gap:6px;margin-top:12px"><input id="categoryPrefixFilter" type="search" placeholder="Filter A–Z…" aria-label="Category name begins with" style="min-width:0"><button id="categoryPrefixClear" type="button" class="btn secondary" aria-label="Clear category filter">Clear</button></div>
           <div class="table-wrap" style="margin-top:12px">
             <table class="category-table">
               <thead><tr><th></th></tr></thead>
@@ -2319,10 +2327,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="permissions.js?v=50056"></script>
+<script src="permissions.js?v=50082"></script>
 <script src="v40407-role-authority.js?v=50071"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50081"></script>
+<script src="assembly.js?v=50082"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
@@ -2330,8 +2338,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="kv-fixes-v50026.js?v=50069"></script>
 <script src="kv-price-data-v50017.js?v=50069"></script>
 <script src="pdf-optimization.js?v=50056"></script>
+<script src="payment-terms.js?v=50082"></script>
 <script src="commercial-identity.js?v=50081"></script>
-<script src="app.js?v=50081"></script>
+<script src="app.js?v=50082"></script>
 <script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50060"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50078"></script>
@@ -2340,7 +2349,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="pricing.js?v=50081"></script>
 <script src="technical-pdf.js?v=50074-gpdf"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50047"></script>
+<script src="categories.js?v=50082"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50079"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
@@ -2361,7 +2370,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="g-series-v50068.js?v=50072"></script>
 <script src="bsw-v50027.js?v=50079"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50071"></script>
+<script src="roles.js?v=50082"></script>
 <script src="motor.js?v=50056"></script>
 <script src="coupling.js?v=50056"></script>
 <script src="baseplate.js?v=50069"></script>

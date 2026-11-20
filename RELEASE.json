@@ -1,10 +1,10 @@
 {
-  "version": "5.00.81",
-  "baseline": "5.00.80",
-  "upgrade_supported_from": "5.00.80",
-  "release_status": "local_verified_with_documented_limits",
+  "version": "5.00.82",
+  "baseline": "5.00.81",
+  "upgrade_supported_from": "5.00.81",
+  "release_status": "packaged_with_database_and_browser_verification_limits",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,13 +13,19 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Centralize commercial model mapping independently of hydraulic family aliases.",
-    "Preserve configured component brands through ES complete sets and quotation serialization."
+    "Quotation view Full/Own/None uses one permission resolver; server history authorization repair proposed, unapplied.",
+    "Category prefix filter preserves selected category and editor state.",
+    "Partial Pumpset validates selected rows and formats actual supplied/customer-supplied components.",
+    "Customer payment options persist in existing text field and saved quotation terms remain snapshots."
   ],
   "known_issues": [
-    "Real secure quotation Save/History/reopen not tested: isolated Supabase project/account unavailable.",
-    "All configured production brands/series/type combinations and full System UI conversion are not exhaustively verified.",
-    "Windows Chrome/Edge not available."
+    "Bug 001 live Full access remains blocked by existing owner-only secure-history RPC until separately approved SQL is applied and authenticated testing succeeds.",
+    "Legacy public quotation list/get RPC grants require review for a complete server-wide None authorization boundary.",
+    "Safari/Chrome/WebKit manual checks and actual PDF export unverified: desktop computer-use unavailable, browser launch failed.",
+    "Live customer/quotation persistence not tested; isolated DOM/in-memory transport and PostgreSQL tests only.",
+    "Historical v42858 CR pricing fixture fails identically on baseline 5.00.81 and this build; pricing engine unchanged."
   ],
-  "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql"
+  "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
+  "production_ready": false,
+  "approval_required_database_proposal": "proposals/V5.00.82_QUOTATION_VIEW_APPROVAL_REQUIRED.sql"
 }

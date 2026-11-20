@@ -237,7 +237,7 @@ function showPage(id){
 }
 
 function customers(){return customerSyncMode==='supabase'?secureCustomers:store.get('ks_customers',[])}
-function quotes(){return Array.isArray(secureQuotes)?secureQuotes:store.get('ks_quotes',[])}
+function quotes(){return visibleQuotationRows(Array.isArray(secureQuotes)?secureQuotes:store.get('ks_quotes',[]))}
 function activeCustomerId(){return localStorage.getItem('ks_active_customer')||''}
 function activeCustomer(){return customers().find(c=>c.id===activeCustomerId())}
 function customerName(id){return customers().find(c=>c.id===id)?.company||''}
@@ -343,7 +343,7 @@ function currentCompanyId(){return String(currentAccess().company_id||currentPro
 function currentRole(){return String(currentAccess().role||'user').toLowerCase()}
 function isCustomerAdmin(){return ['all','full'].includes(permissionLevel('edit_customers'))||hasPermission('customer_assignment')}
 function customerOwnerName(email){const e=String(email||'').toLowerCase();const user=(window.KEYSUITE_SECURE_DATA?.users||[]).find(x=>String(x.email||'').toLowerCase()===e);return user?.name||((e===currentEmail())?currentProfile().display_name:'')||email||'-'}
-function canManageQuotationHistory(){return currentRole()==='owner'}
+function canManageQuotationHistory(){return window.KeySuitePermissions?.quotationLevel?.()==='full'}
 function canDeleteQuotationHistory(){return currentRole()==='owner'||permissionLevel('delete_quotation_history')==='full'}
 function quoteCreatorEmail(q={}){return String(q.createdByEmail||q.created_by_email||q.createdBy||q.preparedByEmail||'').trim().toLowerCase()}
 function quoteCreatorName(q={}){return String(q.createdByName||q.created_by_name||customerOwnerName(quoteCreatorEmail(q))||quoteCreatorEmail(q)||'-')}
@@ -392,7 +392,7 @@ function remoteQuotePayload(q={}){
  const clean=cleanQuoteDocument(q),creator=quoteCreatorEmail(clean)||currentEmail(),creatorName=clean.createdByName||customerOwnerName(creator)||currentProfile().display_name||creator;
  return {...clean,items:normalizeQuoteItemQuantities(clean.items),createdByEmail:creator,createdByName:creatorName,updatedByEmail:currentEmail(),updatedAt:new Date().toISOString()}
 }
-function visibleQuotationRows(rows=[]){return canManageQuotationHistory()?rows:rows.filter(q=>quoteCreatorEmail(q)===currentEmail())}
+function visibleQuotationRows(rows=[]){return rows.filter(q=>window.KeySuitePermissions?.canViewQuotation?.(q,currentEmail(),currentCompanyId())===true)}
 const QUOTATION_BACKUP_KEY='ks_quotes_backup_v42920',QUOTATION_BACKUP_MAX_CHARS=500000,QUOTATION_BACKUP_MAX_ROWS=100;
 function compactQuotationBackupValue(value,depth=0){
  if(depth>12)return null;
@@ -518,12 +518,13 @@ async function deleteQuoteRemote(id,metadata={}){
  purgeDeletedQuoteCaches(id,targetNo);cacheSecureQuotes(remaining.filter(q=>String(q.id)!==String(id)&&(!targetNo||canonicalQuotationNumber(q.no)!==targetNo)))
 }
 async function cleanupRemoteQuotationDuplicates(client,rows=[]){
- const {duplicates}=dedupeQuotationRows(rows);if(!duplicates.length)return 0;let removed=0;
+ if(currentRole()!=='owner')return 0;const {duplicates}=dedupeQuotationRows(rows);if(!duplicates.length)return 0;let removed=0;
  for(const q of duplicates){const remoteId=q.remoteStorageId||q.id;if(!remoteId)continue;const result=await client.rpc('keysuite_delete_quotation_v42502',{p_company_id:currentCompanyId(),p_logical_id:String(q.id||''),p_legacy_id:String(remoteId),p_quotation_no:canonicalQuotationNumber(q.no)});if(result.error){console.warn('Duplicate quotation cleanup skipped',q.no,result.error);continue}removed++}
  return removed
 }
 async function listRemoteQuotes(client){
  const companyId=currentCompanyId();
+ if(window.KeySuitePermissions?.quotationLevel?.()==='none')return {data:[],error:null};
  const v42919=await client.rpc('keysuite_list_quotations_v42919',{p_company_id:companyId});
  if(!v42919.error)return v42919;
  if(!isMissingRpc(v42919.error,'keysuite_list_quotations_v42919'))throw v42919.error;
@@ -580,7 +581,7 @@ function compareQuotationHistoryNewest(a,b){
  return quotationHistoryUpdatedTimestamp(b)-quotationHistoryUpdatedTimestamp(a)
 }
 function filteredQuotes(rows=quotes()){
- const filter=quotationHistoryFilters();return rows.filter(q=>{const period=String(quotationHistoryDate(q)).slice(0,7),customer=quoteDisplayCustomerName(q).toLowerCase(),creator=quoteCreatorEmail(q),searchText=quotationHistorySearchText(q);return (!filter.periods.length||filter.periods.includes(period))&&(!filter.search||searchText.includes(filter.search))&&(!filter.customer||customer.includes(filter.customer))&&(!filter.user||creator===filter.user)}).slice().sort(compareQuotationHistoryNewest)
+ const filter=quotationHistoryFilters();return visibleQuotationRows(rows).filter(q=>{const period=String(quotationHistoryDate(q)).slice(0,7),customer=quoteDisplayCustomerName(q).toLowerCase(),creator=quoteCreatorEmail(q),searchText=quotationHistorySearchText(q);return (!filter.periods.length||filter.periods.includes(period))&&(!filter.search||searchText.includes(filter.search))&&(!filter.customer||customer.includes(filter.customer))&&(!filter.user||creator===filter.user)}).slice().sort(compareQuotationHistoryNewest)
 }
 function historyYearMonthGroup(year,selected){
  const selectedCount=HISTORY_MONTHS.reduce((count,[month])=>count+(selected.has(`${year}-${month}`)?1:0),0);
@@ -600,8 +601,8 @@ function populateQuotationHistoryFilters(rows=quotes()){
 }
 function normalizeCustomerRecord(row){
  let contacts=row.contacts||[];if(typeof contacts==='string'){try{contacts=JSON.parse(contacts)}catch(_){contacts=[]}}
- const pdc=!!row.pdc||/\bPDC\b/i.test(String(row.payment_terms||''));
- return {id:row.id,companyId:row.company_id,company:row.company_name||'',quotationAssignedSaveName:row.quotation_assigned_save_name||'',classification:row.classification||'',pricingCategoryId:row.pricing_category_id||'',defaultQuotationTemplateId:row.default_quotation_template_id||'',assignedUserEmail:row.assigned_user_email||'',createdByEmail:row.created_by_email||'',distanceKm:Number(row.distance_km||0),companyPhone:row.company_phone||'',address:row.address||'',terms:normalizeCustomerTermsDays(row.payment_terms),pdc,tinNumber:row.tin_number||'',brnNumber:row.business_registration_no||'',sstNumber:row.sst_number||'',msicCode:row.msic_code||'',businessActivity:row.business_activity||'',notes:row.notes||'',contacts:Array.isArray(contacts)?contacts:[],status:row.status||'active',createdAt:row.created_at||'',updatedAt:row.updated_at||''}
+ const terms=window.KeySuitePaymentTerms.parse(row.payment_terms);const pdc=!!row.pdc||terms.pdc;
+ return {id:row.id,companyId:row.company_id,company:row.company_name||'',quotationAssignedSaveName:row.quotation_assigned_save_name||'',classification:row.classification||'',pricingCategoryId:row.pricing_category_id||'',defaultQuotationTemplateId:row.default_quotation_template_id||'',assignedUserEmail:row.assigned_user_email||'',createdByEmail:row.created_by_email||'',distanceKm:Number(row.distance_km||0),companyPhone:row.company_phone||'',address:row.address||'',terms:terms.terms,pdc,termOption:terms.termOption,customTerms:terms.customTerms,tinNumber:row.tin_number||'',brnNumber:row.business_registration_no||'',sstNumber:row.sst_number||'',msicCode:row.msic_code||'',businessActivity:row.business_activity||'',notes:row.notes||'',contacts:Array.isArray(contacts)?contacts:[],status:row.status||'active',createdAt:row.created_at||'',updatedAt:row.updated_at||''}
 }
 function customerClient(){return window.KeySuiteAuth?.getClient?.()||null}
 function companyMasterCustomer(company){
@@ -620,7 +621,7 @@ async function importCompanyMasters(client,rows){
  if(result.error){console.warn('Company master could not be added to Customers',result.error);return rows}
  return rows.concat((result.data||[]).map(normalizeCustomerRecord));
 }
-function remoteCustomerPayload(c){const days=normalizeCustomerTermsDays(c.terms);return {id:c.id,company_id:c.companyId||currentAccess().company_id,company_name:c.company,quotation_assigned_save_name:c.quotationAssignedSaveName||null,classification:c.classification||'',pricing_category_id:c.pricingCategoryId||null,default_quotation_template_id:c.defaultQuotationTemplateId||null,assigned_user_email:c.assignedUserEmail||currentEmail(),created_by_email:c.createdByEmail||currentEmail(),distance_km:Number(c.distanceKm||0),company_phone:c.companyPhone||'',address:c.address||'',payment_terms:c.pdc?(Number(days)>0?`${days} days PDC`:'PDC'):days,tin_number:c.tinNumber||'',business_registration_no:c.brnNumber||'',sst_number:c.sstNumber||'',msic_code:c.msicCode||'',business_activity:c.businessActivity||'',notes:c.notes||'',contacts:c.contacts||[],status:c.status||'active',updated_at:new Date().toISOString()}}
+function remoteCustomerPayload(c){const days=normalizeCustomerTermsDays(c.terms);return {id:c.id,company_id:c.companyId||currentAccess().company_id,company_name:c.company,quotation_assigned_save_name:c.quotationAssignedSaveName||null,classification:c.classification||'',pricing_category_id:c.pricingCategoryId||null,default_quotation_template_id:c.defaultQuotationTemplateId||null,assigned_user_email:c.assignedUserEmail||currentEmail(),created_by_email:c.createdByEmail||currentEmail(),distance_km:Number(c.distanceKm||0),company_phone:c.companyPhone||'',address:c.address||'',payment_terms:window.KeySuitePaymentTerms.serialize(c),tin_number:c.tinNumber||'',business_registration_no:c.brnNumber||'',sst_number:c.sstNumber||'',msic_code:c.msicCode||'',business_activity:c.businessActivity||'',notes:c.notes||'',contacts:c.contacts||[],status:c.status||'active',updated_at:new Date().toISOString()}}
 async function loadSecureCustomers(){
  const client=customerClient();if(!client){customerSyncMode='local';customerSyncError='Secure customer connection is unavailable.';renderCustomerAccessNotice();return customers()}
  try{
@@ -713,16 +714,18 @@ function normalizeCustomerTermsDays(value){
  const days=match?Math.max(0,Math.round(Number(match[0])||0)):0;
  return String(days);
 }
-function formatCustomerTerms(value){
- const customer=value&&typeof value==='object'?value:null,raw=customer?customer.terms:value;
- const pdc=!!customer?.pdc||/\bPDC\b/i.test(String(value??''));
- const days=Number(normalizeCustomerTermsDays(raw)||0);
- if(days>0)return `${days} days${pdc?' PDC':''}`;
- return pdc?'PDC':'Cash before delivery';
+function formatCustomerTerms(value){return window.KeySuitePaymentTerms.format(value)}
+function setCustomerTermsUi(customer={}){
+ const t=window.KeySuitePaymentTerms.parse(customer);
+ document.querySelectorAll('[data-customer-term]').forEach(box=>box.checked=box.dataset.customerTerm===t.termOption);
+ if($('customerCustomTerms'))$('customerCustomTerms').value=t.customTerms;
+ syncCustomerPdcUi();
 }
 function syncCustomerPdcUi(){
- const box=$('customerPdc'),terms=$('customerTerms');if(!box||!terms)return;
- terms.disabled=false;terms.title=box.checked?'PDC will be appended to the entered Terms (days) in quotations.':'';
+ const selected=document.querySelector('[data-customer-term]:checked')?.dataset.customerTerm||'';
+ if($('customerCustomTermsWrap'))$('customerCustomTermsWrap').hidden=selected!=='custom';
+ if($('customerCustomTerms'))$('customerCustomTerms').required=selected==='custom';
+ if($('customerTerms')){$('customerTerms').disabled=selected==='cash';if(selected==='cash')$('customerTerms').value='0'}
 }
 function selectedQuotationCustomer(){
  const id=quotationPricingCustomerId||$('qCustomer')?.value||'';
@@ -976,7 +979,7 @@ function openNewCustomer(){
  $('customerEmpty').style.display='none';$('customerDetail').style.display='none';$('customerEditorCard').style.display='block';
  $('customerEditorTitle').textContent='Add New Customer';$('deleteCustomerBtn').style.display='none';
  ['customerId','company','companyPhone','address','quotationAssignedSaveName','customerTerms','tinNumber','brnNumber','sstNumber','msicCode','businessActivity','customerNotes'].forEach(id=>$(id).value='');
- if($('customerPdc'))$('customerPdc').checked=false;syncCustomerPdcUi();
+ if($('customerPdc'))$('customerPdc').checked=false;setCustomerTermsUi();
  $('customerDistance').value='0';$('customerClassification').value='';configureCustomerOwner(currentEmail());configureCustomerDistance();configureCustomerTemplate('');
  $('contactEditor').innerHTML='';contactRow();
  $('company').focus();
@@ -987,7 +990,7 @@ function editCustomer(id){
  $('customerEmpty').style.display='none';$('customerDetail').style.display='none';$('customerEditorCard').style.display='block';
  $('customerEditorTitle').textContent='Edit Customer';$('deleteCustomerBtn').textContent='Archive Customer';$('deleteCustomerBtn').style.display=isCustomerAdmin()?'inline-block':'none';
  $('customerId').value=c.id;$('company').value=c.company||'';$('companyPhone').value=formatMYPhone(c.companyPhone||'');
- $('address').value=c.address||'';$('quotationAssignedSaveName').value=c.quotationAssignedSaveName||'';$('customerTerms').value=normalizeCustomerTermsDays(c.terms);if($('customerPdc'))$('customerPdc').checked=!!c.pdc;syncCustomerPdcUi();$('tinNumber').value=c.tinNumber||'';
+ $('address').value=c.address||'';$('quotationAssignedSaveName').value=c.quotationAssignedSaveName||'';$('customerTerms').value=normalizeCustomerTermsDays(c.terms);if($('customerPdc'))$('customerPdc').checked=!!c.pdc;setCustomerTermsUi(c);$('tinNumber').value=c.tinNumber||'';
  $('brnNumber').value=c.brnNumber||'';$('sstNumber').value=c.sstNumber||'';$('msicCode').value=c.msicCode||'';
  $('businessActivity').value=c.businessActivity||'';$('customerNotes').value=c.notes||'';$('customerDistance').value=Number(c.distanceKm||0);$('customerClassification').value=c.classification||'';configureCustomerOwner(c.assignedUserEmail||currentEmail());configureCustomerDistance();configureCustomerTemplate(c.defaultQuotationTemplateId||'');
  $('contactEditor').innerHTML='';(c.contacts?.length?c.contacts:[{}]).forEach(contactRow);
@@ -1016,7 +1019,8 @@ async function saveCustomer(){
  const button=$('saveCustomer');button.disabled=true;button.textContent='Saving…';
  try{
    const id=customerUuid($('customerId').value),old=customers().find(x=>x.id===id)||{};
-   const c={...old,id,companyId:old.companyId||currentAccess().company_id,company,quotationAssignedSaveName:$('quotationAssignedSaveName').value.trim()||null,classification:$('customerClassification').value||'',pricingCategoryId:old.pricingCategoryId||'',defaultQuotationTemplateId:$('customerDefaultQuotationTemplate')?.value||'',assignedUserEmail:isCustomerAdmin()?($('customerOwner').value||currentEmail()):currentEmail(),createdByEmail:old.createdByEmail||currentEmail(),distanceKm:isCustomerAdmin()?Math.max(0,Number($('customerDistance').value||0)):Number(old.distanceKm||0),companyPhone:formatMYPhone($('companyPhone').value),address:$('address').value.trim(),terms:normalizeCustomerTermsDays($('customerTerms').value),pdc:!!$('customerPdc')?.checked,tinNumber:$('tinNumber').value.trim(),brnNumber:$('brnNumber').value.trim(),sstNumber:$('sstNumber').value.trim(),msicCode:$('msicCode').value.trim(),businessActivity:$('businessActivity').value.trim(),notes:$('customerNotes').value.trim(),contacts:getContacts(),status:'active'};
+   const c={...old,id,companyId:old.companyId||currentAccess().company_id,company,quotationAssignedSaveName:$('quotationAssignedSaveName').value.trim()||null,classification:$('customerClassification').value||'',pricingCategoryId:old.pricingCategoryId||'',defaultQuotationTemplateId:$('customerDefaultQuotationTemplate')?.value||'',assignedUserEmail:isCustomerAdmin()?($('customerOwner').value||currentEmail()):currentEmail(),createdByEmail:old.createdByEmail||currentEmail(),distanceKm:isCustomerAdmin()?Math.max(0,Number($('customerDistance').value||0)):Number(old.distanceKm||0),companyPhone:formatMYPhone($('companyPhone').value),address:$('address').value.trim(),terms:normalizeCustomerTermsDays($('customerTerms').value),pdc:!!$('customerPdc')?.checked,termOption:document.querySelector('[data-customer-term]:checked')?.dataset.customerTerm||'',customTerms:$('customerCustomTerms')?.value.trim()||'',tinNumber:$('tinNumber').value.trim(),brnNumber:$('brnNumber').value.trim(),sstNumber:$('sstNumber').value.trim(),msicCode:$('msicCode').value.trim(),businessActivity:$('businessActivity').value.trim(),notes:$('customerNotes').value.trim(),contacts:getContacts(),status:'active'};
+   if(c.termOption==='custom'&&!c.customTerms)throw new Error('Enter Custom Terms or deselect Custom Terms.');
    const saved=await saveCustomerRemote(c);viewedCustomerId=saved.id;refreshAll();showCustomerDetail(saved.id);alert('Customer saved.');
  }catch(error){console.error(error);alert(`Customer could not be saved: ${error.message||error}`)}finally{button.disabled=false;button.textContent='Save Customer'}
 }
@@ -1114,7 +1118,7 @@ function refreshQuotationContacts(){
  const contact=$('qContact').value===''?{}:contacts[Number($('qContact').value)]||{};
  if($('qPrintedContact')&&!$('qPrintedContact').value)$('qPrintedContact').value=quotationContactName(contact);
  updateQuotationContactInfo();
- if(c)$('payment').value=formatCustomerTerms(c);
+ if(c&&!editingQuoteId&&quotationStatus==='new')$('payment').value=formatCustomerTerms(c);
 }
 function updateQuotationContactInfo(){
  const c=customers().find(x=>x.id===$('qCustomer').value);
@@ -1599,7 +1603,7 @@ function calcTotal(){
 function applyQuotationTemplateDefaults(snapshot,force=false){
  const settings=snapshot?.settings||{};if(isQuotationSealed()||(!force&&quoteHasItems()))return false;
  const set=(id,value)=>{const node=$(id);if(node&&value!=null&&String(value).trim()!=='')node.value=String(value)};
- set('delivery',settings.delivery);set('payment',settings.payment);set('validity',settings.validity);set('priceBasis',settings.priceBasis);return true
+ set('delivery',settings.delivery);if(!selectedQuotationCustomer())set('payment',settings.payment);set('validity',settings.validity);set('priceBasis',settings.priceBasis);return true
 }
 function quotationDraftKey(){return `keysuite:v50015:quotation-draft:${currentCompanyId()}:${currentEmail().toLowerCase()}`}
 function retainQuotationDraft(quotation){try{localStorage.setItem(quotationDraftKey(),JSON.stringify({savedAt:new Date().toISOString(),quotation}))}catch(error){console.warn('Quotation draft backup unavailable',error)}}
@@ -1657,7 +1661,7 @@ async function saveQuote(options={}){
  if(!options.silent){const operation=committed.saveOperation||(isFirstSave?'created':'updated'),adjusted=committed.numberAdjustedFrom?`\nConcurrent number ${committed.numberAdjustedFrom} was already taken; KeySuite assigned ${committed.no}.`:'';alert(`${committed.documentType} ${committed.no} ${operation==='inserted'||operation==='created'?'created':'updated'} successfully.${adjusted}`)}return true
 }
 function loadQuote(id){
- const q=quotes().find(x=>x.id===id);if(!q)return;quotationSessionId=q.assemblySessionId||`quote:${id}`;window.KeySuiteAssembly?.resetForNewQuotation?.();editingQuoteId=id;quotationStatus=q.status||'saved';quotationRevisionOf=q.revisionOf||'';quotationRevisionRootId=q.revisionRootId||'';quotationRevisionNumber=Number(q.revisionNumber||0);quotationAudit=Array.isArray(q.audit)?q.audit:[];
+ const q=quotes().find(x=>x.id===id);if(!q||!visibleQuotationRows([q]).length)return;quotationSessionId=q.assemblySessionId||`quote:${id}`;window.KeySuiteAssembly?.resetForNewQuotation?.();editingQuoteId=id;quotationStatus=q.status||'saved';quotationRevisionOf=q.revisionOf||'';quotationRevisionRootId=q.revisionRootId||'';quotationRevisionNumber=Number(q.revisionNumber||0);quotationAudit=Array.isArray(q.audit)?q.audit:[];
  quotationPricingCustomerId=q.pricingCustomerId||q.customerId||'';
  quotationPricingCustomerSnapshot=customerSnapshot(q.pricingCustomerSnapshot||customers().find(x=>x.id===quotationPricingCustomerId)||null);
  setQuoteNoValue(q.no||'');$('qDate').value=q.originalDate||q.date||'';$('qRevisionDate').value=q.revisionDate||'';$('showRevision').checked=isRevisionCopy();$('qDocumentType').value=q.documentType||'Quotation';
@@ -1934,7 +1938,7 @@ window.addEventListener('message',function(event){
  const sellingId=String(pinnedContext?.id||brandApi?.brandContext?.()?.id||'');
  showPage('quotation');
  const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);
- if(selectedCustomer){refreshQuotationContacts();$('payment').value=formatCustomerTerms(selectedCustomer);}
+ if(selectedCustomer){refreshQuotationContacts();if(!editingQuoteId&&quotationStatus==='new')$('payment').value=formatCustomerTerms(selectedCustomer);}
  const material=p.keysuite_material||$('pumpMaterial').value;
  const seal=p.keysuite_seal||$('sealFaces').value;
  const elastomer=p.keysuite_elastomer||$('sealElastomer').value;
@@ -2355,6 +2359,7 @@ $('startContact')?.addEventListener('change',()=>{
  updateQuotationContactInfo();syncStartContact();
 });
 $('customerPdc')?.addEventListener('change',syncCustomerPdcUi);
+document.querySelectorAll('[data-customer-term]').forEach(box=>box.addEventListener('change',()=>{if(box.checked)document.querySelectorAll('[data-customer-term]').forEach(other=>{if(other!==box)other.checked=false});syncCustomerPdcUi()}));
 $('companyPhone').addEventListener('blur',()=>$('companyPhone').value=formatMYPhone($('companyPhone').value));
 $('addQuoteItem').onclick=()=>{if(!canEditQuotation(true))return;const row=quoteItemRow({manualItem:true,model:'Manual Item',unit:'unit'});focusNewQuoteItem(row);updateQuotationStateUi()};
 $('pasteQuoteItem')?.addEventListener('click',pasteQuoteItem);

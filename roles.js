@@ -51,7 +51,7 @@
     {key:'edit_customers',label:'Add / edit customers',options:['none','own','assigned','all']},
     {key:'customer_assignment',label:'Customer assignment and distance',options:['none','full']},
     {key:'create_quotations',label:'Create quotations',options:['none','full']},
-    {key:'view_quotations',label:'View quotations',options:['none','own','assigned','all']},
+    {key:'view_quotations',label:'View quotations',options:['none','own','full']},
     {key:'delete_quotation_history',label:'Delete quotation history',options:['none','full']},
     {key:'own_profile',label:'Own profile and password',options:['none','full']}
   ];
@@ -256,12 +256,12 @@
     }catch(error){console.error(error);if(notice)notice.textContent=`Role data could not be loaded: ${error.message||error}.`;users=[];audit=[];renderUsers();renderAudit()}
   }
 
-  function permissionValue(roleName,key){return String(currentPermissions()?.[roleName]?.[key]||window.KeySuitePermissions?.DEFAULTS?.[roleName]?.[key]||'none').toLowerCase()}
+  function permissionValue(roleName,key){const value=String(currentPermissions()?.[roleName]?.[key]||window.KeySuitePermissions?.DEFAULTS?.[roleName]?.[key]||'none').toLowerCase();if(key==='view_quotations')return ['all','full'].includes(value)?'full':['own','assigned'].includes(value)?'own':'none';return value}
   function permissionCell(row,roleName){
     const fixed=roleName==='owner'&&['key_dashboard','keyai_access','keyai_openai_control','keyai_sender_assign','manage_roles','customer_settings','delete_quotation_history','use_quick_selection','use_selector','use_product','choose_brand_series','own_profile'].includes(row.key);
     const value=fixed?'full':permissionValue(roleName,row.key);
     if(permissionsEditing&&!fixed){
-      const options=row.options.map(option=>`<option value="${option}"${value===option?' selected':''}>${LEVEL_LABELS[option]||title(option)}</option>`).join('');
+      const options=row.options.map(option=>`<option value="${option}"${value===option?' selected':''}>${row.key==='view_quotations'&&option==='none'?'None':LEVEL_LABELS[option]||title(option)}</option>`).join('');
       return `<td><select data-permission-role="${roleName}" data-permission-key="${row.key}">${options}</select></td>`;
     }
     if(permissionsEditing&&fixed)return `<td><span class="permission-fixed">Fixed Full</span></td>`;

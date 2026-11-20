@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "scope": "In-memory PostgreSQL only; actual production helper interfaces simulated",
+  "cases": [
+    "Full two creators",
+    "Own creator only",
+    "None/unknown denied",
+    "archive/current duplicate resolution",
+    "cross-company denied",
+    "inactive account denied",
+    "anon execute denied"
+  ],
+  "liveApplied": false
+}

@@ -160,8 +160,8 @@
   function openCategory(category,forEdit=false){if(!category)return;fill(category);setEditable(forEdit);message(forEdit?'Editing enabled. Category values and Use choices are unlocked.':'Category loaded. Hold the Edit button for 3 seconds to unlock category values and Use choices.','info')}
   function newCategory(){if(!isOwner()){message('Your role has view-only Category access.','error');return}selectedProduct='CHC_G2';fill(null);setEditable(true);message('New category ready. Values start at 0.00 and customer-factor Use choices start unticked.','info');setTimeout(()=>byId('categoryNameInput')?.focus(),0)}
   function renderRows(){
-    const body=byId('categoryRows');if(!body)return;const rows=sortedRows(categories());
-    if(!rows.length){body.innerHTML='<tr><td class="category-empty">No pricing categories yet.</td></tr>';return}
+    const body=byId('categoryRows');if(!body)return;const prefix=String(byId('categoryPrefixFilter')?.value||'').trim().toLocaleLowerCase();const rows=sortedRows(categories()).filter(row=>String(row.name||row.category_name||'').trim().toLocaleLowerCase().startsWith(prefix));
+    if(!rows.length){body.innerHTML='<tr><td class="category-empty">No matching categories.</td></tr>';return}
     const head=body.closest('table')?.querySelector('thead tr');if(head)head.innerHTML='<th></th>';
     body.innerHTML=rows.map(category=>{const name=String(category.name||category.category_name||'Unnamed Category').trim()||'Unnamed Category';return `<tr class="${category.id===selectedId?'category-row-selected':''}"><td><div class="category-row-layout"><button class="category-name-button ${category.id===selectedId?'active':''}" type="button" data-category-open="${esc(category.id)}"><span>${esc(name)}</span></button></div></td></tr>`}).join('');
   }
@@ -255,6 +255,8 @@
   function bind(){
     if(bound)return;bound=true;syncProductFamilyButtons();
     byId('categoryForm')?.addEventListener('submit',save);byId('newPricingCategory')?.addEventListener('click',newCategory);byId('cancelCategoryEdit')?.addEventListener('click',cancel);
+    byId('categoryPrefixFilter')?.addEventListener('input',renderRows);
+    byId('categoryPrefixClear')?.addEventListener('click',()=>{byId('categoryPrefixFilter').value='';renderRows();byId('categoryPrefixFilter').focus()});
     byId('categorySortDirection')?.addEventListener('click',()=>{categorySort.dir='asc';saveCategorySort();syncCategorySortUi();renderRows()});
     byId('categoryProductSortDirection')?.addEventListener('click',()=>{productSort.dir=productSort.dir==='asc'?'desc':'asc';saveProductSort();applyProductSort()});
     const editButton=byId('editCategoryRule');if(editButton)bindEditLongHold(editButton,unlockCategoryEditor);
