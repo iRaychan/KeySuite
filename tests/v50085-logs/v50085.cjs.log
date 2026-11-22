@@ -1,0 +1,9 @@
+PASS All five required identity cases through Curve messages and List paths across C4/C6; 20 items; selected duty differences, prices, sequential items and Keylargo template retained
+PASS Adding a product also preserves an explicitly selected TESK template
+PASS Brandless non-VMS, mixed other families, future brand/series and captured identity survive navigation; amounts and quantities preserved
+PASS Manual items retain assigned commercial brands including brandless and future names
+PASS Component Motor/Coupling/Tank identities, brandless source precedence, stale-frame protection and costing display preserve each brand without altering source/margin data
+PASS Actual G and BGF product producers retain a future selling brand/series and intentional brandless selection
+PASS Partial and mixed complete assembly/Pumpset/System formatter and normalization preserve each component identity and costing
+PASS Mixed-brand complete/partial Pumpset and System keep pump, motor, coupling and baseplate model identities and BOM labels
+PASS Actual save/history RPC fixture and reopen retain identity and template; quotation print renderer matches all items

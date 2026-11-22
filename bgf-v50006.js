@@ -18,6 +18,7 @@ function message(text,type='info'){const box=$('bgfPriceListMessage');if(!box)re
 // Workbook B10:B13 and B17:B20; B9 groups electric models. HP comes from D4:D7.
 function description(p){return `B.G.Reich Close Coupled Pump Model: ${p.model}\n${p.type==='Engine'?`c/w ${p.motorHp}HP 3600rpm Diesel Engine`:`c/w ${p.motorHp}HP 2Pole Motor (415V / 3Ph / 50Hz)`}\nSuction x Discharge: ${p.inlet} x ${p.outlet}\nPump Material: CI / BZ / SS / Mech Seal`;}
 function quote(p,duty={}){
+ const captured=window.KeySuiteCommercialIdentity?.captureSelection({model:p.model,family:'BGF',commercialIdentity:duty.commercialIdentity});
  const error=$('bgfQuoteMessage');
  const fail=text=>{error.textContent=`${p.model}: ${text}`;error.className='auth-message show error';error.setAttribute('role','alert');error.tabIndex=-1;error.scrollIntoView({block:'nearest'});error.focus({preventScroll:true});};
  try{
@@ -25,14 +26,14 @@ function quote(p,duty={}){
  if(!api?.findBgfPrice||!api?.bgfPriceProblem||!window.KeySuiteApp?.addExternalQuoteItem)throw new Error('Quotation services are not ready. Reload and try again.');
  const found=api.findBgfPrice(p.id),problem=api.bgfPriceProblem(p.id,found);
  if(problem){void window.KeySuiteManualPrice.offer({model:p.model,description:description(p),productFamily:'BGF',pricingSource:{product_family:'BGF',product_id:p.id}},problem);return;}
- const row=window.KeySuiteApp.addExternalQuoteItem({model:p.model,brand:p.brandName,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:duty.flow??$('ksDashFlow')?.value??'',capacityUnit:duty.flowUnit||$('ksDashFlowUnit')?.value||'m3h',headValue:duty.head??$('ksDashHead')?.value??'',headUnit:duty.headUnit||$('ksDashHeadUnit')?.value||'m',pumpData:{family:'BGF',model:p.model,flow_m3h:Number(duty.flow||0),head_m:Number(duty.head||0),speed_rpm:Number(duty.rpm||0),drive_type:p.type}});
+ const row=window.KeySuiteApp.addExternalQuoteItem({commercialIdentity:captured?.commercialIdentity,model:p.model,brand:captured?.commercialIdentity?.brand??p.brandName,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'BGF',displayCapacity:true,capacityValue:duty.flow??$('ksDashFlow')?.value??'',capacityUnit:duty.flowUnit||$('ksDashFlowUnit')?.value||'m3h',headValue:duty.head??$('ksDashHead')?.value??'',headUnit:duty.headUnit||$('ksDashHeadUnit')?.value||'m',pumpData:{family:'BGF',model:p.model,flow_m3h:Number(duty.flow||0),head_m:Number(duty.head||0),speed_rpm:Number(duty.rpm||0),drive_type:p.type}});
  if(!row)throw new Error('The quotation item could not be added.');
  error.textContent='';error.className='auth-message';if(typeof showPage==='function')showPage('quotation');else document.querySelector('[data-page="quotation"]')?.click();
  }catch(e){console.error('BGF quotation lookup failed',e);fail('Pricing lookup / system error. '+(e.message||'Try again or contact the administrator.'));}
 }
-function routeSelection(payload,route='quotation'){
+function routeSelection(payload,route='quotation'){payload=window.KeySuiteCommercialIdentity?.captureSelection({...payload,family:'BGF'})||payload;
  const p=rows.find(row=>String(row.model).toUpperCase()===String(payload?.model||payload?.base_model||'').toUpperCase());if(!p)return false;
- const duty={flow:payload.flow_m3h,head:payload.head_m,rpm:payload.speed_rpm,flowUnit:payload.flow_unit||'m3h',headUnit:payload.head_unit||'m'};
+ const duty={commercialIdentity:payload.commercialIdentity,flow:payload.flow_m3h,head:payload.head_m,rpm:payload.speed_rpm,flowUnit:payload.flow_unit||'m3h',headUnit:payload.head_unit||'m'};
  if(route!=='assembly')return quote(p,duty);
  const found=window.KeySuitePricing?.findBgfPrice?.(p.id),problem=window.KeySuitePricing?.bgfPriceProblem?.(p.id,found);
  if(problem){void window.KeySuiteManualPrice.offer({model:p.model,description:description(p),productFamily:'BGF',pumpData:payload,pricingSource:{product_family:'BGF',product_id:p.id}},problem);return false}

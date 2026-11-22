@@ -1,0 +1,3 @@
+Executed original commercial-identity.js from supplied V5.00.84 archive with family=CHC, sellingSeries=CHC, brandSeries=CHC C6, model=CHC 10-4.
+Actual output: CHC C6 10-4
+Expected output: CHC 10-4

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "workbookRowsChecked": 179,
+  "uniqueModels": 178,
+  "curves": 8,
+  "allModelFieldsAndCurvePointsMatch": true,
+  "allVariantPricesAndAvailabilityMatch": true,
+  "sampleErrorExcluded": true
+}

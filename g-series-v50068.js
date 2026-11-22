@@ -10,14 +10,14 @@ c/w ${p.hp}HP 2Pole Motor (${p.phase==='1Ph'?'240V / 1Ph':'415V / 3Ph'} / 50Hz)
 Suction & Discharge: ${p.inlet} x ${p.outlet}
 Material: CI / SS / SS / Mechanical Seal`}
 function message(s,error=false){for(const el of [$('gQuoteMessage'),$('gCurveMessage')].filter(Boolean)){el.textContent=s||'';el.className=s?'auth-message show '+(error?'error':'info'):'auth-message'}}
-function payload(p,conditions={}){return {family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,motor_kw:p.kw,motor_hp:p.hp,pole:p.pole,motor_voltage:p.phase==='1Ph'?240:415,suction:p.inlet,discharge:p.outlet,weight_kg:p.weight,dimensions:p.dimensions,reference_speed_rpm:p.speed,motor_rated_speed_rpm:p.motor?.speed,...conditions}}
+function payload(p,conditions={}){const value={family:'G',model:p.model,base_model:p.base,motor_phase:p.phase,motor_kw:p.kw,motor_hp:p.hp,pole:p.pole,motor_voltage:p.phase==='1Ph'?240:415,suction:p.inlet,discharge:p.outlet,weight_kg:p.weight,dimensions:p.dimensions,reference_speed_rpm:p.speed,motor_rated_speed_rpm:p.motor?.speed,...conditions};return window.KeySuiteCommercialIdentity?.captureSelection(value)||value}
 function quote(p,conditions){
  const api=window.KeySuitePricing,found=api?.findGPrice?.(p.id),problem=api?.gPriceProblem?.(p.id,found);
  if(problem){
-  void window.KeySuiteManualPrice?.offer?.({model:p.model,brand:'B.G.Reich',description:description(p),productFamily:'G',pumpData:payload(p,conditions),pricingSource:{product_family:'G',product_id:p.id,model:p.model,variant:p.phase}},problem);
+  void window.KeySuiteManualPrice?.offer?.({model:p.model,description:description(p),productFamily:'G',pumpData:payload(p,conditions),pricingSource:{product_family:'G',product_id:p.id,model:p.model,variant:p.phase}},problem);
   return;
  }
- const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions)};
+ const item={model:p.model,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions)};
  const added=window.KeySuiteApp?.addExternalQuoteItem?.(item);
  if(added){document.querySelector('[data-page="quotation"]')?.click();message('')}
  else message('The quotation item could not be added.',true);
@@ -29,7 +29,7 @@ function cost(p){
 async function assembly(p,conditions){
  const api=window.KeySuitePricing,found=api?.findGPrice?.(p.id,{pricingMode:'assembly'}),problem=api?.gPriceProblem?.(p.id,found);
  if(problem){message(problem,true);return}
- const item={model:p.model,brand:'B.G.Reich',qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions),assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset'};
+ const item={model:p.model,qty:1,unitPrice:found.calc.finalPrice,description:description(p),pricingSource:api.sourceSnapshot(found),productFamily:'G',pumpData:payload(p,conditions),assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset'};
  if(!window.KeySuiteAssembly?.addItem){message('Assembly is unavailable.',true);return}
  try{
   if(await window.KeySuiteAssembly.addItem(item,{type:'system',section:'pumpset'}))message(p.model+' added to Assembly.');

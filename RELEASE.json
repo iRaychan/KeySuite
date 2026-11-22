@@ -1,8 +1,8 @@
 {
-  "version": "5.00.84",
-  "baseline": "5.00.83",
-  "upgrade_supported_from": "5.00.83",
-  "release_status": "packaged_with_browser_verification_limits",
+  "version": "5.00.85",
+  "baseline": "5.00.84",
+  "upgrade_supported_from": "5.00.84",
+  "release_status": "tested_locally_browser_export_unverified",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
   "supabase_data_seed_required": false,
@@ -13,14 +13,16 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Shared 60 Hz operating-speed control with decimal precision and red input above 50 Hz; existing hydraulic speed correction retained.",
-    "Capture and preserve commercial brand identity through selector, quotation rows, assembly conversion, saved payloads and print content."
+    "Complete BSW V1.3 workbook replacement: 178 unique models, 84 changed records, 8 curves, verified phase/float availability.",
+    "Shared commercial identity uses selling model series, never CHC C4/C6 navigation labels; identities captured before routing and retained in quotations, assemblies and costing.",
+    "Product List and Product Curve preserve selected identity and quotation template when adding items."
   ],
   "known_issues": [
-    "Safari connection and isolated browser launches unavailable; no visual browser verification.",
-    "Actual PDF export and live secure-history persistence not tested; isolated application/DOM and in-memory RPC tests only.",
-    "Existing V5.00.82 suppression flags are ambiguous; retained and require explicit Restore.",
-    "Inherited legacy quotation RPC authorization limitations remain outside this release."
+    "Cloud Browser cannot reach the local fixture (ERR_CONNECTION_REFUSED); local Chromium socket access is denied. Browser UI and native PDF download remain unverified.",
+    "Save/reopen tested against isolated in-memory RPC fixtures; no production persistence tested.",
+    "PDF content verified through application print DOM and a separate WeasyPrint item-table rendering; this is not a native quotation PDF export test.",
+    "BSW baseline is labelled V1.1 in the supplied V5.00.84 archive; V1.2 was not supplied. Comparison uses actual shipped records.",
+    "Existing V5.00.82 suppression ambiguity and legacy quotation RPC authorization limitations remain outside this release."
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,

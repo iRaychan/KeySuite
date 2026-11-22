@@ -106,7 +106,7 @@
     const merged={...pin,...ctx,material,family:f,productGroup:productGroup||ctx.productGroup||pin.productGroup||''};
     const brand=effectiveBrand(merged);
     merged.id=String(brand?.id||merged.id||'');
-    merged.name=norm(brand?.brand_name)||norm(merged.name)||'B.G.Reich';
+    merged.name=norm(brand?.brand_name??merged.name);
     merged.key=norm(brand?.brand_key)||norm(merged.key)||'';
     merged.logo=effectiveLogo(merged);
     merged.countryOfOrigin=norm(brand?.country_of_origin)||norm(merged.countryOfOrigin);
@@ -181,13 +181,13 @@
   }
   function aliasText(text,s){
     let out=String(text??'');
-    if(window.KeySuiteCommercialIdentity&&s.family!=='CHC')out=window.KeySuiteCommercialIdentity.alias(out,s);
+    if(window.KeySuiteCommercialIdentity)out=window.KeySuiteCommercialIdentity.alias(out,s);
     if(s.masterModel&&s.displayModel)out=replaceModelIdentity(out,s.masterModel,s.displayModel,s.family);
     if(s.sellingSeries){
       if(s.family==='CHC')out=out.replace(/\b(?:CHCS|CHCN|CHC)\b/g,s.sellingSeries);
       else if(s.masterSeries&&low(s.masterSeries)!==low(s.sellingSeries))out=out.replace(new RegExp(`\\b${escRe(s.masterSeries)}\\b`,'g'),s.sellingSeries);
     }
-    if(s.applyBrandName&&s.name)out=out.replace(/B\.G\.Reich/g,s.name);
+    if(s.applyBrandName)out=out.replace(/B\.G\.Reich\s*/g,(window.KeySuiteCommercialIdentity?.cleanBrand(s.name)||'')+' ').trimStart();
     return out.replace(/Carbon\s+v\s+Silicon\s+Carbide\s*\(Car\/Cer\)/gi,'Carbon V Silicon Carbide (Ca SiC)').replace(/\b1\s+Stages\b/gi,'1 Stage');
   }
 

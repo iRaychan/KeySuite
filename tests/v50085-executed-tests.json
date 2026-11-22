@@ -1,0 +1,50 @@
+[
+  {
+    "command": [
+      "node",
+      "tests/commercial-identity.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "node",
+      "tests/v50085.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "node",
+      "tests/v50085-bsw.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "node",
+      "tests/v50084-brands.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "node",
+      "tests/v50083.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "node",
+      "tests/v50082/verify.cjs"
+    ],
+    "status": "PASS",
+    "exit_code": 0
+  }
+]

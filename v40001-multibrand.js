@@ -363,7 +363,7 @@
     mapRowIdentity(row);
     const brandedPump=pumpDataOfRow(row);if(Object.keys(brandedPump).length){brandedPump.keysuite_brand_id=String(brand.id);brandedPump.keysuite_brand_name=String(brand.brand_name||'');brandedPump.keysuite_brand_logo=String(brand.logo_data||'');brandedPump.keysuite_brand_country_of_origin=String(brand.country_of_origin||'');brandedPump.keysuite_product_family=detectedFamily;brandedPump.keysuite_product_group_code=detectedGroup;brandedPump.keysuite_generation_code=generation;brandedPump.keysuite_price_group_code=priceGroup;brandedPump.keysuite_master_series=masterSeries;brandedPump.keysuite_selling_series=sellingSeries;brandedPump.quotation_model=row.querySelector('.item-model')?.value||brandedPump.quotation_model||brandedPump.model||'';row.dataset.pumpData=JSON.stringify(brandedPump);}
     applyBrandMargin(row,{resetBase:true});
-    if(document.querySelectorAll('#quoteItems .quote-item').length===1&&brand.quotation_template_id){try{window.KeySuiteTemplates?.selectForCustomer?.(String(brand.quotation_template_id),{applyDefaults:false});}catch(_){}}
+    // Product brand changes never select a quotation template. The current user/customer selection owns it.
     postBrandContext();
   }
   function reapplyQuoteCapacity(row){
@@ -861,7 +861,7 @@
 
   function displayModelAlias(text,ctx=brandContext()){
     let out=String(text??'');if(!ctx)return out;
-    if(window.KeySuiteCommercialIdentity&&String(ctx.family).toUpperCase()!=='CHC')return window.KeySuiteCommercialIdentity.alias(out,ctx);
+    if(window.KeySuiteCommercialIdentity)return window.KeySuiteCommercialIdentity.alias(out,ctx);
     const family=String(ctx.family||'').toUpperCase(),target=String(ctx.sellingSeries||ctx.masterSeries||'').trim();
     if(family==='CHC'&&target)return out.replace(/\b(?:CHCS|CHCN|CHC)\b/g,target);
     const master=String(ctx.masterSeries||'').trim();if(master&&target&&master.toUpperCase()!==target.toUpperCase()){const re=master.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');out=out.replace(new RegExp(`\\b${re}\\b`,'g'),target);}return out;

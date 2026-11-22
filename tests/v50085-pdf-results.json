@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "renderer": "WeasyPrint 70 of exact application item-table HTML with content-test styling",
+  "pages": 2,
+  "browserExportTested": false,
+  "models": [
+    "VMS 10-4",
+    "VMS 150-2-1",
+    "BM5-2",
+    "F90",
+    "BP-90"
+  ],
+  "mixedComponentsVerified": true
+}

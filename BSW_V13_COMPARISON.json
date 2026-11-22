@@ -1,0 +1,3066 @@
+{
+  "baseline_source": "004 - BSW 261101 - V1.1.xlsx",
+  "baseline_version": "261101-V1.1",
+  "baseline_note": "The supplied V5.00.84 archive ships data labelled V1.1; no V1.2 workbook was supplied. Comparison is against actual shipped engineering/variant records.",
+  "new_source": "004 - BSW 261122 - V1.3.xlsx",
+  "sha256": "45143bce8c9e54d273951488f57bf0cb48a2eb28af3d523f2e45feafa8ea1697",
+  "old_count": 178,
+  "new_count": 178,
+  "added": [],
+  "removed": [],
+  "modified": [
+    {
+      "model": "BSW 100F100-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 730,
+            "H2": 143,
+            "L": 320,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 730,
+            "H2": 143,
+            "L": 320,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F100-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 860,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 860,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F1000-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1520,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1520,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F1250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1630,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1630,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F150-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 810,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 810,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F150-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 910,
+            "H2": 185,
+            "L": 480,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 910,
+            "H2": 185,
+            "L": 480,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F1500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1760,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1760,
+            "H2": 150,
+            "L": 750,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F200-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 860,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 860,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F200-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 950,
+            "H2": 185,
+            "L": 480,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 950,
+            "H2": 185,
+            "L": 480,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F250-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 960,
+            "H2": 173,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 960,
+            "H2": 173,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1263,
+            "H2": 250,
+            "L": 550,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1263,
+            "H2": 250,
+            "L": 550,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F300-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1001,
+            "H2": 173,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1001,
+            "H2": 173,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F300-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1290,
+            "H2": 250,
+            "L": 550,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1290,
+            "H2": 250,
+            "L": 550,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F40-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 580,
+            "H2": 136,
+            "L": 306,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 580,
+            "H2": 136,
+            "L": 306,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F400-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1340,
+            "H2": 272,
+            "L": 602,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1340,
+            "H2": 272,
+            "L": 602,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1408,
+            "H2": 272,
+            "L": 602,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1408,
+            "H2": 272,
+            "L": 602,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F55-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 608,
+            "H2": 136,
+            "L": 306,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 608,
+            "H2": 136,
+            "L": 306,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F600-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1490,
+            "H2": 270,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1490,
+            "H2": 270,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F75-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 690,
+            "H2": 143,
+            "L": 320,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 690,
+            "H2": 143,
+            "L": 320,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F75-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 810,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 810,
+            "H2": 180,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 100F750-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN100 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1622,
+            "H2": 270,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1622,
+            "H2": 270,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": "DN100 PN6",
+            "ØD": 210,
+            "Øk": 170,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F100-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 747,
+            "H2": 150,
+            "L": 356,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 747,
+            "H2": 150,
+            "L": 356,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F1000-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1609,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1609,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F1250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1684,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1684,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F150-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 860,
+            "H2": 171,
+            "L": 380,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 860,
+            "H2": 171,
+            "L": 380,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F150-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 939,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 939,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F1500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1796,
+            "H2": 245,
+            "L": 732,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1796,
+            "H2": 245,
+            "L": 732,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F1750-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F200-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 910,
+            "H2": 171,
+            "L": 380,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 910,
+            "H2": 171,
+            "L": 380,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F200-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F2150-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F250-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 981,
+            "H2": 185,
+            "L": 366,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 981,
+            "H2": 185,
+            "L": 366,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1238,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1238,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F2500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F300-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1011,
+            "H2": 185,
+            "L": 366,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1011,
+            "H2": 185,
+            "L": 366,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F300-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1264,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1264,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F400-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1300,
+            "H2": 235,
+            "L": 647,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1300,
+            "H2": 235,
+            "L": 647,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F500-4",
+      "changes": {
+        "weight_kg": {
+          "before": null,
+          "after": 360
+        },
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1368,
+            "H2": 235,
+            "L": 647,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1368,
+            "H2": 235,
+            "L": 647,
+            "Weight": 360,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        },
+        "curve": {
+          "before": null,
+          "after": {
+            "flow": [
+              0,
+              50,
+              50,
+              50,
+              50,
+              50,
+              50,
+              100,
+              125,
+              150,
+              175,
+              200,
+              225,
+              250,
+              275,
+              280,
+              280,
+              280,
+              280,
+              280
+            ],
+            "efficiency": [
+              0,
+              33,
+              33,
+              33,
+              33,
+              33,
+              33,
+              50,
+              55,
+              60,
+              62,
+              64,
+              65,
+              67,
+              65,
+              63,
+              63,
+              63,
+              63,
+              63
+            ],
+            "head_per_stage": [
+              41,
+              39,
+              39,
+              39,
+              39,
+              39,
+              39,
+              36.3,
+              35,
+              33,
+              31.5,
+              30,
+              28,
+              27,
+              24,
+              23,
+              23,
+              23,
+              23,
+              23
+            ],
+            "npshr": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "has_npsh": false,
+            "speed_rpm": 1450,
+            "shutoff_power_per_impeller_kw": {
+              "full": 13,
+              "medium": null,
+              "small": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F600-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1453,
+            "H2": 236,
+            "L": 647,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1453,
+            "H2": 236,
+            "L": 647,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F75-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 707,
+            "H2": 150,
+            "L": 356,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 707,
+            "H2": 150,
+            "L": 356,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 150F750-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN150 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1622,
+            "H2": 355,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1622,
+            "H2": 355,
+            "L": 675,
+            "Weight": null,
+            "ØDNM": "DN150 PN6",
+            "ØD": 265,
+            "Øk": 225,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F100-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 910,
+            "H2": 205,
+            "L": 450,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 910,
+            "H2": 205,
+            "L": 450,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F1000-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1609,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1609,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F1250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1684,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1684,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F150-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 890,
+            "H2": 185,
+            "L": 430,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 890,
+            "H2": 185,
+            "L": 430,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F150-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F1500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1814,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1814,
+            "H2": 258,
+            "L": 764,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F1750-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F200-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 922,
+            "H2": 185,
+            "L": 430,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 922,
+            "H2": 185,
+            "L": 430,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F200-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 979,
+            "H2": 206,
+            "L": 525,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F2150-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1795,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F250-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 974,
+            "H2": 185,
+            "L": 424,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 974,
+            "H2": 185,
+            "L": 424,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F250-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1238,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1238,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F2500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1926,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1926,
+            "H2": 203,
+            "L": 884,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F300-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1004,
+            "H2": 185,
+            "L": 424,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1004,
+            "H2": 185,
+            "L": 424,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F300-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1264,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1264,
+            "H2": 223,
+            "L": 567,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F400-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1321,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1321,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F500-4",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1390,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1390,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F500-4H",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1390,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1390,
+            "H2": 253,
+            "L": 648,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F600-4",
+      "changes": {
+        "weight_kg": {
+          "before": null,
+          "after": 380
+        },
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1578,
+            "H2": 353,
+            "L": 650,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1578,
+            "H2": 353,
+            "L": 650,
+            "Weight": 380,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        },
+        "curve": {
+          "before": null,
+          "after": {
+            "flow": [
+              0,
+              50,
+              100,
+              100,
+              100,
+              100,
+              100,
+              150,
+              200,
+              250,
+              300,
+              350,
+              400,
+              450,
+              450,
+              450,
+              450,
+              450,
+              450,
+              450
+            ],
+            "efficiency": [
+              0,
+              28,
+              48,
+              48,
+              48,
+              48,
+              48,
+              63,
+              73,
+              76,
+              80,
+              83,
+              78,
+              69,
+              69,
+              69,
+              69,
+              69,
+              69,
+              69
+            ],
+            "head_per_stage": [
+              41.3,
+              40.8,
+              39.8,
+              39.8,
+              39.8,
+              39.8,
+              39.8,
+              37.3,
+              36.3,
+              32.8,
+              30.3,
+              26.8,
+              23.3,
+              18.8,
+              18.8,
+              18.8,
+              18.8,
+              18.8,
+              18.8,
+              18.8
+            ],
+            "npshr": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "has_npsh": false,
+            "speed_rpm": 1450,
+            "shutoff_power_per_impeller_kw": {
+              "full": 22,
+              "medium": null,
+              "small": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F600-4H",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1578,
+            "H2": 353,
+            "L": 650,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1578,
+            "H2": 353,
+            "L": 650,
+            "Weight": null,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 200F750-4",
+      "changes": {
+        "weight_kg": {
+          "before": null,
+          "after": 470
+        },
+        "connection": {
+          "before": null,
+          "after": "DN200 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1647,
+            "H2": 353,
+            "L": 650,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1647,
+            "H2": 353,
+            "L": 650,
+            "Weight": 470,
+            "ØDNM": "DN200 PN6",
+            "ØD": 320,
+            "Øk": 280,
+            "n-Øs": 8,
+            "Øs": 18
+          }
+        },
+        "curve": {
+          "before": null,
+          "after": {
+            "flow": [
+              0,
+              50,
+              100,
+              100,
+              100,
+              100,
+              100,
+              150,
+              200,
+              250,
+              300,
+              350,
+              400,
+              450,
+              450,
+              450,
+              450,
+              450,
+              450,
+              450
+            ],
+            "efficiency": [
+              0,
+              28,
+              48,
+              48,
+              48,
+              48,
+              48,
+              63,
+              73,
+              76,
+              80,
+              83,
+              78,
+              72,
+              72,
+              72,
+              72,
+              72,
+              72,
+              72
+            ],
+            "head_per_stage": [
+              46.3,
+              45.8,
+              44.8,
+              44.8,
+              44.8,
+              44.8,
+              44.8,
+              42.3,
+              41.3,
+              37.8,
+              35.3,
+              31.8,
+              28.3,
+              23.8,
+              23.8,
+              23.8,
+              23.8,
+              23.8,
+              23.8,
+              23.8
+            ],
+            "npshr": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "has_npsh": false,
+            "speed_rpm": 1450,
+            "shutoff_power_per_impeller_kw": {
+              "full": 26,
+              "medium": null,
+              "small": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F10-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 400,
+            "H2": 93,
+            "L": 217,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 400,
+            "H2": 93,
+            "L": 217,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F100-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 690,
+            "H2": 123,
+            "L": 313,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 690,
+            "H2": 123,
+            "L": 313,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F15-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 415,
+            "H2": 93,
+            "L": 217,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 415,
+            "H2": 93,
+            "L": 217,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F150-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 765,
+            "H2": 131,
+            "L": 372,
+            "Weight": 133,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 765,
+            "H2": 131,
+            "L": 372,
+            "Weight": 133,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F20-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 493,
+            "H2": 103,
+            "L": 250,
+            "Weight": 38,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 493,
+            "H2": 103,
+            "L": 250,
+            "Weight": 38,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F200-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 805,
+            "H2": 131,
+            "L": 372,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 805,
+            "H2": 131,
+            "L": 372,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F250-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 900,
+            "H2": 150,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 900,
+            "H2": 150,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F30-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 518,
+            "H2": 103,
+            "L": 250,
+            "Weight": 41,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 518,
+            "H2": 103,
+            "L": 250,
+            "Weight": 41,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F300-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 950,
+            "H2": 150,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 950,
+            "H2": 150,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F40-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 535,
+            "H2": 120,
+            "L": 291,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 535,
+            "H2": 120,
+            "L": 291,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F55-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 565,
+            "H2": 120,
+            "L": 291,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 565,
+            "H2": 120,
+            "L": 291,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 65F75-2",
+      "changes": {
+        "dimensions": {
+          "before": {
+            "H1": 650,
+            "H2": 123,
+            "L": 313,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 16
+          },
+          "after": {
+            "H1": 650,
+            "H2": 123,
+            "L": 313,
+            "Weight": null,
+            "ØDNM": "DN65 PN6",
+            "ØD": 160,
+            "Øk": 130,
+            "n-Øs": 4,
+            "Øs": 14
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F100-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 700,
+            "H2": 125,
+            "L": 325,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 700,
+            "H2": 125,
+            "L": 325,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F150-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 810,
+            "H2": 160,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 810,
+            "H2": 160,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F20-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 505,
+            "H2": 107,
+            "L": 276,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 505,
+            "H2": 107,
+            "L": 276,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F200-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 860,
+            "H2": 160,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 860,
+            "H2": 160,
+            "L": 400,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F250-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 960,
+            "H2": 165,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 960,
+            "H2": 165,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F30-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 530,
+            "H2": 107,
+            "L": 276,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 530,
+            "H2": 107,
+            "L": 276,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F300-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 1010,
+            "H2": 165,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 1010,
+            "H2": 165,
+            "L": 407,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F40-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 560,
+            "H2": 130,
+            "L": 295,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 560,
+            "H2": 130,
+            "L": 295,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F55-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 590,
+            "H2": 130,
+            "L": 295,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 590,
+            "H2": 130,
+            "L": 295,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    },
+    {
+      "model": "BSW 80F75-2",
+      "changes": {
+        "connection": {
+          "before": null,
+          "after": "DN80 PN6"
+        },
+        "dimensions": {
+          "before": {
+            "H1": 660,
+            "H2": 125,
+            "L": 325,
+            "Weight": null,
+            "ØDNM": null,
+            "ØD": null,
+            "Øk": null,
+            "n-Øs": null,
+            "Øs": null
+          },
+          "after": {
+            "H1": 660,
+            "H2": 125,
+            "L": 325,
+            "Weight": null,
+            "ØDNM": "DN80 PN6",
+            "ØD": 190,
+            "Øk": 150,
+            "n-Øs": 4,
+            "Øs": 18
+          }
+        }
+      }
+    }
+  ],
+  "curve_count": 8,
+  "identical_duplicate_rows": [
+    {
+      "model": "BSW 200F1250-4",
+      "kept_row": 96,
+      "duplicate_row": 97
+    }
+  ],
+  "workbook_errors": [
+    {
+      "sheet": "Pg 3 BSW Dimension",
+      "cell": "B2",
+      "value": "#VALUE!"
+    }
+  ],
+  "error_disposition": "Pg 3 BSW Dimension!B2 is a sample presentation error; model dimensions are imported exclusively from BSW Data G:O. No error value is used as engineering data.",
+  "source_price_policy": "Workbook zero prices stay zero/unpriced; existing editable currency prices retain their normal precedence. No production price records are modified."
+}

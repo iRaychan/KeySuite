@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "surfaces": 14,
+  "source_test": "tests/v50084.cjs",
+  "log": "tests/v50085-logs/v50084-speed-current.log",
+  "checks": [
+    "50Hz default",
+    "45/50 normal",
+    "50.01/55/60 red",
+    "60.01 rejected without applying",
+    "decimal Hz/RPM roundtrip",
+    "selected model retained",
+    "live curve affinity scaling"
+  ]
+}

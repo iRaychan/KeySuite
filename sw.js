@@ -1,5 +1,5 @@
-/* KeySuite V5.00.84 Service Worker. */
-const CACHE='keysuite-v50084';
+/* KeySuite V5.00.85 Service Worker. */
+const CACHE='keysuite-v50085';
 const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50079"></script>';
 const SHELL=[
  './payment-terms.js',

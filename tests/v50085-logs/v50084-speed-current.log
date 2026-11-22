@@ -1,0 +1,97 @@
+PASS selector/product.html
+PASS selector-g1/product.html
+PASS selector-cr/product.html
+PASS selector-bfi/product.html
+PASS selector-kv/index.html
+PASS selector-bgf/index.html
+PASS selector-bsw/index.html
+PASS selector/index.html
+PASS selector-g1/index.html
+PASS selector-cr/index.html
+PASS selector-bfi/index.html
+PASS es
+PASS iso
+PASS G
+[
+  {
+    "test": "selector/product.html",
+    "status": "PASS",
+    "hydraulicGroups": 18,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-g1/product.html",
+    "status": "PASS",
+    "hydraulicGroups": 18,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-cr/product.html",
+    "status": "PASS",
+    "hydraulicGroups": 22,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-bfi/product.html",
+    "status": "PASS",
+    "hydraulicGroups": 11,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-kv/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 12,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-bgf/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 1,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-bsw/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 8,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 18,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-g1/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 18,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-cr/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 22,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-bfi/index.html",
+    "status": "PASS",
+    "hydraulicGroups": 11,
+    "checks": "default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion"
+  },
+  {
+    "test": "selector-es/index.html",
+    "status": "PASS",
+    "checks": "default, thresholds, decimal, cap, model change, affinity, live curve"
+  },
+  {
+    "test": "selector-iso/index.html",
+    "status": "PASS",
+    "checks": "default, thresholds, decimal, cap, model change, affinity, live curve"
+  },
+  {
+    "test": "G dynamic commercial curve",
+    "status": "PASS",
+    "checks": "default, decimal thresholds, cap, live curve, identity, affinity"
+  }
+]

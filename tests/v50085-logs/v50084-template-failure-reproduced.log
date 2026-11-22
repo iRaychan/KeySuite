@@ -1,0 +1,7 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'tesk-template'
+- 'standard:isolated'
+
+    at main (/workspace/scratch/57a43f315991/v85/tests/v50085.cjs:45:73)

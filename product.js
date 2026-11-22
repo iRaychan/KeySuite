@@ -113,10 +113,13 @@
     const brands=window.KeySuiteV391,context=brands?.brandContext?.();
     if(action==='add'&&(!context?.id||context.family!=='CHC'||context.productGroup!=='CHC_G1')){alert('The selected selling brand is unavailable. Select the Brand and series again before quoting.');return;}
     if(context?.id&&context.family==='CHC'&&context.productGroup==='CHC_G1'){
+      payload.keysuite_brand_id=context.id;
+      payload.keysuite_brand_name=context.name;
       payload.keysuite_selling_brand_id=context.id;
       payload.keysuite_selling_model=brands.resolveChcIdentity?.(context.id,'CHC_G1',payload.model,payload.keysuite_material)?.sellingModel||'';
     }
-    window.postMessage({type:'KEYSUITE_ADD_SELECTION',route:action==='add'?'quotation':action,payload},'*');
+    const captured=window.KeySuiteCommercialIdentity?.captureSelection(payload)||payload;
+    window.postMessage({type:'KEYSUITE_ADD_SELECTION',route:action==='add'?'quotation':action,payload:captured},'*');
   }
   function ensureEsFrame(){const frame=$('productEsSelectorFrame');if(frame&&frame.src==='about:blank'){esFrameReady=false;frame.src=frame.dataset.src}return frame}
   function esProductSealSync(){const type=$('esProductSealType'),mat=$('esProductSealMaterial');if(!type||!mat)return;if(type.value==='Gland Packing'){mat.innerHTML='<option value="Graphite">Graphite</option>';mat.value='Graphite'}else{const keep=['Carbon Ceramic','Silicon Carbide','Tungsten'].includes(mat.value)?mat.value:'Carbon Ceramic';mat.innerHTML='<option value="Carbon Ceramic">Carbon Ceramic</option><option value="Silicon Carbide">Silicon Carbide</option><option value="Tungsten">Tungsten</option>';mat.value=keep}updateDefaultState(type);updateDefaultState(mat)}
