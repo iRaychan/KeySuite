@@ -1,0 +1,27 @@
+PASS VEC VMS 150-2-1 actual external Quote handoff; identity survives raw row writes, price and source unchanged
+PASS 77 brand/family combinations: configured B.G.Reich, VEC, Megaflow, O.K.Pump, TESK, brandless, future brand/series
+PASS Captured selector identity beats later global state; explicit null/empty brand stays brandless; hydraulic model unchanged
+PASS Actual CHC Selector message -> quotation: VEC VMS 150-2-1, source CHC, price 16670 preserved
+PASS Assembly, Pumpset and mixed System descriptions retain each component brand and unchanged BOM prices/quantities
+PASS Manual items with assigned configured brands use the shared resolver
+PASS Actual save/history mock/reopen preserves identity, descriptions and internal remarks; print DOM has VEC model and keeps internal notes private
+PASS Quotation/PDF brand lists use commercial snapshots, including brandless items; pricing-source brand does not leak
+PASS Real configured mapping in both HMS/BFI directions, VEC/O.K.Pump and future series; legacy wrapper cannot overwrite captured VEC identity
+{
+  "checks": [
+    "VEC VMS 150-2-1 actual external Quote handoff; identity survives raw row writes, price and source unchanged",
+    "77 brand/family combinations: configured B.G.Reich, VEC, Megaflow, O.K.Pump, TESK, brandless, future brand/series",
+    "Captured selector identity beats later global state; explicit null/empty brand stays brandless; hydraulic model unchanged",
+    "Actual CHC Selector message -> quotation: VEC VMS 150-2-1, source CHC, price 16670 preserved",
+    "Assembly, Pumpset and mixed System descriptions retain each component brand and unchanged BOM prices/quantities",
+    "Manual items with assigned configured brands use the shared resolver",
+    "Actual save/history mock/reopen preserves identity, descriptions and internal remarks; print DOM has VEC model and keeps internal notes private",
+    "Quotation/PDF brand lists use commercial snapshots, including brandless items; pricing-source brand does not leak",
+    "Real configured mapping in both HMS/BFI directions, VEC/O.K.Pump and future series; legacy wrapper cannot overwrite captured VEC identity"
+  ],
+  "limitations": [
+    "No Safari/browser visual verification",
+    "Print DOM verified; actual PDF export not tested",
+    "Secure history used in-memory RPC; no production writes"
+  ]
+}

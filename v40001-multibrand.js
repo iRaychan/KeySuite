@@ -343,7 +343,9 @@
 
   function stampRowBrand(row,brandId=state.selectedBrandId,family=state.selectedFamily,{force=false}={}){
     if(!row)return; const existing=rowBrandId(row); if(existing&&!force)return;
-    const brand=byBrandId(brandId)||masterBrand(); if(!brand)return;
+    let snapshot;try{snapshot=JSON.parse(row.dataset.quoteItemPayload||'{}').commercialIdentity||pumpDataOfRow(row).commercialIdentity}catch(_){}
+    if(snapshot)brandId=snapshot.brandId;
+    const brand=byBrandId(brandId); if(!brand){if(snapshot)window.KeySuiteCommercialIdentity?.applyToRow(row);return;}
     if(row.dataset.restoredQuotationItem==='true'){row.dataset.v391BrandId=String(brand.id);return;}
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),detectedFamily=baseFamily(sourceFamily(source,row)||String(family||'').toUpperCase());
     const sourceGeneration=String(source.generation_code||pump.generation_code||pump.keysuite_generation_code||'').toUpperCase();

@@ -1,4 +1,4 @@
-/* V5.00.85: immutable commercial identity, separate from grouping and engineering. */
+/* V5.00.85 corrective R1: commercial identity owns rendering; source data owns engineering/prices. */
 (()=>{
  'use strict';
  const n=v=>String(v??'').trim(),own=(o,k)=>Object.prototype.hasOwnProperty.call(o||{},k);
@@ -47,10 +47,9 @@
   if(grouped(item))return null;
   const p=item.pumpData||item.motorData||item.couplingData||item.tankData||item.keyplcData||item.baseplateData||item.manifoldData||{},s=object(item.pricingSource);
   if(p.commercialIdentity)return p.commercialIdentity;
-  const bid=item.brandId||item.brand_id||p.keysuite_brand_id||p.keysuite_selling_brand_id||
-   (own(p,'keysuite_brand_name')?'':s.v391_brand_id);
+  const bid=item.brandId||item.brand_id||p.keysuite_selling_brand_id||p.keysuite_brand_id;
   const record=(api()?.state?.brands||[]).find(x=>String(x.id)===String(bid));
-  const explicit=own(item,'brand')||own(item,'brandName')||own(p,'keysuite_brand_name')||own(s,'v391_brand_name')||!!record;
+  const explicit=own(item,'brand')||own(item,'brandName')||own(p,'keysuite_brand_name')||!!record;
   const family=item.productFamily||s.v391_product_family||s.product_family||p.family||p.product||'';
   if(!ctx&&!explicit){
    const state=api()?.state;
@@ -59,7 +58,8 @@
    if(!ctx)return null;
   }
   const base=ctx||(!explicit||bid?api()?.brandContext?.(bid,family,p.keysuite_material,s.v41413_product_group_code):null)||{};
-  const name=own(item,'brand')?item.brand:own(item,'brandName')?item.brandName:p.keysuite_brand_name??record?.brand_name??s.v391_brand_name;
+  // Pricing metadata may describe a shared supplier/master, never the selling identity.
+  const name=own(item,'brand')?item.brand:own(item,'brandName')?item.brandName:record?.brand_name??p.keysuite_brand_name;
   const itemModel=withoutDuty(item.model).replace(/^.*\bModel:\s*/i,'');
   return resolve({...base,...(explicit?{name}:{}),id:bid||base.id},p.keysuite_selling_model||p.quotation_model||p.display_model||itemModel||p.model);
  }
@@ -76,14 +76,23 @@
   const a=api(),state=a?.state||{};
   let pin=null;try{pin=sourceWin?.__KEYSUITE_MODEL_PRESENTATION_CONTEXT}catch(_){}
   const family=payload.family||payload.product||payload.productFamily||state.selectedFamily;
-  const group=payload.keysuite_product_group_code||payload.product_group_code||state.selectedProductGroup;
-  const bid=payload.keysuite_brand_id??payload.keysuite_selling_brand_id??pin?.id??state.selectedBrandId;
+  const sameFamily=!pin?.family||String(pin.family).toUpperCase()===String(family).toUpperCase();
+  const sourceModel=withoutDuty(payload.base_model||payload.model),pinnedModel=withoutDuty(pin?.masterModel);
+  const sameModel=!pinnedModel||!sourceModel||sourceModel.toUpperCase()===pinnedModel.toUpperCase()||
+   alias(sourceModel,pin).toUpperCase()===n(pin?.displayModel).toUpperCase();
+  if(!sameFamily||!sameModel)pin=null;
+  const group=payload.keysuite_product_group_code||payload.product_group_code||pin?.productGroup||state.selectedProductGroup;
+  const bid=payload.keysuite_selling_brand_id??payload.keysuite_brand_id??pin?.id??state.selectedBrandId;
   let ctx=pin&&String(pin.id)===String(bid)&&(!pin.family||String(pin.family).toUpperCase()===String(family).toUpperCase())
    ?pin:a?.brandContext?.(bid,family,payload.keysuite_material,group);
   // A failed lookup must not silently select a pricing/master brand.
   if(!ctx||!bid||String(ctx.id)!==String(bid))return payload;
-  if(own(payload,'keysuite_brand_name'))ctx={...ctx,name:payload.keysuite_brand_name};
+  // The selected/pinned brand record outranks catalogue keysuite_brand_name.
   const identity=resolve(ctx,payload.keysuite_selling_model||payload.quotation_model||payload.display_model||payload.model);
+  identity.hydraulic.model=n(payload.base_model||payload.model);
+  identity.pricing.model=n(payload.base_model||payload.model);
+  identity.pricing.series=n(payload.keysuite_price_group_code||group||identity.pricing.series);
+  identity.sourceId=n(payload.source_id||payload.product_id||payload.es_product_id||payload.id||payload.source);
   return {...payload,commercialIdentity:identity,keysuite_brand_id:identity.brandId,keysuite_brand_name:identity.brand};
  }
  function applyToRow(row){

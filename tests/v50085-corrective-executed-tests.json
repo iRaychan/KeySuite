@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "suites": [
+    "v50085-corrective.cjs",
+    "v50085-corrective-boundaries.cjs",
+    "commercial-identity.cjs",
+    "v50085-bsw.cjs",
+    "v50084-brands.cjs",
+    "v50083.cjs",
+    "v50082/verify.cjs"
+  ],
+  "safari_regression_groups": 10,
+  "saved_reopened_items": 48,
+  "native_safari_pdf": {
+    "pages": 8,
+    "sha256": "383bd6e636a11616664c3fe2f92ec4653a4479a473c2cf206ea40deb117de47f",
+    "structural_integrity": "PASS",
+    "exact_brand_model_inputs_asserted": true,
+    "representative_exported_pages_visually_checked": [
+      2,
+      3,
+      7,
+      8
+    ],
+    "ocr": "unavailable; not claimed"
+  },
+  "browser_embedded_source_equivalence": "PASS",
+  "application_code_sha256": {
+    "app.js": "b9f19770041bd3431ca56c9b14054c709ca0afa774985aab407af576fbbdfce0",
+    "commercial-identity.js": "9d91571b25d418aa8b860047348d74503782c36cd38a1e8db8c3d7215b73319e",
+    "manual-price-v50011.js": "0cecc802e4be7ceaeedf003a43bf7d3b58b8cc9c61f98f54eb1015a9ad0e3c4f",
+    "v40001-multibrand.js": "163389dc34995d8d2db18e47f365cab0af944183169d0243de24e64007ea4d44",
+    "release-version.js": "e05433d35cd5febb0f7bf5a3f117b189c2501891633d09e31fb1e3b0c289b2a2",
+    "v41200-bootstrap.js": "bf7475e621588218a2fe7b783c63ad1be7e5a5501df7ac56c101b96950eb66a2",
+    "sw.js": "e53720971aaadd6c9af78f6b9212de21f6500bac8b063ea4f94cf244d48c7334",
+    "index.html": "ba362c7613710f15038f35fde13660a712c4f946293b0150ac00a17bae66a385"
+  },
+  "production_writes": false,
+  "push_deploy_migrate": false
+}

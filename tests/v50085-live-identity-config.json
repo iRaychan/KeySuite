@@ -1,0 +1,337 @@
+{
+  "brands": [
+    {
+      "id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "brand_name": "Tesk",
+      "brand_key": "tesk",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "brand_name": "VEC",
+      "brand_key": "vec",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "911db9c2-24d9-4c1c-aee5-18497da11c8f",
+      "brand_name": "M.O.S",
+      "brand_key": "m.o.s",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "brand_name": "O.K. Pump",
+      "brand_key": "o.k. pump",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "brand_name": "-",
+      "brand_key": "-",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "brand_name": "Megaflow",
+      "brand_key": "megaflow",
+      "brand_type": "oem",
+      "active": true
+    },
+    {
+      "id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "brand_name": "B.G.Reich",
+      "brand_key": "b.g.reich",
+      "brand_type": "master",
+      "active": true
+    }
+  ],
+  "mappings": [
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "master_family": "BFI",
+      "master_series": "BFI",
+      "selling_series": "VFI",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "master_family": "CHC_G2",
+      "master_series": "CHC",
+      "selling_series": "CHC",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "master_family": "CHC_G1",
+      "master_series": "CHC",
+      "selling_series": "CHC",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "master_family": "BFI",
+      "master_series": "HMS",
+      "selling_series": "HMS",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "master_family": "CHC_G1",
+      "master_series": "CHC",
+      "selling_series": "VMS",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "master_family": "ES",
+      "master_series": "ES",
+      "selling_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "master_family": "CHC_G2",
+      "master_series": "CHC",
+      "selling_series": "SVMT",
+      "active": true
+    },
+    {
+      "brand_id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "master_family": "CHC_G2",
+      "master_series": "CHCN",
+      "selling_series": "SVM",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "master_family": "ES",
+      "master_series": "ES",
+      "selling_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "master_family": "BSV",
+      "master_series": "BSV",
+      "selling_series": "BSV",
+      "active": true
+    },
+    {
+      "brand_id": "911db9c2-24d9-4c1c-aee5-18497da11c8f",
+      "master_family": "CHC_G1",
+      "master_series": "CHC",
+      "selling_series": "MVC",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "master_family": "CHC_G1",
+      "master_series": "CHC",
+      "selling_series": "VMS",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "master_family": "CHC_G2",
+      "master_series": "CHC",
+      "selling_series": "VMS",
+      "active": true
+    },
+    {
+      "brand_id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "master_family": "CHC_G2",
+      "master_series": "CHCS",
+      "selling_series": "SVM304",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "master_family": "MOTOR",
+      "master_series": "BM",
+      "selling_series": "IM",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "master_family": "ES",
+      "master_series": "ES",
+      "selling_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "master_family": "ES",
+      "master_series": "ES",
+      "selling_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "master_family": "BFI",
+      "master_series": "HMS",
+      "selling_series": "HMS",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "master_family": "BSW",
+      "master_series": "BSW",
+      "selling_series": "BSW",
+      "active": true
+    },
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "master_family": "ES",
+      "master_series": "ES",
+      "selling_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "master_family": "CHC_G1",
+      "master_series": "CHC",
+      "selling_series": "VMS",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "master_family": "BSW",
+      "master_series": "BSW",
+      "selling_series": "BSW",
+      "active": true
+    }
+  ],
+  "series": [
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "product_group": "CHC_G1",
+      "brand_series": "VMS C4",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "product_group": "CHC_G2",
+      "brand_series": "VMS C6",
+      "active": true
+    },
+    {
+      "brand_id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "product_group": "CHC_G2",
+      "brand_series": "SVM",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "product_group": "MOTOR",
+      "brand_series": "Motor",
+      "active": true
+    },
+    {
+      "brand_id": "aa4bc021-c608-44c4-ae2b-95bb53f5c848",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "product_group": "BFI",
+      "brand_series": "HMS",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "product_group": "BSW",
+      "brand_series": "BSW",
+      "active": true
+    },
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    },
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "product_group": "BFI",
+      "brand_series": "VFI",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "product_group": "BSW",
+      "brand_series": "BSW",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "product_group": "BFI",
+      "brand_series": "HMS",
+      "active": true
+    },
+    {
+      "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+      "product_group": "CHC_G1",
+      "brand_series": "VMS C4",
+      "active": true
+    },
+    {
+      "brand_id": "891814c5-d218-4ab2-b48a-355477e971a6",
+      "product_group": "BSV",
+      "brand_series": "BSV",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "product_group": "CHC_G2",
+      "brand_series": "CHC C6",
+      "active": true
+    },
+    {
+      "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+      "product_group": "CHC_G1",
+      "brand_series": "CHC C4",
+      "active": true
+    },
+    {
+      "brand_id": "911db9c2-24d9-4c1c-aee5-18497da11c8f",
+      "product_group": "CHC_G1",
+      "brand_series": "CHC C4",
+      "active": true
+    },
+    {
+      "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+      "product_group": "CHC_G1",
+      "brand_series": "VMS",
+      "active": true
+    },
+    {
+      "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+      "product_group": "ES",
+      "brand_series": "ES",
+      "active": true
+    }
+  ]
+}

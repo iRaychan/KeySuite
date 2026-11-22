@@ -1783,7 +1783,9 @@ function chcAssemblyQuoteItem(p={}){
  const dutyText=hasDutyPoint(p)?quotationDutyText(p):'';
  const modelDutyText=dutyText;
  const description=[dutyText?`Capacity: ${dutyText}`:'',`B.G.Reich Vertical Multistage Pump Model: ${displayQuotationModel||'-'}`,bare?'(Bare shaft pump only)':motorLine,`Suction & Discharge: ${suctionDischarge}`,`Material: ${materialLine}`].filter(Boolean).join('\n');
- return {model:displayQuotationModel,pricingModel:quotationModel,description};
+ const identity=p.commercialIdentity;
+ return {model:identity?.model||displayQuotationModel,pricingModel:quotationModel,
+   description:identity?window.KeySuiteCommercialIdentity.description(description,identity):description};
 }
 
 function isEsSelectionPayload(p={}){return String(p.product||p.pumpData?.type||'').toUpperCase()==='ES'||/^KeySelector-ES/i.test(String(p.source||''))}
@@ -1945,7 +1947,7 @@ window.addEventListener('message',function(event){
  const sellingModel=pinnedContext
    ? brandApi?.resolveChcIdentity?.(sellingId,'CHC_G1',displayQuotationModel,material)?.sellingModel
      || brandApi?.displayModelAlias?.(displayQuotationModel,pinnedContext) || displayQuotationModel
-   : displayQuotationModel;
+   : p.commercialIdentity?.model||displayQuotationModel;
  const rawConnection=String(p.connection||'');
  const dnMatch=rawConnection.match(/DN\s*\d+/ig)||[];
  const connectionDN=Number((dnMatch[0]||'').match(/\d+/)?.[0]||0);
@@ -1980,13 +1982,15 @@ window.addEventListener('message',function(event){
  const itemModel=[sellingModel,modelDutyText].filter(Boolean).join(' — ');
  const lines=[
    dutyText?`Capacity: ${dutyText}`:'',
-   `B.G.Reich Vertical Multistage Pump Model: ${displayQuotationModel||'-'}`,
+   `${p.commercialIdentity?.brand?p.commercialIdentity.brand+' ':''}Vertical Multistage Pump Model: ${sellingModel||'-'}`,
    bare?'(Bare shaft pump only)':motorLine,
    `Suction & Discharge: ${suctionDischarge}`,
    `Material: ${materialLine}`
  ].filter(Boolean);
  const masterDescription=lines.join('\n');
- const description=pinnedContext
+ const description=p.commercialIdentity
+   ? window.KeySuiteCommercialIdentity.description(masterDescription,p.commercialIdentity)
+   : pinnedContext
    ? brandedQuotationDescription(masterDescription.replace(`Pump Model: ${displayQuotationModel}`,()=>`Pump Model: ${sellingModel}`),pinnedContext.name)
    : masterDescription;
  const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
@@ -1997,6 +2001,8 @@ window.addEventListener('message',function(event){
  const rows=[...document.querySelectorAll('.quote-item')];
  const empty=rows.length===1&&!rows[0].querySelector('.item-model').value&&!rows[0].querySelector('.item-description').value&&!+rows[0].querySelector('.item-price').value;
  const row=empty?rows[0]:quoteItemRow({});
+ // Bind the item snapshot before pricing/legacy brand adapters can touch the row.
+ row.dataset.quoteItemPayload=JSON.stringify({...parseQuoteJson(row.dataset.quoteItemPayload),...(p.commercialIdentity?{commercialIdentity:p.commercialIdentity,brand:p.commercialIdentity.brand,brandId:p.commercialIdentity.brandId}: {})});
  if(pinnedContext){
    row.dataset.v391BrandId=sellingId;
    row.dataset.v391MasterModel=displayQuotationModel;

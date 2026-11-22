@@ -1,0 +1,64 @@
+{
+  "checks": [
+    "PASS Full/Own/None, legacy levels, two users, company boundary, direct load, customer independence and unchanged edit/delete rights",
+    "PASS Category prefix A/B/D/De, case, no matches, clear, A–Z, selection and unsaved editor retention",
+    "PASS Customer payment_terms payload/reopen codec, all modes, legacy credit/PDC, mutually exclusive controls and custom input",
+    "PASS Actual customer saveCustomerRemote -> serialized text -> normalize -> editCustomer reopen, using in-memory database transport",
+    "PASS New quotation inherits customer wording; template and customer refresh preserve saved payment snapshot",
+    "PASS Actual quotation save -> secure-history mock -> reopen -> customer update -> refresh -> print preserves payment snapshot",
+    "PASS Six partial formats A–F, Pump only, Complete Pumpset, dynamic brand/specifications and unchanged component quantities/prices",
+    "PASS Partial description identity also preserves ISO, VMS/new brand and brandless HMS without ES identity injection",
+    "PASS Selected-component-only cost validation, every selected row checked, zero-quantity omitted and no absent accessory inserted",
+    "PASS Actual Pumpset -> toQuotation for all eight configurations carries selected-component totals and exact descriptions",
+    "PASS Every nonempty component subset (15) accepts valid selected source costs and retains its selected membership",
+    "PASS Actual quotation print DOM contains all payment wordings and partial-set brand/model/customer-supply descriptions (PDF export NOT TESTED)"
+  ],
+  "descriptions": [
+    {
+      "name": "A",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\n(Bare shaft pump only)\nc/w\tBaseplate for 7.5HP 2P Motor\nMotor & Flexible Coupling supply by Customer",
+      "unitPrice": 1100
+    },
+    {
+      "name": "B",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\nBaseplate & Flexible Coupling supply by Customer",
+      "unitPrice": 1500
+    },
+    {
+      "name": "C",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)\nc/w\tFlexible Coupling\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\nBaseplate supply by Customer",
+      "unitPrice": 1550
+    },
+    {
+      "name": "D",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)\nc/w\tBaseplate\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\nFlexible Coupling supply by Customer",
+      "unitPrice": 1600
+    },
+    {
+      "name": "E",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\tFlexible Coupling for 7.5HP 2Pole Motor\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\nMotor & Baseplate supply by Customer",
+      "unitPrice": 1050
+    },
+    {
+      "name": "F",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\tBaseplate with Flexible Coupling for 7.5HP 2Pole Motor\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\nMotor supply by Customer",
+      "unitPrice": 1150
+    },
+    {
+      "name": "pump only",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\n(Bare shaft pump only)",
+      "unitPrice": 1000
+    },
+    {
+      "name": "complete",
+      "description": "Megaflow End Suction Pump Model: ES 40-16\nc/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)\nc/w\tBaseplate with Flexible Coupling\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal",
+      "unitPrice": 1650
+    }
+  ],
+  "limits": [
+    "Safari/Chrome/WebKit launch unavailable",
+    "No actual PDF export",
+    "Live secure-history change awaiting approval; no DB writes"
+  ],
+  "at": "2026-11-22T18:14:14.604Z"
+}

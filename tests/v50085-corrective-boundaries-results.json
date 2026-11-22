@@ -1,0 +1,1441 @@
+{
+  "status": "PASS",
+  "mode": "corrected_assertions",
+  "cases": [
+    {
+      "selectedCommercialBrand": "VEC",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 32-3",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 32-3",
+        "g2Model": "CHC 32-30",
+        "family": "32",
+        "stage": 3,
+        "stages": 3,
+        "kw": 5.5,
+        "hp": 7.5,
+        "connection": "DN65",
+        "standard": true,
+        "dimension": {
+          "b1": 620,
+          "b2": 390,
+          "height": 1010,
+          "d1": 275,
+          "d2": 210,
+          "weight": 107
+        },
+        "impellers": {
+          "total": 3,
+          "full": 3,
+          "small": 0,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 32-3",
+        "base_model": "CHC 32-3",
+        "quotation_model": "CHC 32-3",
+        "display_model": "CHC 32-3",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 7.5,
+        "motor_kw": 5.5,
+        "connection": "DN65"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 32-3",
+        "base_model": "CHC 32-3",
+        "quotation_model": "CHC 32-3",
+        "display_model": "CHC 32-3",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 7.5,
+        "motor_kw": 5.5,
+        "connection": "DN65",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "brand": "VEC",
+          "series": "VMS",
+          "model": "VMS 32-3",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 32-3"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 32-3"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+        "keysuite_brand_name": "VEC"
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 32-3",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 32-3",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 32-3",
+          "base_model": "CHC 32-3",
+          "quotation_model": "CHC 32-3",
+          "display_model": "CHC 32-3",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 7.5,
+          "motor_kw": 5.5,
+          "connection": "DN65",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+            "brand": "VEC",
+            "series": "VMS",
+            "model": "VMS 32-3",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 32-3"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 32-3"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "keysuite_brand_name": "VEC"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 32-3",
+        "description": "VEC Vertical Multistage Pump Model: VMS 32-3",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 32-3",
+          "base_model": "CHC 32-3",
+          "quotation_model": "CHC 32-3",
+          "display_model": "CHC 32-3",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 7.5,
+          "motor_kw": 5.5,
+          "connection": "DN65",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+            "brand": "VEC",
+            "series": "VMS",
+            "model": "VMS 32-3",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 32-3"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 32-3"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "keysuite_brand_name": "VEC"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "brand": "VEC",
+          "series": "VMS",
+          "model": "VMS 32-3",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 32-3"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 32-3"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "VEC",
+        "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "VEC",
+        "actualModel": "VMS 32-3"
+      },
+      "legacySourceName": {
+        "actualBrand": "VEC"
+      },
+      "expectedBrand": "VEC",
+      "expectedModel": "VMS 32-3"
+    },
+    {
+      "selectedCommercialBrand": "VEC",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 150-2-1",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 150-2-1",
+        "g2Model": "CHC 150-20-1",
+        "family": "150",
+        "stage": 2,
+        "stages": 2,
+        "kw": 22,
+        "hp": 30,
+        "connection": "DN125",
+        "standard": true,
+        "dimension": {
+          "b1": 1000,
+          "b2": 590,
+          "height": 1590,
+          "d1": 360,
+          "d2": 285,
+          "weight": 295
+        },
+        "impellers": {
+          "total": 2,
+          "full": 1,
+          "small": 1,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 150-2-1",
+        "base_model": "CHC 150-2-1",
+        "quotation_model": "CHC 150-2-1",
+        "display_model": "CHC 150-2-1",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 30,
+        "motor_kw": 22,
+        "connection": "DN125"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 150-2-1",
+        "base_model": "CHC 150-2-1",
+        "quotation_model": "CHC 150-2-1",
+        "display_model": "CHC 150-2-1",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 30,
+        "motor_kw": 22,
+        "connection": "DN125",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "brand": "VEC",
+          "series": "VMS",
+          "model": "VMS 150-2-1",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 150-2-1"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 150-2-1"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+        "keysuite_brand_name": "VEC"
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 150-2-1",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 150-2-1",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 150-2-1",
+          "base_model": "CHC 150-2-1",
+          "quotation_model": "CHC 150-2-1",
+          "display_model": "CHC 150-2-1",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 30,
+          "motor_kw": 22,
+          "connection": "DN125",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+            "brand": "VEC",
+            "series": "VMS",
+            "model": "VMS 150-2-1",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 150-2-1"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 150-2-1"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "keysuite_brand_name": "VEC"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 150-2-1",
+        "description": "VEC Vertical Multistage Pump Model: VMS 150-2-1",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 150-2-1",
+          "base_model": "CHC 150-2-1",
+          "quotation_model": "CHC 150-2-1",
+          "display_model": "CHC 150-2-1",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 30,
+          "motor_kw": 22,
+          "connection": "DN125",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+            "brand": "VEC",
+            "series": "VMS",
+            "model": "VMS 150-2-1",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 150-2-1"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 150-2-1"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "keysuite_brand_name": "VEC"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6",
+          "brand": "VEC",
+          "series": "VMS",
+          "model": "VMS 150-2-1",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 150-2-1"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 150-2-1"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "VEC",
+        "brandId": "ae203517-e11e-48fc-9b64-6a0bc60912e6"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "VEC",
+        "actualModel": "VMS 150-2-1"
+      },
+      "legacySourceName": {
+        "actualBrand": "VEC"
+      },
+      "expectedBrand": "VEC",
+      "expectedModel": "VMS 150-2-1"
+    },
+    {
+      "selectedCommercialBrand": "-",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 10-4",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 10-4",
+        "g2Model": "CHC 10-40",
+        "family": "10",
+        "stage": 4,
+        "stages": 4,
+        "kw": 1.5,
+        "hp": 2,
+        "connection": "DN40 (G1½)",
+        "standard": true,
+        "dimension": {
+          "b1": 418,
+          "b2": 293,
+          "height": 711,
+          "d1": 154,
+          "d2": 111,
+          "weight": 50
+        },
+        "impellers": {
+          "total": 4,
+          "full": 4,
+          "small": 0,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 10-4",
+        "base_model": "CHC 10-4",
+        "quotation_model": "CHC 10-4",
+        "display_model": "CHC 10-4",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 2,
+        "motor_kw": 1.5,
+        "connection": "DN40 (G1½)"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 10-4",
+        "base_model": "CHC 10-4",
+        "quotation_model": "CHC 10-4",
+        "display_model": "CHC 10-4",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 2,
+        "motor_kw": 1.5,
+        "connection": "DN40 (G1½)",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 10-4",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 10-4"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 10-4"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+        "keysuite_brand_name": ""
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 10-4",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 10-4",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 10-4",
+          "base_model": "CHC 10-4",
+          "quotation_model": "CHC 10-4",
+          "display_model": "CHC 10-4",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 2,
+          "motor_kw": 1.5,
+          "connection": "DN40 (G1½)",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 10-4",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 10-4"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 10-4"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 10-4",
+        "description": "Vertical Multistage Pump Model: VMS 10-4",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 10-4",
+          "base_model": "CHC 10-4",
+          "quotation_model": "CHC 10-4",
+          "display_model": "CHC 10-4",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 2,
+          "motor_kw": 1.5,
+          "connection": "DN40 (G1½)",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 10-4",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 10-4"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 10-4"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 10-4",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 10-4"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 10-4"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "",
+        "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "",
+        "actualModel": "VMS 10-4"
+      },
+      "legacySourceName": {
+        "actualBrand": ""
+      },
+      "expectedBrand": "",
+      "expectedModel": "VMS 10-4"
+    },
+    {
+      "selectedCommercialBrand": "-",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 90-2",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 90-2",
+        "g2Model": "CHC 90-20",
+        "family": "90",
+        "stage": 2,
+        "stages": 2,
+        "kw": 15,
+        "hp": 20,
+        "connection": "DN100",
+        "standard": true,
+        "dimension": {
+          "b1": 773,
+          "b2": 490,
+          "height": 1263,
+          "d1": 330,
+          "d2": 255,
+          "weight": 198
+        },
+        "impellers": {
+          "total": 2,
+          "full": 2,
+          "small": 0,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 90-2",
+        "base_model": "CHC 90-2",
+        "quotation_model": "CHC 90-2",
+        "display_model": "CHC 90-2",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 20,
+        "motor_kw": 15,
+        "connection": "DN100"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 90-2",
+        "base_model": "CHC 90-2",
+        "quotation_model": "CHC 90-2",
+        "display_model": "CHC 90-2",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 20,
+        "motor_kw": 15,
+        "connection": "DN100",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 90-2",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 90-2"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 90-2"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+        "keysuite_brand_name": ""
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 90-2",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 90-2",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 90-2",
+          "base_model": "CHC 90-2",
+          "quotation_model": "CHC 90-2",
+          "display_model": "CHC 90-2",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 20,
+          "motor_kw": 15,
+          "connection": "DN100",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 90-2",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 90-2"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 90-2"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 90-2",
+        "description": "Vertical Multistage Pump Model: VMS 90-2",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 90-2",
+          "base_model": "CHC 90-2",
+          "quotation_model": "CHC 90-2",
+          "display_model": "CHC 90-2",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 20,
+          "motor_kw": 15,
+          "connection": "DN100",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 90-2",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 90-2"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 90-2"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 90-2",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 90-2"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 90-2"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "",
+        "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "",
+        "actualModel": "VMS 90-2"
+      },
+      "legacySourceName": {
+        "actualBrand": ""
+      },
+      "expectedBrand": "",
+      "expectedModel": "VMS 90-2"
+    },
+    {
+      "selectedCommercialBrand": "-",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 150-2-1",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 150-2-1",
+        "g2Model": "CHC 150-20-1",
+        "family": "150",
+        "stage": 2,
+        "stages": 2,
+        "kw": 22,
+        "hp": 30,
+        "connection": "DN125",
+        "standard": true,
+        "dimension": {
+          "b1": 1000,
+          "b2": 590,
+          "height": 1590,
+          "d1": 360,
+          "d2": 285,
+          "weight": 295
+        },
+        "impellers": {
+          "total": 2,
+          "full": 1,
+          "small": 1,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 150-2-1",
+        "base_model": "CHC 150-2-1",
+        "quotation_model": "CHC 150-2-1",
+        "display_model": "CHC 150-2-1",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 30,
+        "motor_kw": 22,
+        "connection": "DN125"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 150-2-1",
+        "base_model": "CHC 150-2-1",
+        "quotation_model": "CHC 150-2-1",
+        "display_model": "CHC 150-2-1",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 30,
+        "motor_kw": 22,
+        "connection": "DN125",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 150-2-1",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 150-2-1"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 150-2-1"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+        "keysuite_brand_name": ""
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 150-2-1",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 150-2-1",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 150-2-1",
+          "base_model": "CHC 150-2-1",
+          "quotation_model": "CHC 150-2-1",
+          "display_model": "CHC 150-2-1",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 30,
+          "motor_kw": 22,
+          "connection": "DN125",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 150-2-1",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 150-2-1"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 150-2-1"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 150-2-1",
+        "description": "Vertical Multistage Pump Model: VMS 150-2-1",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 150-2-1",
+          "base_model": "CHC 150-2-1",
+          "quotation_model": "CHC 150-2-1",
+          "display_model": "CHC 150-2-1",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 30,
+          "motor_kw": 22,
+          "connection": "DN125",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+            "brand": "",
+            "series": "VMS",
+            "model": "VMS 150-2-1",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 150-2-1"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 150-2-1"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "keysuite_brand_name": ""
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05",
+          "brand": "",
+          "series": "VMS",
+          "model": "VMS 150-2-1",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 150-2-1"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 150-2-1"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "",
+        "brandId": "e0bbadbb-3bd1-42de-9787-d44a6fce2b05"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "",
+        "actualModel": "VMS 150-2-1"
+      },
+      "legacySourceName": {
+        "actualBrand": ""
+      },
+      "expectedBrand": "",
+      "expectedModel": "VMS 150-2-1"
+    },
+    {
+      "selectedCommercialBrand": "O.K. Pump",
+      "selectedCommercialSeries": "VMS",
+      "selectedCommercialModel": "VMS 15-3",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 15-3",
+        "g2Model": "CHC 15-30",
+        "family": "15",
+        "stage": 3,
+        "stages": 3,
+        "kw": 3,
+        "hp": 4,
+        "connection": "DN50",
+        "standard": true,
+        "dimension": {
+          "b1": 451,
+          "b2": 293,
+          "height": 744,
+          "d1": 177,
+          "d2": 116,
+          "weight": 55
+        },
+        "impellers": {
+          "total": 3,
+          "full": 3,
+          "small": 0,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "VMS",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 15-3",
+        "base_model": "CHC 15-3",
+        "quotation_model": "CHC 15-3",
+        "display_model": "CHC 15-3",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 4,
+        "motor_kw": 3,
+        "connection": "DN50"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 15-3",
+        "base_model": "CHC 15-3",
+        "quotation_model": "CHC 15-3",
+        "display_model": "CHC 15-3",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 4,
+        "motor_kw": 3,
+        "connection": "DN50",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+          "brand": "O.K. Pump",
+          "series": "VMS",
+          "model": "VMS 15-3",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 15-3"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 15-3"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+        "keysuite_brand_name": "O.K. Pump"
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 15-3",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 15-3",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 15-3",
+          "base_model": "CHC 15-3",
+          "quotation_model": "CHC 15-3",
+          "display_model": "CHC 15-3",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 4,
+          "motor_kw": 3,
+          "connection": "DN50",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+            "brand": "O.K. Pump",
+            "series": "VMS",
+            "model": "VMS 15-3",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 15-3"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 15-3"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+          "keysuite_brand_name": "O.K. Pump"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "VMS 15-3",
+        "description": "O.K. Pump Vertical Multistage Pump Model: VMS 15-3",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 15-3",
+          "base_model": "CHC 15-3",
+          "quotation_model": "CHC 15-3",
+          "display_model": "CHC 15-3",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 4,
+          "motor_kw": 3,
+          "connection": "DN50",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+            "brand": "O.K. Pump",
+            "series": "VMS",
+            "model": "VMS 15-3",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 15-3"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 15-3"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+          "keysuite_brand_name": "O.K. Pump"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "1670eeca-8d4b-4b6e-86ab-33ffb417d542",
+          "brand": "O.K. Pump",
+          "series": "VMS",
+          "model": "VMS 15-3",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 15-3"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 15-3"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "O.K. Pump",
+        "brandId": "1670eeca-8d4b-4b6e-86ab-33ffb417d542"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "O.K. Pump",
+        "actualModel": "VMS 15-3"
+      },
+      "legacySourceName": {
+        "actualBrand": "O.K. Pump"
+      },
+      "expectedBrand": "O.K. Pump",
+      "expectedModel": "VMS 15-3"
+    },
+    {
+      "selectedCommercialBrand": "B.G.Reich",
+      "selectedCommercialSeries": "CHC",
+      "selectedCommercialModel": "CHC 10-4",
+      "sourceIdentifier": "KeyCHC-G1",
+      "sourceRecord": {
+        "model": "CHC 10-4",
+        "g2Model": "CHC 10-40",
+        "family": "10",
+        "stage": 4,
+        "stages": 4,
+        "kw": 1.5,
+        "hp": 2,
+        "connection": "DN40 (G1½)",
+        "standard": true,
+        "dimension": {
+          "b1": 418,
+          "b2": 293,
+          "height": 711,
+          "d1": 154,
+          "d2": 111,
+          "weight": 50
+        },
+        "impellers": {
+          "total": 4,
+          "full": 4,
+          "small": 0,
+          "smallest": 0
+        }
+      },
+      "productFamilyMapping": [
+        {
+          "brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "master_family": "CHC_G1",
+          "master_series": "CHC",
+          "selling_series": "CHC",
+          "active": true
+        }
+      ],
+      "quoteButtonPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 10-4",
+        "base_model": "CHC 10-4",
+        "quotation_model": "CHC 10-4",
+        "display_model": "CHC 10-4",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 2,
+        "motor_kw": 1.5,
+        "connection": "DN40 (G1½)"
+      },
+      "capturedPayload": {
+        "source": "KeyCHC-G1",
+        "family": "CHC",
+        "model": "CHC 10-4",
+        "base_model": "CHC 10-4",
+        "quotation_model": "CHC 10-4",
+        "display_model": "CHC 10-4",
+        "generation_code": "G1",
+        "keysuite_product_group_code": "CHC_G1",
+        "keysuite_material": "SS304 (Cast Iron Connection)",
+        "motor_hp": 2,
+        "motor_kw": 1.5,
+        "connection": "DN40 (G1½)",
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "brand": "B.G.Reich",
+          "series": "CHC",
+          "model": "CHC 10-4",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 10-4"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 10-4"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "keysuite_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+        "keysuite_brand_name": "B.G.Reich"
+      },
+      "descriptionGenerationInputs": {
+        "productFamily": "CHC",
+        "model": "CHC 10-4",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 10-4",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 10-4",
+          "base_model": "CHC 10-4",
+          "quotation_model": "CHC 10-4",
+          "display_model": "CHC 10-4",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 2,
+          "motor_kw": 1.5,
+          "connection": "DN40 (G1½)",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+            "brand": "B.G.Reich",
+            "series": "CHC",
+            "model": "CHC 10-4",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 10-4"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 10-4"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "keysuite_brand_name": "B.G.Reich"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2
+      },
+      "finalQuotationItem": {
+        "productFamily": "CHC",
+        "model": "CHC 10-4",
+        "description": "B.G.Reich Vertical Multistage Pump Model: CHC 10-4",
+        "pumpData": {
+          "source": "KeyCHC-G1",
+          "family": "CHC",
+          "model": "CHC 10-4",
+          "base_model": "CHC 10-4",
+          "quotation_model": "CHC 10-4",
+          "display_model": "CHC 10-4",
+          "generation_code": "G1",
+          "keysuite_product_group_code": "CHC_G1",
+          "keysuite_material": "SS304 (Cast Iron Connection)",
+          "motor_hp": 2,
+          "motor_kw": 1.5,
+          "connection": "DN40 (G1½)",
+          "commercialIdentity": {
+            "version": 2,
+            "brandId": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+            "brand": "B.G.Reich",
+            "series": "CHC",
+            "model": "CHC 10-4",
+            "hydraulic": {
+              "series": "CHC",
+              "model": "CHC 10-4"
+            },
+            "pricing": {
+              "series": "CHC_G1",
+              "model": "CHC 10-4"
+            },
+            "sourceId": "KeyCHC-G1"
+          },
+          "keysuite_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "keysuite_brand_name": "B.G.Reich"
+        },
+        "pricingSource": {
+          "product_family": "CHC_G1",
+          "v391_brand_id": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "v391_brand_name": "B.G.Reich",
+          "source_price": 123,
+          "brand_margin": 0.1
+        },
+        "unitPrice": 456,
+        "qty": 2,
+        "commercialIdentity": {
+          "version": 2,
+          "brandId": "051eed45-0c2d-4bcd-b560-b810ee1f221b",
+          "brand": "B.G.Reich",
+          "series": "CHC",
+          "model": "CHC 10-4",
+          "hydraulic": {
+            "series": "CHC",
+            "model": "CHC 10-4"
+          },
+          "pricing": {
+            "series": "CHC_G1",
+            "model": "CHC 10-4"
+          },
+          "sourceId": "KeyCHC-G1"
+        },
+        "brand": "B.G.Reich",
+        "brandId": "051eed45-0c2d-4bcd-b560-b810ee1f221b"
+      },
+      "legacySourceFallback": {
+        "actualBrand": "B.G.Reich",
+        "actualModel": "CHC 10-4"
+      },
+      "legacySourceName": {
+        "actualBrand": "B.G.Reich"
+      },
+      "expectedBrand": "B.G.Reich",
+      "expectedModel": "CHC 10-4"
+    }
+  ]
+}

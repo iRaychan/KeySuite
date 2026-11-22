@@ -3,6 +3,9 @@
   async function offer(item, reason='Automatic pricing is unavailable.') {
     const app=window.KeySuiteApp;
     if(!app?.canEditQuotation?.(true)||!app.ensureQuotationPricingContext('add a manually priced pump'))return null;
+    // A price edit is not a description edit. Capture generated identity before
+    // opening the asynchronous dialog, while the originating selection is known.
+    item=structuredClone(window.KeySuiteCommercialIdentity?.stamp(item)||item);
     const dialog=document.createElement('dialog');
     dialog.style.cssText='max-width:620px;width:90%;border:0;border-radius:16px;padding:24px';
     dialog.innerHTML='<form><h2>Enter selling price</h2><p class="reason"></p><pre style="white-space:pre-wrap;max-height:260px;overflow:auto"></pre><label>Unit selling price (MYR)<input name="price" type="number" min="0.01" step="0.01" required placeholder="Enter price" style="display:block;width:100%;margin:12px 0"></label><p>This price will remain unchanged when categories or price lists refresh.</p><button class="btn" type="submit">Add to quotation</button> <button class="btn secondary" type="button">Cancel</button></form>';
@@ -17,7 +20,7 @@
         event.preventDefault();
         const price=Number(dialog.querySelector('input').value);
         if(!Number.isFinite(price)||price<=0)return;
-        result=app.addExternalQuoteItem({...item,unitPrice:price,descriptionManuallyEdited:true,pricingSource:{...(item.pricingSource||{}),product_family:item.productFamily||'MANUAL',manual_override:true,manual_price_reason:reason,calculated_price:price}});
+        result=app.addExternalQuoteItem({...item,unitPrice:price,pricingSource:{...(item.pricingSource||{}),product_family:item.productFamily||'MANUAL',manual_override:true,manual_price_reason:reason,calculated_price:price}});
         if(result)app.showPage('quotation');
         dialog.close();
       };
