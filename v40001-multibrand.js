@@ -382,7 +382,7 @@
     return raw;
   }
   function mapRowIdentity(row){
-    try{if(JSON.parse(row?.dataset?.quoteItemPayload||'{}').commercialIdentity)return}catch(_){}
+    try{if(JSON.parse(row?.dataset?.quoteItemPayload||'{}').commercialIdentity){window.KeySuiteCommercialIdentity?.applyToRow(row);return}}catch(_){}
     const bid=rowBrandId(row),brand=byBrandId(bid);if(!row||!brand)return;
     const modelInput=row.querySelector('.item-model'),descInput=row.querySelector('.item-description');if(!modelInput||!descInput)return;
     const source=sourceOfRow(row),pump=pumpDataOfRow(row),family=baseFamily(sourceFamily(source,row)||pump.keysuite_product_family||row.dataset.v391Family||'');
@@ -589,17 +589,17 @@
   function wrapApp(){
     if(state.appWrapped||!window.KeySuiteApp)return; state.appWrapped=true;
     const original=window.KeySuiteApp.addExternalQuoteItem?.bind(window.KeySuiteApp);
-    if(original)window.KeySuiteApp.addExternalQuoteItem=data=>{
+    if(original)window.KeySuiteApp.addExternalQuoteItem=data=>{data=window.KeySuiteCommercialIdentity?.stamp(data||{})||data;
       const explicitBrand=String(data?.brand??data?.brandName??data?.pumpData?.keysuite_brand_name??data?.pricingSource?.v391_brand_name??'').trim();
       const explicitId=String(data?.brandId??data?.pumpData?.keysuite_brand_id??data?.pricingSource?.v391_brand_id??'').trim();
       const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
       const selectedProductBrand=family&&baseFamily(family)===baseFamily(state.selectedFamily)&&!data?.manualItem&&!data?.manualBrandOverride&&!data?.brandManuallyEdited&&!data?.descriptionManuallyEdited?byBrandId(state.selectedBrandId):null;
-      const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||selectedProductBrand||byBrandId(defaultPricingBrand(family))||byBrandId(state.selectedBrandId)||masterBrand();
+      const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||(!data?.commercialIdentity&&family!=='ASSEMBLY'?selectedProductBrand:null);
       const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
       const copy={...(data||{})};if(chosenBrand&&!copy.descriptionManuallyEdited){copy.brand=chosenBrand.brand_name;copy.brandName=chosenBrand.brand_name;copy.brandId=chosenBrand.id}if(copy.pumpData&&chosenBrand)copy.pumpData={...copy.pumpData,keysuite_brand_id:chosenBrand.id,keysuite_brand_name:chosenBrand.brand_name};if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
       const row=original(copy);
       if(row){
-        if(chosenBrand)stampRowBrand(row,chosenBrand.id,family,{force:true});
+        if(chosenBrand)stampRowBrand(row,chosenBrand.id,family,{force:true});window.KeySuiteCommercialIdentity?.applyToRow(row);
         window.KeySuiteApp.captureQuotationItemOriginal(row,{replace:true});
         if(typeof calcTotal==='function')calcTotal();
       }

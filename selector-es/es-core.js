@@ -569,9 +569,10 @@
     diameterMm=Number(diameterMm);frequencyHz=Number(frequencyHz);
     if(!finite(diameterMm))diameterMm=maxD;
     if(!finite(frequencyHz))frequencyHz=50;
-    // Manual impeller is an exact whole-mm diameter. Frequency is an exact 0.1 Hz setting.
+    // Manual impeller is an exact whole-mm diameter. Frequency retains the entered decimal setting, up to 60 Hz.
     diameterMm=Math.round(Math.max(minD,Math.min(maxD,diameterMm)));
-    frequencyHz=Math.round(frequencyHz*10)/10;
+    var frequencyPolicy=globalThis.KeySuiteOperatingSpeed||(typeof require==='function'?require('../operating-speed.js'):null);
+    if(!frequencyPolicy||!frequencyPolicy.valid(frequencyHz))return null;
     if(!(frequencyHz>0))return null;
     var speedRatio=frequencyHz/50,duties=normalizeDutyPoints(result.dutyPoints||[]),dutyResults=[];
     if(!duties.length)return null;

@@ -1,7 +1,7 @@
 {
-  "version": "5.00.83",
-  "baseline": "5.00.82",
-  "upgrade_supported_from": "5.00.82",
+  "version": "5.00.84",
+  "baseline": "5.00.83",
+  "upgrade_supported_from": "5.00.83",
   "release_status": "packaged_with_browser_verification_limits",
   "technical_pdf_service_required": false,
   "new_database_migration_required": false,
@@ -13,11 +13,12 @@
     "KeyStock": "1.03"
   },
   "changes": [
-    "Shared commercial series discovery links customer curve preferences and Quick Selection.",
-    "Restore automatic accessories without inferring deletion from absence; retain explicit suppression and restore controls."
+    "Shared 60 Hz operating-speed control with decimal precision and red input above 50 Hz; existing hydraulic speed correction retained.",
+    "Capture and preserve commercial brand identity through selector, quotation rows, assembly conversion, saved payloads and print content."
   ],
   "known_issues": [
-    "Safari and live persistence not tested; isolated tests only.",
+    "Safari connection and isolated browser launches unavailable; no visual browser verification.",
+    "Actual PDF export and live secure-history persistence not tested; isolated application/DOM and in-memory RPC tests only.",
     "Existing V5.00.82 suppression flags are ambiguous; retained and require explicit Restore.",
     "Inherited legacy quotation RPC authorization limitations remain outside this release."
   ],

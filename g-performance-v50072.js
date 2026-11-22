@@ -20,7 +20,7 @@
   const format = (v, places=2) => number(v) ? String(Number(v.toFixed(places))) : 'Unavailable';
   function curveFit(model,key,hz=50){
     const ratio=hz/50;
-    if(!hasCurve(model)||!number(hz)||hz<=0||hz>50)return null;
+    if(!hasCurve(model)||!window.KeySuiteOperatingSpeed.valid(hz))return null;
     const scale=({h:ratio**2,power:ratio**3,npsh:ratio**2})[key]??1;
     return core.fitCurve({flow:model.curve.map(p=>p.q),[key]:model.curve.map(p=>p[key])},key,orders[key],ratio,scale);
   }
@@ -128,7 +128,7 @@
   }
   function plot(){
     const input=$('gSpeed'),candidate=Number(input.value)/($('gSpeedUnit').value==='rpm'?currentModel().speed/50:1);
-    if(!input.checkValidity()||!(candidate>0&&candidate<=50))throw Error('Enter an operating speed above 0 and up to 50 Hz.');
+    if(!input.checkValidity()||!(candidate>0&&candidate<=window.KeySuiteOperatingSpeed.MAX_HZ))throw Error('Enter an operating speed above 0 and up to 60 Hz.');
     const pairs=[[$('gDutyFlow'),$('gDutyHead')],...[...$('gDutyPoints').children].map(row=>[...row.querySelectorAll('input')])];
     const flowFactor=flowUnits[$('gFlowUnit').value],headFactor=headUnits[$('gHeadUnit').value];
     const partial=!!pairs[0][0].value!==!!pairs[0][1].value;
@@ -142,6 +142,7 @@
     if(auto)plotted[0]=auto;
     automatic=!!auto;
     hz=candidate;duties=plotted;
+    window.KeySuiteOperatingSpeed.paint(input,hz);
     window.KeySuiteG.message(partial?'Enter both Flow and Head to plot D1.':'',partial);render();
   }
   function safely(action){return async()=>{try{await action()}catch(error){window.KeySuiteG.message(error.message,true)}}}
@@ -162,9 +163,9 @@
           <div id="gDutyPoints" class="duty-point-list"></div><button class="add-duty-btn" type="button" data-g-add-duty>+ Duty Point</button>
           <div class="hint" style="margin:8px 0 0">Extra duty points use the same Flow and Head units selected for D1.</div>
         </div></details>
-        <label for="gSpeed">Operating Speed</label><div class="g-unit-row"><input id="gSpeed" type="number" min="0.01" max="50" value="50" step="any" required><select id="gSpeedUnit" aria-label="Operating speed unit"><option value="hz">Hz</option><option value="rpm">RPM</option></select></div>
-        <div class="frequency-info">0 Hz = 0 RPM · 50 Hz = <span id="gSpeedLimit"></span> RPM (Max)</div>
-        <div class="motor-note">Changing operating speed updates this model’s curves live. Curves below 50 Hz are speed-adjusted estimates.</div>
+        <label for="gSpeed">Operating Speed</label><div class="g-unit-row"><input id="gSpeed" type="number" min="0.01" max="60" value="50" step="any" required><select id="gSpeedUnit" aria-label="Operating speed unit"><option value="hz">Hz</option><option value="rpm">RPM</option></select></div>
+        <div class="frequency-info">0 Hz = 0 RPM · 50 Hz = <span id="gSpeedLimit"></span> RPM · 60 Hz = <span id="gSpeedMax"></span> RPM (Max)</div>
+        <div class="motor-note">Changing operating speed updates this model’s curves live. Curves away from 50 Hz are speed-adjusted estimates.</div>
         <div class="speed-display"><span>Calculated Speed</span><b id="gRpm"></b></div>
         <label for="gEfficiency">Motor Efficiency</label><select id="gEfficiency"><option>IE1</option></select>
         <label for="gPhase">Motor Phase</label><select id="gPhase"><option value="1Ph">1 Phase</option><option value="3Ph">3 Phase</option></select>
@@ -199,10 +200,14 @@
       plot();
     });
     $('gSpeed').onchange=safely(plot);
+    $('gSpeed').dataset.baseRpm=String(currentModel().speed);
+    $('gSpeed').oninput=safely(plot);
+    window.KeySuiteOperatingSpeed.configure($('gSpeed'),$('gSpeedUnit'),currentModel().speed);
     $('gSpeedLimit').textContent=currentModel().speed;
+    $('gSpeedMax').textContent=currentModel().speed*window.KeySuiteOperatingSpeed.MAX_HZ/50;
     $('gSpeedUnit').onchange=safely(()=>{
       const rpm=$('gSpeedUnit').value==='rpm', speed=$('gSpeed');
-      speed.max=rpm?currentModel().speed:50;
+      speed.max=rpm?currentModel().speed*window.KeySuiteOperatingSpeed.MAX_HZ/50:window.KeySuiteOperatingSpeed.MAX_HZ;
       speed.value=rpm?hz*currentModel().speed/50:hz;
       plot();
     });

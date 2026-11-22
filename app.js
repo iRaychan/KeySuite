@@ -1133,6 +1133,7 @@ function updateQuotationContactInfo(){
 function compareBrandPriority(a,b){const name=x=>String(typeof x==='string'?x:x?.brand_name??x?.name??'').trim(),rank=x=>{const n=name(x).toLowerCase();if(n==='b.g.reich')return 0;if(n==='keylargo')return 1;if(n==='tesk')return 2;if(!n||n==='-'||!/[a-z0-9]/i.test(n[0]))return 4;return 3};return rank(a)-rank(b)||name(a).localeCompare(name(b),undefined,{numeric:true,sensitivity:'base'});}
 function brandDisplayOrder(values=[]){return [...(values||[])].sort(compareBrandPriority)}
 function quoteItemBrands(data={},seen=new Set()){ 
+ if(data?.commercialIdentity){const brand=window.KeySuiteCommercialIdentity?.cleanBrand(data.commercialIdentity.brand)||'';return brand?[brand]:[];}
  if(!data||typeof data!=='object'||seen.has(data))return [];seen.add(data);const names=[];
  for(const key of ['brand','brandName','brand_name','keysuite_brand_name','v391_brand_name'])if(typeof data[key]==='string'&&data[key].trim()&&data[key].trim()!=='-')names.push(data[key].trim());
  if(Array.isArray(data.brands))names.push(...data.brands.filter(x=>typeof x==='string'&&x.trim()&&x.trim()!=='-'));
@@ -1141,18 +1142,8 @@ function quoteItemBrands(data={},seen=new Set()){
  return [...new Map(names.map(n=>[n.toLowerCase(),n])).values()];
 }
 function brandedQuotationDescription(description,brand,sourceBrand=''){
- const lines=String(description??'').split('\n');
- const index=lines.findIndex(line=>line.trim()&&!/^Capacity:/i.test(line.trim()));
- if(index<0)return lines.join('\n');
- const name=String(brand??'').trim();
- let line=lines[index].trimStart();
- if(name==='-'||!name)line=line.replace(/^[-–—]\s+(?=\S)/,'');
- const candidates=[name,sourceBrand,'B.G.Reich'].map(s=>String(s||'').trim()).filter(s=>s&&s!=='-').sort((a,b)=>b.length-a.length);
- for(const candidate of candidates){
-   while(line.toLowerCase().startsWith(candidate.toLowerCase()+' '))line=line.slice(candidate.length).trimStart();
- }
- lines[index]=name&&name!=='-'?`${name} ${line}`:line;
- return lines.join('\n');
+ const identity=window.KeySuiteCommercialIdentity;
+ return identity.description(description,{brand:identity.cleanBrand(brand),sourceBrand,model:''});
 }
 function captureQuotationItemOriginal(row,{replace=false}={}){
  if(!replace&&row.dataset.originalQuotationItem)return;
@@ -1893,7 +1884,7 @@ window.addEventListener('message',function(event){
  if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromBsw?'BSW':fromKv?'KV':fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
  if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const rawPayload=event.data.payload||{};
- const p={...rawPayload};
+ const p=window.KeySuiteCommercialIdentity?.captureSelection({...rawPayload},event.source)||{...rawPayload};
  const route=event.data.route||pendingSelectionRoute||'quotation';pendingSelectionRoute='quotation';
  if(fromBsw||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BSW'){window.KeySuiteBSW?.routeSelection?.(p,route);return}
  if(fromBgf||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BGF'){window.KeySuiteBGF?.routeSelection?.(p,route);return}
@@ -1935,7 +1926,7 @@ window.addEventListener('message',function(event){
  }
  if(!canEditQuotation(true))return;
  if(!ensureQuotationPricingContext('add a pump to the quotation'))return;
- const sellingId=String(pinnedContext?.id||brandApi?.brandContext?.()?.id||'');
+ const sellingId=String(p.commercialIdentity?.brandId||pinnedContext?.id||brandApi?.brandContext?.()?.id||'');
  showPage('quotation');
  const selectedCustomer=customers().find(x=>x.id===$('qCustomer').value);
  if(selectedCustomer){refreshQuotationContacts();if(!editingQuoteId&&quotationStatus==='new')$('payment').value=formatCustomerTerms(selectedCustomer);}
@@ -2023,7 +2014,7 @@ window.addEventListener('message',function(event){
      if(sellingId)brandApi?.stampRowBrand?.(row,sellingId,'CHC',{force:true});
    }catch(error){console.warn('[KeySuite V4.15.10] Selling Brand quote handoff skipped.',error)}
  };
- applySelectedSellingBrand();
+ applySelectedSellingBrand();window.KeySuiteCommercialIdentity?.applyToRow(row);
  captureQuotationItemOriginal(row,{replace:true});
 
  calcTotal();refreshItemExportButtons();focusNewQuoteItem(row);
@@ -2524,11 +2515,8 @@ window.KeySuiteApp={
  selectCustomerForQuotation,
  hydrateQuoteItemCapacity,syncQuoteCapacityDescription,focusQuoteItem:focusNewQuoteItem,
  brandedQuotationDescription,captureQuotationItemOriginal,
- addExternalQuoteItem(data){if(!canEditQuotation(true))return null;const rows=[...document.querySelectorAll('.quote-item')],first=rows[0],empty=rows.length===1&&first&&!first.querySelector('.item-model').value&&!first.querySelector('.item-description').value&&!Number(first.querySelector('.item-price').value||0),coupling=isCouplingQuoteData(data||{}),motor=!coupling&&isMotorQuoteData(data||{}),noCapacity=!coupling&&(motor||isNoCapacityQuoteData(data||{}));if(empty)first.remove();const row=quoteItemRow(data||{});if(data?.pumpData)row.dataset.pumpData=JSON.stringify(data.pumpData);if(data?.motorData)row.dataset.motorData=JSON.stringify(data.motorData);if(data?.pricingSource)row.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data?.couplingData)row.dataset.couplingData=JSON.stringify(data.couplingData);const incomingCapacity=capacityStateFromData(data||{},data?.description||'');row.querySelector('.item-model').value=coupling?normalizeCouplingQuoteModel(data.model||'',data):noCapacity?stripQuotationBrand(data.model||''):capacityModelText(data.model||'',incomingCapacity);row.querySelector('.item-qty').value=data.qty||1;row.querySelector('.item-price').value=Number(data.unitPrice||0).toFixed(2);row.querySelector('.item-description').value=coupling?shaftText(data.description||'',shaftStateFromData(data,data.description||'')):motor?normalizeMotorQuotationDescription(data.description||''):normalizeDescriptionIndentation(stripQuotationBrand(data.description||''));if(coupling)syncQuoteShaftDescription(row);else if(!noCapacity)applyQuoteCapacityData(row,data||{});
- const source=quotePricingSource(data),brand=data.brand??data.brandName??source.v391_brand_name??data.pumpData?.keysuite_brand_name;
- if(brand!=null&&!data.descriptionManuallyEdited&&['CHC','CHC_G1','CHC_G2','CR','KV','BFI','BGF','G','BSV','BSW','ES','ISO','GWS'].includes(quoteProductFamily(data))){
-   const area=row.querySelector('.item-description');area.value=brandedQuotationDescription(area.value,brand);
- }
+ addExternalQuoteItem(data){data=window.KeySuiteCommercialIdentity?.stamp(data||{})||data;if(!canEditQuotation(true))return null;const rows=[...document.querySelectorAll('.quote-item')],first=rows[0],empty=rows.length===1&&first&&!first.querySelector('.item-model').value&&!first.querySelector('.item-description').value&&!Number(first.querySelector('.item-price').value||0),coupling=isCouplingQuoteData(data||{}),motor=!coupling&&isMotorQuoteData(data||{}),noCapacity=!coupling&&(motor||isNoCapacityQuoteData(data||{}));if(empty)first.remove();const row=quoteItemRow(data||{});if(data?.pumpData)row.dataset.pumpData=JSON.stringify(data.pumpData);if(data?.motorData)row.dataset.motorData=JSON.stringify(data.motorData);if(data?.pricingSource)row.dataset.pricingSource=typeof data.pricingSource==='string'?data.pricingSource:JSON.stringify(data.pricingSource);if(data?.couplingData)row.dataset.couplingData=JSON.stringify(data.couplingData);const incomingCapacity=capacityStateFromData(data||{},data?.description||'');row.querySelector('.item-model').value=coupling?normalizeCouplingQuoteModel(data.model||'',data):noCapacity?stripQuotationBrand(data.model||''):capacityModelText(data.model||'',incomingCapacity);row.querySelector('.item-qty').value=data.qty||1;row.querySelector('.item-price').value=Number(data.unitPrice||0).toFixed(2);row.querySelector('.item-description').value=coupling?shaftText(data.description||'',shaftStateFromData(data,data.description||'')):motor?normalizeMotorQuotationDescription(data.description||''):normalizeDescriptionIndentation(stripQuotationBrand(data.description||''));if(coupling)syncQuoteShaftDescription(row);else if(!noCapacity)applyQuoteCapacityData(row,data||{});
+ window.KeySuiteCommercialIdentity?.applyToRow(row);
  captureQuotationItemOriginal(row,{replace:true});calcTotal();refreshItemExportButtons();focusNewQuoteItem(row);return row;},
  ensureQuotationPricingContext,ensureQuotationSourcePricing,
  canEditQuotation,

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="../operating-speed.js?v=50084"></script>
 <meta charset="utf-8">
 <script defer src="../technical-pdf.js?v=50060"></script>
 <script src="../power-curve.js?v=42872"></script>
@@ -239,8 +240,8 @@ body.product-frame main{display:block;max-width:none;padding:8px}body.product-fr
 
   <div id="standardSpeedControls" class="standard-speed-controls">
     <label>Operating Speed</label>
-    <div class="row"><input id="speedInput" type="number" value="50" min="0" max="50" step="0.1"><select id="speedUnit"><option value="hz">Hz</option><option value="rpm">RPM</option></select></div>
-    <div class="frequency-info">0 Hz = 0 RPM · 50 Hz = 2900 RPM (Max)</div>
+    <div class="row"><input id="speedInput" type="number" value="50" min="0" max="60" step="any"><select id="speedUnit"><option value="hz">Hz</option><option value="rpm">RPM</option></select></div>
+    <div class="frequency-info">0 Hz = 0 RPM · 50 Hz = 2900 RPM · 60 Hz = 3480 RPM (Max)</div>
     <div class="motor-note">Before selection, this speed is used to size the pump at D1. After a pump is selected, changing speed updates that selected model's curves live. Press Select Pump again only when you want to re-size/re-select at the new speed.</div>
     <div class="speed-display"><span id="calculatedLabel">Calculated Speed</span><b id="calculatedValue">2900 RPM</b></div>
   </div>
@@ -599,7 +600,7 @@ function keychcParallelMetricGraph(fit,kind,dutyQ,dutyValue,chartHeight=216,powe
 }
 
 function keychcDisplayModelAtSpeed(base,hz,q=selectionState.q,h=selectionState.h){
- if(!base||!(hz>0))return null;
+ if(!base||!KeySuiteOperatingSpeed.valid(hz))return null;
  const curve=DB.curves[base.series];if(!curve)return null;
  const mix=parseImpellerMix(base),r=hz/DB.base_hz;
  const headFit=fitMixedHeadCurve(curve,mix,r),effFit=fitMixedEfficiencyCurve(curve,mix,r);
@@ -612,7 +613,7 @@ function keychcDisplayModelAtSpeed(base,hz,q=selectionState.q,h=selectionState.h
  const shaft=Number.isFinite(predHead)?9.81*q*predHead/3600/(eff/100):NaN;
  return {...base,impellerCurve:mix.type,impellerMix:mix,predHead,margin:Number.isFinite(predHead)?predHead-h:NaN,eff,npsh,shaft,headFit,effFit,npshFit,powerFit,rpm:(Number(curve.speed_rpm)||2900)*r,curveHz:hz};
 }
-function keychcCurveHz(){if(keychcEnhancedEnabled())return KEYSUITE_ENHANCED_MAX_HZ;const hz=Number((document.getElementById('hz')||{}).value||selectionState.curveHz||selectionState.hz||50);return Number.isFinite(hz)?hz:50;}
+function keychcCurveHz(){if(keychcEnhancedEnabled())return KEYSUITE_ENHANCED_MAX_HZ;const hz=Number((document.getElementById('hz')||{}).value||selectionState.curveHz||selectionState.hz||50);return KeySuiteOperatingSpeed.clamp(hz);}
 function keychcCurrentDisplayModel(){const base=selectionState.models[selectionState.selectedIndex];if(!base)return null;return (selectionState.enhanced||keychcEnhancedEnabled())?evaluateEnhancedModel(base,selectionState.q,selectionState.h):keychcDisplayModelAtSpeed(base,keychcCurveHz(),selectionState.q,selectionState.h);}
 
 function parseImpellerMix(m){
@@ -746,6 +747,7 @@ function evaluateEnhancedModel(m,q,h){
 }
 
 function evaluateModel(m,q,h,hz){
+ if(!KeySuiteOperatingSpeed.valid(hz))return null;
  return KEYSUITE_CHC_CORE.evaluateModel(DB,m,q,h,hz);
 }
 
@@ -1539,6 +1541,7 @@ function updateKeyCHCCurveStatus(best){
 }
 
 function renderSelected(){
+ KeySuiteOperatingSpeed.configure(document.getElementById("speedInput"),document.getElementById("speedUnit"));
  const base=selectionState.models[selectionState.selectedIndex];
  if(!base)return;
  const {q,h}=selectionState,hasPrimaryDuty=selectionState.primaryDutyCleared!==true&&q>0&&h>0,enhanced=!!selectionState.enhanced,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:keychcCurveHz(),best=enhanced?evaluateEnhancedModel(base,q,h):keychcDisplayModelAtSpeed(base,hz,q,h);
@@ -1628,29 +1631,10 @@ function updateEnhancedModeUI(){
 }
 
 function updateSpeedConversion(){
-  const mode=speedUnit.value;
-  let value=Math.max(0,Number(speedInput.value)||0);
-  let hz,rpm;
-  if(mode==="hz"){
-    value=Math.min(50,value); hz=value; rpm=hz*58;
-    calculatedLabel.textContent="Calculated Speed";
-    calculatedValue.textContent=`${rpm.toFixed(0)} RPM`;
-  }else{
-    value=Math.min(2900,value); rpm=value; hz=rpm/58;
-    calculatedLabel.textContent="Calculated Frequency";
-    calculatedValue.textContent=`${hz.toFixed(1)} Hz`;
-  }
-  speedInput.value=value;
-  hzHidden.value=hz.toFixed(6);
+  return KeySuiteOperatingSpeed.convert(speedInput,speedUnit,hzHidden,calculatedLabel,calculatedValue);
 }
 function changeSpeedUnit(){
-  const currentHz=Number(hzHidden.value)||0;
-  if(speedUnit.value==="hz"){
-    speedInput.min="0";speedInput.max="50";speedInput.step="0.1";speedInput.value=currentHz.toFixed(1);
-  }else{
-    speedInput.min="0";speedInput.max="2900";speedInput.step="1";speedInput.value=Math.round(currentHz*58);
-  }
-  updateSpeedConversion();
+  return KeySuiteOperatingSpeed.changeUnit(speedInput,speedUnit,hzHidden,calculatedLabel,calculatedValue);
 }
 function keychcApplyLiveCurveSpeed(){
  if(keychcEnhancedEnabled())return;
@@ -1661,11 +1645,12 @@ speedUnit.addEventListener("change",()=>{changeSpeedUnit();keychcApplyLiveCurveS
 speedInput.addEventListener("input",()=>{updateSpeedConversion();keychcApplyLiveCurveSpeed();});
 
 function run(){
+ if(!document.getElementById("speedInput").checkValidity())return;
  const rawFlowText=String(flowInput.value??'').trim(),rawHeadText=String(headInput.value??'').trim(),rawFlow=Number(rawFlowText),rawHead=Number(rawHeadText),flowUnit=flowUnitInput.value,headUnit=headUnitInput.value;
  const q=flowToM3h(rawFlow,flowUnit),h=headToM(rawHead,headUnit),enhanced=!!enhancedMode?.checked;
  let hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:+document.getElementById('hz').value;
- if(!(q>0&&h>0) || (!enhanced&&!(hz>0&&hz<=50))){
-   out.innerHTML=enhanced?'<div class="warning">Please check the input values. Flow and Head must be above 0 for Enhanced selection.</div>':'<div class="warning">Please check the input values. Operating frequency must be above 0 Hz and not more than 50 Hz.</div>';
+ if(!(q>0&&h>0) || (!enhanced&&!(hz>0&&hz<=KeySuiteOperatingSpeed.MAX_HZ))){
+   out.innerHTML=enhanced?'<div class="warning">Please check the input values. Flow and Head must be above 0 for Enhanced selection.</div>':'<div class="warning">Please check the input values. Operating frequency must be above 0 Hz and not more than 60 Hz.</div>';
    alternatives.innerHTML='';
    return;
  }
@@ -1739,7 +1724,7 @@ alternatives.innerHTML='';
   try{flow.value=(selectionState.rawFlowText!==undefined&&selectionState.rawFlowText!==''?selectionState.rawFlowText:(selectionState.rawFlow??selectionState.q??''));head.value=(selectionState.rawHeadText!==undefined&&selectionState.rawHeadText!==''?selectionState.rawHeadText:(selectionState.rawHead??selectionState.h??''));fu.value=selectionState.flowUnit||'m3h';hu.value=selectionState.headUnit||'m';
    motorEff.value=selectionState.motorEffClass||'IE2';motorPhase.value=selectionState.motorPhase||'3Ph';updateMotorVoltageRange();
    const enhanced=!!selectionState.enhanced;if(enhancedMode)enhancedMode.checked=enhanced;updateEnhancedModeUI();
-   const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=hz.toFixed(1);hzHidden.value=String(hz);selectionState.curveHz=hz;selectionState.hz=hz;
+   const hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Number(selectionState.curveHz||selectionState.hz||50);speedUnit.value='hz';speedInput.value=String(hz);hzHidden.value=String(hz);selectionState.curveHz=hz;selectionState.hz=hz;
   }catch(e){}
  }
  function prepareProductModel(modelName,opts={}){
@@ -1759,7 +1744,7 @@ alternatives.innerHTML='';
  function applyProductDuty(flowM3h,headM,meta={}){
   const modelName=String(productModelName||window.keysuiteExportPayload?.quotation_model||selectionState.models?.[selectionState.selectedIndex||0]?.model||'');
   const model=DB.models.find(m=>String(m.model).toLowerCase()===modelName.toLowerCase());
-  const q=Number(flowM3h),h=Number(headM),enhanced=meta.enhanced!==undefined?!!meta.enhanced:!!enhancedMode?.checked,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Math.max(.1,Math.min(50,Number(meta.hz||hzHidden?.value||selectionState.curveHz||selectionState.hz||50)));
+  const q=Number(flowM3h),h=Number(headM),enhanced=meta.enhanced!==undefined?!!meta.enhanced:!!enhancedMode?.checked,hz=enhanced?KEYSUITE_ENHANCED_MAX_HZ:Math.max(.1,Math.min(KeySuiteOperatingSpeed.MAX_HZ,Number(meta.hz||hzHidden?.value||selectionState.curveHz||selectionState.hz||50)));
   if(!model||!(q>0&&h>0))return null;
   const evaluated=enhanced?evaluateEnhancedModel(model,q,h):evaluateModel(model,q,h,hz);
   const rawFlow=meta.rawFlow!=null?Number(meta.rawFlow):q,rawHead=meta.rawHead!=null?Number(meta.rawHead):h,rawFlowText=meta.rawFlowText!=null?String(meta.rawFlowText):String(rawFlow),rawHeadText=meta.rawHeadText!=null?String(meta.rawHeadText):String(rawHead);

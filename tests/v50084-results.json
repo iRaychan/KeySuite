@@ -1,0 +1,70 @@
+{
+  "at": "2026-11-22T13:21:43.169Z",
+  "environment": "JSDOM and isolated/in-memory RPC; no browser or production database",
+  "results": [
+    {
+      "file": "tests/v50084.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "stdout": "PASS selector/product.html\nPASS selector-g1/product.html\nPASS selector-cr/product.html\nPASS selector-bfi/product.html\nPASS selector-kv/index.html\nPASS selector-bgf/index.html\nPASS selector-bsw/index.html\nPASS selector/index.html\nPASS selector-g1/index.html\nPASS selector-cr/index.html\nPASS selector-bfi/index.html\nPASS es\nPASS iso\nPASS G\n[\n  {\n    \"test\": \"selector/product.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 18,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-g1/product.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 18,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-cr/product.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 22,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-bfi/product.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 11,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-kv/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 12,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-bgf/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 1,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-bsw/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 5,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 18,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-g1/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 18,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-cr/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 22,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-bfi/index.html\",\n    \"status\": \"PASS\",\n    \"hydraulicGroups\": 11,\n    \"checks\": \"default, thresholds, decimal, rejection, live curve, model stability, affinity, RPM conversion\"\n  },\n  {\n    \"test\": \"selector-es/index.html\",\n    \"status\": \"PASS\",\n    \"checks\": \"default, thresholds, decimal, cap, model change, affinity, live curve\"\n  },\n  {\n    \"test\": \"selector-iso/index.html\",\n    \"status\": \"PASS\",\n    \"checks\": \"default, thresholds, decimal, cap, model change, affinity, live curve\"\n  },\n  {\n    \"test\": \"G dynamic commercial curve\",\n    \"status\": \"PASS\",\n    \"checks\": \"default, decimal thresholds, cap, live curve, identity, affinity\"\n  }\n]\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/v50084-brands.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "stdout": "PASS VEC VMS 150-2-1 actual external Quote handoff; identity survives raw row writes, price and source unchanged\nPASS 77 brand/family combinations: configured B.G.Reich, VEC, Megaflow, O.K.Pump, TESK, brandless, future brand/series\nPASS Captured selector identity beats later global state; explicit null/empty brand stays brandless; hydraulic model unchanged\nPASS Actual CHC Selector message -> quotation: VEC VMS 150-2-1, source CHC, price 16670 preserved\nPASS Assembly, Pumpset and mixed System descriptions retain each component brand and unchanged BOM prices/quantities\nPASS Manual items with assigned configured brands use the shared resolver\nPASS Actual save/history mock/reopen preserves identity, descriptions and internal remarks; print DOM has VEC model and keeps internal notes private\nPASS Quotation/PDF brand lists use commercial snapshots, including brandless items; pricing-source brand does not leak\nPASS Real configured mapping in both HMS/BFI directions, VEC/O.K.Pump and future series; legacy wrapper cannot overwrite captured VEC identity\n{\n  \"checks\": [\n    \"VEC VMS 150-2-1 actual external Quote handoff; identity survives raw row writes, price and source unchanged\",\n    \"77 brand/family combinations: configured B.G.Reich, VEC, Megaflow, O.K.Pump, TESK, brandless, future brand/series\",\n    \"Captured selector identity beats later global state; explicit null/empty brand stays brandless; hydraulic model unchanged\",\n    \"Actual CHC Selector message -> quotation: VEC VMS 150-2-1, source CHC, price 16670 preserved\",\n    \"Assembly, Pumpset and mixed System descriptions retain each component brand and unchanged BOM prices/quantities\",\n    \"Manual items with assigned configured brands use the shared resolver\",\n    \"Actual save/history mock/reopen preserves identity, descriptions and internal remarks; print DOM has VEC model and keeps internal notes private\",\n    \"Quotation/PDF brand lists use commercial snapshots, including brandless items; pricing-source brand does not leak\",\n    \"Real configured mapping in both HMS/BFI directions, VEC/O.K.Pump and future series; legacy wrapper cannot overwrite captured VEC identity\"\n  ],\n  \"limitations\": [\n    \"No Safari/browser visual verification\",\n    \"Print DOM verified; actual PDF export not tested\",\n    \"Secure history used in-memory RPC; no production writes\"\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/v50083.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "stdout": "PASS centralized G/future discovery, checkbox save/reload, selection and price gates, existing BGF preference\nPASS fresh Pump/Motor automatic accessories, repeated sync no duplicates, explicit removal, restore independently, persistence metadata, ambiguous legacy flags retained, partial pump-only\n",
+      "stderr": ""
+    },
+    {
+      "file": "tests/v50082/verify.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "stdout": "PASS Full/Own/None, legacy levels, two users, company boundary, direct load, customer independence and unchanged edit/delete rights\nPASS Category prefix A/B/D/De, case, no matches, clear, A–Z, selection and unsaved editor retention\nPASS Customer payment_terms payload/reopen codec, all modes, legacy credit/PDC, mutually exclusive controls and custom input\nPASS Actual customer saveCustomerRemote -> serialized text -> normalize -> editCustomer reopen, using in-memory database transport\nPASS New quotation inherits customer wording; template and customer refresh preserve saved payment snapshot\nPASS Actual quotation save -> secure-history mock -> reopen -> customer update -> refresh -> print preserves payment snapshot\nPASS Six partial formats A–F, Pump only, Complete Pumpset, dynamic brand/specifications and unchanged component quantities/prices\nPASS Partial description identity also preserves ISO, VMS/new brand and brandless HMS without ES identity injection\nPASS Selected-component-only cost validation, every selected row checked, zero-quantity omitted and no absent accessory inserted\nPASS Actual Pumpset -> toQuotation for all eight configurations carries selected-component totals and exact descriptions\nPASS Every nonempty component subset (15) accepts valid selected source costs and retains its selected membership\nPASS Actual quotation print DOM contains all payment wordings and partial-set brand/model/customer-supply descriptions (PDF export NOT TESTED)\nPASS isolated application/DOM test suite\n",
+      "stderr": ""
+    },
+    {
+      "file": "operating-speed.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    },
+    {
+      "file": "commercial-identity.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    },
+    {
+      "file": "app.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    },
+    {
+      "file": "assembly.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    },
+    {
+      "file": "v40001-multibrand.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    },
+    {
+      "file": "g-performance-v50072.js",
+      "test": "syntax",
+      "status": "PASS",
+      "stderr": ""
+    }
+  ]
+}
