@@ -1,0 +1,7 @@
+PASS repeatable migration; no seed or inventory changes
+PASS ES full material list read from existing Pricelist
+PASS all models inherit once; ES/ISO and CHC C4/C6 independent; option rename and duplicates
+PASS arrangement and mapping CRUD, exact codes, invalid combinations, duplicate/ambiguity prevention, stale edits, persisted refresh
+PASS Stock Input exact resolution, Normal multi-select compatibility, missing/conflicting/inapplicable rejection, reference protection
+PASS safe deletion and immutable recorded stock identity
+PASS all mutations enforce permissions; delegated access, anonymous denial and tenant isolation

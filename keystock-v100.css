@@ -121,3 +121,10 @@
 #keyStock .stock-browser form label{display:grid;gap:8px}
 #keyStock .stock-browser form input{width:100%;box-sizing:border-box}
 #keyStock .stock-browser li{margin-bottom:6px}
+/* V1.04: all editing remains inside the fourth Finder column. */
+.stock-link-record{margin:12px 0;padding:12px;border:1px solid #d7e1ed;border-radius:10px;background:white}
+.stock-link-option{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.stock-link-option span{flex:1;min-width:100px}
+#stockLinkForm label{display:block;margin:12px 0}
+#stockLinkForm input,#stockLinkForm select{display:block;width:100%;box-sizing:border-box;margin-top:6px}
+.stock-link-record summary{cursor:pointer;font-weight:600}

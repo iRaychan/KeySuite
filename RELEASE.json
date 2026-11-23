@@ -1,32 +1,23 @@
 {
-  "version": "5.00.85",
-  "baseline": "5.00.84",
-  "upgrade_supported_from": "5.00.84",
-  "release_status": "corrective_identity_regressions_passed_isolated_safari",
+  "version": "5.00.86",
+  "baseline": "5.00.85 CORRECTED-R1",
+  "upgrade_supported_from": "5.00.85 CORRECTED-R1",
+  "release_status": "development_review",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.08",
   "modules": {
-    "KeyStock": "1.03"
+    "KeyStock": "1.04"
   },
   "changes": [
-    "Complete BSW V1.3 workbook replacement: 178 unique models, 84 changed records, 8 curves, verified phase/float availability.",
-    "Shared commercial identity uses selling model series, never CHC C4/C6 navigation labels; identities captured before routing and retained in quotations, assemblies and costing.",
-    "Product List and Product Curve preserve selected identity and quotation template when adding items.",
-    "Corrective R1: manual price entry no longer marks generated descriptions as user edits; identity is captured before deferred dialogs.",
-    "Corrective R1: commercial identity no longer derives brand/model from pricing-source metadata; selected brand records outrank stale source brand names.",
-    "Corrective R1: quotation rows bind commercial identity before legacy adapters; revised asset/cache keys prevent mixing original and corrective scripts."
+    "Four-column series dropdown management with exact Pricelist combination mappings.",
+    "ES configuration choices read all existing per-model materials without changing prices.",
+    "Preserved V5.00.85 Corrected R1 quotation and commercial identity code."
   ],
-  "known_issues": [
-    "Save/reopen tested against isolated in-memory RPC fixtures; no production persistence tested.",
-    "BSW baseline is labelled V1.1 in the supplied V5.00.84 archive; V1.2 was not supplied. Comparison uses actual shipped records.",
-    "Existing V5.00.82 suppression ambiguity and legacy quotation RPC authorization limitations remain outside this release.",
-    "Corrected application code verified in an isolated offline Safari harness; live V5.00.85 only reached the customer-selection gate. No production quotation was created or saved.",
-    "Native Safari raster PDF exporter produced an eight-page fixture; exact item strings asserted in print DOM and representative exported page images visually checked. OCR unavailable in execution sandbox."
-  ],
+  "known_issues": [],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
   "approval_required_database_proposal": "proposals/V5.00.82_QUOTATION_VIEW_APPROVAL_REQUIRED.sql",

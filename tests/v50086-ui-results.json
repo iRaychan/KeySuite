@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "checks": [
+    "four columns, exactly three categories, C4/C6 separation, short hold cancelled, three-second unlock",
+    "direct option CRUD, duplicate error, independence and refresh persistence through UI",
+    "arrangement/options/mapping edit and persistence; failed save retains draft and reports error",
+    "Stock Input uses required single-choice Pricelist arrangements",
+    "read-only user cannot reach editing controls"
+  ],
+  "mutations_exercised": 12,
+  "browser": "jsdom DOM integration; native visual review separate"
+}

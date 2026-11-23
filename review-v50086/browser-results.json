@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "browser": "in-app browser",
+  "desktopLayout": {
+    "clientWidth": 1233,
+    "columns": [
+      {
+        "width": 228,
+        "x": 524,
+        "y": 299.5
+      },
+      {
+        "width": 285,
+        "x": 764,
+        "y": 299.5
+      },
+      {
+        "width": 313.5,
+        "x": 1061,
+        "y": 299.5
+      },
+      {
+        "width": 370.5,
+        "x": 1386.5,
+        "y": 299.5
+      }
+    ],
+    "scrollWidth": 1233
+  },
+  "narrowLayout": {
+    "clientWidth": 329,
+    "columns": [
+      {
+        "width": 150,
+        "x": 414,
+        "y": 314
+      },
+      {
+        "width": 186.6640625,
+        "x": 576,
+        "y": 314
+      },
+      {
+        "width": 205.3359375,
+        "x": 774.6640625,
+        "y": 314
+      },
+      {
+        "width": 260,
+        "x": 992,
+        "y": 314
+      }
+    ],
+    "scrollWidth": 838
+  },
+  "checks": [
+    "native three-second hold",
+    "Critical option saved",
+    "arrangement and option saved",
+    "exact mapping saved",
+    "Refresh preserves mapping",
+    "four adjacent columns at desktop and narrow width",
+    "narrow layout horizontal overflow"
+  ],
+  "productionWrites": false
+}

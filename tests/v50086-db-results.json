@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "models": 2587,
+  "es_codes": [
+    "CI / BR / SS / GP",
+    "CI / BR / SS / MS",
+    "CI / CI / SS / GP",
+    "CI / CI / SS / MS",
+    "CI / SS / SS / GP",
+    "CI / SS / SS / MS",
+    "SS304",
+    "SS316",
+    "CI CI SS Dynamic",
+    "Duplex 2205"
+  ],
+  "checks": [
+    "repeatable migration; no seed or inventory changes",
+    "ES full material list read from existing Pricelist",
+    "all models inherit once; ES/ISO and CHC C4/C6 independent; option rename and duplicates",
+    "arrangement and mapping CRUD, exact codes, invalid combinations, duplicate/ambiguity prevention, stale edits, persisted refresh",
+    "Stock Input exact resolution, Normal multi-select compatibility, missing/conflicting/inapplicable rejection, reference protection",
+    "safe deletion and immutable recorded stock identity",
+    "all mutations enforce permissions; delegated access, anonymous denial and tenant isolation"
+  ],
+  "production_changes": false
+}

@@ -1,0 +1,1 @@
+PASS rollback before use, reapply after rollback, and refusal after setup without data loss

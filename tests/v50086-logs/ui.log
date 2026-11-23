@@ -1,0 +1,5 @@
+PASS four columns, exactly three categories, C4/C6 separation, short hold cancelled, three-second unlock
+PASS direct option CRUD, duplicate error, independence and refresh persistence through UI
+PASS arrangement/options/mapping edit and persistence; failed save retains draft and reports error
+PASS Stock Input uses required single-choice Pricelist arrangements
+PASS read-only user cannot reach editing controls

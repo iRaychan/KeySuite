@@ -4,10 +4,10 @@ const {create,as,rpc}=require('./v50051-db.cjs');
 const port=Number(process.env.KEYSTOCK_TEST_PORT||8301);
 const root=path.resolve(__dirname,'..');
 const readOnly=process.env.KEYSTOCK_READ_ONLY==='1';
-const withLedger=process.env.KEYSTOCK_V102==='1'||process.env.KEYSTOCK_V103==='1';
-(async()=>{const db=process.env.KEYSTOCK_V103==='1'?(await require('./v50061-db.cjs').fixture()).db:withLedger?(await require('./v50054-db.cjs').fixture()).db:
+const withLedger=process.env.KEYSTOCK_V104==='1'||process.env.KEYSTOCK_V102==='1'||process.env.KEYSTOCK_V103==='1';
+(async()=>{const db=process.env.KEYSTOCK_V104==='1'?(await require('./v50086-db.cjs').fixture()).db:process.env.KEYSTOCK_V103==='1'?(await require('./v50061-db.cjs').fixture()).db:withLedger?(await require('./v50054-db.cjs').fixture()).db:
   process.env.KEYSTOCK_V101==='1'?(await require('./v50052-db.cjs').fixture()).db:await create();
-  await as(db,readOnly?'user':'owner','test-a',!readOnly);const server=http.createServer(async(req,res)=>{
+  await as(db,readOnly?'user':'owner',process.env.KEYSTOCK_V104==='1'?'test-links':'test-a',!readOnly);const server=http.createServer(async(req,res)=>{
  try{
   if(req.url==='/api/technical-pdf'&&process.env.KEYSUITE_PDF_ORIGIN){
     await require('../tools/technical-pdf-server.cjs').handleTechnicalPdf(req,res);return;
