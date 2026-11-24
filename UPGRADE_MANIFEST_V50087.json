@@ -1,0 +1,49 @@
+{
+  "version": "5.00.87",
+  "baseline": "5.00.86",
+  "baseline_zip_sha256": "fc7c84c4fbb3fe71805a8f29abc517b513c8c694f57eb24ab6047aad440d21ca",
+  "modified": [
+    "RELEASE.json",
+    "VERSION.txt",
+    "app.js",
+    "index.html",
+    "keyhq-launcher.js",
+    "manifest.json",
+    "release-version.js",
+    "sw.js",
+    "v39441-login-stability.js"
+  ],
+  "added": [
+    "README_UPGRADE_V50087.md",
+    "V5.00.87_REPORT.md",
+    "proposals/V5.00.87_ROLLBACK.sql",
+    "quotation-history-v50087.js",
+    "supabase/migrations/20261124100000_v50087_quotation_history_summaries.sql",
+    "tests/v50087-brand-lifecycle.cjs",
+    "tests/v50087-brand-lifecycle.json",
+    "tests/v50087-brand-results.json",
+    "tests/v50087-brand-review.html",
+    "tests/v50087-db-results.json",
+    "tests/v50087-db.cjs",
+    "tests/v50087-ui-results.json",
+    "tests/v50087-ui.cjs",
+    "tools/package_v50087.py"
+  ],
+  "deleted": [],
+  "protected_unchanged_sha256": {
+    "keystock-v100.js": "5beac4736de10e2c334ea4f86556ff813f4f47d76f977a72609ed7f76be2fdb4",
+    "keystock-v100.css": "8f71cf1e306cacdfdfbd8bcdb3abe81a3b2aeb032dd3a06b69e6c1fb715fb5fb",
+    "commercial-identity.js": "9d91571b25d418aa8b860047348d74503782c36cd38a1e8db8c3d7215b73319e",
+    "assembly.js": "9553c469681d8b39c675d8321aec4f9ee015fbff9d4ec87ac9bb0973e0ff43b4",
+    "product.js": "42d5f33e4673607a1f276e788d4be56f755ba6cfb9c7e4c08b022eaf160acb96",
+    "pricing.js": "34981436610388fe85cdf1bb80a777f70658a5c7fda52a9a1b94da87331d35a7",
+    "pricelist.js": "3216b4945ab4e81698cf65080a603dcefa3874cb4acbe60a36f26fda43bb9f2f",
+    "quotation-templates.js": "cd275c26b41d4fbcf1730c6b81fcceb73b76c05e798408bf108edf9abd9e1eea",
+    "manual-price-v50011.js": "0cecc802e4be7ceaeedf003a43bf7d3b58b8cc9c61f98f54eb1015a9ad0e3c4f",
+    "v40001-multibrand.js": "163389dc34995d8d2db18e47f365cab0af944183169d0243de24e64007ea4d44",
+    "technical-pdf.js": "616fe0d35aa1631234e223cfa086cda15379e128cb62b3fdf424f203c6f62d3b"
+  },
+  "production_deployed": false,
+  "production_migrated": false,
+  "production_fix_verified": false
+}

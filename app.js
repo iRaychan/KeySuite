@@ -382,6 +382,7 @@ function dedupeQuotationRows(rows=[]){
 }
 function quotationClient(){return window.KeySuiteAuth?.getClient?.()||null}
 function cleanQuoteDocument(q={}){
+ if(q.summaryOnly)throw new Error('Load the full quotation document before saving or revising.');
  const clean={...q};
  // Remote/list RPC wrappers can expose storage-row identity beside the quotation payload.
  // Never send those aliases back through a save or copy: a revision must be a brand-new logical row.
@@ -423,11 +424,35 @@ function compactQuotationBackup(rows=[]){
 function cacheSecureQuotes(rows){
  const deduped=dedupeQuotationRows(rows);secureQuotes=visibleQuotationRows(deduped.rows);
  try{
-  const backup=compactQuotationBackup(secureQuotes);
-  localStorage.removeItem('ks_quotes_backup_v236');
-  store.set(QUOTATION_BACKUP_KEY,backup);quotationCacheError=''
- }catch(error){quotationCacheError=String(error?.message||error);console.warn('Secure quotation history is live, but the compact browser backup could not be updated.',error)}
+  const existing=cachedQuotationRows().filter(q=>!q.summaryOnly),full=secureQuotes.filter(q=>!q.summaryOnly);
+  const byId=new Map(existing.map(q=>[String(q.id),q]));
+  for(const q of full){const old=byId.get(String(q.id));if(!old||quotationHistoryUpdatedTimestamp(q)>=quotationHistoryUpdatedTimestamp(old))byId.set(String(q.id),q)}
+  // Never remove older/unsynchronised backups to fit a page. If storage is full, retain the previous backup.
+  const backup=[...byId.values()].map(q=>compactQuotationBackupValue(q));
+  store.set(QUOTATION_BACKUP_KEY,backup);quotationCacheError='';
+ }catch(error){quotationCacheError=String(error?.message||error);console.warn('Quotation backup retained; update could not be stored.',error)}
  return secureQuotes
+}
+let quotationHistoryService=null,historyCursor=null,historyCursorStack=[],historyRequestSerial=0,historyFilterTimer,historyLoadedScope='';
+function quotationHistoryApi(){
+ if(!quotationHistoryService)quotationHistoryService=new window.KeySuiteQuotationHistoryV50087(()=>({client:quotationClient(),company:currentCompanyId(),email:currentEmail()}));
+ return quotationHistoryService;
+}
+function historyServerState(){return quotationSyncMode==='supabase'?quotationHistoryService?.state:null}
+async function ensureHistoryDocument(id){
+ const q=quotes().find(row=>String(row.id)===String(id));
+ if(quotationSyncMode!=='supabase'){
+  if(q&&!q.summaryOnly)return q;
+  throw new Error('This quotation document is not in the local backup. Retry when Supabase is available.');
+ }
+ const result=await quotationHistoryApi().document(id,q?.no||''),full={...normalizeRemoteQuote(result),companyId:currentCompanyId()};
+ if(!visibleQuotationRows([full]).length)throw new Error('Quotation access is not permitted.');
+ cacheSecureQuotes([full,...quotes().filter(row=>String(row.id)!==String(full.id))]);return full;
+}
+function scheduleHistoryFilter(){
+ historyCursor=null;historyCursorStack=[];clearTimeout(historyFilterTimer);document.querySelectorAll('#historyPagination button').forEach(button=>button.disabled=true);
+ if(!quotationClient()){refreshQuotes();return}
+ historyFilterTimer=setTimeout(()=>loadSecureQuotes(),250);
 }
 function isMissingRpc(error,name){const text=String(error?.message||error||'').toLowerCase();return text.includes(String(name||'').toLowerCase())&&(text.includes('not found')||text.includes('does not exist')||text.includes('schema cache'))}
 async function rpcSaveQuotation(client,payload){
@@ -469,93 +494,58 @@ async function saveQuoteRemote(q,{quiet=false}={}){
  if(response?.status==='conflict')throw new Error('Quotation reference '+payload.no+' is already used. Choose an unused reference.');
  const savedPayload=response?.status==='saved'?(response.saved||payload):(response||payload),savedNo=canonicalQuotationNumber(savedPayload?.no)||canonicalQuotationNumber(payload.no);
  let saved={...normalizeRemoteQuote(savedPayload),id:payload.id,no:savedNo,saveOperation:response?.operation||'',numberAdjustedFrom};
- // Re-read secure history after a save so remoteStorageId is taken from the actual database row,
- // while the logical quotation ID remains the exact ID of the version that was saved.
- let refreshed;
- try{refreshed=await listRemoteQuotes(client)}catch(error){
-  // The authenticated RPC commits atomically and returns its saved document.
-  // History availability is independent of that commit acknowledgement.
-  if(response?.status!=='saved'||!response.saved||String(savedPayload.id)!==String(payload.id)||!savedNo)throw error;
-  quotationSyncError='Quotation saved securely; history refresh is temporarily unavailable. Retry history refresh.';
-  cacheSecureQuotes([saved,...(secureQuotes||[])]);renderQuotationHistoryNotice();refreshQuotes();return saved;
+ if(response?.status!=='saved'||!response.saved||String(savedPayload.id)!==String(payload.id)||!savedNo){
+  const error=new Error('The database did not confirm this quotation save. Your draft is retained; retry Save.');error.code='quotation_save_unconfirmed';throw error;
  }
- const remote=(refreshed.data||[]).map(normalizeRemoteQuote);
- const exact=remote.find(item=>String(item.id)===String(payload.id))||remote.find(item=>canonicalQuotationNumber(item.no)===savedNo);
- if(!exact){const error=new Error('The database did not confirm this quotation save. Your draft is retained; please retry.');error.code='quotation_save_unconfirmed';throw error}
- saved={...exact,saveOperation:saved.saveOperation,numberAdjustedFrom:saved.numberAdjustedFrom};cacheSecureQuotes(remote);
- refreshQuotes();return saved
+ cacheSecureQuotes([saved,...quotes().filter(row=>String(row.id)!==String(saved.id))]);
+ historyCursor=null;historyCursorStack=[];await loadSecureQuotes();refreshQuotes();return saved
 }
+
 function purgeDeletedQuoteCaches(id,no=''){
  const logical=String(id||''),canonicalNo=canonicalQuotationNumber(no),keep=q=>String(q?.id||'')!==logical&&(!canonicalNo||canonicalQuotationNumber(q?.no)!==canonicalNo);
  const local=store.get('ks_quotes',[]),backup=store.get(QUOTATION_BACKUP_KEY,[]);
  if(Array.isArray(local))store.set('ks_quotes',local.filter(keep));
  if(Array.isArray(backup))store.set(QUOTATION_BACKUP_KEY,backup.filter(keep));
+ const summaryKey=`ks_history_summary_v50087:${currentCompanyId()}|${currentEmail()}`,summary=store.get(summaryKey,[]);if(Array.isArray(summary))store.set(summaryKey,summary.filter(keep));
  if(Array.isArray(secureQuotes))secureQuotes=secureQuotes.filter(keep);
  return keep
 }
 async function deleteQuoteRemote(id,metadata={}){
- const client=quotationClient();if(!client||quotationSyncMode!=='supabase')return;
- const quote=metadata.quote||quotes().find(q=>String(q.id)===String(id)),targetNo=canonicalQuotationNumber(metadata.no||quote?.no),companyId=currentCompanyId();
- let remote=[];
- try{const before=await listRemoteQuotes(client);remote=(before.data||[]).map(normalizeRemoteQuote)}catch(error){console.warn('Quotation delete pre-check was skipped.',error)}
- const matches=remote.filter(q=>String(q.id)===String(id)||(targetNo&&canonicalQuotationNumber(q.no)===targetNo));
- const targets=matches.length?matches:[quote||{id,remoteStorageId:id,no:targetNo}];
- const seen=new Set();
- for(const target of targets){
-  const logicalId=String(target?.id||id),remoteId=String(target?.remoteStorageId||logicalId);const key=`${logicalId}|${remoteId}`;if(seen.has(key))continue;seen.add(key);
-  const result=await client.rpc('keysuite_delete_quotation_v42502',{p_company_id:companyId,p_logical_id:logicalId,p_legacy_id:remoteId,p_quotation_no:targetNo||canonicalQuotationNumber(target?.no)});
-  if(result.error)throw result.error;
- }
- let refreshed=await listRemoteQuotes(client),remaining=(refreshed.data||[]).map(normalizeRemoteQuote);
- let survivors=remaining.filter(q=>String(q.id)===String(id)||(targetNo&&canonicalQuotationNumber(q.no)===targetNo));
- for(const target of survivors){
-  const remoteId=String(target.remoteStorageId||'');if(!remoteId)continue;
-  const legacy=await client.rpc('keysuite_delete_quotation_v42502',{p_company_id:companyId,p_logical_id:String(target.id||id),p_legacy_id:remoteId,p_quotation_no:targetNo||canonicalQuotationNumber(target.no)});
-  if(legacy.error)throw legacy.error;
- }
- if(survivors.length){refreshed=await listRemoteQuotes(client);remaining=(refreshed.data||[]).map(normalizeRemoteQuote);survivors=remaining.filter(q=>String(q.id)===String(id)||(targetNo&&canonicalQuotationNumber(q.no)===targetNo))}
- if(survivors.length)throw new Error(`Quotation ${targetNo||id} is still present in secure history after delete.`);
- purgeDeletedQuoteCaches(id,targetNo);cacheSecureQuotes(remaining.filter(q=>String(q.id)!==String(id)&&(!targetNo||canonicalQuotationNumber(q.no)!==targetNo)))
-}
-async function cleanupRemoteQuotationDuplicates(client,rows=[]){
- if(currentRole()!=='owner')return 0;const {duplicates}=dedupeQuotationRows(rows);if(!duplicates.length)return 0;let removed=0;
- for(const q of duplicates){const remoteId=q.remoteStorageId||q.id;if(!remoteId)continue;const result=await client.rpc('keysuite_delete_quotation_v42502',{p_company_id:currentCompanyId(),p_logical_id:String(q.id||''),p_legacy_id:String(remoteId),p_quotation_no:canonicalQuotationNumber(q.no)});if(result.error){console.warn('Duplicate quotation cleanup skipped',q.no,result.error);continue}removed++}
- return removed
-}
-async function listRemoteQuotes(client){
- const companyId=currentCompanyId();
- if(window.KeySuitePermissions?.quotationLevel?.()==='none')return {data:[],error:null};
- const v42919=await client.rpc('keysuite_list_quotations_v42919',{p_company_id:companyId});
- if(!v42919.error)return v42919;
- if(!isMissingRpc(v42919.error,'keysuite_list_quotations_v42919'))throw v42919.error;
- const v42916=await client.rpc('keysuite_list_quotations_v42916',{p_company_id:companyId});
- if(!v42916.error)return v42916;
- if(!isMissingRpc(v42916.error,'keysuite_list_quotations_v42916'))throw v42916.error;
- const v409=await client.rpc('keysuite_list_quotations_v409',{p_company_id:companyId});
- if(!v409.error)return v409;
- if(!isMissingRpc(v409.error,'keysuite_list_quotations_v409'))throw v409.error;
- const modern=await client.rpc('keysuite_list_quotations_v408');
- if(!modern.error)return modern;
- const legacy=await client.rpc('keysuite_list_quotations_v236',{p_year:null,p_month:null,p_customer:null,p_user_email:null});
- if(!legacy.error)return legacy;
- const error=new Error(`V4.09 history: ${v409.error?.message||'company-bound RPC unavailable'}; V4.08: ${modern.error?.message||'compatibility RPC unavailable'}; legacy: ${legacy.error?.message||'quotation RPC unavailable'}`);error.v409=v409.error;error.modern=modern.error;error.legacy=legacy.error;throw error
+ const client=quotationClient();if(!client||quotationSyncMode!=='supabase')throw new Error('Secure history must be available before deleting.');
+ const quote=metadata.quote||quotes().find(q=>String(q.id)===String(id));
+ const targetNo=canonicalQuotationNumber(metadata.no||quote?.no);
+ const result=await client.rpc('keysuite_delete_quotation_v42502',{p_company_id:currentCompanyId(),p_logical_id:String(id),p_legacy_id:String(quote?.remoteStorageId||id),p_quotation_no:targetNo});
+ if(result.error)throw result.error;
+ purgeDeletedQuoteCaches(id,targetNo);await loadSecureQuotes();
 }
 function cachedQuotationRows(){const backup=store.get(QUOTATION_BACKUP_KEY,[]),legacyBackup=store.get('ks_quotes_backup_v236',[]),local=store.get('ks_quotes',[]),rows=[...(Array.isArray(backup)?backup:[]),...(Array.isArray(legacyBackup)?legacyBackup:[]),...(Array.isArray(local)?local:[])];return dedupeQuotationRows(rows).rows}
 async function loadSecureQuotes(){
- const client=quotationClient();quotationHistoryLoading=true;renderQuotationHistoryNotice();
- if(!client){quotationSyncMode='local';quotationSyncError='Secure quotation connection is unavailable. Showing the latest saved quotation cache.';cacheSecureQuotes(cachedQuotationRows());quotationHistoryLoading=false;renderQuotationHistoryNotice();refreshQuotes();refreshNewQuotationReference();return secureQuotes}
+ const serial=++historyRequestSerial,scope=`${currentCompanyId()}|${currentEmail()}`,client=quotationClient();quotationHistoryLoading=true;renderQuotationHistoryNotice();renderHistoryPagination();
  try{
-  const result=await listRemoteQuotes(client);
-  let refreshed=result,remote=(refreshed.data||[]).map(normalizeRemoteQuote);
-  const removed=await cleanupRemoteQuotationDuplicates(client,remote);if(removed){refreshed=await listRemoteQuotes(client);remote=(refreshed.data||[]).map(normalizeRemoteQuote);console.info(`[KeySuite V4.08.05] Removed ${removed} duplicate quotation record${removed===1?'':'s'}.`)}
-  quotationSyncMode='supabase';quotationSyncError='';cacheSecureQuotes(remote);quotationHistoryLoading=false;renderQuotationHistoryNotice();refreshQuotes();refreshNewQuotationReference();return secureQuotes
- }catch(error){console.error('Secure quotations unavailable',error);quotationSyncMode='error';quotationSyncError=String(error?.message||error);cacheSecureQuotes(cachedQuotationRows());quotationHistoryLoading=false;renderQuotationHistoryNotice();refreshQuotes();refreshNewQuotationReference();return secureQuotes}
+  if(!client)throw new Error('Secure quotation connection is unavailable.');
+  const result=await quotationHistoryApi().load(quotationHistoryFilters(),historyCursor);
+  if(!result||serial!==historyRequestSerial||scope!==`${currentCompanyId()}|${currentEmail()}`)return secureQuotes;
+  quotationSyncMode='supabase';quotationSyncError='';
+  const documents=(historyLoadedScope===scope?secureQuotes||[]:[]).filter(q=>!q.summaryOnly&&visibleQuotationRows([q]).length);historyLoadedScope=scope;
+  const fullIds=new Set(documents.map(q=>String(q.id)));
+  secureQuotes=visibleQuotationRows([...documents,...dedupeQuotationRows([...result.rows,...result.recent]).rows.filter(q=>!fullIds.has(String(q.id)))]);
+  // Summary backup is separate: it cannot overwrite full local documents or pending drafts.
+  try{const key=`ks_history_summary_v50087:${scope}`,old=store.get(key,[]),byNo=new Map(old.map(q=>[canonicalQuotationNumber(q.no)||q.id,q]));for(const q of [...result.rows,...result.recent])byNo.set(canonicalQuotationNumber(q.no)||q.id,q);store.set(key,[...byNo.values()]);store.set(`ks_history_sync_v50087:${scope}`,new Date().toISOString());quotationCacheError=''}catch(error){quotationCacheError=String(error.message||error)}
+ }catch(error){
+  if(serial!==historyRequestSerial||scope!==`${currentCompanyId()}|${currentEmail()}`)return secureQuotes;
+  quotationSyncMode='error';quotationSyncError=String(error?.message||error);
+  const summary=store.get(`ks_history_summary_v50087:${scope}`,[]),full=cachedQuotationRows(),ids=new Set(full.map(q=>String(q.id)));
+  secureQuotes=visibleQuotationRows([...full,...summary.filter(q=>!ids.has(String(q.id)))]);
+ }finally{
+  if(serial===historyRequestSerial){quotationHistoryLoading=false;renderQuotationHistoryNotice();refreshQuotes();refreshNewQuotationReference()}
+ }
+ return secureQuotes;
 }
 function renderQuotationHistoryNotice(){
  const node=$('quotationHistoryNotice');if(!node)return;
  if(quotationHistoryLoading){node.textContent='Loading Supabase quotation history…';node.className='auth-message show info';return}
- if(quotationSyncError){node.innerHTML=`<span>Quotation History: Supabase sync unavailable — local backup shown. ${esc(quotationSyncError)}</span> <button type="button" class="btn secondary sync-retry-button" id="retryQuotationHistorySync">Retry</button>`;node.className='auth-message show';$('retryQuotationHistorySync')?.addEventListener('click',()=>loadSecureQuotes());return}
- if(quotationCacheError){node.textContent=`Quotation History is live from Supabase. This browser could not update its local backup: ${quotationCacheError}`;node.className='auth-message show info';return}
+ if(quotationSyncError){const last=store.get(`ks_history_sync_v50087:${currentCompanyId()}|${currentEmail()}`,'');node.innerHTML=`<span>Supabase history unavailable — local backup may be incomplete or outdated. ${last?`Last successful history retrieval: ${esc(new Date(last).toLocaleString())}. `:''}${esc(quotationSyncError)}</span> <button type="button" class="btn secondary sync-retry-button" id="retryQuotationHistorySync">Retry</button>`;node.className='auth-message show';$('retryQuotationHistorySync')?.addEventListener('click',()=>{historyCursor=null;historyCursorStack=[];loadSecureQuotes()});return}
+ if(quotationCacheError){node.textContent=`Quotation History is live from Supabase. Local backup update failed: ${quotationCacheError}`;node.className='auth-message show info';return}
  node.textContent='';node.className='auth-message'
 }
 const HISTORY_MONTHS=[['01','January'],['02','February'],['03','March'],['04','April'],['05','May'],['06','June'],['07','July'],['08','August'],['09','September'],['10','October'],['11','November'],['12','December']];
@@ -566,7 +556,7 @@ function historyPeriodSummary(){const values=checkedHistoryPeriods(),summary=$('
 function quotationHistoryFilters(){return {periods:checkedHistoryPeriods(),search:String($('historySearch')?.value||'').trim().toLowerCase(),customer:String($('historyCustomer')?.value||'').trim().toLowerCase(),user:canManageQuotationHistory()?String($('historyUser')?.value||'').trim().toLowerCase():currentEmail()}}
 function quotationHistorySearchText(q){
  const models=(Array.isArray(q?.items)?q.items:[]).flatMap(item=>[item?.model,item?.product,item?.productFamily,item?.product_family]).filter(Boolean);
- return [q?.project,q?.project2,q?.projectName,q?.project_name,q?.no,q?.quotationNo,q?.quotation_no,quoteDisplayCustomerName(q),q?.model,q?.product,q?.productFamily,...models].filter(Boolean).join(' ').toLowerCase()
+ return [q?.searchText,q?.project,q?.project2,q?.projectName,q?.project_name,q?.no,q?.quotationNo,q?.quotation_no,quoteDisplayCustomerName(q),q?.model,q?.product,q?.productFamily,...models].filter(Boolean).join(' ').toLowerCase()
 }
 function quotationHistoryTimestamp(q){const raw=q?.createdAt||q?.created_at||q?.updatedAt||q?.updated_at||q?.date||'';const value=Date.parse(raw);return Number.isFinite(value)?value:0}
 function quotationHistoryUpdatedTimestamp(q){const raw=q?.updatedAt||q?.updated_at||q?.createdAt||q?.created_at||q?.date||'';const value=Date.parse(raw);return Number.isFinite(value)?value:0}
@@ -581,6 +571,7 @@ function compareQuotationHistoryNewest(a,b){
  return quotationHistoryUpdatedTimestamp(b)-quotationHistoryUpdatedTimestamp(a)
 }
 function filteredQuotes(rows=quotes()){
+ const server=historyServerState();if(server)return server.rows.map(normalizeRemoteQuote);
  const filter=quotationHistoryFilters();return visibleQuotationRows(rows).filter(q=>{const period=String(quotationHistoryDate(q)).slice(0,7),customer=quoteDisplayCustomerName(q).toLowerCase(),creator=quoteCreatorEmail(q),searchText=quotationHistorySearchText(q);return (!filter.periods.length||filter.periods.includes(period))&&(!filter.search||searchText.includes(filter.search))&&(!filter.customer||customer.includes(filter.customer))&&(!filter.user||creator===filter.user)}).slice().sort(compareQuotationHistoryNewest)
 }
 function historyYearMonthGroup(year,selected){
@@ -592,12 +583,12 @@ function historyYearMonthGroup(year,selected){
 }
 function populateQuotationHistoryFilters(rows=quotes()){
  const box=$('historyYearMonthOptions'),user=$('historyUser'),userWrap=$('historyUserWrap');if(!box)return;
- const selected=new Set(checkedHistoryPeriods()),years=[...new Set(rows.map(q=>String(quotationHistoryDate(q)).slice(0,4)).filter(v=>/^\d{4}$/.test(v)))].sort((a,b)=>b.localeCompare(a));
+ const selected=new Set(checkedHistoryPeriods()),years=[...new Set([...(historyServerState()?.facets?.years||[]),...selected.values()].map(v=>String(v).slice(0,4)).concat(rows.map(q=>String(quotationHistoryDate(q)).slice(0,4))).filter(v=>/^\d{4}$/.test(v)))].sort((a,b)=>b.localeCompare(a));
  if(!historyYearAccordionInitialized){const currentYear=String(new Date().getFullYear());if(years.length)historyExpandedYears.add(years.includes(currentYear)?currentYear:years[0]);historyYearAccordionInitialized=true}
  box.innerHTML=years.map(year=>historyYearMonthGroup(year,selected)).join('')||'<div class="muted">No quotation dates available.</div>';
  box.querySelectorAll('details[data-history-year-group]').forEach(group=>group.addEventListener('toggle',()=>{const year=String(group.dataset.historyYearGroup||'');if(!year)return;if(group.open)historyExpandedYears.add(year);else historyExpandedYears.delete(year)}));
  historyPeriodSummary();
- if(userWrap)userWrap.style.display=canManageQuotationHistory()?'grid':'none';if(user&&canManageQuotationHistory()){const selectedUser=user.value,directory=new Map((window.KEYSUITE_SECURE_DATA?.users||[]).map(row=>[String(row.email||'').toLowerCase(),row.name||row.email]));rows.forEach(q=>{const email=quoteCreatorEmail(q);if(email&&!directory.has(email))directory.set(email,quoteCreatorName(q))});user.innerHTML='<option value="">All Users</option>'+[...directory.entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1]))).map(([email,name])=>`<option value="${esc(email)}">${esc(name)}${name!==email?` · ${esc(email)}`:''}</option>`).join('');user.value=directory.has(selectedUser)?selectedUser:''}
+ if(userWrap)userWrap.style.display=canManageQuotationHistory()?'grid':'none';if(user&&canManageQuotationHistory()){const selectedUser=user.value,directory=new Map((window.KEYSUITE_SECURE_DATA?.users||[]).map(row=>[String(row.email||'').toLowerCase(),row.name||row.email]));[...rows,...(historyServerState()?.facets?.users||[]).map(u=>({createdByEmail:u.email,createdByName:u.name}))].forEach(q=>{const email=quoteCreatorEmail(q);if(email&&!directory.has(email))directory.set(email,quoteCreatorName(q))});user.innerHTML='<option value="">All Users</option>'+[...directory.entries()].sort((a,b)=>String(a[1]).localeCompare(String(b[1]))).map(([email,name])=>`<option value="${esc(email)}">${esc(name)}${name!==email?` · ${esc(email)}`:''}</option>`).join('');user.value=directory.has(selectedUser)?selectedUser:''}
 }
 function normalizeCustomerRecord(row){
  let contacts=row.contacts||[];if(typeof contacts==='string'){try{contacts=JSON.parse(contacts)}catch(_){contacts=[]}}
@@ -927,7 +918,9 @@ function quoteRevisionNumberFromNo(value){const match=String(value||'').match(/(
 function baseQuotationNumber(value){return String(value||'').trim().replace(/-r\d+\s*$/i,'').replace(/\s*\(r\d+\)\s*$/i,'').replace(/-v\d+\s*$/i,'').trim()}
 async function reviseQuotation(){
  const source=currentQuote();if(!source||!isQuotationSealed())return;
- const baseNo=baseQuotationNumber(source.no),number=nextRevisionNumber(baseNo),newNo=`${baseNo}-R${number}`,today=localCalendarDate();
+ const baseNo=baseQuotationNumber(source.no);
+ if(quotationSyncMode==='supabase'){try{const siblings=(await quotationHistoryApi().matching(baseNo)).map(normalizeRemoteQuote);const fullIds=new Set(quotes().filter(q=>!q.summaryOnly).map(q=>String(q.id)));secureQuotes=[...quotes(),...siblings.filter(q=>!fullIds.has(String(q.id))&&!quotes().some(x=>String(x.id)===String(q.id)))];}catch(error){alert('Cannot confirm the latest revision number: '+(error.message||error));return}}
+ const number=nextRevisionNumber(baseNo),newNo=`${baseNo}-R${number}`,today=localCalendarDate();
  const rootQuote=quotes().find(q=>canonicalQuotationNumber(q.no)===canonicalQuotationNumber(baseNo));
  const rootId=rootQuote?.id||source.revisionRootId||source.revisionOf||source.id;
  const now=new Date().toISOString(),copyId=newUuid(),sourceDocument=cleanQuoteDocument(JSON.parse(JSON.stringify(source)));
@@ -1652,6 +1645,8 @@ async function saveQuote(options={}){
  if(!options.silent){const operation=committed.saveOperation||(isFirstSave?'created':'updated'),adjusted=committed.numberAdjustedFrom?`\nConcurrent number ${committed.numberAdjustedFrom} was already taken; KeySuite assigned ${committed.no}.`:'';alert(`${committed.documentType} ${committed.no} ${operation==='inserted'||operation==='created'?'created':'updated'} successfully.${adjusted}`)}return true
 }
 function loadQuote(id){
+ const summary=quotes().find(x=>String(x.id)===String(id));
+ if(summary?.summaryOnly)return ensureHistoryDocument(id).then(q=>loadQuote(q.id)).catch(error=>alert(error.message||error));
  const q=quotes().find(x=>x.id===id);if(!q||!visibleQuotationRows([q]).length)return;quotationSessionId=q.assemblySessionId||`quote:${id}`;window.KeySuiteAssembly?.resetForNewQuotation?.();editingQuoteId=id;quotationStatus=q.status||'saved';quotationRevisionOf=q.revisionOf||'';quotationRevisionRootId=q.revisionRootId||'';quotationRevisionNumber=Number(q.revisionNumber||0);quotationAudit=Array.isArray(q.audit)?q.audit:[];
  quotationPricingCustomerId=q.pricingCustomerId||q.customerId||'';
  quotationPricingCustomerSnapshot=customerSnapshot(q.pricingCustomerSnapshot||customers().find(x=>x.id===quotationPricingCustomerId)||null);
@@ -1668,7 +1663,7 @@ function loadQuote(id){
  loadQuotationAdjustments(q.adjustments);
  const items=q.items?.length?q.items:[{model:q.model||'',qty:q.qty||1,unitPrice:q.unitPrice||0,description:q.description||''}];setQuoteItems(items);showPage('quotation');setQuoteCustomerCollapsed(true);window.KeySuitePricing?.selectCustomer?.(quotationPricingCustomerId,false);syncStartCustomer(quotationPricingCustomerId);updateQuotationStateUi()
 }
-function deleteQuote(id){if(!canDeleteQuotationHistory()){alert('Your role is not allowed to delete quotation history.');return}if(!confirm('Delete this quotation?'))return;const target=quotes().find(x=>String(x.id)===String(id)),targetNo=canonicalQuotationNumber(target?.no);purgeDeletedQuoteCaches(id,targetNo);deleteQuoteRemote(id,{quote:target,no:targetNo}).catch(error=>{console.error(error);alert(`Quotation could not be deleted from secure history: ${error.message||error}`);loadSecureQuotes()});refreshAll()}
+function deleteQuote(id){if(!canDeleteQuotationHistory()){alert('Your role is not allowed to delete quotation history.');return}if(!confirm('Delete this quotation?'))return;const target=quotes().find(x=>String(x.id)===String(id)),targetNo=canonicalQuotationNumber(target?.no);deleteQuoteRemote(id,{quote:target,no:targetNo}).catch(error=>{console.error(error);alert(`Quotation could not be deleted from secure history: ${error.message||error}`);loadSecureQuotes()});refreshAll()}
 function newQuote(){
  quotationSessionId=newUuid();window.KeySuiteAssembly?.resetForNewQuotation?.();window.KeySuiteTemplates?.resetSelection?.();
  editingQuoteId=null;quotationStatus='new';quotationRevisionOf='';quotationRevisionRootId='';quotationRevisionNumber=0;quotationAudit=[];quotationPricingCustomerId='';quotationPricingCustomerSnapshot=null;
@@ -1680,11 +1675,16 @@ function newQuote(){
 }
 function quoteDisplayCustomerName(q){return q.printedCompany||q.customerName||q.customer_name||q.company||customerName(q.customerId)||q.pricingCustomerSnapshot?.company||customerName(q.pricingCustomerId)||''}
 function refreshQuotes(){
- const all=quotes();populateQuotationHistoryFilters(all);const arr=filteredQuotes(all).slice().sort(compareQuotationHistoryNewest),showUser=canManageQuotationHistory(),canDelete=canDeleteQuotationHistory(),userHead=$('historyUserHead');if(userHead)userHead.style.display=showUser?'table-cell':'none';
- $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.items?.length||1,userCell=showUser?`<td>${esc(quoteCreatorName(q))}</td>`:'',sealed=String(q.status||'').toLowerCase()==='sealed',pdf=sealed?`<button class="btn quotation-history-pdf" data-pdf-q="${q.id}" title="PDF — sealed quotation">PDF</button>`:'',del=canDelete?`<button class="btn danger" data-del-q="${q.id}">Delete</button>`:'';return `<tr><td>${esc(q.no)}</td><td>${esc(quotationHistoryDate(q))}${q.revisionOf||quoteRevisionNumberFromNo(q.no)?`<small style="display:block">Original: ${esc(q.originalDate||q.date)}</small>`:''}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(quoteDisplayCustomerName(q))}</td>${userCell}<td>${itemCount}</td><td>${money(q.total)}</td><td><div class="quotation-history-actions"><span class="quotation-history-pdf-slot">${pdf}</span><button class="btn secondary" data-open-q="${q.id}">Open</button>${del}</div></td></tr>`}).join('')||`<tr><td colspan="${showUser?8:7}" class="muted">No quotations match the selected filters.</td></tr>`;
- document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>loadQuote(b.dataset.openQ));document.querySelectorAll('[data-pdf-q]').forEach(b=>b.onclick=()=>openHistoryQuotationPdf(b.dataset.pdfQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));
- $('recentQuotes').innerHTML=all.slice().sort(compareQuotationHistoryNewest).slice(0,5).map(q=>{const first=q.items?.[0]?.model||q.model||'';return `<tr><td>${esc(q.no)}</td><td>${esc(quoteDisplayCustomerName(q))}</td><td>${esc(first)}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';
- if($('mCustomers'))$('mCustomers').textContent=customers().length;if($('mQuotes'))$('mQuotes').textContent=all.length;if($('mValue'))$('mValue').textContent=money(all.reduce((sum,q)=>sum+q.total,0));if($('mPending'))$('mPending').textContent=all.length;renderQuotationHistoryNotice();
+ const all=quotes();populateQuotationHistoryFilters(all);const arr=filteredQuotes(all),showUser=canManageQuotationHistory(),canDelete=canDeleteQuotationHistory(),userHead=$('historyUserHead');if(userHead)userHead.style.display=showUser?'table-cell':'none';
+ $('quoteRows').innerHTML=arr.map(q=>{const itemCount=q.itemCount??(q.items?.length||1),userCell=showUser?`<td>${esc(quoteCreatorName(q))}</td>`:'',sealed=String(q.status||'').toLowerCase()==='sealed',pdf=sealed?`<button class="btn quotation-history-pdf" data-pdf-q="${esc(q.id)}" title="PDF — sealed quotation">PDF</button>`:'',del=canDelete?`<button class="btn danger" data-del-q="${esc(q.id)}">Delete</button>`:'';return `<tr><td>${esc(q.no)}</td><td>${esc(quotationHistoryDate(q))}${q.revisionOf||quoteRevisionNumberFromNo(q.no)?`<small style="display:block">Original: ${esc(q.originalDate||q.date)}</small>`:''}</td><td>${esc(q.documentType||'Quotation')}</td><td>${esc(quoteDisplayCustomerName(q))}</td>${userCell}<td>${itemCount}</td><td>${money(q.total)}</td><td><div class="quotation-history-actions"><span class="quotation-history-pdf-slot">${pdf}</span><button class="btn secondary" data-open-q="${esc(q.id)}">Open</button>${del}</div></td></tr>`}).join('')||`<tr><td colspan="${showUser?8:7}" class="muted">No quotations match the selected filters.</td></tr>`;
+ document.querySelectorAll('[data-open-q]').forEach(b=>b.onclick=()=>{if(quotationSyncMode==='supabase')ensureHistoryDocument(b.dataset.openQ).then(q=>loadQuote(q.id)).catch(e=>alert(e.message||e));else loadQuote(b.dataset.openQ)});document.querySelectorAll('[data-pdf-q]').forEach(b=>b.onclick=()=>openHistoryQuotationPdf(b.dataset.pdfQ));document.querySelectorAll('[data-del-q]').forEach(b=>b.onclick=()=>deleteQuote(b.dataset.delQ));
+ $('recentQuotes').innerHTML=(historyServerState()?.recent||all.slice().sort(compareQuotationHistoryNewest).slice(0,5)).map(q=>{const first=q.items?.[0]?.model||q.model||'';return `<tr><td>${esc(q.no)}</td><td>${esc(quoteDisplayCustomerName(q))}</td><td>${esc(first)}</td><td>${money(q.total)}</td><td>${esc(q.documentType||'Quotation')}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No quotations yet.</td></tr>';
+ if($('mCustomers'))$('mCustomers').textContent=customers().length;if($('mQuotes'))$('mQuotes').textContent=historyServerState()?.metrics?.count??all.length;if($('mValue'))$('mValue').textContent=money(historyServerState()?.metrics?.value??all.reduce((sum,q)=>sum+q.total,0));if($('mPending'))$('mPending').textContent=historyServerState()?.metrics?.count??all.length;renderQuotationHistoryNotice();renderHistoryPagination();
+}
+function renderHistoryPagination(){
+ const body=$('quoteRows');if(!body)return;let nav=$('historyPagination');if(!nav){nav=document.createElement('div');nav.id='historyPagination';nav.style.cssText='display:flex;align-items:center;gap:12px;padding:14px 0';body.closest('table').after(nav)}
+ const server=historyServerState();nav.hidden=!server;if(!server)return;nav.innerHTML=`<button type="button" class="btn secondary" data-history-prev ${!historyCursorStack.length||quotationHistoryLoading?'disabled':''}>Previous</button><span>Page ${historyCursorStack.length+1} · Up to 50 quotations per page</span><button type="button" class="btn secondary" data-history-next ${!server.next_cursor||quotationHistoryLoading?'disabled':''}>Next</button>`;
+ nav.querySelector('[data-history-next]').onclick=()=>{historyCursorStack.push(historyCursor);historyCursor=server.next_cursor;loadSecureQuotes()};nav.querySelector('[data-history-prev]').onclick=()=>{historyCursor=historyCursorStack.pop()??null;loadSecureQuotes()};
 }
 
 function updateConnectionAvailabilityFromSelection(selection){
@@ -2201,13 +2201,13 @@ function exportAllQuotationAndCurves(){
 }
 
 
-function openHistoryQuotationPdf(id){
- const quote=quotes().find(row=>String(row.id)===String(id));if(!quote)return;
+async function openHistoryQuotationPdf(id){
+ let quote;try{quote=await ensureHistoryDocument(id)}catch(error){alert(error.message||error);return}
  if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}
  loadQuote(quote.id);requestAnimationFrame(()=>setTimeout(()=>printCompleteQuotation({historySnapshot:true}),100));
 }
 function quotationPrintCss(){let css='';for(const sheet of [...document.styleSheets]){try{css+=[...sheet.cssRules].map(rule=>rule.cssText).join('\n')}catch(_){}}return css.replace(/@media\s+print/gi,'@media all').replace(/body\.print-complete\s+#printQuotationDocument/g,'#printQuotationDocument').replace(/body\.print-complete\s+\.app/g,'.app')}
-async function openHistoryQuotationPdfModal(id){const quote=quotes().find(row=>String(row.id)===String(id));if(!quote)return;if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}loadQuote(quote.id);await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,80)));buildPrintQuotation();document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});await Promise.all([...document.querySelectorAll('#printQuotationDocument img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));const customer=quotationExportCompany(),filename=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation'),css=quotationPrintCss(),content=$('printQuotationDocument').outerHTML;let dialog=$('keyhqPdfModal');if(!dialog){dialog=document.createElement('dialog');dialog.id='keyhqPdfModal';dialog.className='keyhq-pdf-modal';dialog.innerHTML='<header><div><small>KEYHQ · ORIGINAL KEYSUITE QUOTATION</small><h2 id="keyhqPdfTitle"></h2></div><div><button type="button" data-pdf-print>Print / Save as PDF</button><button type="button" data-pdf-close aria-label="Close">×</button></div></header><iframe title="Original KeySuite quotation print preview"></iframe><span class="keyhq-pdf-status"></span>';document.body.appendChild(dialog);const style=document.createElement('style');style.textContent='.keyhq-pdf-modal{position:fixed;inset:18px;z-index:7000;width:auto;height:auto;max-width:none;max-height:none;padding:0;border:1px solid #34556c;border-radius:14px;background:#0b1622;color:#eef8ff}.keyhq-pdf-modal::backdrop{background:#02060dcc}.keyhq-pdf-modal header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e2030}.keyhq-pdf-modal h2{margin:2px 0 0;font-size:14px}.keyhq-pdf-modal small{color:#8bd4e8;font-size:8px}.keyhq-pdf-modal header div:last-child{display:flex;gap:8px}.keyhq-pdf-modal button{border:0;border-radius:8px;padding:9px 12px;background:#c8ff66;color:#12200a;font-weight:900;cursor:pointer}.keyhq-pdf-modal [data-pdf-close]{background:#263d50;color:#fff}.keyhq-pdf-modal iframe{width:100%;height:calc(100% - 62px);border:0;background:#25282d}.keyhq-pdf-status{position:absolute;left:18px;bottom:8px;padding:5px 8px;border-radius:8px;background:#07111ddd;color:#dff8ff;font-size:10px;pointer-events:none}';document.head.appendChild(style);dialog.querySelector('[data-pdf-close]').onclick=()=>dialog.close()}const frame=dialog.querySelector('iframe'),status=dialog.querySelector('.keyhq-pdf-status'),print=dialog.querySelector('[data-pdf-print]');print.disabled=true;frame.onload=()=>{print.disabled=false};$('keyhqPdfTitle').textContent=filename;frame.srcdoc=`<!doctype html><meta charset="utf-8"><title>${esc(filename.replace(/\.pdf$/i,''))}</title><style>@page{size:A4;margin:0}${css}#printQuotationDocument{display:block!important}.print-page{display:block!important}@media screen{html,body{background:#25282d!important}body{display:block!important;margin:0!important;padding:24px!important;box-sizing:border-box}#printQuotationDocument{width:210mm;margin:0 auto!important;background:transparent!important}.print-page{background:#fff!important;margin:0 auto 18px!important;box-shadow:0 4px 24px #0006}}</style>${content}`;print.onclick=()=>{frame.contentWindow?.focus();frame.contentWindow?.print()};status.textContent='Original sealed quotation · permissions preserved';dialog.showModal()}
+async function openHistoryQuotationPdfModal(id){let quote;try{quote=await ensureHistoryDocument(id)}catch(error){alert(error.message||error);return}if(String(quote.status||'').toLowerCase()!=='sealed'){alert('PDF is available only for Sealed quotations.');return}loadQuote(quote.id);await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,80)));buildPrintQuotation();document.querySelectorAll('#printQuotationDocument .print-company img,#printQuotationDocument .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo)img.src=KEYLARGO_LOGO_DATA});await Promise.all([...document.querySelectorAll('#printQuotationDocument img')].map(img=>img.decode?.().catch(()=>{})||Promise.resolve()));const customer=quotationExportCompany(),filename=quotationPdfFilename(customer,$('qDate').value,$('quoteNo').value||'Quotation'),css=quotationPrintCss(),content=$('printQuotationDocument').outerHTML;let dialog=$('keyhqPdfModal');if(!dialog){dialog=document.createElement('dialog');dialog.id='keyhqPdfModal';dialog.className='keyhq-pdf-modal';dialog.innerHTML='<header><div><small>KEYHQ · ORIGINAL KEYSUITE QUOTATION</small><h2 id="keyhqPdfTitle"></h2></div><div><button type="button" data-pdf-print>Print / Save as PDF</button><button type="button" data-pdf-close aria-label="Close">×</button></div></header><iframe title="Original KeySuite quotation print preview"></iframe><span class="keyhq-pdf-status"></span>';document.body.appendChild(dialog);const style=document.createElement('style');style.textContent='.keyhq-pdf-modal{position:fixed;inset:18px;z-index:7000;width:auto;height:auto;max-width:none;max-height:none;padding:0;border:1px solid #34556c;border-radius:14px;background:#0b1622;color:#eef8ff}.keyhq-pdf-modal::backdrop{background:#02060dcc}.keyhq-pdf-modal header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#0e2030}.keyhq-pdf-modal h2{margin:2px 0 0;font-size:14px}.keyhq-pdf-modal small{color:#8bd4e8;font-size:8px}.keyhq-pdf-modal header div:last-child{display:flex;gap:8px}.keyhq-pdf-modal button{border:0;border-radius:8px;padding:9px 12px;background:#c8ff66;color:#12200a;font-weight:900;cursor:pointer}.keyhq-pdf-modal [data-pdf-close]{background:#263d50;color:#fff}.keyhq-pdf-modal iframe{width:100%;height:calc(100% - 62px);border:0;background:#25282d}.keyhq-pdf-status{position:absolute;left:18px;bottom:8px;padding:5px 8px;border-radius:8px;background:#07111ddd;color:#dff8ff;font-size:10px;pointer-events:none}';document.head.appendChild(style);dialog.querySelector('[data-pdf-close]').onclick=()=>dialog.close()}const frame=dialog.querySelector('iframe'),status=dialog.querySelector('.keyhq-pdf-status'),print=dialog.querySelector('[data-pdf-print]');print.disabled=true;frame.onload=()=>{print.disabled=false};$('keyhqPdfTitle').textContent=filename;frame.srcdoc=`<!doctype html><meta charset="utf-8"><title>${esc(filename.replace(/\.pdf$/i,''))}</title><style>@page{size:A4;margin:0}${css}#printQuotationDocument{display:block!important}.print-page{display:block!important}@media screen{html,body{background:#25282d!important}body{display:block!important;margin:0!important;padding:24px!important;box-sizing:border-box}#printQuotationDocument{width:210mm;margin:0 auto!important;background:transparent!important}.print-page{background:#fff!important;margin:0 auto 18px!important;box-shadow:0 4px 24px #0006}}</style>${content}`;print.onclick=()=>{frame.contentWindow?.focus();frame.contentWindow?.print()};status.textContent='Original sealed quotation · permissions preserved';dialog.showModal()}
 function encodeAscii(value){return new TextEncoder().encode(String(value))}
 function concatBytes(parts){const length=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(length);let offset=0;for(const part of parts){out.set(part,offset);offset+=part.length}return out}
 async function jpegFromPrintPage(page,css){const width=794,height=1123;
@@ -2305,11 +2305,11 @@ $('cancelCustomerEdit').onclick=cancelCustomerEdit;
 $('deleteCustomerBtn').onclick=()=>deleteCustomer($('customerId').value);
 $('editDetailCustomer').onclick=()=>editCustomer(viewedCustomerId);
 $('customerSearch').addEventListener('input',refreshCustomerList);
-['historySearch','historyCustomer','historyUser'].forEach(id=>$(id)?.addEventListener(id==='historyUser'?'change':'input',refreshQuotes));
-$('historyYearMonthOptions')?.addEventListener('change',event=>{if(!event.target.matches('input[data-history-period]'))return;historyPeriodSummary();refreshQuotes()});
-$('historyYearMonthOptions')?.addEventListener('click',event=>{const button=event.target.closest('[data-history-year-action]');if(!button)return;event.preventDefault();const checked=button.dataset.historyYearAction==='select',year=button.dataset.historyYear;document.querySelectorAll(`#historyYearMonthOptions input[data-history-year="${year}"]`).forEach(input=>input.checked=checked);historyPeriodSummary();refreshQuotes()});
-document.querySelectorAll('[data-history-period-action]').forEach(button=>button.addEventListener('click',()=>{const checked=button.dataset.historyPeriodAction==='select';document.querySelectorAll('#historyYearMonthOptions input[data-history-period]').forEach(input=>input.checked=checked);historyPeriodSummary();refreshQuotes()}));
-$('clearHistoryFilters')?.addEventListener('click',()=>{document.querySelectorAll('#historyYearMonthOptions input[data-history-period]').forEach(input=>input.checked=false);['historySearch','historyCustomer','historyUser'].forEach(id=>{const node=$(id);if(node)node.value=''});historyPeriodSummary();refreshQuotes()});
+['historySearch','historyCustomer','historyUser'].forEach(id=>$(id)?.addEventListener(id==='historyUser'?'change':'input',scheduleHistoryFilter));
+$('historyYearMonthOptions')?.addEventListener('change',event=>{if(!event.target.matches('input[data-history-period]'))return;historyPeriodSummary();scheduleHistoryFilter()});
+$('historyYearMonthOptions')?.addEventListener('click',event=>{const button=event.target.closest('[data-history-year-action]');if(!button)return;event.preventDefault();const checked=button.dataset.historyYearAction==='select',year=button.dataset.historyYear;document.querySelectorAll(`#historyYearMonthOptions input[data-history-year="${year}"]`).forEach(input=>input.checked=checked);historyPeriodSummary();scheduleHistoryFilter()});
+document.querySelectorAll('[data-history-period-action]').forEach(button=>button.addEventListener('click',()=>{const checked=button.dataset.historyPeriodAction==='select';document.querySelectorAll('#historyYearMonthOptions input[data-history-period]').forEach(input=>input.checked=checked);historyPeriodSummary();scheduleHistoryFilter()}));
+$('clearHistoryFilters')?.addEventListener('click',()=>{document.querySelectorAll('#historyYearMonthOptions input[data-history-period]').forEach(input=>input.checked=false);['historySearch','historyCustomer','historyUser'].forEach(id=>{const node=$(id);if(node)node.value=''});historyPeriodSummary();scheduleHistoryFilter()});
 $('qCustomer').addEventListener('change',()=>{
  if(!canEditQuotation(true)){syncStartCustomer(quotationPricingCustomerId||'');return}
  if(quoteHasItems()){alert('Remove all quotation items before changing the customer.');$('qCustomer').value=quotationPricingCustomerId||'';syncStartCustomer(quotationPricingCustomerId||'');return}
@@ -2493,9 +2493,11 @@ $('closeRecentQuotesBottom')?.addEventListener('click',()=>$('recentQuotesDialog
 window.KeySuiteCustomerStore={load:loadSecureCustomers,getMode:()=>customerSyncMode,getError:()=>customerSyncError};
 window.KeySuiteQuotationStore={
  getCustomerName:quoteDisplayCustomerName,
+ renderNotice:renderQuotationHistoryNotice,
  load:loadSecureQuotes,
  getMode:()=>quotationSyncMode,
  getError:()=>quotationSyncError,
+ async listSummaries(){await loadSecureQuotes();if(quotationSyncMode!=='supabase')return quotes();const rows=(await quotationHistoryApi().matching('')).map(normalizeRemoteQuote),full=quotes().filter(q=>!q.summaryOnly),ids=new Set(full.map(q=>String(q.id)));secureQuotes=visibleQuotationRows([...full,...rows.filter(q=>!ids.has(String(q.id)))]);return rows;},
  getQuotes:()=>quotes().map(row=>({...row,items:Array.isArray(row.items)?row.items.map(item=>({...item})):[]})),
  openHistoryPdf:openHistoryQuotationPdf,
  openHistoryPdfModal:openHistoryQuotationPdfModal,

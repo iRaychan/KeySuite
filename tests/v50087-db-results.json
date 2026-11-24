@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "checks": [
+    "migration is repeatable and source quotation bytes remain unchanged",
+    "bounded summary page; latest first; global facets, metrics and recent rows; full payload excluded",
+    "keyset pagination beyond 1000 rows reaches all older records without duplicates",
+    "whole-database quotation/customer/project/model search, dates, creator and clear filters",
+    "on-demand full document retains items, remarks, template, signatures and audit",
+    "company isolation and direct projection/helper access denied",
+    "Own/Assigned/None, forged user filter, unauthenticated and anonymous restrictions",
+    "archive/current winner and permission order preserved",
+    "insert/update/revision/delete keep projection transactional and preserve numbering",
+    "same-fixture full-list versus paged summary payload comparison",
+    "rollback removes only derived objects; source records and old RPC remain"
+  ],
+  "fixtureRecords": 1250,
+  "performance": {
+    "environment": "isolated PGlite; same synthetic data, full response serialization; not a production benchmark",
+    "before": {
+      "ms": 208.71,
+      "bytes": 40686860
+    },
+    "after": {
+      "ms": 5.28,
+      "bytes": 33503
+    },
+    "payloadReductionPercent": 99.92
+  }
+}

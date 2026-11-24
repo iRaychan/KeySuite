@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "checks": [
+    "history initial load uses only summaries, complete facets and global dashboard totals",
+    "Next/Previous paging preserves stable page navigation",
+    "debounced search queries server across older pages",
+    "Clear Filters restores the unfiltered first page",
+    "Open hydrates the full document; quantities and remarks survive; local-only backup preserved",
+    "PDF fetches and loads the full sealed document before rendering",
+    "atomic save acknowledgement refreshes summary history; retry keeps the same logical ID",
+    "revision reads sibling summaries globally before allocating the next revision; full contents preserved",
+    "failed save rejects and cannot be reported as a central success",
+    "outage exposes incomplete backup mode and retrieval time without removing pending records",
+    "Retry restores central authoritative rows and preserves unsynchronised local backups",
+    "overlapping history/Retry calls are serialized; obsolete responses cannot replace latest results",
+    "KeyHQ on-demand summary list reaches older records without loading full documents",
+    "explicit successful deletion also removes its summary backup",
+    "no legacy full-list retrieval or automatic production duplicate cleanup",
+    "equivalent device contexts retrieve identical central summary rows",
+    "commercial identity remains attached to loaded quotation items"
+  ],
+  "requests": [
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_document_v50087",
+    "keysuite_history_document_v50087",
+    "keysuite_save_quotation_v50037",
+    "keysuite_history_page_v50087",
+    "keysuite_save_quotation_v50037",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_save_quotation_v50037",
+    "keysuite_history_page_v50087",
+    "keysuite_save_quotation_v50037",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087",
+    "keysuite_delete_quotation_v42502",
+    "keysuite_history_page_v50087",
+    "keysuite_history_page_v50087"
+  ],
+  "alerts": [
+    "Revision created as R-2611-0123-R6."
+  ]
+}

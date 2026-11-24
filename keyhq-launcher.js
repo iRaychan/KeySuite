@@ -100,7 +100,7 @@
   async function loadQuotations(){
     const store=window.KeySuiteQuotationStore;
     if(!store)return {quotations:[],mode:'unavailable',error:'Secure quotation store is unavailable.'};
-    try{const loaded=await store.load();const rows=store.getQuotes?.()||loaded||[];return {quotations:(Array.isArray(rows)?rows:[]).map(quotationSummary).filter(row=>row.id&&row.reference),mode:store.getMode?.()||'unknown',error:store.getError?.()||''}}catch(error){return {quotations:[],mode:'error',error:String(error?.message||error)}}
+    try{const loaded=store.listSummaries?await store.listSummaries():await store.load();const rows=store.listSummaries?loaded:(store.getQuotes?.()||loaded||[]);return {quotations:(Array.isArray(rows)?rows:[]).map(quotationSummary).filter(row=>row.id&&row.reference),mode:store.getMode?.()||'unknown',error:store.getError?.()||''}}catch(error){return {quotations:[],mode:'error',error:String(error?.message||error)}}
   }
 
   function resetSessionCache(companyId){if(sessionCache.company===companyId)return;sessionCache.company=companyId;sessionCache.people=null;sessionCache.profiles=null;sessionCache.scopes=null;sessionCache.floorConfig=null;messengerPromise=null;directoryPromise=null;contextLoaded=false;latestContext={}}

@@ -83,7 +83,7 @@ async function startBackgroundLoad(force = false) {
       if (myAttempt !== attempt) return rows;
       const error = String(store.getError?.() || '').trim();
       if (error) {
-        setNotice(`Quotation history is temporarily unavailable: ${error}`, 'error', true);
+        if(store.renderNotice)store.renderNotice();else setNotice(`Quotation history is temporarily unavailable: ${error}`, 'error', true);
       } else {
         // app.js normally clears this itself after a successful load.
         const node = historyNotice();
