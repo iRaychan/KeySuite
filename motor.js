@@ -69,7 +69,7 @@
     if(!product||!customer||!category)return null;
     const calc=window.KeySuitePricing?.calculatePrice?.(
       priceBook(product),'MOTOR',category,'MOTOR',
-      {...options,customer,rarity:product.rarity||'common',rarityBook:rarityBook(product),pricingMode:options.pricingMode||'quotation'}
+      {...options,customer,stockProductId:product.id,stockVariant:'SKU',rarity:product.rarity||'common',rarityBook:rarityBook(product),pricingMode:options.pricingMode||'quotation'}
     );
     if(!calc)return null;
     return {product,material:'MOTOR',variant:'MOTOR',rarity:calc.rarity,calc,category,customer,family:'MOTOR'};

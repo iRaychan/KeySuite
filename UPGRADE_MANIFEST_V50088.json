@@ -1,0 +1,31 @@
+{
+  "version": "5.00.88",
+  "baseline": "5.00.87 FULL",
+  "baseline_sha256": "ea6d37dadbc36f705aee8dd1a28917a2b035432b33c9a7dc1d3f98596055abd3",
+  "files": [
+    "VERSION.txt",
+    "RELEASE.json",
+    "manifest.json",
+    "release-version.js",
+    "index.html",
+    "sw.js",
+    "auth.js",
+    "app.js",
+    "pricing.js",
+    "categories.js",
+    "v3944-categories.js",
+    "keystock-v100.js",
+    "motor.js",
+    "iso-v50011.js",
+    "bsv-catalogue.js",
+    "bsw-pricing-v50036.js",
+    "stock-source-v50088.js",
+    "supabase/functions/telegram-webhook/index.ts",
+    "supabase/migrations/20261124122013_v50088_stock_sources.sql",
+    "supabase/rollback_v50088.sql",
+    "tests/v50088.cjs",
+    "tests/v50088-category.cjs",
+    "tests/v50088-dropdown.cjs",
+    "UPGRADE_MANIFEST_V50088.json"
+  ]
+}

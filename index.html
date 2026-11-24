@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.87</title>
-  <script src="release-version.js?v=50087"></script>
+  <title>KeySuite V5.00.88</title>
+  <script src="release-version.js?v=50088"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -268,7 +268,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
     .category-currency-selector-title{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
     .category-currency-selector-title>div{min-width:0}.category-currency-selector-title b{display:block;font-size:13px;color:#17365d}.category-currency-selector-title small{display:block;margin-top:2px;color:#64748b;line-height:1.35;white-space:normal}
     .category-currency-count{flex:0 0 auto;border-radius:999px;background:#fff;color:#475569;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}
-    .category-currency-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;width:100%;min-width:0}
+    .category-currency-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px;width:100%;min-width:0}
     .category-currency-option{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;min-width:0!important;margin:0!important;padding:9px 8px!important;border:1px solid #bfd2e8!important;border-radius:8px!important;background:#fff!important;font-weight:800!important;box-sizing:border-box!important;cursor:pointer}
     .category-currency-option input{width:auto!important;min-width:0!important;margin:0!important}.category-currency-option span{min-width:0;overflow:hidden;text-overflow:ellipsis}
     .category-currency-option:has(input:checked){border-color:#0f4c81!important;background:#e3f0ff!important;color:#0f4c81!important}.category-currency-option:has(input:disabled){cursor:default;opacity:.72}
@@ -664,7 +664,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.87</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.88</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -680,7 +680,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.87</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.88</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -706,7 +706,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.87</div>
+    <div class="suite-version">KeySuite V5.00.88</div>
   </aside>
 
   <main>
@@ -1469,13 +1469,14 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
                   <h3 id="categoryProductHeading">CHC Pricing Rule</h3>
                   <div class="category-currency-selector">
                     <div class="category-currency-selector-title">
-                      <div><b>Price List Currency</b><small>Start at 0 selected. Tick only the currencies this Category may use.</small></div>
+                      <div><b>Price List Source</b><small>Start at 0 selected. Select the sources this Category may use.</small></div>
                       <span id="categoryCurrencySelectionCount" class="category-currency-count">0 selected</span>
                     </div>
-                    <div class="category-currency-options" role="group" aria-label="Price List Currency">
+                    <div class="category-currency-options" role="group" aria-label="Price List Source">
                       <label class="category-currency-option"><input id="categoryCurrencyUSD" class="category-currency-choice" type="checkbox" value="USD"> <span>USD</span></label>
                       <label class="category-currency-option"><input id="categoryCurrencyRMB" class="category-currency-choice" type="checkbox" value="RMB"> <span>RMB</span></label>
                       <label class="category-currency-option"><input id="categoryCurrencyMYR" class="category-currency-choice" type="checkbox" value="MYR"> <span>MYR</span></label>
+                      <label class="category-currency-option"><input id="categoryCurrencySTOCK" class="category-currency-choice" type="checkbox" value="STOCK"> <span>STOCK</span></label>
                     </div>
                     <div id="categoryCurrencySummary" class="category-currency-summary"></div>
                   </div>
@@ -2342,16 +2343,16 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="payment-terms.js?v=50082"></script>
 <script src="commercial-identity.js?v=50085-corrected-r1"></script>
 <script src="quotation-history-v50087.js?v=50087"></script>
-<script src="app.js?v=50087"></script>
-<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50085"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
+<script src="app.js?v=50088"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50088"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50078"></script>
 <script src="manual-price-v50011.js?v=50085-corrected-r1"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50081"></script>
+<script src="pricing.js?v=50088"></script>
 <script src="technical-pdf.js?v=50074-gpdf"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50082"></script>
+<script src="categories.js?v=50088"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50079"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
@@ -2373,7 +2374,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="bsw-v50027.js?v=50085"></script>
 <script src="manifold.js?v=42821"></script>
 <script src="roles.js?v=50082"></script>
-<script src="motor.js?v=50056"></script>
+<script src="motor.js?v=50088"></script>
 <script src="coupling.js?v=50056"></script>
 <script src="baseplate.js?v=50069"></script>
 <script src="quotation-templates.js?v=409"></script>
@@ -2434,7 +2435,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="company-settings.js?v=41707"></script>
 <script src="keyai.js?v=50060"></script>
 <script src="keylab.js?v=41406"></script>
-<script src="auth.js?v=50071"></script>
+<script src="stock-source-v50088.js?v=50088"></script>
+<script src="auth.js?v=50088"></script>
 <script src="keyhq/avatar-sync.js?v=42925"></script>
 <script src="keyhq-social.js?v=50001"></script>
 <script src="keyhq-launcher.js?v=50001"></script>
@@ -2477,13 +2479,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50078"></script>
 <script src="kv-product-families-v50027.js?v=50069"></script>
-<script src="v41200-bootstrap.js?v=50087"></script>
+<script src="v41200-bootstrap.js?v=50088"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
 <link rel="stylesheet" href="v50033-actions.css?v=50046">
 <link rel="stylesheet" href="v50063-focused-fixes.css?v=50069">
 <script src="v50051-version-lock.js?v=50071"></script>
 <link rel="stylesheet" href="keystock-v100.css?v=50086">
-<script src="keystock-v100.js?v=50086"></script>
+<script src="keystock-v100.js?v=50088"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2573,5 +2575,5 @@ document.addEventListener('click',event=>{
 </script>
 
 <script src="costing-audit-v50032.js?v=50085"></script>
-<script src="bsv-catalogue.js?v=50046"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50085"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
+<script src="bsv-catalogue.js?v=50088"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50088"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>

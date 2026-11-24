@@ -1187,6 +1187,11 @@ function quoteItemRow(data={}, {restored=false}={}){
  if(data.originalQuotationItem&&Object.hasOwn(data.originalQuotationItem,'unitPrice'))wrap.dataset.originalQuotationItem=JSON.stringify(data.originalQuotationItem);
  if(data.descriptionManuallyEdited)wrap.dataset.descriptionManuallyEdited='true';if(data.modelManuallyEdited)wrap.dataset.modelManuallyEdited='true';
  wrap.dataset.itemBrands=JSON.stringify(quoteItemBrands(data));if(data.manualItem){wrap.dataset.manualItem='true';wrap.dataset.quoteKind='manual';}
+ wrap.addEventListener('input',event=>{
+   if(!event.target.matches('.item-qty'))return;
+   const source=JSON.parse(wrap.dataset.pricingSource||'{}');
+   if(source.stock_available!=null)window.KeySuiteStockCost?.notice(Number(event.target.value)>source.stock_available?'Insufficient stock. Available when priced: '+source.stock_available:'');
+ });
  wrap.addEventListener('input',e=>{if(e.isTrusted&&e.target.matches('.item-price'))recordQuotationManualPrice(wrap,e.target);if(e.target.matches('.item-model'))wrap.dataset.modelManuallyEdited='true';if(e.target.matches('.item-description'))wrap.dataset.descriptionManuallyEdited='true';},true);
  const savedRemark=String(data.internalRemark??data.remark??'').trim();if(savedRemark)wrap.dataset.internalRemark=savedRemark;
  const normalizedDescription=normalizeDescriptionIndentation(data.description||''),rawDescription=motorItem?normalizedDescription:stripQuotationBrand(normalizedDescription),capacityState=data.manualItem?manualQuoteCapacityState(data):capacityStateFromData(data,rawDescription),shaftState=shaftStateFromData(data,rawDescription),description=restored||data.manualItem||data.descriptionManuallyEdited?String(data.description||''):couplingItem?shaftText(rawDescription,shaftState):motorItem?normalizeMotorQuotationDescription(rawDescription):capacityText(rawDescription,capacityState),baseModel=couplingItem?normalizeCouplingQuoteModel(data.model||'',data):stripQuotationBrand(data.model||''),cleanModel=restored||data.modelManuallyEdited?String(data.model||''):(!couplingItem&&!noCapacityItem)?capacityModelText(baseModel,capacityState):baseModel;
@@ -1598,6 +1603,7 @@ async function saveQuote(options={}){
  const isFirstSave=!editingQuoteId&&quotationStatus==='new';
  let quotationNo='';try{quotationNo=validateQuoteNoForSave(options)}catch(error){if(!options.silent)alert(error.message||error);return false}
  const items=getQuoteItems();if(!items.length){if(!options.silent)alert('At least one item is required.');return false}
+ if(isFirstSave&&window.KeySuiteStockCost&&!await window.KeySuiteStockCost.verifyNewQuotation(items))return false;
  const invalid=items.find(x=>!x.model||Number(x.qty)<=0);if(invalid){if(!options.silent)alert('Every quotation item requires a Model / Item and valid Quantity. Unit Price may remain blank while the quotation is a draft.');return false}
  const total=calcTotal();
  if (!$('quoteAdjustmentError').hidden || !Number.isFinite(total) || total < 0) {
@@ -1829,6 +1835,7 @@ async function routeEsSelection(p={},route='quotation'){
  if(target==='quotation'&&!canEditQuotation(true))return;
  if(!ensureQuotationPricingContext(`add an ES ${bare?'bare shaft pump':'pumpset'} to the ${target==='assembly'?'Assembly':'quotation'}`))return;
  const id=esSelectionProductId(p),material=String(p.keysuite_material||'CI / SS / SS / MS');
+ if(['CIBRSSMS','CIBRSSGP','CICISSDYNAMIC'].includes(material.toUpperCase().replace(/[^A-Z0-9]/g,''))){alert('This ES configuration is retired. Select a current ES material.');return;}
  // Complete ES sets use the same Assembly component pricing/BOM as Move to Pumpset → Move to Quotation.
  const pricingMode=(target==='assembly'||!bare)?'assembly':'quotation';
  const brandApi=window.KeySuiteV40001;

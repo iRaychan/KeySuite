@@ -74,7 +74,7 @@
   function normalizeRule(raw={},family='CHC',cat=null){
     const fallback={margin:.38,normal:0,rare:0,transport:30,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true};
     const bool=(value,defaultValue=true)=>value===undefined||value===null?defaultValue:!!value;
-    return {margin:Number(raw.margin??(family==='CHC'?(cat?.margins?.CHC??cat?.factors?.CHC):fallback.margin)??fallback.margin),normal:Number(raw.normal??fallback.normal),rare:Number(raw.rare??fallback.rare),trimming:Number(raw.trimming??0),transport:Number(raw.transport??cat?.transport??fallback.transport),useCommission:bool(raw.useCommission??raw.use_commission??raw.includeCommission??raw.include_commission,fallback.useCommission),useSetDiscount:bool(raw.useSetDiscount??raw.use_set_discount??raw.includeSetDiscount??raw.include_set_discount,fallback.useSetDiscount),useFinalDiscount:bool(raw.useFinalDiscount??raw.use_final_discount??raw.includeFinalDiscount??raw.include_final_discount,fallback.useFinalDiscount),useFuelCharge:bool(raw.useFuelCharge??raw.use_fuel_charge??raw.includeFuelCharge??raw.include_fuel_charge,fallback.useFuelCharge),currencies:[...new Set((Array.isArray(raw.currencies)?raw.currencies:[]).map(v=>String(v||'').toUpperCase()).filter(v=>['USD','RMB','MYR'].includes(v)))]};
+    return {margin:Number(raw.margin??(family==='CHC'?(cat?.margins?.CHC??cat?.factors?.CHC):fallback.margin)??fallback.margin),normal:Number(raw.normal??fallback.normal),rare:Number(raw.rare??fallback.rare),trimming:Number(raw.trimming??0),transport:Number(raw.transport??cat?.transport??fallback.transport),useCommission:bool(raw.useCommission??raw.use_commission??raw.includeCommission??raw.include_commission,fallback.useCommission),useSetDiscount:bool(raw.useSetDiscount??raw.use_set_discount??raw.includeSetDiscount??raw.include_set_discount,fallback.useSetDiscount),useFinalDiscount:bool(raw.useFinalDiscount??raw.use_final_discount??raw.includeFinalDiscount??raw.include_final_discount,fallback.useFinalDiscount),useFuelCharge:bool(raw.useFuelCharge??raw.use_fuel_charge??raw.includeFuelCharge??raw.include_fuel_charge,fallback.useFuelCharge),currencies:[...new Set((Array.isArray(raw.currencies)?raw.currencies:[]).map(v=>String(v||'').toUpperCase()).filter(v=>['USD','RMB','MYR','STOCK'].includes(v)))]};
   }
   function categoryRule(cat,family='CHC_G2'){
     const code=normalizedFamily(family);
@@ -95,7 +95,7 @@
   }
   function formula(cat=category(),family='CHC',rarity='many',mode='quotation',customer=selectedCustomer()){
     const rule=categoryRule(cat,family),company=companyFactors(mode,cat,family,customer),level=normalizeRarity(rarity),pricingMode=normalizePricingMode(mode);
-    const selected=rule.currencies||[];if(!selected.length)return `${familyLabel(family)} · ${pricingMode==='assembly'?'Assembly':'Quotation'} = No Price List Currency selected → Price unavailable`;const sourceText=selected.length===1?(selected[0]==='MYR'?'MYR':`${selected[0]} × ${selected[0]} rate`):`Highest of ${selected.map(v=>v==='MYR'?'MYR':`(${v} × ${v} rate)`).join(', ')}`;
+    const selected=rule.currencies||[];if(!selected.length)return `${familyLabel(family)} · ${pricingMode==='assembly'?'Assembly':'Quotation'} = No Price List Source selected → Price unavailable`;const sourceText=selected.length===1?(selected[0]==='STOCK'?'STOCK × 1.000':selected[0]==='MYR'?'MYR':`${selected[0]} × ${selected[0]} rate`):`Highest of ${selected.map(v=>v==='STOCK'?'STOCK × 1.000':v==='MYR'?'MYR':`(${v} × ${v} rate)`).join(', ')}`;
     if(level==='fixed')return `${familyLabel(family)} Fixed · ${pricingMode==='assembly'?'Assembly':'Quotation'} = ${sourceText} → Fixed final selling price (no Margin / Normal / Rare / Transport / Commission / Set Discount / Final Discount / Fuel / RM10 rounding)`;
     const parts=[sourceText,'÷ (1 − Brand Margin)','÷ (1 − Margin)'];
     if(level==='common'||level==='rare')parts.push('÷ (1 − Normal)');if(level==='rare')parts.push('÷ (1 − Rare)');if(['ES','ISO'].includes(normalizedFamily(family)))parts.push('+ Trimming');parts.push('+ Transport');if(company.includeCommission)parts.push('÷ (1 − Customer Commission)');if(pricingMode==='quotation'&&company.includeSetDiscount)parts.push('÷ (1 − Customer Set Discount)');if(company.includeFinalDiscount)parts.push('÷ (1 − Customer Final Discount)');if(company.includeFuelCharge)parts.push('+ Fuel Charge');parts.push('Round up to RM10');
@@ -135,6 +135,7 @@
     const catalogue=code==='ISO'?[window.KeySuiteISO?.findProduct?.(id)].filter(Boolean):(pools[code]||[]),product=catalogue.find(row=>[row?.id,row?.model,row?.base_model].some(value=>String(value||'').replace(/^ISO\s+/i,'').trim().toLowerCase()===wanted.replace(/^iso\s+/,'')));
     if(!product)return null;
     let book=product.pricesByCurrency||{},rarityBook=product.rarityByCurrency||{},variant=String(preferredVariant||options.material||options.keysuite_material||'').trim();
+    if(code==='ES'&&['CIBRSSMS','CIBRSSGP','CICISSDYNAMIC'].includes(variant.toUpperCase().replace(/[^A-Z0-9]/g,'')))return null;
     if(code==='ISO'||code==='ES'||code==='KEYPLC'||code==='MANIFOLD')book=esPriceBook(product);
     if(code==='BFI'&&/316|BFIN/i.test(String(options.material||variant)))book=product.bfinPricesByCurrency||book;
     if(!Object.keys(book.USD||{}).length&&!Object.keys(book.RMB||{}).length&&!Object.keys(book.MYR||{}).length){
@@ -173,18 +174,30 @@
     // Brand Margin applies to the converted source in both pricing modes.
     // Normal/Many/Rare pricing still follows the category's selected currencies.
     
-    const allCandidates=currencyCandidates(priceBook,options.rarityBook||{},variant,family);if(!allCandidates.length)return null;
+    const allCandidates=currencyCandidates(priceBook,options.rarityBook||{},variant,family);if(!allCandidates.length&&!categoryRule(cat,family).currencies.includes('STOCK'))return null;
     const pricingMode=normalizePricingMode(options.pricingMode),requested=String(options.rarity||'').toLowerCase();
     const priceContext=context(options),sellingBrandId=selectedPricingBrand(family,options);
     const pricingBrandId=sellingBrandId||window.KeySuiteV391?.defaultPricingBrand?.(family)||'';
     const configuredRate=window.KeySuiteV391?.customerBrandMargin?.(priceContext.customer?.id,pricingBrandId)??0;
     const brandMarginError='Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.';
     if(brandMarginStage(1,configuredRate)==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
+    const stockEnabled=categoryRule(cat,family).currencies.includes('STOCK')&&!options.convertedSource;
+    let stockWarning='',stockAvailable=null,stockCheck=null;
+    if(stockEnabled){
+      const row=window.KeySuiteStockCost?.lookup(family,variant,options,pricingBrandId);
+      stockCheck={family,variant,brandId:pricingBrandId,stockProductId:options.stockProductId,stockModel:options.stockModel,stockVariant:options.stockVariant,stockConfigurationId:options.stockConfigurationId,observed:row?.cost??null};
+      if(row){
+        allCandidates.push({currency:'STOCK',sourcePrice:Number(row.cost),baseMyr:Number(row.cost),multiplier:1,rarity:resolveModelRarity(priceBook,options.rarityBook,variant)});
+        stockAvailable=Number(row.available);
+        if(Number(options.qty??options.quantity??1)>stockAvailable)stockWarning='Insufficient stock. Available quantity: '+row.available;
+      }else stockWarning='STOCK unavailable for this exact product and configuration.';
+      window.KeySuiteStockCost?.notice(stockWarning);
+    }
     const fixedCandidates=requested==='fixed'?allCandidates:allCandidates.filter(row=>row.rarity==='fixed');
-    if(fixedCandidates.length){
-      const chosen=fixedCandidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),finalPrice=brandMarginStage(chosen.baseMyr,configuredRate);
+    if(fixedCandidates.length&&(!stockEnabled||fixedCandidates.some(r=>categoryRule(cat,family).currencies.includes(r.currency)))){
+      const chosen=(stockEnabled?fixedCandidates.filter(r=>categoryRule(cat,family).currencies.includes(r.currency)):fixedCandidates).reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),finalPrice=brandMarginStage(chosen.baseMyr,configuredRate);
       if(finalPrice==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
-      return {family,variant,rarity:'fixed',pricingMode,fixedPrice:true,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase:chosen.baseMyr,afterBrand:finalPrice,candidates:fixedCandidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
+      return {stockCheck,stockAvailable,stockWarning,family,variant,rarity:'fixed',pricingMode,fixedPrice:true,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase:chosen.baseMyr,afterBrand:finalPrice,candidates:fixedCandidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
     }
     if(!cat)return null;
     const rule=categoryRule(cat,family),allowed=new Set(rule.currencies||[]);if(!allowed.size)return null;
@@ -205,7 +218,7 @@
     const journeyMultiplier=priceContext.returnJourney?2:1;
     const fuelCharge=company.includeFuelCharge?(priceContext.distanceKm*journeyMultiplier/priceContext.fuelEfficiency)*Math.max(priceContext.fuelPrice-priceContext.fuelBasePrice,0):0;
     const unroundedPrice=beforeFuel+fuelCharge,finalPrice=roundUp10(unroundedPrice);
-    return {family,variant,rarity,pricingMode,fixedPrice:false,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase,afterBrand,availableCandidates:allCandidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,trimming,withTrimming,transport:rule.transport,commission:company.commission,setDiscount:company.setDiscount,finalDiscount:company.finalDiscount,includeCommission:company.includeCommission,includeSetDiscount:company.includeSetDiscount,includeFinalDiscount:company.includeFinalDiscount,includeFuelCharge:company.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice};
+    return {stockCheck,stockAvailable,stockWarning,family,variant,rarity,pricingMode,fixedPrice:false,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase,afterBrand,availableCandidates:allCandidates,candidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:rule.margin,normal:rule.normal,rare:rule.rare,trimming,withTrimming,transport:rule.transport,commission:company.commission,setDiscount:company.setDiscount,finalDiscount:company.finalDiscount,includeCommission:company.includeCommission,includeSetDiscount:company.includeSetDiscount,includeFinalDiscount:company.includeFinalDiscount,includeFuelCharge:company.includeFuelCharge,marginPrice,afterNormal,afterRare,withTransport,afterCommission,afterSetDiscount,beforeFuel,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier,fuelCharge,unroundedPrice,finalPrice};
   }
 
   function calculate(sourceOrBook,material='CHC',cat=category(),options={}){
@@ -225,7 +238,7 @@
     if(calc?.componentPricingError)return String(calc.componentPricingError);
     if(calc?.motorPricingError)return String(calc.motorPricingError);
     if(calc?.snapshotFallback&&Number(calc.beforeFuel)>0)return '';
-    if(!calc||!(Number(calc.baseMyr)>0))return 'Cannot quote: No valid USD, RMB or MYR cost is available.';
+    if(!calc||(!(Number(calc.baseMyr)>0)&&!(calc.sourceCurrency==='STOCK'&&calc.baseMyr===0)))return 'Cannot quote: No enabled costing source is available.';
     if(calc.fixedPrice||normalizeRarity(calc.rarity)==='fixed')return '';
     if(!(Number(calc.margin)>0))return 'Cannot quote: Category Margin is 0%.';
     return '';
@@ -256,7 +269,7 @@
     // base amount is zero even when the separately stored pump and motor are
     // both priceable. Re-resolve that snapshot before marking a free-text row
     // red; editing Model / Item or Description must not invalidate its price.
-    if(!(baseMyr>0)){
+    if(!(baseMyr>0)&&!(source.source_currency==='STOCK'&&source.base_myr===0)){
       const refreshed=repriceSource(source,'quotation',{customer,category:cat});
       if(refreshed?.calc)return quoteBlockReason(refreshed.calc);
       if(family==='CHC')return chcPriceProblem(source.product_id||source.model||'CHC item',{
@@ -264,7 +277,7 @@
         motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class||'IE3',
         bareShaft:source.bare_shaft===true
       });
-      return 'Cannot quote: No valid USD, RMB or MYR cost is available.';
+      return 'Cannot quote: No enabled costing source is available.';
     }
     if(fixedPrice)return '';
     if(!(margin>0))return 'Cannot quote: Category Margin is 0%.';
@@ -380,7 +393,7 @@
     visibleRows=variants(showUnpriced).filter(row=>(material==='ALL'||row.material===material)&&(!search||row.product.model.toLowerCase().includes(search)||row.material.toLowerCase().includes(search)));
     const c=company(),cat=category(),currencyRule=cat?categoryRule(cat,selectedPricingFamily):null,selectedCurrencies=currencyRule?.currencies||[];byId('pricingSourceCurrencyHeader').textContent=selectedCurrencies.length===0?'Source':selectedCurrencies.length===1?selectedCurrencies[0]:'Highest Selected';
     byId('pricingRows').innerHTML=visibleRows.map((row,index)=>{
-      const calc=c&&cat?calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer:c,rarityBook:row.product.rarityByCurrency||{}}):null;
+      const calc=c&&cat?calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer:c,stockProductId:row.product.id,rarityBook:row.product.rarityByCurrency||{}}):null;
       return `<tr><td><b>${e(row.product.model)}</b></td><td><span class="pricing-badge ${calc?'ok':'warn'}">${e(row.material)}</span></td><td><span class="pricing-badge">${e(calc?rarityLabel(calc.rarity):'-')}</span></td><td class="num">${calc?`${e(calc.sourceCurrency)} ${n(calc.sourcePrice,2)}`:'-'}</td><td class="num">${calc?cash(calc.baseMyr):'-'}</td><td class="num">${calc?percent(calc.margin):'-'}</td><td class="num">${calc?cash(calc.marginPrice):'-'}</td><td class="num">${calc?cash(calc.withTransport):'-'}</td><td class="num">${calc?cash(calc.beforeFuel):'-'}</td><td class="num">${calc?cash(calc.fuelCharge):'-'}</td><td class="num"><b>${calc?cash(calc.finalPrice):'-'}</b></td><td>${calc?`<button type="button" class="btn green" data-pricing-add="${index}">Add to Quotation</button>`:''}</td></tr>`;
     }).join('')||'<tr><td colspan="12" class="muted">No matching products.</td></tr>';
     const contextText=!c?'Select a customer in Key.':!cat?'Assign a Pricing Category to generate prices.':'Normal pricing uses the highest converted currency and rounds upward to RM10. Fixed pricing uses the Fixed record as the final selling price with no margin, discounts, fuel factor or RM10 rounding.';byId('pricingCount').textContent=`Showing ${visibleRows.length.toLocaleString('en-MY')} variants. ${contextText}`;document.querySelectorAll('[data-pricing-add]').forEach(button=>button.addEventListener('click',()=>addToQuotation(Number(button.dataset.pricingAdd))));
@@ -452,7 +465,7 @@
     // IE substitution removes the included raw cost, then adds the selected
     // motor calculated with the MOTOR pricing rule.
     const motorSpec=efficiency=>`${hp>0?`${Number(hp)} HP`:`${Number(kw)} kW`}, ${pole}-pole ${efficiency}`;
-    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null};
+    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,stockProductId:product.id,stockVariant:'SKU',rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null};
     const includedMatch=pricedMotor(included);if(!includedMatch)return {...calc,motorPricingError:`Cannot quote: Included motor price is missing for ${motorSpec(included)}. Update the Motor Price List before using bare-shaft or motor-substitution pricing.`};
     const replacementMatch=bareShaft?includedMatch:pricedMotor(selected);if(!replacementMatch)return {...calc,motorPricingError:`Cannot quote: Replacement motor price is missing for ${motorSpec(selected)}. Update the Motor Price List before quoting this motor substitution.`};
     const includedMotor=includedMatch.product,replacementMotor=replacementMatch.product,includedCalc=includedMatch.calc,replacementCalc=replacementMatch.calc;
@@ -492,7 +505,7 @@
     const defaultMotorEfficiency=(generation==='G1'?'IE2':'IE3'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':(normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency)||defaultMotorEfficiency);
     // Pump price records are complete packages: C4/G1 includes IE2 and C6/G2
     // includes IE3. Only a non-standard IE class uses MOTOR substitution.
-    const rawCalc=calculatePrice(product.pricesByCurrency||{},material,cat,pricingFamily,{...options,customer,rarityBook:product.rarityByCurrency||{}});
+    const rawCalc=calculatePrice(product.pricesByCurrency||{},material,cat,pricingFamily,{...options,customer,stockProductId:product.id,rarityBook:product.rarityByCurrency||{}});
     const replacedCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:motorHp,motor_kw:motorKw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);
     const calc=applyChcSealAddon(replacedCalc,base,{...options,generation_code:generation});
     const seal=options.seal??options.keysuite_seal??options.sealFaces??'Car/Cer',elastomer=options.elastomer??options.keysuite_elastomer??'Viton';
@@ -538,7 +551,7 @@
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const requestedMaterial=String(options.material||options.keysuite_material||'').toUpperCase(),identity=crModelIdentity(['CRS','CRN'].includes(requestedMaterial)?String(model).replace(/^CR[SN]?\b/i,requestedMaterial):model),catalogue=(secureData.crProducts?.length?secureData.crProducts:(window.KeySuiteCRPriceData?.models||[]));
     const lookup=[identity.base,crLegacyPriceModel(identity.base)].map(value=>String(value).toLowerCase()),product=catalogue.find(row=>lookup.includes(String(row.model||'').toLowerCase()));if(!product)return null;
-    const rawCalc=calculatePrice(product.pricesByCurrency||{},identity.material,cat,'CR',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
+    const rawCalc=calculatePrice(product.pricesByCurrency||{},identity.material,cat,'CR',{...options,customer,stockProductId:product.id,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
     const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
     const seal=options.seal??options.keysuite_seal??'Car / Sic',elastomer=options.elastomer??options.keysuite_elastomer??'Viton',addon=motorCalc.fixedPrice?0:crSealAddon(identity.base,seal),calc=window.KeySuiteComponents.apply({...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),sealAddon:addon,sealDescription:chcSealDescription(seal,elastomer),finalPrice:Number(motorCalc.finalPrice||0)+addon},'CR',identity.base,{...options,seal,elastomer});
@@ -569,7 +582,7 @@
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return null;
     const catalogue=secureData.kvProducts?.length?secureData.kvProducts:(window.KeySuiteKVPriceData?.models||[]),rawModel=String(model||'').trim(),wanted=rawModel.replace(/^(?:KVC|KVN|KVSD|KVD|KV)\b/i,'KV').toLowerCase(),product=catalogue.find(row=>String(row.model||'').trim().toLowerCase()===wanted);if(!product)return null;
     const material=String(options.material||options.keysuite_material||rawModel.match(/^(KVC|KVN|KVSD|KVD|KV)\b/i)?.[1]||'KV').toUpperCase(),variant=['KVC','KV','KVN','KVD','KVSD'].includes(material)?material:'KV';
-    const rawCalc=calculatePrice(product.pricesByCurrency||{},variant,cat,'KV',{...options,customer,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
+    const rawCalc=calculatePrice(product.pricesByCurrency||{},variant,cat,'KV',{...options,customer,stockProductId:product.id,rarityBook:product.rarityByCurrency||{}});if(!rawCalc)return null;
     const hp=Number(options.motor_hp??options.motorHp??product.motor_hp??product.hp),kw=Number(options.motor_kw??options.motorKw??product.motor_kw??product.kw),pole=Number(options.pole??product.pole??2)||2,defaultMotorEfficiency='IE3',selectedMotorEfficiency=normalizedEfficiency(options.motor_efficiency_class||options.motorEfficiencyClass||defaultMotorEfficiency)||defaultMotorEfficiency;
     const motorCalc=applyPumpMotorReplacement(rawCalc,{...options,customer,category:cat,motor_hp:hp,motor_kw:kw,pole,motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);if(!motorCalc)return null;
     const seal=options.seal||options.keysuite_seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer=options.elastomer||options.keysuite_elastomer||'Viton',addons=motorCalc.fixedPrice?{materialAddon:0,oringAddon:0,total:0}:kvAddonPrice(seal,elastomer),calc={...motorCalc,baseFinalPrice:Number(motorCalc.finalPrice||0),kvMaterialAddon:addons.materialAddon,kvOringAddon:addons.oringAddon,finalPrice:Number(motorCalc.finalPrice||0)+addons.total};
@@ -598,9 +611,9 @@
     if(!product)return {ok:false,reason:'MODEL_NOT_FOUND',identity,customer,category:cat};
     const available=Array.isArray(product.phases)&&product.phases.length?product.phases:['1Ph','3Ph'],variant=available.includes(identity.phase)?identity.phase:(available.includes('3Ph')?'3Ph':available[0]);
     const priceBook=identity.material==='SS316'?(product.bfinPricesByCurrency||{}):(product.pricesByCurrency||{}),rarityBook=identity.material==='SS316'?(product.bfinRarityByCurrency||{}):(product.rarityByCurrency||{}),allCandidates=currencyCandidates(priceBook,rarityBook,variant,'BFI');
-    if(!allCandidates.length)return {ok:false,reason:'NO_SOURCE_PRICE',identity,product,variant,customer,category:cat,priceBook,rarityBook,allCandidates:[],allowedCurrencies:[]};
+    if(!allCandidates.length&&!categoryRule(cat,'BFI').currencies.includes('STOCK'))return {ok:false,reason:'NO_SOURCE_PRICE',identity,product,variant,customer,category:cat,priceBook,rarityBook,allCandidates:[],allowedCurrencies:[]};
     const rule=categoryRule(cat,'BFI'),allowedCurrencies=[...new Set(rule.currencies||[])],allowed=new Set(allowedCurrencies),fixedCandidates=String(options.rarity||'').toLowerCase()==='fixed'?allCandidates:allCandidates.filter(row=>row.rarity==='fixed'),allowedCandidates=fixedCandidates.length?fixedCandidates:allCandidates.filter(row=>allowed.has(row.currency));
-    if(!fixedCandidates.length&&(!allowed.size||!allowedCandidates.length))return {ok:false,reason:'CURRENCY_NOT_ENABLED',identity,product,variant,customer,category:cat,allCandidates,allowedCurrencies,allowedCandidates};
+    if(!allowed.has('STOCK')&&!fixedCandidates.length&&(!allowed.size||!allowedCandidates.length))return {ok:false,reason:'CURRENCY_NOT_ENABLED',identity,product,variant,customer,category:cat,allCandidates,allowedCurrencies,allowedCandidates};
     return {ok:true,reason:'OK',identity,product,variant,customer,category:cat,priceBook,rarityBook,allCandidates,allowedCurrencies,allowedCandidates,fixedCandidates};
   }
   function bfiPriceProblem(model,phase='3Ph',options={}){
@@ -618,7 +631,7 @@
   }
   function findBfiPrice(model,phase='3Ph',options={}){
     const status=bfiPriceStatus(model,phase,options);if(!status.ok)return null;
-    const {product,variant,customer,category:cat}=status,baseCalc=calculatePrice(status.priceBook||{},variant,cat,'BFI',{...options,customer,rarityBook:status.rarityBook||{}}),defaultMotorEfficiency=pumpDefaultMotorEfficiency(options.motor_hp??product.motor_hp,variant==='1Ph'?'IE1':'IE2'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':String(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency).toUpperCase(),calc=applyPumpMotorReplacement(baseCalc,{...options,customer,category:cat,motor_hp:Number((options.motor_hp??product.motor_hp)||0),pole:Number(options.pole||2),motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);
+    const {product,variant,customer,category:cat}=status,baseCalc=calculatePrice(status.priceBook||{},variant,cat,'BFI',{...options,customer,stockProductId:product.id,stockVariant:(status.identity.material==='SS316'?'BFIN:':'BFI:')+variant,rarityBook:status.rarityBook||{}}),defaultMotorEfficiency=pumpDefaultMotorEfficiency(options.motor_hp??product.motor_hp,variant==='1Ph'?'IE1':'IE2'),selectedMotorEfficiency=defaultMotorEfficiency==='IE1'?'IE1':String(options.motor_efficiency_class||options.motorEfficiencyClass||options.motor_efficiency||defaultMotorEfficiency).toUpperCase(),calc=applyPumpMotorReplacement(baseCalc,{...options,customer,category:cat,motor_hp:Number((options.motor_hp??product.motor_hp)||0),pole:Number(options.pole||2),motor_efficiency_class:selectedMotorEfficiency},defaultMotorEfficiency);
     const pumpMaterial=/316/.test(String(options.material||status.identity?.material||''))?'SS316':'SS304';
     return calc?{product,material:pumpMaterial,variant,rarity:calc.rarity,calc,category:cat,customer,family:'BFI',sourceExtra:{motor_phase:variant,pump_material:pumpMaterial,material_variant:pumpMaterial==='SS316'?'BFIN':'BFI',bfi_identity_suffix:status.identity?.suffix||'',default_motor_efficiency_class:defaultMotorEfficiency,selected_motor_efficiency_class:selectedMotorEfficiency,motor_hp:Number((options.motor_hp??product.motor_hp)||0),motor_pole:Number(options.pole||2),...(calc.motorReplacement?{motor_replacement:calc.motorReplacement}: {})}}:null;
   }
@@ -633,7 +646,7 @@
     if(!cat.productRules?.BGF)return 'The assigned pricing category has no BGF pricing rules.';
     const rule=categoryRule(cat,'BGF');
     if(!rule.currencies?.length)return 'No source currency is enabled in the BGF category rules.';
-    if(!rule.currencies.some(c=>Number(product['price_'+c.toLowerCase()])>0))return 'No positive model price is saved in the enabled BGF currencies: '+rule.currencies.join(', ')+'.';
+    if(found?.calc?.sourceCurrency!=='STOCK'&&!rule.currencies.some(c=>Number(product['price_'+c.toLowerCase()])>0))return 'No positive model price is saved in the enabled BGF currencies: '+rule.currencies.join(', ')+'.';
     if(!(rule.margin>0))return 'The BGF category margin is missing or 0%.';
     if(!found?.calc||!Number.isFinite(found.calc.finalPrice)||found.calc.finalPrice<=0)return 'Pricing lookup error: the configured source could not produce a valid price. Check currency conversion and pricing settings.';
     return quoteBlockReason(found.calc);
@@ -643,7 +656,7 @@
     const product=(window.KeySuiteBGF?.models?.()||secureData.bgfProducts||[]).find(p=>[p.id,p.model].some(v=>String(v).toLowerCase()===String(model).toLowerCase()));
     if(!product||!customer)return null;
     const book={},rarity={};for(const c of ['USD','RMB','MYR']){book[c]={BGF:Number(product['price_'+c.toLowerCase()]||0)};rarity[c]={BGF:product['rarity_'+c.toLowerCase()]||'common'};}
-    const calc=calculatePrice(book,'BGF',cat,'BGF',{...options,customer,rarityBook:rarity});
+    const calc=calculatePrice(book,'BGF',cat,'BGF',{...options,customer,stockProductId:product.id,stockVariant:'SKU',rarityBook:rarity});
     return calc?{product,material:'BGF',variant:'BGF',calc,category:cat,customer,family:'BGF'}:null;
   }
   function findGPrice(model,options={}){
@@ -652,7 +665,7 @@
     if(!product||!customer||!cat)return null;
     const variant=product.phase==='1Ph'?'M':'T',book={},rarity={};
     for(const cur of ['USD','RMB','MYR']){book[cur]={[variant]:Number(product['price_'+cur.toLowerCase()]||0)};rarity[cur]={[variant]:product['rarity_'+cur.toLowerCase()]||'many'}}
-    const calc=calculatePrice(book,variant,cat,'G',{...options,customer,rarityBook:rarity});
+    const calc=calculatePrice(book,variant,cat,'G',{...options,customer,stockProductId:product.id,rarityBook:rarity});
     return calc?{product,material:variant,variant,calc,category:cat,customer,family:'G'}:null;
   }
   function gPriceProblem(model,found){
@@ -671,7 +684,7 @@
   function findGwsPrice(model,pressure,options={}){
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer)return null;
     const wanted=String(model||'').toLowerCase(),product=(secureData.gwsProducts||[]).find(p=>String(p.id).toLowerCase()===wanted||String(p.model).toLowerCase()===wanted);if(!product)return null;
-    const calc=calculatePrice(product.pricesByCurrency||{},'SKU',cat,'GWS',{...options,customer,rarityBook:product.rarityByCurrency||{}});return calc?{product,material:'SKU',variant:'SKU',rarity:calc.rarity,calc,category:cat,customer,family:'GWS'}:null;
+    const calc=calculatePrice(product.pricesByCurrency||{},'SKU',cat,'GWS',{...options,customer,stockProductId:product.id,rarityBook:product.rarityByCurrency||{}});return calc?{product,material:'SKU',variant:'SKU',rarity:calc.rarity,calc,category:cat,customer,family:'GWS'}:null;
   }
 
   function findAutoGwsTank(sizeLitres,minimumPressureBar=0,options={}){
@@ -690,7 +703,7 @@
     return {product:{id:`BASEPLATE-${family}`,model:label},material:'BASEPLATE',variant:family,calc,category:cat,customer,family:'BASEPLATE',sourceExtra:{configuration:{...config,family},raw_cost_myr:Number(raw.total),baseplate_frame:frame,source_price_book:`${family} Baseplate`}};
   }
 
-  function sourceSnapshot(found){return {fixed_price:!!found.calc.fixedPrice,pricing_brand_id:found.calc.pricingBrandId||'',...(found.calc.sellingBrandId?{v391_brand_id:found.calc.sellingBrandId}:{}),brand_margin:found.calc.brandMargin,brand_margin_error:found.calc.brandMarginError,adjusted_base_myr:found.calc.adjustedBase,after_brand_margin_price:found.calc.afterBrand,component_addon_myr:found.calc.componentAddon??null,component_details:found.calc.componentDetails||[],motor_details:found.calc.motorDetails||null,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:typeof found.variant==='string'?found.variant:found.variant?.material||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,motor_source_adjustment:found.calc.motorSourceAdjustment||0,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,trimming:found.calc.trimming||0,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,margin_price:found.calc.marginPrice,after_normal:found.calc.afterNormal,after_rare:found.calc.afterRare,with_trimming:found.calc.withTrimming,with_transport:found.calc.withTransport,after_commission:found.calc.afterCommission,after_set_discount:found.calc.afterSetDiscount,before_fuel:found.calc.componentBaseBeforeFuel??found.calc.beforeFuel,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
+  function sourceSnapshot(found){return {...(found.calc.stockCheck?{stock_check:found.calc.stockCheck}:{}),...(found.calc.stockAvailable!=null?{stock_available:found.calc.stockAvailable}:{}),fixed_price:!!found.calc.fixedPrice,pricing_brand_id:found.calc.pricingBrandId||'',...(found.calc.sellingBrandId?{v391_brand_id:found.calc.sellingBrandId}:{}),brand_margin:found.calc.brandMargin,brand_margin_error:found.calc.brandMarginError,adjusted_base_myr:found.calc.adjustedBase,after_brand_margin_price:found.calc.afterBrand,component_addon_myr:found.calc.componentAddon??null,component_details:found.calc.componentDetails||[],motor_details:found.calc.motorDetails||null,product_family:found.family||found.calc.family||'CHC',product_id:found.product.id,material:found.material,variant:typeof found.variant==='string'?found.variant:found.variant?.material||found.material,rarity:found.calc.rarity,pricing_mode:found.calc.pricingMode||'quotation',customer_id:found.customer?.id||'',category_id:found.category?.id||'',source_currency:found.calc.sourceCurrency,currency_multiplier:found.calc.multiplier,source_price:found.calc.sourcePrice,motor_source_adjustment:found.calc.motorSourceAdjustment||0,base_myr:found.calc.baseMyr,margin:found.calc.margin,normal:found.calc.normal,rare:found.calc.rare,trimming:found.calc.trimming||0,transport:found.calc.transport,commission:found.calc.commission,set_discount:found.calc.setDiscount,final_discount:found.calc.finalDiscount,include_final_discount:found.calc.includeFinalDiscount,include_commission:found.calc.includeCommission,include_set_discount:found.calc.includeSetDiscount,include_fuel_charge:found.calc.includeFuelCharge,margin_price:found.calc.marginPrice,after_normal:found.calc.afterNormal,after_rare:found.calc.afterRare,with_trimming:found.calc.withTrimming,with_transport:found.calc.withTransport,after_commission:found.calc.afterCommission,after_set_discount:found.calc.afterSetDiscount,before_fuel:found.calc.componentBaseBeforeFuel??found.calc.beforeFuel,distance_km:found.calc.distanceKm,fuel_price:found.calc.fuelPrice,fuel_base_price:found.calc.fuelBasePrice,fuel_efficiency:found.calc.fuelEfficiency,return_journey:found.calc.returnJourney,journey_multiplier:found.calc.journeyMultiplier,fuel_charge:found.calc.fuelCharge,unrounded_price:found.calc.unroundedPrice,calculated_price:found.calc.finalPrice,...(found.enclosure?{panel_type:found.enclosure,enclosure_surcharge:Number(found.calc.enclosureSurcharge||0)}:{}),...(found.sourceExtra||{})}}
   function assemblySellingBrand(brand,group){
     if(!brand?.id)return {};
     return {v391_brand_id:brand.id,v391_brand_name:brand.name||'',
@@ -801,8 +814,9 @@
   }
   function repriceAssemblyLeaf(item,mode,{customer,category}){
     const source=componentPricingSource(item);
-    const found=repriceSource(source,mode,{customer,category});
+    const found=repriceSource(source,mode,{customer,category,qty:item.qty});
     if(found)return found;
+    if(categoryRule(category,source.product_family).currencies.includes('STOCK')&&source.manual_override!==true)return null;
     const calc=customer&&category&&calculationFromSnapshot(item,source,category,customer,mode);
     return calc?{product:{id:source.product_id||item.id||'',model:item.model||''},material:source.material||source.variant||'',variant:source.variant||source.material||'',calc,category,customer,family:source.product_family,sourceExtra:{snapshot_fallback:true}}:null;
   }
@@ -941,7 +955,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
 
   function exportCsv(){
     const rows=[['Customer','Category','Model','Variant','Rarity','Source Currency','Source Price','Base MYR','Margin','Normal','Rare','Transport','Fuel Charge','Final Price']],c=company(),cat=category();
-    for(const row of visibleRows){const calc=c&&cat?calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer:c,rarityBook:row.product.rarityByCurrency||{}}):null;if(calc)rows.push([c.company,cat.name,row.product.model,row.material,rarityLabel(calc.rarity),calc.sourceCurrency,calc.sourcePrice,calc.baseMyr,calc.margin,calc.normal,calc.rare,calc.transport,calc.fuelCharge,calc.finalPrice])}
+    for(const row of visibleRows){const calc=c&&cat?calculatePrice(row.product.pricesByCurrency||{},row.material,cat,'CHC',{customer:c,stockProductId:row.product.id,rarityBook:row.product.rarityByCurrency||{}}):null;if(calc)rows.push([c.company,cat.name,row.product.model,row.material,rarityLabel(calc.rarity),calc.sourceCurrency,calc.sourcePrice,calc.baseMyr,calc.margin,calc.normal,calc.rare,calc.transport,calc.fuelCharge,calc.finalPrice])}
     const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n'),link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download='KeySuite_V1.20_Visible_Pricing.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
   }
 
@@ -984,7 +998,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     const variants=product.variants||[];
     const variant=material?variants.find(v=>normMaterial(v.material)===normMaterial(material)):variants.find(v=>['priceUsd','priceRmb','priceMyr'].some(key=>Number(v[key])>0));
     if(!variant)return null;
-    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,customer,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material});
+    const calc=window.KeySuiteComponents.apply(calculatePrice(esPriceBook(product),variant.material,cat,'ES',{...options,customer,stockProductId:product.id,rarity:product.rarity||'common'}),'ES',product.model,{...options,material:variant.material});
     return calc?{product,variant,material:variant.material,calc,category:cat,customer,family:'ES',sourceExtra:{seal_type:options.sealType||(/\bGP\b/i.test(variant.material)?'Gland Packing':'Mechanical Seal'),seal_material:normalizeEsSeal(options.seal||options.keysuite_seal),elastomer:options.elastomer||options.keysuite_elastomer||'Viton'}}:null;
   }
 
@@ -1017,6 +1031,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
     if(options.bareShaft!==false)lines.push('(Bare shaft pump only)');return lines.join('\n');
   }
   function addEs(id,route='quotation',material='CI / SS / SS / MS',options={}){
+    if(['CIBRSSMS','CIBRSSGP','CICISSDYNAMIC'].includes(String(material).toUpperCase().replace(/[^A-Z0-9]/g,''))){alert('This ES configuration is retired.');return}
     if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add an ES pump to the ${route==='assembly'?'Assembly':'quotation'}`))return;
     const found=findEsPrice(id,material,{...options,pricingMode:route==='assembly'?'assembly':'quotation'});
     const product=found?.product||(secureData.esProducts||[]).find(x=>x.id===id);if(!product)return;

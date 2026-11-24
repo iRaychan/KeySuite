@@ -990,7 +990,7 @@ async function guidedCatalogRows(service:any,product:any){
   if(group==='CHC_G2')q=service.from('ks_products_chc').select('*').order('source_row').limit(3000);
   else if(group==='CHC_G1')q=service.from('ks_products_chc_g1').select('*').order('source_row').limit(3000);
   else if(group==='BFI')q=service.from('ks_products_bfi').select('*').eq('status','active').order('source_row').limit(3000);
-  else if(group==='ES')q=service.from('ks_products_es').select('*').order('source_row').limit(3000);
+  else if(group==='ES')q=service.from('keysuite_active_es_v50088').select('*').order('source_row').limit(3000);
   else if(group==='GWS')q=service.from('ks_products_gws').select('*').eq('status','active').order('source_row').limit(3000);
   else if(group==='MOTOR')q=service.from('ks_products_motor').select('*').eq('active',true).order('efficiency_class').order('hp').order('pole').limit(3000);
   else if(group==='COUPLING')q=service.from('ks_products_coupling').select('*').eq('active',true).order('component_type').order('source_row').limit(3000);
@@ -1639,6 +1639,7 @@ function pricingRarity(value:any){const v=String(value||'common').toLowerCase();
 function pricingBool(value:any,fallback=true){return value===undefined||value===null?fallback:!!value}
 function pricingRule(category:any,family:string){
   const fam=String(family||'CHC').toUpperCase(),rules=parseJsonObject(category?.product_rules),raw=parseJsonObject(rules?.[fam]);
+  if(Array.isArray(raw.currencies)&&raw.currencies.includes('STOCK'))throw new Error('This pricing rule uses STOCK. Open KeySuite with your inventory permissions to calculate this quotation.');
   const fallback=fam==='CHC'?{margin:Number(category?.chc_margin??category?.chc_factor??.38),normal:0,rare:0,transport:Number(category?.transport??30),useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true}:{margin:0,normal:0,rare:0,transport:0,useCommission:true,useSetDiscount:true,useFinalDiscount:true,useFuelCharge:true};
   return {margin:Number(raw.margin??fallback.margin),normal:Number(raw.normal??fallback.normal),rare:Number(raw.rare??fallback.rare),transport:Number(raw.transport??fallback.transport),useCommission:pricingBool(raw.useCommission??raw.use_commission??raw.includeCommission??raw.include_commission,fallback.useCommission),useSetDiscount:pricingBool(raw.useSetDiscount??raw.use_set_discount??raw.includeSetDiscount??raw.include_set_discount,fallback.useSetDiscount),useFinalDiscount:pricingBool(raw.useFinalDiscount??raw.use_final_discount??raw.includeFinalDiscount??raw.include_final_discount,fallback.useFinalDiscount),useFuelCharge:pricingBool(raw.useFuelCharge??raw.use_fuel_charge??raw.includeFuelCharge??raw.include_fuel_charge,fallback.useFuelCharge)};
 }
@@ -1753,7 +1754,7 @@ async function quotePumpForCustomer(service:any,customerId:string,item:any,keySu
     const productRes=await service.from('ks_products_bfi').select('*').ilike('model',full).maybeSingle();if(productRes.error||!productRes.data)throw new Error(`No ${priceSeries} price-list record was found for ${rawModel||full}.`);const p:any=productRes.data;productId=String(p.id||'');rarity='';material=isBfin?'SS316':'SS304';
     candidates=['USD','RMB','MYR'].map(currency=>{const c=currency.toLowerCase();return {currency,sourcePrice:Number(p[`price_${prefix}${c}_${phase}`]||0),multiplier:(rates as any)[currency],rarity:p[`rarity_${prefix}${c}_${phase}`]||'common'}});
   }else if(family==='ES'){
-    const full=String(item?.model||'').trim(),stripped=full.replace(/^ES\s+/i,'').trim();let productRes=await service.from('ks_products_es').select('*').ilike('model',stripped).maybeSingle();if((productRes.error||!productRes.data)&&full!==stripped)productRes=await service.from('ks_products_es').select('*').ilike('model',full).maybeSingle();if(productRes.error||!productRes.data)throw new Error(`No ES price-list record was found for ${full}.`);const p:any=productRes.data;productId=String(p.id||'');rarity=pricingRarity(p.rarity||'common');
+    const full=String(item?.model||'').trim(),stripped=full.replace(/^ES\s+/i,'').trim();let productRes=await service.from('keysuite_active_es_v50088').select('*').ilike('model',stripped).maybeSingle();if((productRes.error||!productRes.data)&&full!==stripped)productRes=await service.from('keysuite_active_es_v50088').select('*').ilike('model',full).maybeSingle();if(productRes.error||!productRes.data)throw new Error(`No ES price-list record was found for ${full}.`);const p:any=productRes.data;productId=String(p.id||'');rarity=pricingRarity(p.rarity||'common');
     const variants=Array.isArray(p.variants)?p.variants:[],rawRequested=String(item?.pricing_material||item?.keysuite_material||item?.options?.material||'').trim(),requested=esPricingMaterial(rawRequested),requestedKey=materialKey(requested);
     let variant=requestedKey?variants.find((v:any)=>materialKey(v?.material)===requestedKey&&['priceUsd','priceRmb','priceMyr'].some(k=>Number(v?.[k])>0)):null;
     if(!variant&&(!rawRequested||/^standard$/i.test(rawRequested)))variant=variants.find((v:any)=>['priceUsd','priceRmb','priceMyr'].some(k=>Number(v?.[k])>0));

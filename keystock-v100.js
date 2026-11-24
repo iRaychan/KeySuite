@@ -264,6 +264,7 @@
     message('Saving…');
     try {
       const result=await rpc(action,payload);
+      await window.KeySuiteStockCost?.refresh();
       if(context!==authContext)return;
       if(after)after(result);
       if(!await load())return;
@@ -647,7 +648,7 @@
       else form+=`<label>Name<input name="label" maxlength="120" required value="${esc(d.label||'')}"></label>${d.type==='arrangement'?`<label>Display order<input name="sort_order" type="number" step="1" min="0" max="9999" value="${d.sort_order||0}"></label>`:''}`;
       form+='<div class="stock-actions"><button class="btn">Save</button><button type="button" class="btn secondary" id="stockLinkCancel">Cancel</button></div></form><hr>';
     }
-    return form+(option?`<h3>${esc(option.label)}</h3><p><strong>${maps.some(m=>m.variant===option.id&&mappingStatus(m,configurations)==='Mapped')?'Mapped':'Unmapped'}</strong> · Valid for ${option.models.length} of ${members.length} models.</p>
+    return form+(option?`<h3>${esc(option.label)}</h3>${dropdownSeries==='KV'&&window.KeySuiteKVV50026?.materials?.[option.id]?`<p>${esc(window.KeySuiteKVV50026.materials[option.id])}</p>`:''}<p><strong>${maps.some(m=>m.variant===option.id&&mappingStatus(m,configurations)==='Mapped')?'Mapped':'Unmapped'}</strong> · Valid for ${option.models.length} of ${members.length} models.</p>
       <details><summary>Applicable models</summary><ul>${option.models.map(m=>`<li>${esc(m.model)}</li>`).join('')}</ul></details>
       <h4>Saved mappings</h4>${maps.filter(m=>m.variant===option.id).map(m=>`<div class="stock-link-record"><strong>${esc(mappingStatus(m,configurations))}</strong><p>${Object.entries(m.selections).map(([id,value])=>`${esc(state.groups.find(g=>g.id===id)?.label||'Removed arrangement')}: ${esc(state.options.find(o=>o.id===value)?.label||'Removed option')}`).join('<br>')}</p><div class="stock-actions">${button('edit-mapping',m.id,'Edit')}${button('delete-mapping',m.id,'Delete')}</div></div>`).join('')||'<p>No saved mapping for this configuration.</p>'}
       ${gs.length?button('add-mapping','','＋ Add Mapping'):'<p>Create a dropdown arrangement below to define a combination.</p>'}`:'<p>No Pricelist configurations for this series.</p>')+
@@ -957,7 +958,7 @@
   function receiptRow(){
     return `<tr data-receipt-row>
       <td><input name="model" aria-label="Model" list="stockReceiptModels" required placeholder="Enter model"></td>
-      <td><input name="cost" aria-label="Cost (RM)" type="number" min="0" step="any" ${state.can_cost?'':'disabled'} placeholder="${state.can_cost?'Optional':'Restricted'}"></td>
+      <td><input name="cost" aria-label="Landed cost / unit (MYR)" type="number" min="0" step="any" ${state.can_cost?'':'disabled'} placeholder="${state.can_cost?'Optional':'Restricted'}"></td>
       <td><input name="quantity" aria-label="Quantity" type="number" min="0" step="any" required></td>
       <td><select name="location_id" aria-label="Location" required><option value="">Select location</option>${refOptions('location')}</select></td>
       <td><input name="remark" aria-label="Remark"></td><td><button type="button" class="btn secondary" data-remove-row>Delete</button></td>
@@ -974,7 +975,7 @@
         <div id="stockReceiptConfig" class="stock-wide"></div>
       </div></details>
       <details open><summary>Stock</summary><datalist id="stockReceiptModels"></datalist>
-        ${stockTable(['Model','Cost (RM)','Qty','Location','Remark','Delete'],[receiptRow()],'','id="stockReceiptRows"')}
+        ${stockTable(['Model','Landed cost / unit (MYR)','Qty','Location','Remark','Delete'],[receiptRow()],'','id="stockReceiptRows"')}
         <div class="stock-actions"><button type="button" id="stockAddReceiptRow" class="btn secondary">Add row</button></div>
       </details>
       <div class="stock-actions"><button class="btn">Save Receiving</button></div></form>`;

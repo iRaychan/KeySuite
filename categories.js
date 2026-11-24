@@ -40,7 +40,7 @@
       useSetDiscount:boolValue(rule.useSetDiscount??rule.use_set_discount??rule.includeSetDiscount??rule.include_set_discount,fallback.useSetDiscount),
       useFinalDiscount:boolValue(rule.useFinalDiscount??rule.use_final_discount??rule.includeFinalDiscount??rule.include_final_discount,fallback.useFinalDiscount),
       useFuelCharge:boolValue(rule.useFuelCharge??rule.use_fuel_charge??rule.includeFuelCharge??rule.include_fuel_charge,fallback.useFuelCharge),
-      currencies:[...new Set((Array.isArray(rule.currencies)?rule.currencies:(Array.isArray(fallback.currencies)?fallback.currencies:[])).map(v=>String(v||'').toUpperCase()).filter(v=>['USD','RMB','MYR'].includes(v)))]
+      currencies:[...new Set((Array.isArray(rule.currencies)?rule.currencies:(Array.isArray(fallback.currencies)?fallback.currencies:[])).map(v=>String(v||'').toUpperCase()).filter(v=>['USD','RMB','MYR','STOCK'].includes(v)))]
     };
   }
   const productLabel=product=>product==='CHC_G1'?'CHC G1':product==='CHC_G2'?'CHC G2':String(product||'');
@@ -91,15 +91,15 @@
     const cancel=byId('cancelCategoryEdit');if(cancel)cancel.disabled=!editing;
     byId('categoryForm')?.classList.toggle('category-form-readonly',!editing);setRuleFieldsEditable(editing);renderRows();
   }
-  function selectedCurrenciesFromUi(){return ['USD','RMB','MYR'].filter(code=>!!byId(`categoryCurrency${code}`)?.checked)}
+  function selectedCurrenciesFromUi(){return ['USD','RMB','MYR','STOCK'].filter(code=>!!byId(`categoryCurrency${code}`)?.checked)}
   function showCurrencySummary(){
     const rates=productRates(),box=byId('categoryCurrencySummary'),selected=selectedCurrenciesFromUi(),count=byId('categoryCurrencySelectionCount');
     if(count)count.textContent=`${selected.length} selected`;
-    if(box){const note=selected.length===0?'<span>Price unavailable until at least 1 currency is ticked.</span>':selected.length===1?`<span>Use ${esc(selected[0])} only.</span>`:`<span>Use highest of ${esc(selected.join(' + '))} after MYR conversion.</span>`;box.innerHTML=`${note}<span>USD × ${num(rates.USD,2)}</span><span>RMB × ${num(rates.RMB,3)}</span><span>MYR × 1.000</span>`}
+    if(box){const note=selected.length===0?'<span>Price unavailable until at least 1 source is ticked.</span>':selected.length===1?`<span>Use ${esc(selected[0])} only.</span>`:`<span>Use highest of ${esc(selected.join(' + '))} after MYR conversion.</span>`;box.innerHTML=`${note}<span>USD × ${num(rates.USD,2)}</span><span>RMB × ${num(rates.RMB,3)}</span><span>MYR × 1.000</span><span>STOCK × 1.000</span>`}
   }
-  function currencyFormula(rule){const selected=(rule?.currencies||[]).filter(v=>['USD','RMB','MYR'].includes(v));if(!selected.length)return 'No Price List Currency selected → Price unavailable';const converted=selected.map(v=>v==='MYR'?'MYR':`${v} × ${v} rate`);return selected.length===1?converted[0]:`Highest of ${converted.join(' / ')}`}
+  function currencyFormula(rule){const selected=(rule?.currencies||[]).filter(v=>['USD','RMB','MYR','STOCK'].includes(v));if(!selected.length)return 'No Price List Source selected → Price unavailable';const converted=selected.map(v=>v==='STOCK'?'STOCK × 1.000':v==='MYR'?'MYR':`${v} × ${v} rate`);return selected.length===1?converted[0]:`Highest of ${converted.join(' / ')}`}
   function formulaText(rule,rarity,mode='quotation'){
-    if(!(rule?.currencies||[]).length)return 'No Price List Currency selected → Price unavailable';
+    if(!(rule?.currencies||[]).length)return 'No Price List Source selected → Price unavailable';
     if(rarity==='fixed')return `${currencyFormula(rule)} → Fixed final selling price (no Margin / Normal / Rare / Transport / Commission / Set Discount / Final Discount / Fuel / RM10 rounding)`;
     const parts=[currencyFormula(rule),'÷ (1 − Margin)'];
     if(rarity==='common'||rarity==='rare')parts.push('÷ (1 − Normal)');if(rarity==='rare')parts.push('÷ (1 − Rare)');if(['ES','ISO'].includes(selectedProduct))parts.push('+ Trimming');parts.push('+ Transport');
@@ -146,7 +146,7 @@
     const rule=category?ruleFor(category,selectedProduct):newCategoryRule();
     byId('categoryMarginInput').value=num(rule.margin*100,2).replace(/,/g,'');byId('categoryNormalInput').value=num(rule.normal*100,2).replace(/,/g,'');byId('categoryRareInput').value=num(rule.rare*100,2).replace(/,/g,'');byId('categoryTrimmingInput').value=num(rule.trimming,2).replace(/,/g,'');byId('categoryLock_trimming').hidden=!hasTrimming(selectedProduct);byId('categoryTransportInput').value=num(rule.transport,2).replace(/,/g,'');
     byId('categoryUseCommission').checked=rule.useCommission;byId('categoryUseSetDiscount').checked=rule.useSetDiscount;byId('categoryUseFinalDiscount').checked=rule.useFinalDiscount;byId('categoryUseFuelCharge').checked=rule.useFuelCharge;
-    ['USD','RMB','MYR'].forEach(code=>{const input=byId(`categoryCurrency${code}`);if(input)input.checked=(rule.currencies||[]).includes(code)});
+    ['USD','RMB','MYR','STOCK'].forEach(code=>{const input=byId(`categoryCurrency${code}`);if(input)input.checked=(rule.currencies||[]).includes(code)});
     fillCompanyFactorValues();
     byId('categoryProductHeading').textContent=`${productLabel(selectedProduct)} Pricing Rule`;if(byId('categoryMarginLabel'))byId('categoryMarginLabel').textContent=`${productLabel(selectedProduct)} Margin`;
     document.querySelectorAll('[data-category-product]').forEach(button=>button.classList.toggle('active',button.dataset.categoryProduct===selectedProduct));
@@ -176,7 +176,7 @@
   async function reload(){
     const client=window.KeySuiteAuth?.getClient?.();if(!client)return [];
     const {data,error}=await client.from('ks_pricing_categories').select('*').or('is_active.is.null,is_active.eq.true').order('category_name');if(error)throw error;
-    const mapped=mapRows(data),target=window.KEYSUITE_SECURE_DATA?.categories;if(Array.isArray(target))target.splice(0,target.length,...mapped);window.KeySuitePricing?.render?.();return mapped;
+    const mapped=mapRows(data),target=window.KEYSUITE_SECURE_DATA?.categories;if(Array.isArray(target))target.splice(0,target.length,...mapped);await window.KeySuiteStockCost?.refresh();window.KeySuitePricing?.render?.();return mapped;
   }
   function percentValue(id,label,validate=true){const value=Number(byId(id)?.value);if(validate&&(!Number.isFinite(value)||value<0||value>=100))throw new Error(`${label} must be from 0% to below 100%.`);return Number.isFinite(value)?value/100:0}
   function readRule(validate=true){
@@ -184,7 +184,7 @@
     return {margin:percentValue('categoryMarginInput',`${selectedProduct} Margin`,validate),normal:percentValue('categoryNormalInput','Normal',validate),rare:percentValue('categoryRareInput','Rare',validate),trimming:Number.isFinite(trimming)?trimming:0,transport:Number.isFinite(transport)?transport:0,useCommission:!!byId('categoryUseCommission')?.checked,useSetDiscount:!!byId('categoryUseSetDiscount')?.checked,useFinalDiscount:!!byId('categoryUseFinalDiscount')?.checked,useFuelCharge:!!byId('categoryUseFuelCharge')?.checked,currencies:selectedCurrenciesFromUi()};
   }
   function ruleInputSnapshot(){
-    const fields=['MarginInput','NormalInput','RareInput','TrimmingInput','TransportInput','UseCommission','UseSetDiscount','UseFinalDiscount','UseFuelCharge','CurrencyUSD','CurrencyRMB','CurrencyMYR'];
+    const fields=['MarginInput','NormalInput','RareInput','TrimmingInput','TransportInput','UseCommission','UseSetDiscount','UseFinalDiscount','UseFuelCharge','CurrencyUSD','CurrencyRMB','CurrencyMYR','CurrencySTOCK'];
     return JSON.stringify(fields.map(field=>{
       const input=byId('category'+field);
       return input?.type==='checkbox'?input.checked:input?.value;
@@ -208,6 +208,13 @@
           if(!saved)throw new Error('Saved category could not be reloaded.');
         }
         openCategory(saved,false);message(`Category “${name}” saved.`,'info');
+        return;
+      }
+      if(category){
+        const {error}=await client.rpc('keysuite_category_rule_v50088',{p_category_id:category.id,p_product_code:selectedProduct,p_rule:rule,p_name:name===category.name?null:name});
+        if(error)throw error;
+        openCategory((await reload()).find(row=>row.id===category.id),false);
+        message('Pricing rule saved.','info');
         return;
       }
       if(isSubmersible(selectedProduct)){
@@ -237,9 +244,10 @@
       }
       const {error}=await client.rpc(rpc,args);if(error)throw error;
       let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').ilike('category_name',name).limit(1);if(lookup.error)throw lookup.error;targetId=String(lookup.data?.[0]?.id||'')}
-      if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Currency.');
+      if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Source.');
       const currencySave=['BGF','G','ISO'].includes(selectedProduct)?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
-      const rows=await reload(),saved=rows.find(item=>item.id===targetId);openCategory(saved,false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Currency selected.`,'info');
+      if(rule.currencies.includes('STOCK')){const {error}=await client.rpc('keysuite_category_rule_v50088',{p_category_id:targetId,p_product_code:selectedProduct,p_rule:rule});if(error)throw error}
+      const rows=await reload(),saved=rows.find(item=>item.id===targetId);openCategory(saved,false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Source selected.`,'info');
     }catch(error){console.error(error);message(String(error?.message||error||'Pricing Category could not be saved.'),'error')}
     finally{button.disabled=false;button.textContent=original}
   }
@@ -263,7 +271,7 @@
     byId('categoryRows')?.addEventListener('click',event=>{const button=event.target.closest('[data-category-open]');if(!button)return;const category=categories().find(item=>item.id===button.dataset.categoryOpen);if(category)openCategory(category,false)});
     document.querySelectorAll('[data-category-product]').forEach(button=>button.addEventListener('click',()=>{selectedProduct=button.dataset.categoryProduct;fillRule(currentCategory());message(editing?`${selectedProduct} pricing rule loaded. Fields and Use choices are unlocked.`:`${selectedProduct} pricing rule loaded. Hold the Edit button for 3 seconds to make changes.`,'info')}));
     ['categoryMarginInput','categoryNormalInput','categoryRareInput','categoryTrimmingInput','categoryTransportInput','categoryUseCommission','categoryUseSetDiscount','categoryUseFinalDiscount','categoryUseFuelCharge'].forEach(id=>{byId(id)?.addEventListener('input',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())});byId(id)?.addEventListener('change',()=>{updateFormula();if(id==='categoryMarginInput')refreshZeroMarginIndicators(currentCategory())})});
-    ['USD','RMB','MYR'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula();const input=document.querySelector(`[data-row-category="${CSS.escape(selectedId)}"][data-row-currency="${code}"]`);if(input)input.checked=byId(`categoryCurrency${code}`).checked}));
+    ['USD','RMB','MYR','STOCK'].forEach(code=>byId(`categoryCurrency${code}`)?.addEventListener('change',()=>{showCurrencySummary();updateFormula();const input=document.querySelector(`[data-row-category="${CSS.escape(selectedId)}"][data-row-currency="${code}"]`);if(input)input.checked=byId(`categoryCurrency${code}`).checked}));
     ['categoryManualCost','categoryManualCurrency','categoryManualRarity'].forEach(id=>{byId(id)?.addEventListener('input',updateManualQuote);byId(id)?.addEventListener('change',updateManualQuote)});
   }
   function render(){

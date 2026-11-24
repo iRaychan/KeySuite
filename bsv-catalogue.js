@@ -40,7 +40,7 @@
     const category = options.category || window.KEYSUITE_SECURE_DATA?.categories?.find(c => c.id === customer?.pricingCategoryId);
     if (!config || !row || !customer || !category) return null;
     const book = Object.fromEntries(['USD', 'RMB', 'MYR'].map(c => [c, { [variant]: row['price_' + c.toLowerCase()] }]));
-    const calc = window.KeySuitePricing.calculatePrice(book, variant, category, 'BSV', { ...options, customer, rarity: row.rarity });
+    const calc = window.KeySuitePricing.calculatePrice(book, variant, category, 'BSV', { ...options, customer, stockModel:model, rarity: row.rarity });
     return calc ? { product: { id: model, model: config.name }, material: variant, variant, family: 'BSV', customer, category, calc, sourceExtra: { technical_model: model } } : null;
   }
   function message(text) {
