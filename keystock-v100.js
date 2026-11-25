@@ -11,7 +11,8 @@
     movement:['Stock Movement','M3 7h17m-4-4 4 4-4 4M21 17H4m4-4-4 4 4 4'],
     history:['Stock History','M3 12a9 9 0 1 0 3-7M3 3v5h5m4-2v6l4 2'],
     receive:['Add Stock','M4 7l8-4 8 4v10l-8 4-8-4V7zm0 0 8 4 8-4m-8 4v10'],
-    dropdowns:['Dropdown Management','M3 4h18v3l-7 7v6l-4-2v-4L3 7z']
+    dropdowns:['Dropdown Management','M3 4h18v3l-7 7v6l-4-2v-4L3 7z'],
+    references:['Supplier & Location','M4 5h16v14H4z']
   };
   const navIcon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"></path></svg>`;
   const locationLabel=id=>state.locations.find(l=>l.id===id)?.label||'Not Assigned';
@@ -146,6 +147,25 @@
       } catch(e){message(e.message,true);}
       finally{busy=false;button.disabled=false;}
     });
+  }
+  let referenceTab='supplier',referenceFilter='';
+  function referenceList(){
+    const allowed=caps('manage_stock_'+referenceTab+'s')&&editMode;
+    return state[referenceTab+'s'].filter(r=>textMatch(r.label,referenceFilter)).sort((a,b)=>natural.compare(a.label,b.label)).map(r=>`<li>${esc(r.label)}${r.retired?' (inactive)':''} ${allowed?`<button class="btn secondary" data-ref-type="${referenceTab}" data-rename-ref="${r.id}">Edit</button> ${r.retired?`<button class="btn secondary" data-ref-type="${referenceTab}" data-retire-ref="${r.id}">Restore</button>`:`<button class="btn secondary" data-remove-reference="${r.id}">Delete or deactivate</button>`}`:''}</li>`).join('');
+  }
+  function referencePage(){
+    return `<h2>Supplier &amp; Location</h2>${['supplier','location'].map(type=>`<button class="btn secondary" data-reference-tab="${type}" aria-pressed="${type===referenceTab}">${type==='supplier'?'Supplier':'Location'}</button>`).join(' ')}
+    <label>Filter<input type="search" id="masterFilter" value="${esc(referenceFilter)}"></label><button class="btn secondary" id="masterClear">Clear</button>
+    ${editMode&&caps('manage_stock_'+referenceTab+'s')?`<form data-ref-form="${referenceTab}"><label>Name<input name="label" required></label><button class="btn">Add</button></form>`:''}
+    <ul class="stock-ref-list" id="masterRows">${referenceList()}</ul>`;
+  }
+  function bindReferencePage(){
+    const update=()=>{$('masterRows').innerHTML=referenceList();bindReferences();};
+    $('masterFilter').oninput=e=>{referenceFilter=e.target.value;update()};
+    $('masterClear').onclick=()=>{referenceFilter='';$('masterFilter').value='';update()};
+    $('stockContent').querySelectorAll('[data-reference-tab]').forEach(b=>b.onclick=()=>{referenceTab=b.dataset.referenceTab;referenceFilter='';render()});
+    $('masterRows').onclick=e=>{const id=e.target.closest('[data-remove-reference]')?.dataset.removeReference;if(id&&editMode&&confirm('Delete this unused entry, or deactivate it if it has history?'))save('delete_'+referenceTab,{id})};
+    bindReferences();
   }
   function manageReferences(type) {
     if(!caps('manage_stock_'+type+'s'))return '';
@@ -327,7 +347,7 @@
       const lot=lots.get(p.lot_id);
       const opening=openings.get(lot.opening_id);
       return {...p,supplier:lot.supplier,supplier_id:lot.supplier_id,created_at:lot.fifo_at,
-        received_on:lot.received_on,legacy:!!opening,snapshot:opening?.snapshot};
+        cost:lot.unit_cost_myr,received_on:lot.received_on,legacy:!!opening,snapshot:opening?.snapshot};
     });
   }
   const stockTable=(headers,rows,empty,attributes='')=>`<div class="stock-scroll"><table class="stock-phase2-table" ${attributes}>
@@ -410,26 +430,43 @@
     const reserved=formatQty(batches.reduce((sum,b)=>sum+Number(b.reserved||0),0));
     const columns=state.groups.filter(g=>belongs(g,selected)&&g.kind==='normal'&&(!g.retired
       ||batches.some(b=>Object.hasOwn(configs.get(b.configuration_id).selections,g.id)))).sort(sort);
-    const rows=batches.map(b=>{
+    const buckets=new Map();
+    const price=n=>n==null?'—':Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const batchRows=batches.map(b=>{
       const config=configs.get(b.configuration_id);
-      const values=[...columns.map(g=>(!ledger()||b.legacy&&b.id===b.lot_id?b.snapshot?.selections?.[g.id]?.option:'')
-        ||optionLabel(config.selections[g.id])),
-      config.variant||'Unmapped',locationLabel(b.location_id),
-      b.received_on||(b.legacy?'Opening · '+localDate(b.created_at):localDate(b.created_at)),
-      formatQty(Number(b.quantity)),ledger()?formatQty(Number(b.reserved)):'—','—',formatQty(Number(b.quantity))];
+      const group=config.variant?'variant:'+config.variant:'configuration:'+config.id;
+      if(!buckets.has(group))buckets.set(group,[]);
+      buckets.get(group).push(b);
+      const values=[b.received_on||localDate(b.created_at),locationLabel(b.location_id),price(b.cost),formatQty(b.quantity),formatQty(b.reserved||0),'—',formatQty(b.quantity)];
       const actions=ledger()?[
         ['adjust','+','adjust_stock','Add or adjust stock'],
         ['reserve','R','reserve_stock','Reserve stock'],
         ['issue','−','confirm_stock_out','Deduct stock']
       ].filter(([, ,permission])=>ledgerCap(permission)).map(([action,label,,title])=>
-        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join(''):'';
+        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action issue" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
       return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions||'—'}</div></td></tr>`;
     });
+    const rowById=new Map(batches.map((b,i)=>[b.id,batchRows[i]]));
+    const rows=[...buckets.values()].flatMap((members,index)=>{
+      const config=configs.get(members[0].configuration_id),variant=config.variant||configLabel(config);
+      const qty=members.reduce((sum,b)=>sum+Number(b.quantity),0),reserve=members.reduce((sum,b)=>sum+Number(b.reserved||0),0);
+      const costs=members.filter(b=>b.quantity>0&&b.cost!=null).map(b=>Number(b.cost));
+      const nested=stockTable(['Date','Location','Cost (RM)','Total','Reserve','Not Complete','On Hand','Actions'],members.map(b=>rowById.get(b.id)),'','data-layout="batch-details"');
+      return [`<tr><td><button class="stock-link" aria-expanded="false" data-bucket="${index}">${esc(variant)}</button></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty)}</td><td>${formatQty(reserve)}</td><td>—</td><td>${formatQty(qty)}</td></tr><tr hidden id="bucket-${index}"><td colspan="6">${nested}</td></tr>`];
+    });
+    const openings=new Set(state.opening_balances.filter(b=>!b.voided_at&&configs.has(b.configuration_id)).map(b=>b.id));
+    const shortages=new Map();
+    for(const entry of state.critical_quantities){
+      if(openings.has(entry.opening_id))shortages.set(entry.option_id,(shortages.get(entry.option_id)||0)+Number(entry.missing_quantity));
+    }
+    const critical=state.groups.filter(g=>belongs(g,selected)&&g.kind==='critical').flatMap(g=>
+      state.options.filter(o=>o.group_id===g.id&&(!o.retired&&!g.retired||shortages.has(o.id))).map(o=>
+        '<div>'+esc(g.label)+' · '+esc(o.label)+(shortages.has(o.id)?' · Recorded opening shortage '+formatQty(shortages.get(o.id)):'')+'</div>')).join('');
     const normal=columns.map(g=>{
       const tally=new Map();
       for(const b of batches){
         const option=configs.get(b.configuration_id).selections[g.id];
-        if(option)tally.set(option,(tally.get(option)||0)+Number(b.quantity));
+        for(const id of [option].flat().filter(Boolean))tally.set(id,(tally.get(id)||0)+Number(b.quantity));
       }
       const choices=state.options.filter(o=>o.group_id===g.id&&(!o.retired||tally.has(o.id))).sort(sort);
       return `<div class="stock-normal-row"><b>${esc(g.label)}</b>${choices.map(o=>
@@ -439,12 +476,14 @@
       <div class="stock-detail-metrics">${[['Total',total],['Reserve',ledger()?reserved:'—'],['Not Complete','—'],['On Hand',total]].map(([label,value],i)=>
         `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
       <p id="stockMetricStatus" class="stock-metrics-note" role="status" hidden></p>
-      ${normal}<h3>Stock Breakdown by Configuration &amp; Location</h3>
+      <details><summary>Critical Group</summary>${critical||'No critical options'}</details><details><summary>Normal Group</summary>${normal||'No normal options'}</details><h3>Stock by configuration</h3>
       <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
       <p class="stock-metrics-note">Opening dates identify the historical count. Purchase batches show their receiving date.</p>
-      ${stockTable([...columns.map(g=>g.label),'Pricelist Mapping','Location','Add In Date','Total','Reserve','Not Complete','On Hand','Actions'],rows,'No active opening balances match these filters.')}`;
+      ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}`;
   }
   function bindStockDetail(){
+    $('stockContent').querySelectorAll('[data-bucket]').forEach(b=>b.onclick=()=>{const row=$('bucket-'+b.dataset.bucket);row.hidden=!row.hidden;b.setAttribute('aria-expanded',String(!row.hidden))});
+    $('stockContent').querySelectorAll('[data-cancel-position]').forEach(b=>b.onclick=()=>{if(!editMode||!ledgerCap('delete_stock_batch'))return;const reason=prompt('Reason for cancelling this receiving batch')?.trim();if(reason&&confirm('Cancel the entire batch and record a reversal?'))save('cancel_batch',{position:b.dataset.cancelPosition,reason,request_id:uid()})});
     $('stockDetailBack').onclick=back;
     $('stockDateOrder').onchange=e=>{newestFirst=e.target.value==='newest';render();};
     $('stockContent').querySelectorAll('[data-row-action]').forEach(button=>button.onclick=()=>{
@@ -950,11 +989,6 @@
     selector.onchange=()=>{form.innerHTML=movementFields(selector.value);bind();};
     bind();
   }
-  function serialPolicy(item){
-    const policies=ledger().serial_policy;
-    return (policies.find(p=>p.scope==='product'&&p.subject===item.key)
-      ||policies.find(p=>p.scope==='series'&&p.subject===item.family))?.required===true;
-  }
   function receiptRow(){
     return `<tr data-receipt-row>
       <td><input name="model" aria-label="Model" list="stockReceiptModels" required placeholder="Enter model"></td>
@@ -966,16 +1000,18 @@
   }
   function receiveView(){
     return `<h2>Add Stock</h2><form id="stockReceiveForm">
-      <details open><summary>General</summary><div class="stock-form">
+      <details open><summary>General</summary><div class="receipt-general">
         <label>Series<select id="stockReceiveSeries" name="family" required><option value="">Select series</option>
           ${Object.entries(seriesLabels).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
-        ${inlineReference('supplier').replace('Supplier (optional)','Supplier').replace('<select name="supplier_id">','<select name="supplier_id" required>')}
+        <label>Supplier<select name="supplier_id" required><option value="">Select supplier</option>${refOptions('supplier')}</select></label>
         ${dateField()}
         <label>Reference<input name="reference"></label>
-        <div id="stockReceiptConfig" class="stock-wide"></div>
       </div></details>
+      <details><summary>Pricelist Link</summary><label>Configuration<select id="receiptVariant" required></select></label><p role="status" id="receiptCompatibility"></p></details>
+      <details><summary>Critical Group</summary><div id="receiptCritical"></div></details>
+      <details><summary>Normal Group</summary><div id="stockReceiptConfig"></div></details>
       <details open><summary>Stock</summary><datalist id="stockReceiptModels"></datalist>
-        ${stockTable(['Model','Landed cost / unit (MYR)','Qty','Location','Remark','Delete'],[receiptRow()],'','id="stockReceiptRows"')}
+        ${stockTable(['Model','Landed Cost (RM)','Qty','Location','Remark','Delete'],[receiptRow()],'','id="stockReceiptRows"')}
         <div class="stock-actions"><button type="button" id="stockAddReceiptRow" class="btn secondary">Add row</button></div>
       </details>
       <div class="stock-actions"><button class="btn">Save Receiving</button></div></form>`;
@@ -995,32 +1031,36 @@
       if(candidates.length===1)return candidates[0].model;
     }
     function storeConfigurations(){
-      config.querySelectorAll('fieldset').forEach((panel,i)=>{
+      config.querySelectorAll('fieldset[data-row]').forEach(panel=>{
         const row=rows.children[Number(panel.dataset.row)];
-        if(!row)return;
-        drafts.set(row,{key:panel.dataset.key,groups:Object.fromEntries([...panel.querySelectorAll('[data-receive-group]')]
-          .map(s=>[s.dataset.receiveGroup,s.multiple?[...s.selectedOptions].map(o=>o.value).sort():s.value])),variant:panel.querySelector('[data-receive-variant]')?.value||'',
-          serials:panel.querySelector('[name=serials]')?.value||''});
+        if(row)drafts.set(row,{key:panel.dataset.key,groups:Object.fromEntries([...panel.querySelectorAll('select')].map(s=>[s.dataset.receiveGroup,s.multiple?[...s.selectedOptions].map(o=>o.value).sort():s.value]))});
       });
     }
+    function configurations(model){
+      const linked=state.groups.filter(g=>belongs(g,model.key)&&!g.retired&&g.kind==='linked');
+      const choices=model.choices||[];
+      if(!linked.length)return choices.length?choices.map(v=>({variant:v.code,label:v.label,selections:{}})):[{variant:'',label:'Unmapped',selections:{}}];
+      const mappings=[...(state.series_mappings||[]).filter(m=>m.series_key===model.family),...state.mappings.filter(m=>m.item_key===model.key)];
+      return mappings.filter(m=>!m.retired&&choices.some(v=>v.code===m.variant)&&Object.keys(m.selections).length===linked.length&&linked.every(g=>options(g).some(o=>o.id===m.selections[g.id]))).map(m=>({...m,label:m.variant+' · '+Object.values(m.selections).map(optionLabel).join(' / ')}));
+    }
+    let offered=[];
     function renderConfigurations(){
-      config.innerHTML=[...rows.children].map((row,index)=>{
-        const model=findModel(row.querySelector('[name=model]').value);
-        if(!model)return '';
-        const groups=state.groups.filter(g=>belongs(g,model.key)&&!g.retired&&g.kind!=='critical').sort(sort);
-        const old=drafts.get(row), draft=old?.key===model.key?old:{groups:{}};
-        const choices=model.choices||[];
-        return `<fieldset data-row="${index}" data-key="${esc(model.key)}"><legend>Row ${index+1} · ${esc(model.model)}</legend>
-          <div class="stock-form">${groups.map(g=>`<label>${g.kind==='linked'?'Pricelist Link · ':''}${esc(g.label)}
-            ${g.series_key&&g.kind==='normal'?'<small>Optional · select all that apply (⌘ / Ctrl-click)</small>':''}
-            <select data-receive-group="${g.id}" ${g.series_key&&g.kind==='normal'?'multiple':'required'}>${g.series_key&&g.kind==='normal'?'':'<option value="">Select</option>'}${options(g).map(o=>
-              `<option value="${o.id}" ${(g.series_key&&g.kind==='normal'?draft.groups[g.id]?.includes(o.id):draft.groups[g.id]===o.id)?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`).join('')}
-          ${groups.some(g=>g.kind==='linked')||!choices.length?'':`<label>Existing Pricelist configuration<select data-receive-variant>
-            <option value="">Unmapped</option>${choices.map(v=>`<option value="${esc(v.code)}" ${draft.variant===v.code?'selected':''}>${esc(v.label)}</option>`).join('')}</select></label>`}
-          <label>Serial numbers ${serialPolicy(model)?'(required)':'(optional)'}
-            <textarea name="serials" ${serialPolicy(model)?'required':''} placeholder="One per unit">${esc(draft.serials||'')}</textarea></label>
-          </div></fieldset>`;
+      const select=$('receiptVariant'), previous=select.value;
+      const selectedRows=[...rows.children].map((row,index)=>({row,index,model:findModel(row.querySelector('[name=model]').value)})).filter(x=>x.model);
+      const [first]=selectedRows;
+      const key=m=>JSON.stringify([m.variant,Object.entries(m.selections).sort()]);
+      const match=(m,model)=>{const list=configurations(model).filter(x=>x.variant===m.variant);return list.find(x=>key(x)===key(m))||(list.length===1?list[0]:null)};
+      offered=first?configurations(first.model).map(m=>({key:key(m),label:m.label,variant:m.variant,byModel:new Map(selectedRows.map(x=>[x.model.key,match(m,x.model)]))})):[];
+      select.innerHTML='<option value="">Select configuration</option>'+offered.filter(m=>[...m.byModel.values()].every(Boolean)).map(m=>`<option value="${esc(m.key)}">${esc(m.label)}</option>`).join('');
+      select.value=previous;
+      if(!select.value&&select.options.length===2)select.selectedIndex=1;
+      $('receiptCompatibility').textContent=first&&select.options.length===1?'No common configuration for '+selectedRows.map(x=>x.model.model).join(', '):'';
+      config.innerHTML=selectedRows.map(({row,index,model})=>{
+        const groups=state.groups.filter(g=>belongs(g,model.key)&&!g.retired&&g.kind==='normal').sort(sort);
+        const draft=drafts.get(row)?.key===model.key?drafts.get(row).groups:{};
+        return `<fieldset data-row="${index}" data-key="${esc(model.key)}"><legend>${esc(model.model)}</legend>${groups.map(g=>`<label>${esc(g.label)}<select data-receive-group="${g.id}" ${g.series_key?'multiple':'required'}>${g.series_key?'':'<option value="">Select</option>'}${options(g).map(o=>`<option value="${o.id}" ${[draft[g.id]].flat().includes(o.id)?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`).join('')||'No normal options'}</fieldset>`;
       }).join('');
+      $('receiptCritical').textContent=selectedRows.map(({model})=>{const labels=state.groups.filter(g=>belongs(g,model.key)&&!g.retired&&g.kind==='critical').flatMap(g=>options(g).map(o=>o.label));return labels.length?model.model+' · '+labels.join(', '):''}).filter(Boolean).join('; ')||'No critical options for the selected models.';
     }
     function changeSeries(){
       storeConfigurations();
@@ -1031,7 +1071,9 @@
       list.innerHTML=models.map(({label})=>`<option value="${esc(label)}"></option>`).join('');
       renderConfigurations();
     }
+    $('receiptVariant').addEventListener('invalid',()=>{$('receiptVariant').closest('details').open=true;message($('receiptCompatibility').textContent||'Select a compatible Pricelist Link configuration.',true);});
     series.onchange=changeSeries;
+    changeSeries();
     rows.onchange=e=>{if(e.target.name==='model'){storeConfigurations();renderConfigurations();}};
     rows.onclick=e=>{
       const button=e.target.closest('[data-remove-row]');
@@ -1053,12 +1095,17 @@
       storeConfigurations();
       const p={family:series.value,supplier_id:form.elements.supplier_id.value,date:form.elements.date.value,
         reference:form.elements.reference.value,rows:[]};
+      const shared=offered.find(x=>x.key===$('receiptVariant').value);
+      if(!shared){$('receiptVariant').closest('details').open=true;return message($('receiptCompatibility').textContent||'Select a compatible Pricelist Link configuration.',true);}
+      p.shared_variant=shared.variant;
       for(const [index,row] of [...rows.children].entries()){
         const field=name=>row.querySelector(`[name="${name}"]`).value;
         const model=findModel(field('model')), draft=drafts.get(row);
         if(!model||draft?.key!==model.key)return message(`Row ${index+1}: select an unambiguous model from the chosen series.`,true);
-        const data={item_key:model.key,selections:draft.groups,variant:draft.variant,
-          location_id:field('location_id'),quantity:field('quantity'),remark:field('remark'),serials:serialValues(draft.serials)};
+        const mapping=shared.byModel.get(model.key);
+        if(!mapping)return message('Configuration is incompatible with '+model.model,true);
+        const data={item_key:model.key,selections:{...draft.groups,...mapping.selections},variant:shared.variant,
+          location_id:field('location_id'),quantity:field('quantity'),remark:field('remark')};
         if(state.can_cost&&field('cost')!=='')data.unit_cost_myr=field('cost');
         p.rows.push(data);
       }
@@ -1252,10 +1299,10 @@
   function render() {
     if(!state)return;
     const edit=$('stockEdit');
-    edit.hidden=tab==='dropdowns'?!canDropdowns():!mayEdit();
+    edit.hidden=tab==='references'?!(caps('manage_stock_locations')||caps('manage_stock_suppliers')):tab==='detail'?!(mayEdit()||ledgerCap('delete_stock_batch')):tab==='dropdowns'?!canDropdowns():!mayEdit();
     edit.cancelStockHold?.();
     edit.textContent=editMode?'Done Editing':'Hold 3s to Edit';
-    hold(edit,3,()=>{editMode=true;editKey='';if(tab==='items'||tab==='dropdowns')render();else moveTo('items');});
+    hold(edit,3,()=>{editMode=true;editKey='';if(['items','dropdowns','references','detail'].includes(tab))render();else moveTo('items');});
     if(editMode){
       edit.onpointerdown=null;edit.onkeydown=null;
       edit.onclick=()=>{editMode=false;editKey='';optionDraft=null;linkDraft=null;render();};
@@ -1283,7 +1330,8 @@
       </div>`;
     utilities.querySelectorAll('[data-stock-tool]').forEach(b=>b.onclick=()=>{utilities.open=false;moveTo(b.dataset.stockTool);});
     let body;
-    if(tab==='check')body=stockCheck();
+    if(tab==='references')body=referencePage();
+    else if(tab==='check')body=stockCheck();
     else if(tab==='detail')body=stockDetail();
     else if(tab==='missing')body=missingParts();
     else if(tab==='history')body=stockHistory();
@@ -1292,12 +1340,13 @@
     else if(tab==='movement')body=ledger()?movementView():`<h2>Stock Movement</h2>${timeFrame('stockMovementTime',movementFilter,[7,30,90])}
       <p>The current database has no stock movement ledger.</p>`;
     else if(tab==='location')body=filters()+`<label>Location<select id="stockLocation"><option value="">Not Assigned</option>${refOptions('location',location,true)}</select></label>
-        ${manageReferences('location')}<div id="stockTable">${table()}</div>`;
-    else if(tab==='items')body=filters()+management()+manageReferences('supplier');
+        <div id="stockTable">${table()}</div>`;
+    else if(tab==='items')body=filters()+management();
     else if(tab==='input')body=filters(true)+(ledger()?(item()?history(item()):'<p>Select a model to view original opening balances.</p>'):inputForm());
     else body=seriesDropdowns()+serialPolicyView();
     $('stockContent').innerHTML=body;
-    if(tab==='check')bindStockCheck();
+    if(tab==='references')bindReferencePage();
+    else if(tab==='check')bindStockCheck();
     else if(tab==='detail')bindStockDetail();
     else if(tab==='history')bindStockHistory();
     else if(tab==='receive')bindReceive();

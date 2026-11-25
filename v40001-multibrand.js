@@ -597,7 +597,8 @@
       const family=String(data?.productFamily||data?.pricingSource?.product_family||state.selectedFamily||'').toUpperCase();
       const selectedProductBrand=family&&baseFamily(family)===baseFamily(state.selectedFamily)&&!data?.manualItem&&!data?.manualBrandOverride&&!data?.brandManuallyEdited&&!data?.descriptionManuallyEdited?byBrandId(state.selectedBrandId):null;
       const selected=byBrandId(explicitId)||state.brands.find(brand=>String(brand.brand_name||'').toLowerCase()===explicitBrand.toLowerCase())||(!data?.commercialIdentity&&family!=='ASSEMBLY'?selectedProductBrand:null);
-      const chosenBrand=explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected;
+      const identity=data?.commercialIdentity;
+      const chosenBrand=identity?(byBrandId(identity.brandId)?.brand_name?.replace(/^[-–—]$/,'')===identity.brand?byBrandId(identity.brandId):null):(explicitBrand==='-'&&selected?.brand_name!=='-'?null:selected);
       const copy={...(data||{})};if(chosenBrand&&!copy.descriptionManuallyEdited){copy.brand=chosenBrand.brand_name;copy.brandName=chosenBrand.brand_name;copy.brandId=chosenBrand.id}if(copy.pumpData&&chosenBrand)copy.pumpData={...copy.pumpData,keysuite_brand_id:chosenBrand.id,keysuite_brand_name:chosenBrand.brand_name};if(copy.pricingSource)copy.pricingSource={...copy.pricingSource,v391_brand_id:chosenBrand?.id||'',v391_brand_name:chosenBrand?.brand_name||'',v391_brand_logo:chosenBrand?.logo_data||'',v391_brand_country_of_origin:chosenBrand?.country_of_origin||'',v391_product_family:family};
       const row=original(copy);
       if(row){

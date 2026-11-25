@@ -1,0 +1,32 @@
+{
+  "version": "5.00.89",
+  "baseline": "5.00.88 FULL",
+  "baseline_sha256": "1cfc2a9594c248064a9e90bf91db50b6b503abd6285f317dd2d26969e2fc7a27",
+  "files": [
+    "VERSION.txt",
+    "RELEASE.json",
+    "manifest.json",
+    "index.html",
+    "release-version.js",
+    "sw.js",
+    "permissions.js",
+    "roles.js",
+    "categories.js",
+    "keystock-v100.js",
+    "commercial-identity.js",
+    "v40001-multibrand.js",
+    "stock-source-v50088.js",
+    "costing-audit-v50032.js",
+    "release-v50089.css",
+    "tests/v50087-ui.cjs",
+    "tests/v50089.cjs",
+    "tests/v50089-ui.cjs",
+    "tests/v50089-audit.cjs",
+    "tests/v50089-brand.cjs",
+    "supabase/migrations/20261125093807_v50089_keystock.sql",
+    "supabase/rollback_v50089.sql"
+  ],
+  "migration": "supabase/migrations/20261125093807_v50089_keystock.sql",
+  "rollback": "supabase/rollback_v50089.sql",
+  "installation": "Overlay at the V5.00.88 source root. Apply the versioned database migration separately during an approved release."
+}

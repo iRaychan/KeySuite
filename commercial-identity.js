@@ -26,7 +26,7 @@
   let commercial=alias(sourceModel,ctx),prefix=series(ctx);
   // A bare model number needs its configured selling prefix once; a named model is complete.
   if(prefix&&/^\d/.test(commercial))commercial=prefix+' '+commercial;
-  return {version:2,brandId:n(ctx.id||ctx.brandId),brand,series:prefix,model:commercial,
+  return {version:3,brandSelection:brand?'named':ctx.name!=null||ctx.brand!=null?'none':'missing',brandId:n(ctx.id||ctx.brandId),brand,series:prefix,model:commercial,
    hydraulic:{series:n(ctx.family),model:sourceModel},pricing:{series:n(ctx.masterSeries||ctx.family),model:n(ctx.masterModel||sourceModel)}};
  }
  function description(text,identity){
@@ -59,9 +59,14 @@
   }
   const base=ctx||(!explicit||bid?api()?.brandContext?.(bid,family,p.keysuite_material,s.v41413_product_group_code):null)||{};
   // Pricing metadata may describe a shared supplier/master, never the selling identity.
-  const name=own(item,'brand')?item.brand:own(item,'brandName')?item.brandName:record?.brand_name??p.keysuite_brand_name;
+  const name=ctx?.name??(own(item,'brand')?item.brand:own(item,'brandName')?item.brandName:record?.brand_name??p.keysuite_brand_name);
+  const declaredBrand=own(item,'brand')||own(item,'brandName');
+  const matches=declaredBrand?(api()?.state?.brands||[]).filter(row=>cleanBrand(row.brand_name).toLowerCase()===cleanBrand(name).toLowerCase()):[];
+  const matchingBrand=matches.find(row=>String(row.id)===String(bid))||(matches.length===1?matches[0]:null);
+  const commercialId=ctx?.id??(declaredBrand?(matchingBrand?.id||(!record?bid:'')||''):(bid||base.id));
+  const commercialBase=!ctx&&declaredBrand&&String(commercialId)!==String(bid)?(commercialId&&api()?.brandContext?.(commercialId,family,p.keysuite_material,s.v41413_product_group_code)||{}):base;
   const itemModel=withoutDuty(item.model).replace(/^.*\bModel:\s*/i,'');
-  return resolve({...base,...(explicit?{name}:{}),id:bid||base.id},p.keysuite_selling_model||p.quotation_model||p.display_model||itemModel||p.model);
+  return resolve({...commercialBase,...(explicit?{name}:{}),id:commercialId},p.keysuite_selling_model||p.quotation_model||p.display_model||itemModel||p.model);
  }
  function stamp(item,ctx=null){
   const identity=forItem(item,ctx);if(!identity)return item;
@@ -69,7 +74,7 @@
   return {...item,model,commercialIdentity:identity,brand:identity.brand,brandId:identity.brandId,
    ...(item.bomDescription&&!item.bomManual?{bomDescription:[identity.brand,identity.model].filter(Boolean).join(' ')}:{}),
    ...(item.pumpData?{pumpData:{...item.pumpData,commercialIdentity:identity}}:{}),
-   description:item.descriptionManuallyEdited?item.description:description(item.description,identity)};
+   description:item.descriptionManuallyEdited||item.manualItem&&!item.pumpData&&item.description!==item.model?item.description:description(item.description,identity)};
  }
  function captureSelection(payload={},sourceWin=null){
   if(payload.commercialIdentity)return payload;
@@ -82,7 +87,8 @@
    alias(sourceModel,pin).toUpperCase()===n(pin?.displayModel).toUpperCase();
   if(!sameFamily||!sameModel)pin=null;
   const group=payload.keysuite_product_group_code||payload.product_group_code||pin?.productGroup||state.selectedProductGroup;
-  const bid=payload.keysuite_selling_brand_id??payload.keysuite_brand_id??pin?.id??state.selectedBrandId;
+  const listBrand=!sourceWin&&n(state.selectedFamily).toUpperCase()===n(family).toUpperCase()?state.selectedBrandId:null;
+  const bid=payload.keysuite_selling_brand_id??(pin&&pinnedModel?pin.id:null)??listBrand??payload.keysuite_brand_id??pin?.id??state.selectedBrandId;
   let ctx=pin&&String(pin.id)===String(bid)&&(!pin.family||String(pin.family).toUpperCase()===String(family).toUpperCase())
    ?pin:a?.brandContext?.(bid,family,payload.keysuite_material,group);
   // A failed lookup must not silently select a pricing/master brand.
@@ -110,7 +116,7 @@
    model.value=identity.model+suffix;
   }
   if(Object.keys(pump).length)row.dataset.pumpData=JSON.stringify({...pump,commercialIdentity:identity,keysuite_brand_id:identity.brandId,keysuite_brand_name:identity.brand});
-  if(row.dataset.descriptionManuallyEdited!=='true'&&!payload.descriptionManuallyEdited)area.value=description(area.value,identity);
+  if(row.dataset.descriptionManuallyEdited!=='true'&&!payload.descriptionManuallyEdited&&!(payload.manualItem&&!Object.keys(pump).length&&payload.description!==payload.model))area.value=description(area.value,identity);
  }
  function curveTitle(dialog){
   if(!dialog?.hasAttribute('open'))return '';

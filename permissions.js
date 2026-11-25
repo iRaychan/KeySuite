@@ -13,6 +13,7 @@
   for(const [role,permissions] of Object.entries(DEFAULTS)){
     for(const key of stockKeys)permissions[key]=['owner','admin'].includes(role)?'full':'none';
     permissions.view_stock='full';
+    for(const key of ['view_stock_cost','delete_stock_batch'])permissions[key]=role==='owner'?'full':'none';
     for(const key of ['receive_stock','manage_stock_dropdowns','reserve_stock','confirm_stock_out','adjust_stock','move_stock']){
       permissions[key]=['owner','admin'].includes(role)?'full':'none';
     }

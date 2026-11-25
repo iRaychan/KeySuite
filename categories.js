@@ -243,10 +243,11 @@
         rpc='keysuite_manage_pricing_category_v221';args={...params,p_product_code:selectedProduct==='CHC_G2'?'CHC':selectedProduct};
       }
       const {error}=await client.rpc(rpc,args);if(error)throw error;
-      let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').ilike('category_name',name).limit(1);if(lookup.error)throw lookup.error;targetId=String(lookup.data?.[0]?.id||'')}
+      let targetId=selectedId||'';if(!targetId){const lookup=await client.from('ks_pricing_categories').select('id,category_name').eq('category_name',name).single();if(lookup.error)throw lookup.error;targetId=String(lookup.data?.id||'')}
       if(!targetId)throw new Error('Saved Category ID could not be resolved for Price List Source.');
-      const currencySave=['BGF','G','ISO'].includes(selectedProduct)?{error:null}:await client.rpc('keysuite_save_category_currency_selection_v41511',{p_category_id:targetId,p_product_code:selectedProduct,p_currencies:rule.currencies});if(currencySave.error)throw currencySave.error;
-      if(rule.currencies.includes('STOCK')){const {error}=await client.rpc('keysuite_category_rule_v50088',{p_category_id:targetId,p_product_code:selectedProduct,p_rule:rule});if(error)throw error}
+      selectedId=targetId;
+      const ruleSave=await client.rpc('keysuite_category_rule_v50088',{p_category_id:targetId,p_product_code:selectedProduct,p_rule:rule});
+      if(ruleSave.error)throw ruleSave.error;
       const rows=await reload(),saved=rows.find(item=>item.id===targetId);openCategory(saved,false);message(`${selectedProduct} pricing rule for “${name}” saved. ${rule.currencies.length} Price List Source selected.`,'info');
     }catch(error){console.error(error);message(String(error?.message||error||'Pricing Category could not be saved.'),'error')}
     finally{button.disabled=false;button.textContent=original}

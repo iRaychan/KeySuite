@@ -1,6 +1,6 @@
-/* KeySuite V5.00.88 Service Worker. */
-const CACHE='keysuite-v50088';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50088"></script>';
+/* KeySuite V5.00.89 Service Worker. */
+const CACHE='keysuite-v50089';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50089"></script>';
 const SHELL=[
  './stock-source-v50088.js','./quotation-history-v50087.js','./payment-terms.js',
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',
@@ -18,7 +18,7 @@ SHELL[SHELL.indexOf('./v42875-version-lock.js')]='./v50035-version-lock.js';
 SHELL.push('./operating-speed.js','./release-version.js','./v50063-focused-fixes.css','./v50051-version-lock.js','./product-family-registry-v50047.js','./RELEASE.json');
 SHELL.push('./g-data-v50068.js','./g-pdf-v50068.js','./g-series-v50068.js','./assets/v50068/g-dimension.png','./selector-bgf/bgreich-logo.png');
 SHELL.push('./g-performance-v50072.js','./g-performance-v50072.css','./supabase/functions/shared-bfi/bfi-selector-core.js');
-SHELL.push('./commercial-identity.js');
+SHELL.push('./commercial-identity.js','./release-v50089.css');
 SHELL.push('./bfi-curve-layout.css','./bfi-curve-view.js','./bfi-report-template.js');
 SHELL.push('./pump-pdf-report.html','./technical-pdf.js','./selector-iso/iso-pumpset-dimension.png');
 SHELL.push('./technical-pdf.js?v=50074-gpdf','./g-pdf-v50068.js?v=50074-gpdf');
