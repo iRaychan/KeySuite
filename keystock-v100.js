@@ -22,7 +22,27 @@
   let dropdownFilter=['','','',''];
   let dropdownSeries='', dropdownKind='critical', dropdownOption='', optionDraft=null;
   let missingFilter={model:'',series:'',component:''};
-  let newestFirst=false;
+  let newestFirst=false, batchEdit=null;
+  const detailFilters={critical:'',normal:''};
+  const detailSections={critical:false,normal:false};
+  const statusChoices=['','unconfigured','zero','positive'];
+  const statusPreferenceKey=()=>{
+    const a=window.KEYSUITE_ACCESS||{},user=window.KeySuiteAuth?.getSession?.()?.user?.id||a.user_id||a.email||window.KEYSUITE_PROFILE?.email;
+    return a.company_id&&user?`keysuite:stock-status:${a.company_id}:${String(user).toLowerCase()}`:'';
+  };
+  function stockStatusPreference(value){
+    const key=statusPreferenceKey();
+    if(!key)return '';
+    try{
+      if(value===undefined){
+        const saved=localStorage.getItem(key)||'';
+        return statusChoices.includes(saved)?saved:'';
+      }
+      if(value)localStorage.setItem(key,value);
+      else localStorage.removeItem(key);
+    }catch(_){}
+    return '';
+  }
   function emptyStockFilter(){return {location:'',supplier:'',serial:'',open:false};}
   function emptyHistoryFilter(){return {model:'',serial:'',period:'all',from:'',to:'',open:false};}
   const ledger=()=>state?.ledger;
@@ -60,6 +80,11 @@
     trail.push({tab,selected,family,query,location,status,scroll:scrollRoot()?.scrollTop||0,y:window.scrollY});
     if (trail.length>40) trail.shift();
     tab=next;
+    batchEdit=null;
+    if(next==='detail'){
+      detailFilters.critical=detailFilters.normal='';
+      detailSections.critical=detailSections.normal=false;
+    }
     if(key){selected=key;if(next!=='detail'){family=item().family;query='';}}
     correction=null;
     entryId=uid();
@@ -71,7 +96,7 @@
     const prev=trail.pop();
     if(!prev)return false;
     ({tab,selected,family,query,location,status}=prev);
-    correction=null;entryId=uid();render();
+    correction=null;batchEdit=null;entryId=uid();render();
     requestAnimationFrame(()=>{scrollRoot()?.scrollTo(0,prev.scroll);window.scrollTo(0,prev.y);});
     return true;
   }
@@ -263,6 +288,7 @@
       if(token!==request)return false;
       if(!data?.permissions)throw Error('The KeyStock V1.01 database migration is required.');
       state=data;
+      status=stockStatusPreference()||status;
       render();
       const writable=data.can_manage||Object.values(data.permissions).some(Boolean);
       message(`KeyStock ${data.config_version==='v104'?'V1.04':data.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01'} · ${items().length.toLocaleString()} catalogue models · ${writable?'Editing available':'Read only'}`);
@@ -346,7 +372,7 @@
     return ledger().positions.map(p=>{
       const lot=lots.get(p.lot_id);
       const opening=openings.get(lot.opening_id);
-      return {...p,supplier:lot.supplier,supplier_id:lot.supplier_id,created_at:lot.fifo_at,
+      return {...p,opening_id:lot.opening_id,supplier:lot.supplier,supplier_id:lot.supplier_id,created_at:lot.fifo_at,
         cost:lot.unit_cost_myr,received_on:lot.received_on,legacy:!!opening,snapshot:opening?.snapshot};
     });
   }
@@ -410,7 +436,7 @@
     $('stockCheckFilter').ontoggle=e=>{stockFilter.open=e.target.open;};
     $('stockQuery').oninput=e=>{query=e.target.value;update();};
     $('stockFamily').onchange=e=>{family=e.target.value;update();};
-    $('stockStatus').onchange=e=>{status=e.target.value;update();};
+    $('stockStatus').onchange=e=>{status=e.target.value;stockStatusPreference(status);update();};
     $('stockFilterLocation').oninput=e=>{stockFilter.location=e.target.value;update();};
     $('stockFilterSupplier').oninput=e=>{stockFilter.supplier=e.target.value;update();};
     $('stockFilterSerial').oninput=e=>{stockFilter.serial=e.target.value;update();};
@@ -423,13 +449,25 @@
     const model=item();
     if(!model)return '<p>This model is unavailable.</p>';
     const configs=new Map(state.configurations.filter(c=>c.item_key===selected).map(c=>[c.id,c]));
-    const batches=batchesForCheck(configs).sort((a,b)=>(newestFirst?-1:1)*(
+    const allBatches=batchesForCheck(configs).sort((a,b)=>(newestFirst?-1:1)*(
       (a.received_on||localDate(a.created_at)).localeCompare(b.received_on||localDate(b.created_at))
       ||a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id)));
-    const total=formatQty(batches.reduce((sum,b)=>sum+Number(b.quantity),0));
-    const reserved=formatQty(batches.reduce((sum,b)=>sum+Number(b.reserved||0),0));
-    const columns=state.groups.filter(g=>belongs(g,selected)&&g.kind==='normal'&&(!g.retired
-      ||batches.some(b=>Object.hasOwn(configs.get(b.configuration_id).selections,g.id)))).sort(sort);
+    const total=formatQty(allBatches.reduce((sum,b)=>sum+Number(b.quantity),0));
+    const reserved=formatQty(allBatches.reduce((sum,b)=>sum+Number(b.reserved||0),0));
+    const hasOption=(batch,option)=>Object.values(configs.get(batch.configuration_id).selections||{}).some(value=>[value].flat().includes(option));
+    const batches=allBatches.filter(b=>Object.values(detailFilters).every(option=>!option||hasOption(b,option)));
+    const groupFilter=kind=>{
+      const button=(id,label)=>`<button type="button" class="btn secondary" data-detail-kind="${kind}" data-detail-option="${esc(id)}" aria-pressed="${detailFilters[kind]===id}">${label}</button>`;
+      const openingIds=new Set(allBatches.map(batch=>batch.opening_id||batch.id));
+      const shortages=kind==='critical'?state.critical_quantities.filter(entry=>openingIds.has(entry.opening_id)):[];
+      const sections=groups(kind).map(group=>`<div class="stock-normal-row"><b>${esc(group.label)}</b>${options(group).map(option=>{
+        const total=allBatches.filter(batch=>hasOption(batch,option.id)).reduce((sum,batch)=>sum+Number(batch.quantity),0);
+        const missing=shortages.filter(entry=>entry.option_id===option.id).reduce((sum,entry)=>sum+Number(entry.missing_quantity),0);
+        return button(option.id,`${esc(option.label)} <strong>${formatQty(total)}</strong>`)+
+          (missing>0?`<small>Recorded opening shortage: ${formatQty(missing)}</small>`:'');
+      }).join('')}</div>`).join('');
+      return `<details data-detail-section="${kind}" ${detailSections[kind]?'open':''}><summary>${kind==='critical'?'Critical':'Normal'} Group</summary><div class="stock-normal-row">${button('','All')}</div>${sections}</details>`;
+    };
     const buckets=new Map();
     const price=n=>n==null?'—':Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
     const batchRows=batches.map(b=>{
@@ -443,7 +481,7 @@
         ['reserve','R','reserve_stock','Reserve stock'],
         ['issue','−','confirm_stock_out','Deduct stock']
       ].filter(([, ,permission])=>ledgerCap(permission)).map(([action,label,,title])=>
-        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action issue" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
+        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('edit_stock_batch')?`<button type="button" class="stock-row-action" data-edit-position="${b.id}" aria-label="Edit batch">✎</button>`:'')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action issue" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
       return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions||'—'}</div></td></tr>`;
     });
     const rowById=new Map(batches.map((b,i)=>[b.id,batchRows[i]]));
@@ -454,34 +492,82 @@
       const nested=stockTable(['Date','Location','Cost (RM)','Total','Reserve','Not Complete','On Hand','Actions'],members.map(b=>rowById.get(b.id)),'','data-layout="batch-details"');
       return [`<tr><td><button class="stock-link" aria-expanded="false" data-bucket="${index}">${esc(variant)}</button></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty)}</td><td>${formatQty(reserve)}</td><td>—</td><td>${formatQty(qty)}</td></tr><tr hidden id="bucket-${index}"><td colspan="6">${nested}</td></tr>`];
     });
-    const openings=new Set(state.opening_balances.filter(b=>!b.voided_at&&configs.has(b.configuration_id)).map(b=>b.id));
-    const shortages=new Map();
-    for(const entry of state.critical_quantities){
-      if(openings.has(entry.opening_id))shortages.set(entry.option_id,(shortages.get(entry.option_id)||0)+Number(entry.missing_quantity));
-    }
-    const critical=state.groups.filter(g=>belongs(g,selected)&&g.kind==='critical').flatMap(g=>
-      state.options.filter(o=>o.group_id===g.id&&(!o.retired&&!g.retired||shortages.has(o.id))).map(o=>
-        '<div>'+esc(g.label)+' · '+esc(o.label)+(shortages.has(o.id)?' · Recorded opening shortage '+formatQty(shortages.get(o.id)):'')+'</div>')).join('');
-    const normal=columns.map(g=>{
-      const tally=new Map();
-      for(const b of batches){
-        const option=configs.get(b.configuration_id).selections[g.id];
-        for(const id of [option].flat().filter(Boolean))tally.set(id,(tally.get(id)||0)+Number(b.quantity));
-      }
-      const choices=state.options.filter(o=>o.group_id===g.id&&(!o.retired||tally.has(o.id))).sort(sort);
-      return `<div class="stock-normal-row"><b>${esc(g.label)}</b>${choices.map(o=>
-        `<span>${esc(o.label)} <strong>${formatQty(tally.get(o.id)||0)}</strong></span>`).join('')}</div>`;
-    }).join('');
     return `<div class="stock-detail-head"><button class="btn secondary" id="stockDetailBack">Back</button><h2>${esc(model.model)}</h2></div>
       <div class="stock-detail-metrics">${[['Total',total],['Reserve',ledger()?reserved:'—'],['Not Complete','—'],['On Hand',total]].map(([label,value],i)=>
         `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
       <p id="stockMetricStatus" class="stock-metrics-note" role="status" hidden></p>
-      <details><summary>Critical Group</summary>${critical||'No critical options'}</details><details><summary>Normal Group</summary>${normal||'No normal options'}</details><h3>Stock by configuration</h3>
+      ${groupFilter('critical')}${groupFilter('normal')}<h3>Stock by configuration</h3>
+      ${batchEdit?stockBatchEditor(batchEdit):''}
       <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
       <p class="stock-metrics-note">Opening dates identify the historical count. Purchase batches show their receiving date.</p>
       ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}`;
   }
+  function stockBatchEditor(batch){
+    const config=state.configurations.find(c=>c.id===batch.configuration_id);
+    if(!config)return '';
+    const active=groups(),linked=active.some(g=>g.kind==='linked');
+    const lot=ledger().lots.find(l=>l.id===batch.lot_id);
+    const shared=ledger().positions.some(p=>p.lot_id===batch.lot_id&&p.id!==batch.id&&Number(p.quantity)>0);
+    const selections=active.map(g=>{
+      const prior=[config.selections[g.id]].flat().filter(Boolean),multiple=g.kind==='normal'&&g.series_key;
+      const choices=state.options.filter(option=>option.group_id===g.id&&(!option.retired||prior.includes(option.id))).sort(sort);
+      return `<label>${esc(g.label)}<select data-correction-group="${g.id}" ${multiple?'multiple':''}>${multiple?'':'<option value="">Select an option</option>'}
+       ${choices.map(o=>`<option value="${o.id}" ${prior.includes(o.id)?'selected':''}>${esc(o.label)}${o.retired?' (archived)':''}</option>`).join('')}</select></label>`;
+    }).join('');
+    return `<form id="stockBatchCorrection" class="stock-form">
+      <h3 class="stock-wide">Edit stock batch</h3><p class="stock-wide">${esc(configLabel(config))} · ${esc(locationLabel(batch.location_id))}</p>
+      <label>Location<select name="location"><option value="">Not Assigned</option>${refOptions('location',batch.location_id)}</select></label>
+      ${linked?'':`<label>Pricelist configuration<select name="variant">${choiceOptions(config.variant)}</select></label>`}
+      ${selections}
+      ${state.can_cost?`<label>Landed unit cost (RM)<input name="cost" type="number" min="0" step="any" value="${batch.cost??''}" ${shared?'disabled':''}></label>`:''}
+      <label>Remark<input name="remark" value="${esc(lot.remarks)}" ${shared?'disabled':''}></label>
+      ${shared?'<p class="stock-wide">Cost and remark are shared by the active positions in this receiving lot.</p>':''}
+      <label>Correction reason<input name="reason" required></label>
+      <div class="stock-wide stock-actions"><button class="btn">Save correction</button><button type="button" class="btn secondary" id="stockBatchCancel">Cancel</button></div>
+    </form>`;
+  }
+  function bindStockBatchEditor(){
+    const form=$('stockBatchCorrection');
+    if(!form)return;
+    const batch=batchEdit;
+    $('stockBatchCancel').onclick=()=>{batchEdit=null;render();};
+    const controls=[...form.querySelectorAll('[data-correction-group]')];
+    const readSelections=()=>Object.fromEntries(controls.flatMap(control=>{
+      const value=control.multiple?[...control.selectedOptions].map(o=>o.value).sort():control.value;
+      return value.length?[[control.dataset.correctionGroup,value]]:[];
+    }));
+    const initialSelections=JSON.stringify(readSelections());
+    const initialVariant=form.elements.variant?.value;
+    form.onsubmit=e=>{
+      e.preventDefault();
+      if(!editMode||!ledgerCap('edit_stock_batch'))return;
+      const fields=new FormData(form);
+      const draft=readSelections();
+      const payload={position:batch.id,revision:batch.edit_revision??0,expected_quantity:batch.quantity,location_id:fields.get('location'),reason:fields.get('reason')};
+      if(JSON.stringify(draft)!==initialSelections||fields.has('variant')&&fields.get('variant')!==initialVariant){
+        payload.selections=draft;
+        if(fields.has('variant'))payload.variant=fields.get('variant');
+      }
+      if(fields.has('remark'))payload.remark=fields.get('remark');
+      if(fields.has('cost'))payload.unit_cost_myr=fields.get('cost')===''?null:Number(fields.get('cost'));
+      save('edit_batch',payload,()=>{batchEdit=null;});
+    };
+  }
   function bindStockDetail(){
+    const root=$('stockContent');
+    root.querySelectorAll('[data-detail-section]').forEach(node=>node.ontoggle=()=>{detailSections[node.dataset.detailSection]=node.open;});
+    root.querySelectorAll('[data-detail-option]').forEach(button=>button.onclick=()=>{
+      detailSections[button.dataset.detailKind]=true;
+      detailFilters[button.dataset.detailKind]=button.dataset.detailOption;render();
+    });
+    root.querySelectorAll('[data-edit-position]').forEach(button=>button.onclick=()=>{
+      if(!editMode||!ledgerCap('edit_stock_batch'))return;
+      const batch=currentBatches().find(b=>b.id===button.dataset.editPosition);
+      if(!batch)return;
+      if(Number(batch.reserved)>0)return message('Release active reservations before correcting this batch.',true);
+      batchEdit=batch;render();$('stockBatchCorrection')?.scrollIntoView({block:'nearest'});
+    });
+    bindStockBatchEditor();
     $('stockContent').querySelectorAll('[data-bucket]').forEach(b=>b.onclick=()=>{const row=$('bucket-'+b.dataset.bucket);row.hidden=!row.hidden;b.setAttribute('aria-expanded',String(!row.hidden))});
     $('stockContent').querySelectorAll('[data-cancel-position]').forEach(b=>b.onclick=()=>{if(!editMode||!ledgerCap('delete_stock_batch'))return;const reason=prompt('Reason for cancelling this receiving batch')?.trim();if(reason&&confirm('Cancel the entire batch and record a reversal?'))save('cancel_batch',{position:b.dataset.cancelPosition,reason,request_id:uid()})});
     $('stockDetailBack').onclick=back;
@@ -705,7 +791,7 @@
       const source=type==='arrangement'?state.groups:type==='option'?state.options:seriesMappings();
       const old=source.find(x=>x.id===id);
       if(action==='delete'){
-        if(!old||!window.confirm(`Delete this ${type}? Existing stock history is retained. Referenced arrangements and options cannot be deleted.`))return;
+        if(!old||!(type==='option'?confirmOptionRemoval(old):window.confirm(`Delete this ${type}? Existing stock history is retained.`)))return;
         save(type==='arrangement'?'arrangement_delete':type==='option'?'link_option_delete':'series_mapping_delete',
           {series_key:dropdownSeries,id,revision:old.revision,group_id:old.group_id},()=>{linkDraft=null;});return;
       }
@@ -723,6 +809,13 @@
       save(d.type==='arrangement'?'arrangement_save':d.type==='option'?'link_option_save':'series_mapping_save',
         {...d,series_key:dropdownSeries},()=>{if(d.type==='mapping')dropdownOption=d.variant;linkDraft=null;});
     };
+  }
+  function confirmOptionRemoval(option){
+    const referenced=state.configurations.some(c=>[c.selections?.[option.group_id]].flat().includes(option.id))
+      ||state.critical_quantities.some(q=>q.option_id===option.id)
+      ||[...state.mappings,...(state.series_mappings||[])].some(m=>m.selections?.[option.group_id]===option.id);
+    const warning=referenced?' Existing stock and historical labels are retained. Pricelist combinations using this option will be removed from future receiving.':'';
+    return window.confirm(`Remove “${option.label}” from future stock selections?${warning}`);
   }
   function seriesDropdowns(){
     if(!['v103','v104'].includes(state.config_version))return '<h2>Dropdown Management</h2><p>The V1.04 database update is required for this interface.</p>';
@@ -792,7 +885,7 @@
     if($('stockOptionDelete'))$('stockOptionDelete').onclick=()=>{
       if(!editable())return;
       const option=state.options.find(o=>o.id===dropdownOption);
-      if(!option||!window.confirm(`Delete “${option.label}” from every ${seriesLabels[dropdownSeries]||dropdownSeries} model? Options used by stock records cannot be deleted.`))return;
+      if(!option||!confirmOptionRemoval(option))return;
       save('series_option_delete',{series_key:dropdownSeries,kind:dropdownKind,id:option.id,revision:option.revision},()=>{dropdownOption='';});
     };
   }
@@ -1299,7 +1392,7 @@
   function render() {
     if(!state)return;
     const edit=$('stockEdit');
-    edit.hidden=tab==='references'?!(caps('manage_stock_locations')||caps('manage_stock_suppliers')):tab==='detail'?!(mayEdit()||ledgerCap('delete_stock_batch')):tab==='dropdowns'?!canDropdowns():!mayEdit();
+    edit.hidden=tab==='references'?!(caps('manage_stock_locations')||caps('manage_stock_suppliers')):tab==='detail'?!(mayEdit()||ledgerCap('delete_stock_batch')||ledgerCap('edit_stock_batch')):tab==='dropdowns'?!canDropdowns():!mayEdit();
     edit.cancelStockHold?.();
     edit.textContent=editMode?'Done Editing':'Hold 3s to Edit';
     hold(edit,3,()=>{editMode=true;editKey='';if(['items','dropdowns','references','detail'].includes(tab))render();else moveTo('items');});
@@ -1419,7 +1512,7 @@
     window.addEventListener('KEYSUITE_AUTH_CONTEXT_READY',()=>{
       refreshVisibility();
       ++authContext;++request;
-      state=null;selected='';family='';query='';location='';status='';tab='check';trail.length=0;
+      state=null;selected='';family='';query='';location='';status=stockStatusPreference();tab='check';trail.length=0;batchEdit=null;
       expanded.clear();editMode=false;editKey='';correction=null;entryId=uid();
       stockFilter=emptyStockFilter();
       historyFilter=emptyHistoryFilter();

@@ -1,27 +1,29 @@
 {
-  "version": "5.00.89",
-  "baseline": "5.00.88",
-  "upgrade_supported_from": "5.00.88",
+  "version": "5.00.90",
+  "baseline": "5.00.89",
+  "upgrade_supported_from": "5.00.89",
   "release_status": "corrective_review",
   "technical_pdf_service_required": false,
   "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
-  "frozen_quotation_pdf_version": "1.08",
+  "frozen_quotation_pdf_version": "1.09",
   "modules": {
     "KeyStock": "1.04"
   },
   "changes": [
-    "Protect Category rule persistence and stock cost access",
-    "Shared receiving configuration, supplier and location management, audited batch cancellation",
-    "Four-source costing audit and commercial quotation identity"
+    "Commercial identity precedence, shared mapped STOCK costing and consistent generated pumpset descriptions",
+    "KeyStock status preferences, stock option archival, audited batch correction, group filtering and movement layout",
+    "Category Compare trimming and measured quotation PDF pagination, capacity spacing and wrapping"
   ],
   "known_issues": [
-    "Stock costing requires an eligible KeyStock catalogue identity, commercial brand and configuration. Bot pricing with STOCK enabled requires a delegated inventory permission context."
+    "Stock Check status preferences are stored per user and company in the current browser.",
+    "Production inputs for the reported ES 40-16 price difference were unavailable for verification.",
+    "Shared receiving-lot cost and remark corrections require lot-level review when multiple positions remain active."
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
-  "approval_required_database_proposal": "supabase/migrations/20261125093807_v50089_keystock.sql",
-  "asset_revision": "50089"
+  "approval_required_database_proposal": "supabase/migrations/20261126133759_v50090_stock_corrections.sql",
+  "asset_revision": "50090"
 }

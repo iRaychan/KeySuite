@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.89</title>
-  <script src="release-version.js?v=50089"></script>
+  <title>KeySuite V5.00.90</title>
+  <script src="release-version.js?v=50090"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -142,6 +142,35 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
   .print-system-item-head td{padding-bottom:0}.print-system-item-head .print-item-model{margin-bottom:0}.print-system-item-desc-row td{padding-top:1.5mm}.print-system-item-desc-row .print-system-desc-cell{width:auto!important;text-align:left!important;white-space:normal!important}.print-system-item-desc-row .print-item-desc{width:100%}
   .print-capacity-item .print-item-model{margin-bottom:.35mm}.print-system-item-desc-row.print-capacity-item td{padding-top:.35mm}
   .print-system-item-desc-row.print-pump-continuation td{padding-top:0}
+  .print-cover-flow .print-header{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 70mm;gap:5.8mm;padding:1mm 0 0 5.8mm}
+  .print-cover-flow .print-company{position:static;margin-left:auto;width:70mm}
+  .print-cover-flow .print-customer-address{position:static;width:auto;margin-top:4mm}
+  .print-cover-flow .print-customer-block{min-width:0;overflow-wrap:anywhere}
+  .print-cover-flow .print-customer-block>.print-date{margin-top:2mm}
+  .print-cover-flow .print-customer-block>.print-meta{margin:2mm 0 0}
+  .print-cover-flow .print-header:has(.print-template-header:not(:empty)){padding-top:8mm}
+  .print-cover-flow h1,.print-cover-flow .print-meta,.print-cover-flow .print-dear,.print-cover-flow .print-intro{position:static;width:auto}
+  .print-cover-flow h1{margin:1mm 0}
+  .print-cover-flow .print-items-table{margin-top:2mm}
+  .print-cover-flow .print-quote-line td{padding-top:4mm}
+  .print-cover-flow .print-terms>div{min-height:4.8mm}
+  .print-cover-flow .print-closing p{margin-bottom:1mm}
+  .print-cover-flow .signature-space{margin-top:1mm}
+  .print-cover-flow .print-meta,.print-cover-flow .print-dear,.print-cover-flow .print-intro{margin:0 5.8mm 2mm}
+  .print-page .print-terms,.print-page .print-closing{position:static;width:auto;margin:2mm 5.8mm 0}
+  .print-page .print-closing p{margin:0 0 2mm}
+  .print-page .print-closing p:empty{display:none}
+  .print-quote-line .print-quote-body{width:auto;text-align:left;white-space:normal}
+  .print-quote-body::after{content:"";display:block;clear:both}
+  .print-item-amounts{float:right;width:76mm;display:grid;grid-template-columns:22mm 27mm 27mm;line-height:1.28;text-align:right}
+  .print-item-amounts span:first-child{text-align:center;overflow-wrap:anywhere}
+  .print-quote-body .print-item-desc{overflow-wrap:anywhere}
+  .print-item-desc strong{font-weight:700}
+  .print-page .print-terms strong{font-weight:400}
+  .template-amount-only .print-item-amounts{width:54mm;grid-template-columns:22mm 32mm}
+  .template-amount-only .print-item-amounts span:nth-child(2){display:none}
+  .print-cover-flow .print-summary-spacer td{height:3mm}
+  .print-template-bank:empty{display:none}
   .print-summary-spacer td{height:5mm;padding:0!important}
   .print-summary-line td{height:0;padding:0!important;border:0!important}
   .print-summary-rule{height:0;border-top:1.2px solid #111;width:100%;margin:0;padding:0}
@@ -660,12 +689,12 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <link rel="stylesheet" href="g-performance-v50072.css?v=50074">
 <link rel="stylesheet" href="bfi-curve-layout.css?v=50074">
 <script src="v50033-series-registry.js?v=50083"></script>
-<link rel="stylesheet" href="release-v50089.css?v=50089">
+<link rel="stylesheet" href="release-v50089.css?v=50090">
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.89</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.90</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -681,7 +710,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.89</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.90</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -707,7 +736,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.89</div>
+    <div class="suite-version">KeySuite V5.00.90</div>
   </aside>
 
   <main>
@@ -2277,14 +2306,24 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="printQuotationDocument" aria-hidden="true">
   <section class="print-page print-cover">
     <div class="print-header">
-      <div class="print-customer-address">
-        <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
-        <div><span>Attn</span><b>:</b><strong id="pAttn"></strong></div>
-        <div><span>Tel</span><b>:</b><strong id="pTel"></strong></div>
-        <div><span>Mobile</span><b>:</b><strong id="pMobile"></strong></div>
-        <div><span>Email</span><b>:</b><strong id="pEmail"></strong></div>
-      </div>
       <div id="pTemplateHeader" class="print-template-header"></div>
+      <div class="print-customer-block">
+        <div class="print-customer-address">
+          <div><span>To</span><b>:</b><strong id="pTo"></strong></div>
+          <div><span>Attn</span><b>:</b><strong id="pAttn"></strong></div>
+          <div><span>Tel</span><b>:</b><strong id="pTel"></strong></div>
+          <div><span>Mobile</span><b>:</b><strong id="pMobile"></strong></div>
+          <div><span>Email</span><b>:</b><strong id="pEmail"></strong></div>
+        </div>
+        <div class="print-date"><span>Date</span> <b>:</b> <strong id="pDate"></strong></div>
+        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span> <b>:</b> <strong id="pRevisionDate"></strong></div>
+        <div class="print-meta">
+          <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
+          <div><span>Your reference</span><b>:</b><strong id="pCustomerRef"></strong></div>
+          <div><span>Our reference</span><b>:</b><strong id="pQuoteNo"></strong></div>
+          <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
+        </div>
+      </div>
       <div class="print-company">
         <img id="pTemplateLogo" src="keylargo-logo.png" alt="Keylargo">
         <strong id="pTemplateCompanyName">Keylargo Industrial Sdn. Bhd. (297660-M)</strong>
@@ -2292,17 +2331,9 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
         <div id="pTemplatePhone">Tel&nbsp;&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2099</div>
         <div id="pTemplateFax">Fax&nbsp;&nbsp;&nbsp;: +60 (3) 6094 2033</div>
         <div id="pTemplateEmail">email&nbsp;: <span class="print-company-email">keylargo@keylargo.com.my</span></div>
-        <div class="print-date"><span>Date</span> <b>:</b> <strong id="pDate"></strong></div>
-        <div id="pRevisionRow" class="print-date print-revision-date"><span>Rev</span> <b>:</b> <strong id="pRevisionDate"></strong></div>
       </div>
     </div>
     <h1 id="pDocTitle">Quotation</h1>
-    <div class="print-meta">
-      <div><span>Project</span><b>:</b><strong id="pProject"></strong></div>
-      <div><span>Your reference</span><b>:</b><strong id="pCustomerRef"></strong></div>
-      <div><span>Our reference</span><b>:</b><strong id="pQuoteNo"></strong></div>
-      <div><span>Handled by</span><b>:</b><strong id="pPreparedBy"></strong></div>
-    </div>
     <p class="print-dear" id="pDear">Dear Sir / Madam,</p>
     <p class="print-intro" id="pTemplateIntro">We like to thank you for your inquiry and pleased to submit our quotation on the terms set out below.</p>
     <div class="print-terms">
@@ -2330,10 +2361,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="permissions.js?v=50089"></script>
+<script src="permissions.js?v=50090"></script>
 <script src="v40407-role-authority.js?v=50071"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50085"></script>
+<script src="assembly.js?v=50090"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
@@ -2342,18 +2373,18 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="kv-price-data-v50017.js?v=50069"></script>
 <script src="pdf-optimization.js?v=50056"></script>
 <script src="payment-terms.js?v=50082"></script>
-<script src="commercial-identity.js?v=50089"></script>
+<script src="commercial-identity.js?v=50090"></script>
 <script src="quotation-history-v50087.js?v=50087"></script>
-<script src="app.js?v=50089"></script>
-<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50089"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
+<script src="app.js?v=50090"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50090"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50078"></script>
 <script src="manual-price-v50011.js?v=50085-corrected-r1"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50089"></script>
+<script src="pricing.js?v=50090"></script>
 <script src="technical-pdf.js?v=50074-gpdf"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50089"></script>
+<script src="categories.js?v=50090"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50079"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
@@ -2374,8 +2405,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="g-series-v50068.js?v=50085"></script>
 <script src="bsw-v50027.js?v=50085"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50089"></script>
-<script src="motor.js?v=50089"></script>
+<script src="roles.js?v=50090"></script>
+<script src="motor.js?v=50090"></script>
 <script src="coupling.js?v=50056"></script>
 <script src="baseplate.js?v=50069"></script>
 <script src="quotation-templates.js?v=409"></script>
@@ -2436,8 +2467,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="company-settings.js?v=41707"></script>
 <script src="keyai.js?v=50060"></script>
 <script src="keylab.js?v=41406"></script>
-<script src="stock-source-v50088.js?v=50089"></script>
-<script src="auth.js?v=50089"></script>
+<script src="stock-source-v50088.js?v=50090"></script>
+<script src="auth.js?v=50090"></script>
 <script src="keyhq/avatar-sync.js?v=42925"></script>
 <script src="keyhq-social.js?v=50001"></script>
 <script src="keyhq-launcher.js?v=50001"></script>
@@ -2480,13 +2511,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50078"></script>
 <script src="kv-product-families-v50027.js?v=50069"></script>
-<script src="v41200-bootstrap.js?v=50089"></script>
+<script src="v41200-bootstrap.js?v=50090"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
-<link rel="stylesheet" href="v50033-actions.css?v=50046">
+<link rel="stylesheet" href="v50033-actions.css?v=50090">
 <link rel="stylesheet" href="v50063-focused-fixes.css?v=50069">
 <script src="v50051-version-lock.js?v=50071"></script>
-<link rel="stylesheet" href="keystock-v100.css?v=50086">
-<script src="keystock-v100.js?v=50089"></script>
+<link rel="stylesheet" href="keystock-v100.css?v=50090">
+<script src="keystock-v100.js?v=50090"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2575,6 +2606,6 @@ document.addEventListener('click',event=>{
 })();
 </script>
 
-<script src="costing-audit-v50032.js?v=50089"></script>
-<script src="bsv-catalogue.js?v=50089"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50089"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
+<script src="costing-audit-v50032.js?v=50090"></script>
+<script src="bsv-catalogue.js?v=50090"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50090"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>

@@ -100,7 +100,7 @@ async function main(){
  pass('Actual quotation save -> secure-history mock -> reopen -> customer update -> refresh -> print preserves payment snapshot');
  // All eight real formatter configurations, with dynamic commercial branding and specifications.
  const pump={id:'p',section:'pump',qty:1,unitPrice:1000,model:'ES 40-16',productFamily:'ES',commercialIdentity:{brand:'Megaflow',model:'ES 40-16',series:'ES'},pumpData:{motor_hp:7.5,pole:2},pricingSource:{product_family:'ES',source_currency:'USD',source_price:100},description:'Megaflow End Suction Pump Model: ES 40-16\nSuction x Discharge: DN65 x DN40\nPump Material: CI / SS / SS / Mech Seal\n(Bare shaft pump only)'};
- const motor={id:'m',section:'motor',qty:1,unitPrice:500,motorData:{hp:7.5,pole:2},pricingSource:{source_currency:'RMB',source_price:100},description:'c/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz)'};
+ const motor={id:'m',section:'motor',qty:1,unitPrice:500,motorData:{hp:7.5,pole:2},pricingSource:{source_currency:'RMB',source_price:100},description:'c/w\t7.5HP 2Pole IE3 Motor (415V / 3Ph / 50Hz) Model: ES 3BM7.5-2'};
  const coupling={id:'c',section:'coupling',qty:1,unitPrice:50,couplingData:{model:'F60'},pricingSource:{source_currency:'RMB',source_price:50},description:'c/w\tFlexible Coupling'};
  const baseplate={id:'b',section:'baseplate',qty:1,unitPrice:100,pricingSource:{raw_cost_myr:100},description:''};
  w.testComponents={pump,motor,coupling,baseplate};w.KeySuiteCoupling={assemblyDescription:()=> 'c/w\tBaseplate with Flexible Coupling'};
@@ -113,7 +113,8 @@ async function main(){
   assert(text.includes('DN65 x DN40'));assert(text.includes('CI / SS / SS / Mech Seal'));
   if(missing)assert(text.endsWith(missing+' supply by Customer'),text);
   else assert(!text.includes('supply by Customer'));
-  if(keys.includes('motor'))assert(text.includes(motor.description));else assert(!text.includes('IE3 Motor'));
+  if(keys.includes('motor'))assert(text.includes(motor.description.split(' Model:')[0]));else assert(!text.includes('IE3 Motor'));
+  assert(!text.includes('ES 3BM7.5-2'));
   if(['A','E','F'].includes(name))assert.match(text,/7\.5HP 2P(?:ole)? Motor/);
   if(name==='pump only')assert(text.includes('(Bare shaft pump only)'));
   // Sanitization may add legacy default seals; pricing, quantity and item membership remain unchanged.
@@ -146,6 +147,18 @@ async function main(){
   assert.equal(item.description,w.results82.find(r=>r.name===name).description);assert.equal(item.pricingSource.carried_final_price,true);
  }
  pass('Actual Pumpset -> toQuotation for all eight configurations carries selected-component totals and exact descriptions');
+ const allComponents=Object.values(w.testComponents).map(item=>structuredClone(item));
+ const manuallyEdited={...motor,description:'c/w Motor (415V / 3Ph / 50Hz) Model: Customer spec',descriptionManuallyEdited:true};
+ assert(w.KeySuiteAssembly.formatPumpsetDescription({assembly_type:'pumpset',items:[pump,manuallyEdited,coupling,baseplate]}).includes('Model: Customer spec'));
+ const viaAssembly=plain(run('getQuoteItems()[0]'));
+ run('setQuoteItems([])');
+ assert(await w.KeySuiteAssembly.quotePumpsetSelection(allComponents,{model:'ES 40-16',qty:1}));
+ const direct=plain(run('getQuoteItems()[0]'));
+ assert.equal(direct.description,viaAssembly.description);
+ assert.equal(direct.unitPrice,viaAssembly.unitPrice);
+ assert(motor.description.includes('ES 3BM7.5-2'));
+ pass('ES 40-16 direct complete-set and Assembly handoffs agree for the same BOM and prices. Internal motor code retained and manual wording preserved.');
+
  for(let mask=1;mask<16;mask++){
   const items=Object.values(w.testComponents).filter((_,index)=>mask&(1<<index)).map(x=>structuredClone(x));
   assert.equal(w.__assembly82.missingPumpsetSourceCosts(items).length,0);

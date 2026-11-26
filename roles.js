@@ -20,6 +20,7 @@
   const LEVEL_LABELS={none:'No',view:'View',own:'Own',assigned:'Assigned',all:'All',full:'Full'};
   const PERMISSION_ROWS=[
     {key:'view_stock_cost',label:'View Stock Cost',options:['none','full']},
+    {key:'edit_stock_batch',label:'Edit Stock Batch',options:['none','full']},
     {key:'delete_stock_batch',label:'Delete Stock Batch',options:['none','full']},
     {key:'view_stock',label:'View Stock',options:['none','full']},
     {key:'receive_stock',label:'Add Stock (Receiving)',options:['none','full']},

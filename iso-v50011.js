@@ -29,14 +29,14 @@
   if(!window.KeySuiteApp.ensureQuotationPricingContext('add an ISO pump'))return;
   const p=find(payload.base_model||payload.model);if(!p)return;
   const material=payload.keysuite_material||$('isoMaterial').value,sealType=payload.keysuite_seal_type||$('isoSealType').value,seal=payload.keysuite_seal||$('isoSeal').value,elastomer=payload.keysuite_elastomer||$('isoElastomer').value,bare=payload.keysuite_bare_shaft!==false;
-  const found=price(p.id,material,{sealType,seal,elastomer,pricingMode:target==='assembly'||!bare?'assembly':'quotation'});
+  const found=price(p.id,material,{commercialIdentity:payload.commercialIdentity,sealType,seal,elastomer,pricingMode:target==='assembly'||!bare?'assembly':'quotation'});
   const capacity=payload.raw_flow_text===''||payload.raw_head_text===''?null:esSelectionCapacity(payload);
   const motorData={hp:payload.motor_hp,pole:payload.pole,efficiencyClass:payload.motor_efficiency_class,
    voltage:payload.motor_voltage,phase:payload.motor_phase,frequency:payload.motor_frequency_hz??payload.frequency_hz};
   const components=payload.assembly_components||[],mode=assemblyMode(payload);
   const completeAssembly=components.some(part=>part.type==='baseplate')&&components.some(part=>part.type==='coupling');
   const options={sealType,bareShaft:bare},withDuty=desc=>[capacity?capacityLine(capacity):'',desc].filter(Boolean).join('\n');
-  const item={model:'ISO '+p.model,description:withDuty(description(p,material,options)),qty:1,...(capacity||{}),pricingSource:{product_family:'ISO',product_id:p.id,material,seal_type:sealType,seal_material:seal,elastomer},productFamily:'ISO',pumpData:payload,assemblySection:'pump',section:'pump',assemblyLevel:'PUMPSET_COMPONENT'};
+  const item={commercialIdentity:payload.commercialIdentity,model:payload.commercialIdentity?.model||'ISO '+p.model,description:withDuty(description(p,material,options)),qty:1,...(capacity||{}),pricingSource:{product_family:'ISO',product_id:p.id,material,seal_type:sealType,seal_material:seal,elastomer},productFamily:'ISO',pumpData:payload,assemblySection:'pump',section:'pump',assemblyLevel:'PUMPSET_COMPONENT'};
   const offer=reason=>window.KeySuiteManualPrice.offer({...item,unit:bare?'unit':'set',description:withDuty(description(p,material,{
    ...options,motorLine:window.KeySuiteMotor.assemblyMotorLine(motorData),
    couplingLine:completeAssembly?window.KeySuiteCoupling.assemblyDescription(mode):''

@@ -69,6 +69,7 @@
   return resolve({...commercialBase,...(explicit?{name}:{}),id:commercialId},p.keysuite_selling_model||p.quotation_model||p.display_model||itemModel||p.model);
  }
  function stamp(item,ctx=null){
+  if(item.manualItem&&!item.pumpData&&!item.commercialIdentity)return item;
   const identity=forItem(item,ctx);if(!identity)return item;
   const model=item.modelManuallyEdited?item.model:identity.model+(n(item.model).slice(withoutDuty(item.model).length));
   return {...item,model,commercialIdentity:identity,brand:identity.brand,brandId:identity.brandId,
@@ -76,25 +77,31 @@
    ...(item.pumpData?{pumpData:{...item.pumpData,commercialIdentity:identity}}:{}),
    description:item.descriptionManuallyEdited||item.manualItem&&!item.pumpData&&item.description!==item.model?item.description:description(item.description,identity)};
  }
- function captureSelection(payload={},sourceWin=null){
-  if(payload.commercialIdentity)return payload;
+ function captureSelection(payload={},sourceWin=null,explicitContext=null){
+  if(payload.commercialIdentity&&!explicitContext)return payload;
   const a=api(),state=a?.state||{};
   let pin=null;try{pin=sourceWin?.__KEYSUITE_MODEL_PRESENTATION_CONTEXT}catch(_){}
-  const family=payload.family||payload.product||payload.productFamily||state.selectedFamily;
+  const family=String(payload.family||payload.product||payload.productFamily||state.selectedFamily||'').toUpperCase();
   const sameFamily=!pin?.family||String(pin.family).toUpperCase()===String(family).toUpperCase();
   const sourceModel=withoutDuty(payload.base_model||payload.model),pinnedModel=withoutDuty(pin?.masterModel);
   const sameModel=!pinnedModel||!sourceModel||sourceModel.toUpperCase()===pinnedModel.toUpperCase()||
    alias(sourceModel,pin).toUpperCase()===n(pin?.displayModel).toUpperCase();
   if(!sameFamily||!sameModel)pin=null;
-  const group=payload.keysuite_product_group_code||payload.product_group_code||pin?.productGroup||state.selectedProductGroup;
-  const listBrand=!sourceWin&&n(state.selectedFamily).toUpperCase()===n(family).toUpperCase()?state.selectedBrandId:null;
-  const bid=payload.keysuite_selling_brand_id??(pin&&pinnedModel?pin.id:null)??listBrand??payload.keysuite_brand_id??pin?.id??state.selectedBrandId;
-  let ctx=pin&&String(pin.id)===String(bid)&&(!pin.family||String(pin.family).toUpperCase()===String(family).toUpperCase())
-   ?pin:a?.brandContext?.(bid,family,payload.keysuite_material,group);
+  const generation=n(payload.generation_code||payload.keysuite_generation_code).toUpperCase();
+  const group=explicitContext?.productGroup||payload.keysuite_product_group_code||payload.product_group_code||(family==='CHC'&&/^G[12]$/.test(generation)?'CHC_'+generation:'')||pin?.productGroup||state.selectedProductGroup;
+  const activeBrand=n(state.selectedFamily).toUpperCase()===family?state.selectedBrandId:null;
+  const trustedPin=pin&&(pinnedModel||pin.pinned===true);
+  const bid=explicitContext?.id||payload.keysuite_selling_brand_id||(trustedPin?pin.id:null)||
+   (sourceWin&&sourceWin!==window&&pin&&!trustedPin?payload.keysuite_brand_id:null)||activeBrand||payload.keysuite_brand_id||a?.defaultPricingBrand?.(family);
+  const ctx=explicitContext||(pin&&String(pin.id)===String(bid)&&(!pin.family||String(pin.family).toUpperCase()===String(family).toUpperCase())
+   ?pin:a?.brandContext?.(bid,family,payload.keysuite_material,group));
   // A failed lookup must not silently select a pricing/master brand.
   if(!ctx||!bid||String(ctx.id)!==String(bid))return payload;
   // The selected/pinned brand record outranks catalogue keysuite_brand_name.
-  const identity=resolve(ctx,payload.keysuite_selling_model||payload.quotation_model||payload.display_model||payload.model);
+  const presentedModel=withoutDuty(payload.keysuite_selling_model||payload.quotation_model||payload.display_model||payload.model);
+  const modelContext=a?.commercialModelContext?.(ctx,sourceModel||presentedModel)||ctx;
+  const mappedChc=family==='CHC'&&a?.resolveChcIdentity?.(bid,group,sourceModel||presentedModel,payload.keysuite_material);
+  const identity=resolve(modelContext,payload.keysuite_selling_model||((mappedChc&&!payload.enhanced&&!payload.enhanced_curve)?mappedChc.sellingModel:presentedModel));
   identity.hydraulic.model=n(payload.base_model||payload.model);
   identity.pricing.model=n(payload.base_model||payload.model);
   identity.pricing.series=n(payload.keysuite_price_group_code||group||identity.pricing.series);

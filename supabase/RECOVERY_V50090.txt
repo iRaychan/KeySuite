@@ -1,0 +1,12 @@
+KeySuite V5.00.90 inventory migration recovery
+
+Migration
+Apply 20261126133759_v50090_stock_corrections.sql after the V5.00.89 migration and before enabling the V5.00.90 stock editor. The migration is transactional. Verify in an isolated copy before scheduling a production change. Take the usual database backup before a separate, approved release.
+
+Application rollback
+Restore the V5.00.89 application files, including its service worker, if the frontend must be rolled back. Keep the V5.00.90 database migration installed so edited positions, archived configuration options, issue configuration snapshots and audit records remain usable. Stock costing, receiving, stock movement and the V1.04 stock state protocol still use the existing RPC names.
+
+Data recovery
+Use the audited before/after record for the affected position to plan a compensating correction. Inspect keystock.audit for the reason, operator, time, configuration, location and remark. An authorized database administrator can join keystock.batch_correction_costs by audit ID for before/after landed costs. The audit copies are historical, and the old issue configuration snapshot is retained for returns. Review intervening movements and reservations before making a correction. If the original option was archived, restore the option and applicable mapping through a reviewed database change first. The batch correction checks the position revision and quantity. Avoid resetting the database, dropping the migration tables, or replaying an old batch quantity.
+
+A migration that fails before commit rolls back its schema changes automatically.

@@ -97,6 +97,7 @@ function sourceCostAvailable(item){
  // V4.04.21: the BOM item already carries the selected source-cost snapshot. Trust it first.
  // A positive USD/RMB/MYR source price is sufficient; calculated/selling price alone is never sufficient.
  if(['USD','RMB','MYR'].includes(currency)&&sourcePrice>0)return true;
+ if(currency==='STOCK'&&source.source_price!=null&&Number.isFinite(sourcePrice)&&sourcePrice>=0)return true;
  // Baseplate is a calculated MYR raw cost and is stored explicitly in the pricing snapshot.
  if(Number(source.raw_cost_myr??source.rawCostMyr??0)>0)return true;
  // Support explicit per-currency snapshots/imports when present without relying on a second product lookup.
@@ -188,6 +189,9 @@ function commercialComponentLine(item,text){
  const identity=item&&window.KeySuiteCommercialIdentity?.forItem(item);
  return identity?window.KeySuiteCommercialIdentity.description(text,identity):text;
 }
+function customerMotorLine(text){
+ return String(text||'').replace(/(\bMotor\s*\([^\n]*?\))\s+Model:[^\r\n]*/gi,'$1');
+}
 function completePumpsetDescription(d=current){
  if(!d||d.assembly_type!=='pumpset')return '';
  const pumps=(d.items||[]).filter(item=>item.section==='pump');pumps.forEach(sanitizeEsPumpDescription);const motor=(d.items||[]).find(item=>item.section==='motor'),couplings=(d.items||[]).filter(item=>item.section==='coupling'&&item.couplingData?.model),coupling=couplings.find(isAutoCouplingItem)||couplings[0];
@@ -201,7 +205,7 @@ function completePumpsetDescription(d=current){
   :'';
  if(couplingLine)couplingLine=commercialComponentLine(coupling,baseplateIdentity?couplingLine.replace(/Baseplate with\s*/i,''):couplingLine);
  const baseplateLine=baseplateIdentity?commercialComponentLine(baseplateItem,'c/w\tBaseplate'):'';
- return pumps.map((pump,index)=>{const part=pumpDescriptionParts(pump),lines=[part.model];if(index===0)lines.push(motorLine,couplingLine,baseplateLine);lines.push(part.suction,part.material,...part.extras);return lines.filter(Boolean).join('\n')}).join('\n');
+ return pumps.map((pump,index)=>{const part=pumpDescriptionParts(pump),lines=[part.model];if(index===0)lines.push(motor.descriptionManuallyEdited?motorLine:customerMotorLine(motorLine),couplingLine,baseplateLine);lines.push(part.suction,part.material,...part.extras);return lines.filter(Boolean).join('\n')}).join('\n');
 }
 function completedPumpsetDescription(d=current){
  if(!d||d.assembly_type!=='pumpset')return '';
@@ -216,7 +220,7 @@ function completedPumpsetDescription(d=current){
   const rating=hp>0?`${Math.round(hp*100)/100}HP`:kw>0?`${kw}kW`:'',pole=Number(md.pole||pd.motor_pole||pd.motorPole||pd.pole||2);
   const sizing=rating?` for ${rating} ${pole}Pole Motor`:'';
   const lines=[part.model];
-  if(index===0&&motor)lines.push(normalizeDescriptionIndentation(motor.description||'').trim());
+  if(index===0&&motor)lines.push(normalizeDescriptionIndentation(motor.descriptionManuallyEdited?motor.description:customerMotorLine(motor.description)).trim());
   const baseplateIdentity=baseplate&&window.KeySuiteCommercialIdentity?.forItem(baseplate);
   if(index===0&&coupling)lines.push(commercialComponentLine(coupling,`c/w\t${baseplate&&!baseplateIdentity?'Baseplate with ':''}Flexible Coupling${motor?'':sizing}`));
   if(index===0&&baseplate&&((!coupling&&motor)||(coupling&&baseplateIdentity)))lines.push(commercialComponentLine(baseplate,'c/w\tBaseplate'));
@@ -231,7 +235,10 @@ function rebuildDescription(d=current){
  if(!d)return '';
  (d.items||[]).forEach(item=>{Object.assign(item,window.KeySuiteCommercialIdentity?.stamp(item)||item);item.description=normalizeDescriptionIndentation(item.description)});
  const completed=completedPumpsetDescription(d);
- const body=completed||orderedItems(d).map(item=>stripCapacityDescription(String(item.description||'').trimEnd())).filter(Boolean).join('\n');
+ const body=completed||orderedItems(d).map(item=>{
+   const text=stripCapacityDescription(String(item.description||'').trimEnd());
+   return item.descriptionManuallyEdited?text:customerMotorLine(text);
+ }).filter(Boolean).join('\n');
  d.description=applyAssemblyCapacity(body,d);
  d.description=normalizeDescriptionIndentation(d.description);
  return d.description;
@@ -692,7 +699,7 @@ async function toSystem(){
  read();if(type!=='pumpset')return;if(!current?.items?.length){alert('Add at least one component first.');return}if(!current.customer_id){alert('Select a customer for this Pumpset.');return}
  const sourceDraft=current,description=normalizeDescriptionIndentation(String(sourceDraft.description||'')).trim(),unitPrice=quoteUnitPrice(sourceDraft),qty=2;
  const resolvedCouplings=(sourceDraft.items||[]).filter(item=>item.section==='coupling').map(item=>JSON.parse(JSON.stringify(item))),resolvedCoupling=resolvedCouplings.find(isAutoCouplingItem)||resolvedCouplings[0]||null,couplingSnapshot=resolvedCoupling?JSON.parse(JSON.stringify(resolvedCoupling)):null;
- const grouped={model:sourceDraft.model_item||sourceDraft.name||'Pumpset',bomDescription:sourceDraft.model_item||sourceDraft.name||'Pumpset',description,qty,unitPrice,assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset',section:'pumpset',productFamily:'ASSEMBLY',pricingSource:{product_family:'MANUAL',source_kind:'PUMPSET_TO_SYSTEM',pricing_mode:'assembly',calculated_price:unitPrice,assembly_items:JSON.parse(JSON.stringify(sourceDraft.items||[])),resolved_coupling:couplingSnapshot,resolved_couplings:resolvedCouplings},pumpsetData:{sourceAssemblyId:sourceDraft.id,modelItem:sourceDraft.model_item||'',qty,unitPrice,bom:JSON.parse(JSON.stringify(sourceDraft.items||[])),resolvedCoupling:couplingSnapshot,resolvedCouplings,capacity:{displayCapacity:!!sourceDraft.display_capacity,capacityValue:sourceDraft.capacity_value||'',capacityUnit:sourceDraft.capacity_unit||'m³/hr',headValue:sourceDraft.head_value||'',headUnit:sourceDraft.head_unit||'Mtr'}}};
+ const grouped={model:sourceDraft.model_item||sourceDraft.name||'Pumpset',bomDescription:sourceDraft.model_item||sourceDraft.name||'Pumpset',description,descriptionManuallyEdited:!!sourceDraft.description_manual,qty,unitPrice,assemblyLevel:'COMPLETE_PUMPSET',assemblySection:'pumpset',section:'pumpset',productFamily:'ASSEMBLY',pricingSource:{product_family:'MANUAL',source_kind:'PUMPSET_TO_SYSTEM',pricing_mode:'assembly',calculated_price:unitPrice,assembly_items:JSON.parse(JSON.stringify(sourceDraft.items||[])),resolved_coupling:couplingSnapshot,resolved_couplings:resolvedCouplings},pumpsetData:{sourceAssemblyId:sourceDraft.id,modelItem:sourceDraft.model_item||'',qty,unitPrice,bom:JSON.parse(JSON.stringify(sourceDraft.items||[])),resolvedCoupling:couplingSnapshot,resolvedCouplings,capacity:{displayCapacity:!!sourceDraft.display_capacity,capacityValue:sourceDraft.capacity_value||'',capacityUnit:sourceDraft.capacity_unit||'m³/hr',headValue:sourceDraft.head_value||'',headUnit:sourceDraft.head_unit||'Mtr'}}};
  if(blockAssemblyMargin(sourceDraft.items||[]))return;const added=await addItem(grouped,{type:'system',section:'pumpset'});if(!added)return;sourceDraft.status='system';try{await persist(sourceDraft)}catch(error){console.warn('Pumpset source status could not be saved.',error)}
  if($('assemblyNotice'))$('assemblyNotice').textContent='Pumpset transferred to System with an automatically selected KeyPLC panel based on Motor HP and quantity.';
 }
@@ -716,17 +723,19 @@ async function quotePumpsetSelection(items=[],meta={}){
 }
 async function toQuotation(){
  read();if(current?.assembly_type==='pumpset'){current.items=current.items.filter(item=>Number(item.qty??1)>0);if(!current.description_manual)rebuildDescription(current)}if(!current?.items?.length){alert('Add at least one component first.');return}if(!current.customer_id){alert('Select a customer for this assembly.');return}if(blockAssemblyMargin(current.items||[]))return;
- if(await window.KeySuiteApp?.selectCustomerForQuotation?.(current.customer_id)===false)return;const description=normalizeDescriptionIndentation(String(current.description||'')).trim();let unitPrice=0,pricingSource=null;
+ if(await window.KeySuiteApp?.selectCustomerForQuotation?.(current.customer_id)===false)return;const description=current.description_manual?String(current.description||''):normalizeDescriptionIndentation(String(current.description||'')).trim();let unitPrice=0,pricingSource=null;
  if(type==='pumpset'&&blockMissingPumpsetSourceCosts(current.items||[]))return;
  // V4.28.71: Assembly/System already owns the final unit price shown to the user.
  // Carry that exact value into Quotation; repricing the BOM here applies Fuel again.
  syncQuoteUnitPrice(current);unitPrice=quoteUnitPrice(current);if(!(unitPrice>0)){alert('Quotation pricing is not available.');return}
- const displayPricing=consolidatedPricing(current,'assembly');pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:type==='pumpset'?'PUMPSET':'SYSTEM',source_assembly_id:current.id,carried_final_price:true,calculated_price:unitPrice};
+ const displayPricing=consolidatedPricing(current,'assembly');
+ if(!displayPricing&&!current.quote_price_manual&&window.KeySuitePricing?.flattenAssemblyItems?.(current.items).some(item=>sourceObject(item).stock_check)){
+   alert('A BOM component no longer has an available automatic price. Reprice the component or enter a Pumpset selling price.');return;
+ }
+ pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:type==='pumpset'?'PUMPSET':'SYSTEM',source_assembly_id:current.id,carried_final_price:true,calculated_price:unitPrice};
  current.quote_unit_price=Number(unitPrice||0);window.KeySuiteApp?.showPage?.('quotation');
  const capacityValue=String(current.capacity_value||'').trim(),headValue=String(current.head_value||'').trim();
- // A completed System duty point must survive the System → Quotation → PDF handoff,
- // including drafts whose display flag was not persisted by an older version.
- const displayCapacity=!!current.display_capacity||!!(capacityValue&&headValue);
+ const displayCapacity=!!current.display_capacity;
  const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:current.model_item||current.name||'',qty:Number(current.quote_qty||1),unitPrice:Number(unitPrice||0),description,unit:'set',sourceType:type,brands:window.quoteItemBrands?.({items:current.items})||[],pricingSource,displayCapacity,capacityValue,capacityUnit:current.capacity_unit||'m³/hr',headValue,headUnit:current.head_unit||'Mtr'});if(!row){alert('Unable to add the assembly to Quotation.');return}
  current.status='quoted';dirtyDraftIds.delete(current.id);try{await persist(current)}catch(e){alert(`Assembly quotation was created, but the assembly status could not be saved: ${e.message||e}`)}
  const missing=pricingSource?.missing_bom_prices||[];if(missing.length)alert(`Pumpset added to Quotation. ${missing.length} BOM component price${missing.length===1?' is':'s are'} missing; complete the quotation Unit Price before sealing.`)

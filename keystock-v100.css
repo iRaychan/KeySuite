@@ -128,3 +128,16 @@
 #stockLinkForm label{display:block;margin:12px 0}
 #stockLinkForm input,#stockLinkForm select{display:block;width:100%;box-sizing:border-box;margin-top:6px}
 .stock-link-record summary{cursor:pointer;font-weight:600}
+
+#keyStock [data-detail-option][aria-pressed="true"]{background:#175b9b;color:white}
+#keyStock #stockMovementTime .stock-tools,#keyStock #stockMovementForm{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:none}
+#keyStock :is(#stockMovementTime,#stockMovementFormPanel) label{
+  display:grid;grid-template-columns:15rem minmax(0,1fr);align-items:center;gap:12px;margin-bottom:0
+}
+#keyStock #stockMovementFormPanel>label{margin-block:12px}
+#keyStock :is(#stockMovementTime,#stockMovementFormPanel) label :is(input,select,textarea){width:100%;min-width:0;margin:0;min-height:40px}
+#keyStock #stockMovementForm>div:last-child{padding-inline-start:calc(15rem + 12px)}
+@media(max-width:640px){
+  #keyStock :is(#stockMovementTime,#stockMovementFormPanel) label{grid-template-columns:8rem minmax(0,1fr)}
+  #keyStock #stockMovementForm>div:last-child{padding-inline-start:calc(8rem + 12px)}
+}

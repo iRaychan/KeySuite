@@ -153,7 +153,7 @@
   function selectedPricingBrand(family,options={}){
     const api=window.KeySuiteV391,code=normalizedFamily(family);
     const group=options.keysuite_product_group_code||options.assembly_selling_product_group||family;
-    const explicit=options.v391_brand_id||options.keysuite_brand_id||options.sellingBrand?.id;
+    const explicit=options.commercialIdentity?.brandId||options.sellingBrand?.id||options.v391_brand_id||options.keysuite_brand_id;
     if(explicit)return explicit;
     const active=api?.state?.selectedFamily,activeGroup=api?.state?.selectedProductGroup;
     if(options.useSelectedBrand===false||!active)return '';
@@ -193,23 +193,25 @@
       }else stockWarning='STOCK unavailable for this exact product and configuration.';
       window.KeySuiteStockCost?.notice(stockWarning);
     }
-    const fixedCandidates=requested==='fixed'?allCandidates:allCandidates.filter(row=>row.rarity==='fixed');
-    if(fixedCandidates.length&&(!stockEnabled||fixedCandidates.some(r=>categoryRule(cat,family).currencies.includes(r.currency)))){
-      const chosen=(stockEnabled?fixedCandidates.filter(r=>categoryRule(cat,family).currencies.includes(r.currency)):fixedCandidates).reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),finalPrice=brandMarginStage(chosen.baseMyr,configuredRate);
+    const enabled=allCandidates.filter(row=>categoryRule(cat,family).currencies.includes(row.currency)||options.convertedSource===true);
+    const chosen=enabled.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null);
+    if(!chosen)return null;
+    if(requested==='fixed'||chosen.rarity==='fixed'){
+      const finalPrice=brandMarginStage(chosen.baseMyr,configuredRate);
       if(finalPrice==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
-      return {stockCheck,stockAvailable,stockWarning,family,variant,rarity:'fixed',pricingMode,fixedPrice:true,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase:chosen.baseMyr,afterBrand:finalPrice,candidates:fixedCandidates,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
+      return {stockCheck,stockAvailable,stockWarning,family,variant,rarity:'fixed',pricingMode,fixedPrice:true,pricingBrandId,sellingBrandId,brandMargin:configuredRate,adjustedBase:chosen.baseMyr,afterBrand:finalPrice,candidates:enabled,sourceCurrency:chosen.currency,sourcePrice:chosen.sourcePrice,multiplier:chosen.multiplier,baseMyr:chosen.baseMyr,margin:0,normal:0,rare:0,transport:0,commission:0,setDiscount:0,finalDiscount:0,includeCommission:false,includeSetDiscount:false,includeFinalDiscount:false,includeFuelCharge:false,marginPrice:finalPrice,afterNormal:finalPrice,afterRare:finalPrice,withTransport:finalPrice,afterCommission:finalPrice,afterSetDiscount:finalPrice,beforeFuel:finalPrice,distanceKm:priceContext.distanceKm,fuelPrice:priceContext.fuelPrice,fuelBasePrice:priceContext.fuelBasePrice,fuelEfficiency:priceContext.fuelEfficiency,returnJourney:priceContext.returnJourney,journeyMultiplier:priceContext.returnJourney?2:1,fuelCharge:0,unroundedPrice:finalPrice,finalPrice};
     }
     if(!cat)return null;
     const rule=categoryRule(cat,family),allowed=new Set(rule.currencies||[]);if(!allowed.size)return null;
-    const candidates=allCandidates.filter(row=>allowed.has(row.currency)||options.convertedSource===true);if(!candidates.length)return null;
-    const chosen=candidates.reduce((best,row)=>!best||row.baseMyr>best.baseMyr?row:best,null),company=companyFactors(pricingMode,cat,family,priceContext.customer),rarity=normalizeRarity(options.rarity||chosen.rarity),fixedPrice=false;
+    const candidates=enabled;
+    const company=companyFactors(pricingMode,cat,family,priceContext.customer),rarity=normalizeRarity(options.rarity||chosen.rarity),fixedPrice=false;
     const adjustedBase=Number.isFinite(options.sourceCostAdjustmentMyr)?Math.max(0,chosen.baseMyr+options.sourceCostAdjustmentMyr):chosen.baseMyr;
     const afterBrand=brandMarginStage(adjustedBase,configuredRate);
     if(afterBrand==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
     const marginPrice=afterBrand/Math.max(.0001,1-rule.margin);
     const afterNormal=(rarity==='common'||rarity==='rare')?marginPrice/Math.max(.0001,1-rule.normal):marginPrice;
     const afterRare=rarity==='rare'?afterNormal/Math.max(.0001,1-rule.rare):afterNormal;
-    const trimming=['ES','ISO'].includes(normalizedFamily(family))?Math.max(0,Number(rule.trimming)||0):0;
+    const trimming=['ES','ISO','BSV','BSW'].includes(normalizedFamily(family))?Math.max(0,Number(rule.trimming)||0):0;
     const withTrimming=afterRare+trimming;
     const withTransport=withTrimming+rule.transport;
     const afterCommission=company.includeCommission?withTransport/Math.max(.0001,1-company.commission):withTransport;
@@ -876,16 +878,21 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   }
 
   function priceAssemblyRowsForDisplay(items=[],options={}){
-    const roots=[],bomCount=(items||[]).filter(item=>Math.max(0,Number(item?.qty||0))>0).length;
+    const roots=[],leaves=[],bomCount=(items||[]).filter(item=>Math.max(0,Number(item?.qty||0))>0).length;
     const motorBrand=esPumpsetMotorBrand(items);
     for(const item of items||[]){
       const result=priceAssemblyForDisplay([item],{...options,motorBrand});if(result.error)return result;
+      leaves.push(...result.items);
       const qty=Math.max(0,Number(item?.qty||0));roots.push({id:item?.id||'',model:item?.model||'',qty,beforeFuelLine:Number(result.source?.before_fuel_total||0),fuelCharge:Number(result.fuelCharge||0),transportTotal:Number(result.transportTotal||0)});
     }
     const fuelCharge=roots.reduce((max,row)=>row.qty>0?Math.max(max,row.fuelCharge):max,0),fuelSharePerBom=bomCount>0?fuelCharge/bomCount:0,rows={},transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
     let total=0;
     for(const row of roots){const unitBeforeFuel=row.qty>0?row.beforeFuelLine/row.qty:0,fuelShare=row.qty>0?fuelSharePerBom:0,fuelSharePerUnit=row.qty>0?fuelShare/row.qty:0,unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit),lineTotal=row.qty*unitPrice;rows[row.id]={...row,unitBeforeFuel,fuelShare,fuelSharePerUnit,unitPrice,lineTotal};total+=lineTotal}
-    return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule:'VISIBLE_BOM_EQUAL_FUEL_SHARE_ROUND_EACH_UNIT'};
+    const pricingRule='VISIBLE_BOM_EQUAL_FUEL_SHARE_ROUND_EACH_UNIT';
+    return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule,source:{
+      product_family:'ASSEMBLY',pricing_mode:'assembly',assembly_items:leaves,transport_total:transportTotal,
+      fuel_charge:fuelCharge,calculated_price:total,pricing_rule:pricingRule
+    }};
   }
 
   function applyPriceToQuoteRow(row,model,options={}){if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return false;const found=options.productFamily==='GWS'?findGwsPrice(model,options.pressure,options):findPrice(model,options);if(!found){if(options.productFamily!=='GWS')alert(chcPriceProblem(model,options));return false}if(!row||!ensureQuoteableCalculation(found.calc,model))return false;const input=row.querySelector('.item-price');if(!input)return false;input.value=found.calc.finalPrice.toFixed(2);row.dataset.pricingSource=JSON.stringify(sourceSnapshot(found));if(typeof calcTotal==='function')calcTotal();return true}
@@ -1033,12 +1040,13 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
   function addEs(id,route='quotation',material='CI / SS / SS / MS',options={}){
     if(['CIBRSSMS','CIBRSSGP','CICISSDYNAMIC'].includes(String(material).toUpperCase().replace(/[^A-Z0-9]/g,''))){alert('This ES configuration is retired.');return}
     if(!window.KeySuiteApp?.ensureQuotationPricingContext?.(`add an ES pump to the ${route==='assembly'?'Assembly':'quotation'}`))return;
-    const found=findEsPrice(id,material,{...options,pricingMode:route==='assembly'?'assembly':'quotation'});
+    const identity=window.KeySuiteCommercialIdentity?.captureSelection({...options,family:'ES',model:(secureData.esProducts||[]).find(row=>row.id===id)?.model}).commercialIdentity;
+    const found=findEsPrice(id,material,{...options,commercialIdentity:identity,pricingMode:route==='assembly'?'assembly':'quotation'});
     const product=found?.product||(secureData.esProducts||[]).find(x=>x.id===id);if(!product)return;
     const seal=normalizeEsSeal(options.seal),elastomer=String(options.elastomer||ES_DEFAULT_ELASTOMER),description=esDescription(product,material,{seal,elastomer});
-    if(!found||quoteBlockReason(found.calc)){void window.KeySuiteManualPrice.offer({model:product.model,description,productFamily:'ES',pricingSource:{product_family:'ES',product_id:product.id,material,variant:material,seal_material:seal,elastomer}},quoteBlockReason(found?.calc));return;}
+    if(!found||quoteBlockReason(found.calc)){void window.KeySuiteManualPrice.offer({commercialIdentity:identity,model:product.model,description,productFamily:'ES',pricingSource:{product_family:'ES',product_id:product.id,material,variant:material,seal_material:seal,elastomer}},quoteBlockReason(found?.calc));return;}
     const {variant,calc}=found;
-    const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const brand=window.KeySuiteV40001?.brandContext?.(window.KeySuiteV40001?.state?.selectedBrandId,'ES','',route==='assembly'?'ES':undefined);const item={model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,brandId:brand?.id,brand:brand?.name,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
+    const pricingSource={...sourceSnapshot(found),seal_material:seal,elastomer};const brand=window.KeySuiteV40001?.brandContext?.(window.KeySuiteV40001?.state?.selectedBrandId,'ES','',route==='assembly'?'ES':undefined);const item={commercialIdentity:identity,model:product.model,description,qty:1,unitPrice:calc.finalPrice,pricingSource,brandId:identity?.brandId||brand?.id,brand:identity?.brand??brand?.name,assemblyLevel:'PUMPSET_COMPONENT',assemblySection:'pump'};
     if(route==='assembly'&&brand?.id){Object.assign(pricingSource,assemblySellingBrand(brand,'ES'));const adjusted=applyAssemblyBrandMargin(found,pricingSource,found.customer);item.unitPrice=adjusted.calc.finalPrice;item.pricingSource={...pricingSource,...sourceSnapshot(adjusted)};}
     if(route==='assembly'){window.KeySuiteAssembly?.addItem?.(item);return}
     if(window.KeySuiteApp?.canEditQuotation&&!window.KeySuiteApp.canEditQuotation(true))return;

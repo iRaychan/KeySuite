@@ -17,15 +17,14 @@
      snapshots.set(data,{rows:result.data,at:Date.now()});
    }catch{if(generation===request)snapshots.delete(data);}
  }
- function lookup(family,variant,options,brandId){
+ function lookup(family,variant,options){
    const snapshot=snapshots.get(window.KEYSUITE_SECURE_DATA);
-   const brand=window.KeySuiteV391?.state?.brands?.find(b=>String(b.id)===String(brandId))?.brand_name;
-   if(!brand||!snapshot||Date.now()-snapshot.at>30000)return null;
+   if(!snapshot||Date.now()-snapshot.at>30000)return null;
    const code=family==='CHC'?'CHC_G2':family;
    if(!(options.stockVariant||variant)&&!options.stockConfigurationId)return null;
-   const matches=snapshot.rows.filter(r=>r.brand===brand&&r.variant===(options.stockVariant||variant)&&
+   const matches=snapshot.rows.filter(r=>r.variant===(options.stockVariant||variant)&&
      (options.stockProductId?r.item_key===code+':'+options.stockProductId:
-       options.stockModel&&r.item_key.startsWith(code+':')&&r.model===options.stockModel)&&
+       r.item_key.startsWith(code+':')&&(options.stockModel?r.model===options.stockModel:!!options.stockConfigurationId))&&
      (!options.stockConfigurationId||options.stockConfigurationId===r.id));
    if(!matches.length||new Set(matches.map(row=>row.item_key)).size!==1)return null;
    const priced=matches.filter(row=>row.cost!=null);
@@ -34,10 +33,16 @@
  }
  function notice(message){
    let node=document.getElementById('stockCostNotice');
-   if(!node&&message){node=document.createElement('aside');node.id='stockCostNotice';node.setAttribute('role','status');
-     node.style.cssText='position:fixed;bottom:12px;left:20%;background:#fff5dd;color:#463600;padding:8px 14px;border:1px solid #d8b964;border-radius:6px;z-index:10';
-     document.body.append(node);}
+   if(!node&&message){node=document.createElement('div');node.id='stockCostNotice';node.setAttribute('role','status');
+     node.style.cssText='width:max-content;max-width:100%;margin:0 0 12px;background:#fff5dd;color:#463600;padding:8px 14px;border:1px solid #d8b964;border-radius:6px';
+   }
+   if(node&&message){
+     const host=document.querySelector('main .page.active')||document.body;
+     if(node.parentElement!==host)host.prepend(node);
+   }
    if(node){node.hidden=!message;node.textContent=message;}
+   clearTimeout(notice.timeout);
+   if(message)notice.timeout=setTimeout(()=>notice(''),4500);
  }
  async function verifyNewQuotation(items){
    const checks=[];

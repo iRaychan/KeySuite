@@ -1153,24 +1153,26 @@ function recordQuotationManualPrice(row,input){
  if(Object.keys(source).length)row.dataset.pricingSource=JSON.stringify(source);
  else delete row.dataset.pricingSource;
 }
-function quotePrintDescription(item){const text=String(item.description??'');return [item.manualItem&&item.manualCapacity?'Capacity: '+item.manualCapacity:'',text.length||item.descriptionManuallyEdited?text:String(item.model??'')].filter(Boolean).join('\n');}
-function quotationItemPrintBody(item){
- const heading=item.displayHeader?String(item.itemHeader||'').trim():'';
- return `<div class="print-item-desc">${heading?`<strong>${esc(heading)}</strong>\n`:''}${esc(quotePrintDescription(item))}</div>`;
+function quotePrintDescription(item){
+ const text=String(item.description??'');
+ const body=text.length||item.descriptionManuallyEdited?text:String(item.model??'');
+ const capacity=item.manualItem&&item.manualCapacity?'Capacity: '+item.manualCapacity:'';
+ if(item.manualItem||item.descriptionManuallyEdited){
+   return [capacity&&!body.split(/\r?\n/).some(line=>line.trim()===capacity)?capacity:'',body].filter(Boolean).join('\n');
+ }
+ const state=capacityStateFromData(item,body);
+ const lines=body.split(/\r?\n/);
+ const first=lines.findIndex(line=>line.trim());
+ if(first>=0&&/^\s*Capacity:/i.test(lines[first]))lines.splice(first,1);
+ return [capacityLine(state),lines.join('\n')].filter(Boolean).join('\n');
 }
-function esIsoPumpsetPrintParts(item,description){
- const source=item.pricingSource||{},kind=String(source.source_kind||'');
- const family=String(item.pumpData?.product||quoteProductFamily(item)).toUpperCase();
- const esIso=/^PUMPSET_DIRECT_(ES|ISO)$/.test(kind)||
-   (kind!=='SYSTEM'&&(['ES','ISO'].includes(family)||
-    (kind==='PUMPSET'&&/^\s*(?:Capacity:[^\n]*\n)?[^\n]*\b(?:ISO )?End Suction Pump Model:/i.test(description))));
- if(!esIso||!/^\s*Capacity:/i.test(description))return null;
- const [first,...rest]=description.replace(/^(?:[^\S\r\n]*\r?\n)+/,'').split('\n');
- const heading=item.displayHeader?String(item.itemHeader||'').trim():'';
- return {
-   first:`<div class="print-item-desc">${heading?`<strong>${esc(heading)}</strong>\n`:''}${esc(first)}</div>`,
-   rest:`<div class="print-item-desc">${esc(rest.join('\n'))}</div>`
- };
+function quotationItemPrintRow(item,index,text,continued=false){
+ const heading=!continued&&item.displayHeader?String(item.itemHeader||'').trim():'';
+ const amounts=continued?'':`<div class="print-item-amounts">
+   <span>${esc(printQty(item.qty,item.unit))}</span><span>${printAmount(item.unitPrice)}</span><span>${printAmount(item.qty*item.unitPrice)}</span>
+ </div>`;
+ const detail=[heading?`<strong>${esc(heading)}</strong>`:'',esc(text)].filter(Boolean).join('\n');
+ return `<tr class="print-quote-line" data-print-index="${index}"><td>${continued?'':index+1}</td><td class="print-quote-body" colspan="4">${amounts}<div class="print-item-desc">${detail}</div></td></tr>`;
 }
 function quoteClipboardKey(){return `keysuite:v50015:quote-item-clipboard:${currentCompanyId()}:${currentEmail().toLowerCase()}`}
 function copyQuoteItemToClipboard(item){try{localStorage.setItem(quoteClipboardKey(),JSON.stringify({copiedAt:new Date().toISOString(),item:structuredClone(item)}));return true}catch(error){alert(`Item could not be copied: ${error.message||error}`);return false}}
@@ -1850,7 +1852,7 @@ async function routeEsSelection(p={},route='quotation'){
  }
  const capacity=esSelectionCapacity(p);
  const pricedDescription=window.KeySuitePricing?.esDescription?.(found.product,found.material||found.variant?.material||material,{seal:p.keysuite_seal,elastomer:p.keysuite_elastomer,bareShaft:bare,impellerMm:p.impeller_mm,trimmed:p.impeller_trimmed===true})||String(p.description||'');
- const commercialIdentity=window.KeySuiteCommercialIdentity.resolve(selectedBrand||{},found.product?.model||p.quotation_model||p.model);
+ const commercialIdentity=p.commercialIdentity||window.KeySuiteCommercialIdentity.resolve(selectedBrand||{},found.product?.model||p.quotation_model||p.model);
  const pumpDescription=window.KeySuiteCommercialIdentity.description(pricedDescription,commercialIdentity).trim();
  const pricingSource={...window.KeySuitePricing.sourceSnapshot(found),...window.KeySuitePricing.assemblySellingBrand(selectedBrand,'ES')};
  const pumpData=sellingBrandId?{...p,keysuite_brand_id:sellingBrandId,keysuite_brand_name:sellingBrandName}:p;
@@ -1873,12 +1875,12 @@ async function routeEsSelection(p={},route='quotation'){
  if(!configured||configured.error||!configured.item){alert(configured?.error||'The automatically selected ES Motor could not be priced. Move to Pumpset to review the Motor selection.');return}
  const addComplete=await ensureEsCompleteQuoteRouter();
  if(typeof addComplete!=='function'){alert('Unable to load the Complete ES Pumpset quotation route. Please reload KeySuite once and try again.');return}
- await addComplete([pumpItem,configured.item],{model:found.product?.model||p.quotation_model||p.model||'ES Pumpset',capacity,qty:1});
+ await addComplete([pumpItem,configured.item],{model:commercialIdentity?.model||found.product?.model||p.quotation_model||p.model||'ES Pumpset',capacity,qty:1});
 }
 
 window.addEventListener('message',function(event){
  if(!event.data)return;
- if(event.origin===location.origin&&(event.source===$('selectorIsoFrame')?.contentWindow||event.source===$('productIsoSelectorFrame')?.contentWindow)){if(event.data.type==='KEYSUITE_ADD_SELECTION')void window.KeySuiteISO.route(event.data.payload||{},event.data.route||'quotation');return;}
+ if(event.origin===location.origin&&(event.source===$('selectorIsoFrame')?.contentWindow||event.source===$('productIsoSelectorFrame')?.contentWindow)){if(event.data.type==='KEYSUITE_ADD_SELECTION')void window.KeySuiteISO.route(window.KeySuiteCommercialIdentity?.captureSelection(event.data.payload||{},event.source)||event.data.payload||{},event.data.route||'quotation');return;}
  const fromEs=event.source===$('selectorEsFrame')?.contentWindow||String(event.data.product||'').toUpperCase()==='ES';
  const fromBfi=event.source===$('selectorBfiFrame')?.contentWindow||event.source===$('productBfiSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='BFI';
  const fromCr=event.source===$('selectorCrFrame')?.contentWindow||event.source===$('productCrSelectorFrame')?.contentWindow||String(event.data.product||event.data.family||'').toUpperCase()==='CR';
@@ -1893,7 +1895,9 @@ window.addEventListener('message',function(event){
  if(event.data.type==='KEYSUITE_SELECTION_EMPTY'){alert(`Please run a ${fromBsw?'BSW':fromKv?'KV':fromBfi?'BFI':fromEs?'ES':'CHC'} selection first.`);return}
  if(event.data.type!=='KEYSUITE_ADD_SELECTION')return;
  const rawPayload=event.data.payload||{};
- const p=window.KeySuiteCommercialIdentity?.captureSelection({...rawPayload},event.source)||{...rawPayload};
+ const pinnedContext=event.data.quoteRequestId?window.KeySuiteProduct?.consumeC4Quote?.(event,rawPayload):null;
+ if(event.data.quoteRequestId&&!pinnedContext)return;
+ const p=window.KeySuiteCommercialIdentity?.captureSelection({...rawPayload},event.source,pinnedContext)||{...rawPayload};
  const route=event.data.route||pendingSelectionRoute||'quotation';pendingSelectionRoute='quotation';
  if(fromBsw||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BSW'){window.KeySuiteBSW?.routeSelection?.(p,route);return}
  if(fromBgf||String(p.family||p.product||p.productFamily||'').toUpperCase()==='BGF'){window.KeySuiteBGF?.routeSelection?.(p,route);return}
@@ -1913,16 +1917,15 @@ window.addEventListener('message',function(event){
    p.keysuite_price_group_code=`CHC_${generation}`;
  }
  const brandApi=window.KeySuiteV391;
- const pinnedContext=event.data.quoteRequestId?window.KeySuiteProduct?.consumeC4Quote?.(event,p):null;
- if(event.data.quoteRequestId&&!pinnedContext)return;
  if(route==='assembly'){
    const c4Product=event.origin===location.origin&&event.source===$('productSelectorFrame')?.contentWindow&&p.generation_code==='G1';
-   const selling=pinnedContext||(c4Product?brandApi?.brandContext?.(undefined,'CHC',p.keysuite_material,'CHC_G1'):null);
+   const selling=pinnedContext||(p.commercialIdentity?{id:p.commercialIdentity.brandId,name:p.commercialIdentity.brand}:null)||(c4Product?brandApi?.brandContext?.(undefined,'CHC',p.keysuite_material,'CHC_G1'):null);
    if(c4Product&&!selling?.id){alert('Select the selling brand and C4 series again.');return;}
    const quoteItem=chcAssemblyQuoteItem(p),bare=selectionBareMode(p,$('bareShaft')?.checked);
    const pricingModel=quoteItem.pricingModel||p.base_model||p.quotation_model||p.model;
    const item=window.KeySuitePricing?.buildChcAssemblyItem?.(pricingModel,{...p,bareShaft:bare,sellingBrand:selling})||{model:quoteItem.model||pricingModel||'CHC Pumpset',qty:1,unitPrice:0,pumpData:p};
-   const sellingModel=selling?brandApi?.resolveChcIdentity?.(selling.id,'CHC_G1',quoteItem.model,p.keysuite_material)?.sellingModel:quoteItem.model;
+   const sellingModel=p.commercialIdentity?.model||quoteItem.model;
+   item.commercialIdentity=p.commercialIdentity;
    item.model=sellingModel||quoteItem.model||item.model;
    item.description=selling?brandedQuotationDescription(quoteItem.description.replace(`Pump Model: ${quoteItem.model}`,()=>`Pump Model: ${item.model}`),selling.name):quoteItem.description;
    item.pumpData={...p,keysuite_bare_shaft:bare,keysuite_supply_mode:bare?'BARE':'COMPLETE'};
@@ -2000,7 +2003,7 @@ window.addEventListener('message',function(event){
    : pinnedContext
    ? brandedQuotationDescription(masterDescription.replace(`Pump Model: ${displayQuotationModel}`,()=>`Pump Model: ${sellingModel}`),pinnedContext.name)
    : masterDescription;
- const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
+ const pricedSelection=window.KeySuitePricing?.findPrice?.(quotationModel,{commercialIdentity:p.commercialIdentity,sellingBrand:pinnedContext,material:p.keysuite_material,seal,elastomer,keysuite_seal:seal,keysuite_elastomer:elastomer,generation_code:p.generation_code,motor_hp:Number(p.motor_hp||0),motor_kw:Number(p.motor_kw||0),pole:Number(p.pole||2),motor_efficiency_class:p.motor_efficiency_class,bareShaft:bare});
  if(!pricedSelection||window.KeySuitePricing.quoteBlockReason(pricedSelection.calc)){
    const pumpData=pinnedContext?{...p,keysuite_brand_id:sellingId,keysuite_brand_name:pinnedContext.name,quotation_model:sellingModel}:p;
    void window.KeySuiteManualPrice.offer({model:itemModel,description,pumpData,productFamily:'CHC',...(pinnedContext?{brandId:sellingId,brand:pinnedContext.name}:null)},window.KeySuitePricing.quoteBlockReason(pricedSelection?.calc));return;
@@ -2038,57 +2041,31 @@ function displayDate(value){
  const d=value?new Date(value+'T00:00:00'):new Date();
  return d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
 }
-function estimatePrintItemHeight(item){
- const text=[item.displayHeader?String(item.itemHeader||'').trim():'',quotePrintDescription(item)].filter(Boolean).join('\n');
- const logical=text.split(/\n/);
- const charsPerLine=quoteUsesSetPrintLayout(item)?116:70;
- let lines=0;
- // System/Pumpset descriptions span the normal Description and Qty columns in print/PDF.
- logical.forEach(line=>{lines+=Math.max(1,Math.ceil(String(line).length/charsPerLine))});
- return 5+lines*4.05; // measured print estimate in millimetres, including row top spacing
-}
-function paginatePrintItems(prepared){
- const normalLimit=177; // usable item height before the lower print margin
- const adjustments = quotationAdjustments();
- const summaryReserve = adjustments.sstPercent !== null && adjustments.discountValue !== null ? 32 : 26;
- const lastLimit=normalLimit-summaryReserve;
- const pages=[];let current=[],used=0;
- prepared.forEach(entry=>{
-   if(current.length && used+entry.height>normalLimit){pages.push(current);current=[];used=0;}
-   current.push(entry);used+=entry.height;
- });
- if(current.length||!pages.length)pages.push(current);
- // Keep the final page within the totals-safe area. Move all required trailing rows together,
- // instead of creating one mostly-empty page for each moved item.
- let finalPage=pages[pages.length-1];
- let finalUsed=finalPage.reduce((n,x)=>n+x.height,0);
- if(finalUsed>lastLimit && finalPage.length>1){
-   const carry=[];
-   while(finalPage.length>1 && finalUsed>lastLimit){
-     const moved=finalPage.pop();
-     finalUsed-=moved.height;
-     carry.unshift(moved);
-   }
-   if(carry.length)pages.push(carry);
- }
- return pages;
-}
+let quotationPageIndicatorTimer;
 function updateQuotePageIndicators(){
  const box=$('quoteItems');if(!box)return;
- box.querySelectorAll('.quote-page-indicator').forEach(x=>x.remove());
- const rows=[...box.querySelectorAll('.quote-item')];
- const items=getQuoteItems();
- if(!rows.length||!items.length)return;
- const prepared=items.map((item,i)=>({height:estimatePrintItemHeight(item),rowIndex:i}));
- const pages=paginatePrintItems(prepared);
- let cumulative=0;
- pages.slice(0,-1).forEach((pg,pageIndex)=>{
-   cumulative+=pg.length;
-   const row=rows[cumulative-1];
-   if(!row)return;
+ box.querySelectorAll('.quote-page-indicator').forEach(marker=>marker.remove());
+ clearTimeout(quotationPageIndicatorTimer);
+ if(box.querySelectorAll('.quote-item').length<5)return;
+ quotationPageIndicatorTimer=setTimeout(()=>{
+   if(!document.querySelector('#macQuotationPdfPreview[open]'))buildPrintQuotation();
+ },250);
+}
+function showQuotationPageIndicators(pages){
+ const box=$('quoteItems');if(!box)return;
+ box.querySelectorAll('.quote-page-indicator').forEach(marker=>marker.remove());
+ const rows=[...box.querySelectorAll('.quote-item')].filter(r=>{
+   const item=getQuoteItemData(r);
+   return item.model||item.description||Number(item.unitPrice)>0;
+ });
+ pages.slice(0,-1).forEach((page,index)=>{
+   const last=[...page.querySelectorAll('tr[data-print-index]')].at(-1);
+   const next=pages[index+1].querySelector('tr[data-print-index]');
+   const row=last&&rows[Number(last.dataset.printIndex)];
+   if(!row||!next||last.dataset.printIndex===next.dataset.printIndex)return;
    const marker=document.createElement('div');
    marker.className='quote-page-indicator no-print';
-   marker.innerHTML=`<span>End of printed Page ${pageIndex+2} — next item starts Page ${pageIndex+3}</span>`;
+   marker.textContent=`End of printed Page ${index+1} — next item starts Page ${index+2}`;
    row.insertAdjacentElement('afterend',marker);
  });
 }
@@ -2154,29 +2131,121 @@ function buildPrintQuotation(){
  $('pPayment').textContent=$('payment').value||'-';
  $('pValidity').textContent=$('validity').value||'-';
  $('pPriceBasis').textContent=$('priceBasis').value||'-';
- const items=getQuoteItems();
- let subtotal=0;
- const prepared=items.map((item,i)=>{
-   const amount=item.qty*item.unitPrice,description=quotePrintDescription(item),body=quotationItemPrintBody(item);subtotal+=amount;
-   const setItem=quoteUsesSetPrintLayout(item),capacityItem=/^Capacity:/i.test(description.trim()),capacityClass=capacityItem?' print-capacity-item':'';
-   const pumpParts=setItem?esIsoPumpsetPrintParts(item,description):null;
-   const customUnit=!['unit','set'].includes(item.unit.toLowerCase());
-   const qtyCell=`<td${customUnit?' style="white-space:normal;overflow-wrap:anywhere"':''}>${esc(printQty(item.qty,item.unit))}</td>`;
-   const html=setItem
-     ?`<tr class="print-system-item-head${capacityClass}"><td rowspan="2">${i+1}</td><td>${pumpParts?.first||''}</td>${qtyCell}<td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr><tr class="print-system-item-desc-row${capacityClass}${pumpParts?' print-pump-continuation':''}"><td class="print-system-desc-cell" colspan="4">${pumpParts?.rest??body}</td></tr>`
-     :`<tr class="${capacityClass.trim()}"><td>${i+1}</td><td>${body}</td>${qtyCell}<td>${printAmount(item.unitPrice)}</td><td>${printAmount(amount)}</td></tr>`;
-   return {height:estimatePrintItemHeight(item),html};
- });
- const pages=paginatePrintItems(prepared);
- const totalPages=1+pages.length;
- document.querySelector('.print-cover footer').innerHTML=`<div id="pTemplateFooter">E &amp; O.E.</div><div>Page 1 of ${totalPages}</div>`;
- const quoteNo=$('quoteNo').value||'';
- $('pItemPages').innerHTML=pages.map((pg,idx)=>itemPageHtml(idx+2,totalPages,quoteNo,shownDate,pg.map(x=>x.html),idx===pages.length-1,subtotal)).join('');
- document.querySelectorAll('#pItemPages .print-items-logo').forEach(img=>{if(!img.dataset.templateLogo){img.onerror=null;img.src=KEYLARGO_LOGO_DATA}});
+ const items=getQuoteItems(),quoteNo=$('quoteNo').value||'';
+ const root=$('printQuotationDocument'),cover=root.querySelector('.print-cover'),pagesBox=$('pItemPages');
+ const terms=root.querySelector('.print-terms'),closing=root.querySelector('.print-closing');
+ cover.insertBefore(terms,cover.querySelector('footer'));
+ cover.insertBefore(closing,cover.querySelector('footer'));
+ cover.querySelector('.print-items-table')?.remove();
+ pagesBox.replaceChildren();
+ cover.classList.add('print-cover-flow');
  const saved=currentQuote(),templateSnapshot=(isQuotationSealed()&&saved?.quotationTemplateSnapshot)?saved.quotationTemplateSnapshot:window.KeySuiteTemplates?.getSelectedSnapshot?.();
  window.KeySuiteTemplates?.applyToPrint?.(templateSnapshot,{quoteNo,customer:printedCompany,date:shownDate});
- const cover=document.querySelector('.print-cover'),meta=cover?.querySelector('.print-meta');
- if(meta){const mm=96/25.4,ctx=document.createElement('canvas').getContext('2d');ctx.font='11pt Calibri, Arial, Helvetica, sans-serif';let lines=0;for(const paragraph of String($('pProject').textContent||'').split('\n')){let line='';lines++;for(const word of paragraph.split(/\s+/)){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>147.2*mm){lines++;line=word}else line=next}}const extra=Math.max(0,lines-1)*5.24*mm;for(const [selector,top] of [['.print-dear',136],['.print-intro',147],['.print-terms',158],['.print-closing',194]]){const node=cover.querySelector(selector);if(node)node.style.top=(top*mm+extra)+'px'}}
+ layoutQuotationPages(root,items,quoteNo,shownDate,terms,closing);
+ window.KeySuiteTemplates?.applyToPrint?.(templateSnapshot,{quoteNo,customer:printedCompany,date:shownDate});
+ const footerLabel=cover.querySelector('#pTemplateFooter').textContent;
+ const pages=[...root.querySelectorAll('.print-page')];
+ pages.forEach((page,index)=>{
+   const footer=page.querySelector('footer');
+   footer.firstElementChild.textContent=footerLabel;
+   footer.lastElementChild.textContent=`Page ${index+1} of ${pages.length}`;
+ });
+ showQuotationPageIndicators(pages);
+}
+function layoutQuotationPages(root,items,quoteNo,date,terms,closing){
+ const cover=root.querySelector('.print-cover'),pagesBox=$('pItemPages');
+ const subtotal=items.reduce((total,item)=>total+item.qty*item.unitPrice,0);
+ const template=document.createElement('template');
+ template.innerHTML=itemPageHtml(0,0,quoteNo,date,[],true,subtotal).trim();
+ const continuation=template.content.firstElementChild;
+ const summary=[...continuation.querySelectorAll('tbody tr')];
+ let page=cover;
+ const table=continuation.querySelector('table').cloneNode(true);
+ table.querySelector('tbody').replaceChildren();
+ cover.insertBefore(table,terms);
+ terms.remove();
+ closing.remove();
+ const measurement=document.createElement('iframe');
+ measurement.setAttribute('aria-hidden','true');
+ measurement.style.cssText='position:fixed;left:-10000px;top:0;width:210mm;height:297mm;border:0;visibility:hidden';
+ document.body.append(measurement);
+ try{
+   const doc=measurement.contentDocument;
+   doc.body.style.margin='0';
+   const sheet=doc.createElement('style');
+   sheet.textContent=quotationPrintCss()+' #printQuotationDocument{display:block!important}';
+   doc.head.append(sheet);
+   const fixture=doc.importNode(root.cloneNode(false),false);
+   doc.body.append(fixture);
+   const fits=()=>{
+     const clone=doc.importNode(page,true);
+     fixture.replaceChildren(clone);
+     const foot=clone.querySelector('footer').getBoundingClientRect();
+     const content=clone.querySelector('.print-closing,.print-terms')?.getBoundingClientRect();
+     const bounds=clone.querySelector('table').getBoundingClientRect();
+     const end=clone.querySelector('.print-closing')?.getBoundingClientRect()||content||bounds;
+     return !foot.top||Math.max(end.bottom,bounds.bottom)+6<=foot.top;
+   };
+   const body=()=>page.querySelector('tbody');
+   const nextPage=()=>{
+     if(!body().children.length)page.querySelector('table').remove();
+     page=continuation.cloneNode(true);
+     page.querySelector('tbody').replaceChildren();
+     pagesBox.append(page);
+   };
+   const append=(item,index,text,continued)=>body().insertAdjacentHTML('beforeend',quotationItemPrintRow(item,index,text,continued));
+   for(const [index,item] of items.entries()){
+     let remaining=quotePrintDescription(item),continued=false;
+     do{
+       append(item,index,remaining,continued);
+       if(fits())break;
+       body().lastElementChild.remove();
+       // Keep ordinary items together when the current page already has content.
+       if(body().children.length){nextPage();continue;}
+       if(page===cover){nextPage();continue;}
+       // Oversized descriptions can span continuation pages. Find the largest
+       // measured prefix that fits, then break at the nearest word boundary.
+       const chars=Array.from(remaining);
+       let low=0,high=chars.length;
+       while(low+1<high){
+         const mid=Math.floor((low+high)/2);
+         append(item,index,chars.slice(0,mid).join(''),continued);
+         if(fits())low=mid;else high=mid;
+         body().lastElementChild.remove();
+       }
+       let cut=Math.max(1,low);
+       const prefix=chars.slice(0,cut).join('');
+       const lastLineBreak=prefix.lastIndexOf('\n');
+       const boundary=prefix.match(/[^\S\r\n]+\S*$/u);
+       if(lastLineBreak>0)cut=Array.from(prefix.slice(0,lastLineBreak+1)).length;
+       else if(boundary?.index>0)cut=Array.from(prefix.slice(0,boundary.index+boundary[0].match(/^\s+/u)[0].length)).length;
+       append(item,index,chars.slice(0,cut).join(''),continued);
+       remaining=chars.slice(cut).join('');
+       continued=true;
+       if(remaining)nextPage();
+     }while(remaining);
+   }
+   const appendClosing=()=>{
+     body().append(...summary.map(row=>row.cloneNode(true)));
+     page.querySelector('footer').before(terms,closing);
+   };
+   appendClosing();
+   if(!fits()){
+     terms.remove();closing.remove();
+     body().querySelectorAll('tr:not(.print-quote-line)').forEach(row=>row.remove());
+     const trailing=body().children.length>1?body().lastElementChild:null;
+     trailing?.remove();
+     nextPage();
+     if(trailing)body().append(trailing);
+     appendClosing();
+     if(trailing&&!fits()){
+       terms.remove();closing.remove();
+       body().querySelectorAll('tr:not(.print-quote-line)').forEach(row=>row.remove());
+       nextPage();
+       appendClosing();
+     }
+   }
+ }finally{measurement.remove();}
 }
 function exportAllQuotationAndCurves(){
  if(!ensureSealedForPdf())return;
