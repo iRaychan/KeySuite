@@ -874,22 +874,56 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
       priced.push({id:item?.id||'',model:item?.model||'',qty,unitPrice:Number(found.calc.fixedPrice?found.calc.finalPrice:found.calc.beforeFuel||0),pricingSource:snapshot});components.push({qty,calc:found.calc});
     }
     const consolidated=consolidateAssemblyPricing(components),total=consolidated.total;
-    return {total,items:priced,displayedComponentTotal,transportTotal:consolidated.transportTotal,fuelCharge:consolidated.maxFuelCharge,source:{product_family:'ASSEMBLY',pricing_mode:'assembly',customer_id:customer.id||'',category_id:cat.id||'',assembly_items:priced,displayed_component_total:displayedComponentTotal,transport_total:consolidated.transportTotal,fuel_charge:consolidated.maxFuelCharge,before_fuel_total:consolidated.beforeFuelTotal,unrounded_price:consolidated.unroundedPrice,calculated_price:total,pricing_rule:'COMPONENT_BEFORE_SET_DISCOUNT_SUM_TRANSPORT_MAX_FUEL'}};
+    return {total,items:priced,displayedComponentTotal,transportTotal:consolidated.transportTotal,fuelCharge:consolidated.maxFuelCharge,
+      fuelEligible:components.some(({qty,calc})=>qty>0&&!calc.fixedPrice&&calc.includeFuelCharge!==false),
+      source:{product_family:'ASSEMBLY',pricing_mode:'assembly',customer_id:customer.id||'',category_id:cat.id||'',assembly_items:priced,displayed_component_total:displayedComponentTotal,transport_total:consolidated.transportTotal,fuel_charge:consolidated.maxFuelCharge,before_fuel_total:consolidated.beforeFuelTotal,unrounded_price:consolidated.unroundedPrice,calculated_price:total,pricing_rule:'COMPONENT_BEFORE_SET_DISCOUNT_SUM_TRANSPORT_MAX_FUEL'}};
+  }
+
+  function compareAssemblyFuel(rows){
+    const active=rows.filter(row=>row.qty>0);
+    const eligible=active.filter(row=>row.fuelEligible);
+    const configured=eligible.reduce((max,row)=>Math.max(max,row.fuelCharge),0);
+    const sharedPerLine=eligible.length?configured/eligible.length:0;
+    const before=active.reduce((sum,row)=>sum+row.beforeFuelLine,0);
+    const shared={fuel:0,final:0},nonShared={fuel:0,final:0};
+    const details=active.map(row=>{
+      const unitBeforeFuel=row.beforeFuelLine/row.qty;
+      const fuelShare=row.fuelEligible?sharedPerLine:0;
+      const fuelSharePerUnit=fuelShare/row.qty;
+      const fullFuelPerUnit=row.fuelEligible?row.fuelCharge:0;
+      const unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit);
+      const fullUnitPrice=roundUp10(unitBeforeFuel+fullFuelPerUnit);
+      const lineTotal=unitPrice*row.qty,fullLineTotal=fullUnitPrice*row.qty;
+      shared.fuel+=fuelShare;
+      shared.final+=lineTotal;
+      nonShared.fuel+=fullFuelPerUnit*row.qty;
+      nonShared.final+=fullLineTotal;
+      return {...row,unitBeforeFuel,fuelShare,fuelSharePerUnit,unitPrice,lineTotal,fullFuelPerUnit,fullLineTotal};
+    });
+    for(const column of [shared,nonShared]){
+      column.before=before;
+      column.after=before+column.fuel;
+      column.rounding=column.final-column.after;
+    }
+    return {configured,eligibleCount:eligible.length,sharedPerLine,uniformFullFuel:eligible.every(row=>row.fuelCharge===configured),shared,nonShared,details};
   }
 
   function priceAssemblyRowsForDisplay(items=[],options={}){
-    const roots=[],leaves=[],bomCount=(items||[]).filter(item=>Math.max(0,Number(item?.qty||0))>0).length;
+    const roots=[],leaves=[];
     const motorBrand=esPumpsetMotorBrand(items);
     for(const item of items||[]){
+      const qty=Math.max(0,Number(item?.qty??1));
+      if(!qty)continue;
       const result=priceAssemblyForDisplay([item],{...options,motorBrand});if(result.error)return result;
       leaves.push(...result.items);
-      const qty=Math.max(0,Number(item?.qty||0));roots.push({id:item?.id||'',model:item?.model||'',qty,beforeFuelLine:Number(result.source?.before_fuel_total||0),fuelCharge:Number(result.fuelCharge||0),transportTotal:Number(result.transportTotal||0)});
+      roots.push({id:item?.id||'',model:item?.bomDescription||item?.model||'',qty,beforeFuelLine:Number(result.source?.before_fuel_total||0),fuelCharge:Number(result.fuelCharge||0),fuelEligible:result.fuelEligible,transportTotal:Number(result.transportTotal||0)});
     }
-    const fuelCharge=roots.reduce((max,row)=>row.qty>0?Math.max(max,row.fuelCharge):max,0),fuelSharePerBom=bomCount>0?fuelCharge/bomCount:0,rows={},transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
-    let total=0;
-    for(const row of roots){const unitBeforeFuel=row.qty>0?row.beforeFuelLine/row.qty:0,fuelShare=row.qty>0?fuelSharePerBom:0,fuelSharePerUnit=row.qty>0?fuelShare/row.qty:0,unitPrice=roundUp10(unitBeforeFuel+fuelSharePerUnit),lineTotal=row.qty*unitPrice;rows[row.id]={...row,unitBeforeFuel,fuelShare,fuelSharePerUnit,unitPrice,lineTotal};total+=lineTotal}
+    const fuelComparison=compareAssemblyFuel(roots);
+    const {configured:fuelCharge,sharedPerLine:fuelSharePerBom,eligibleCount:bomCount}=fuelComparison;
+    const rows=Object.fromEntries(fuelComparison.details.map(row=>[row.id,row]));
+    const total=fuelComparison.shared.final,transportTotal=roots.reduce((sum,row)=>sum+row.transportTotal,0);
     const pricingRule='VISIBLE_BOM_EQUAL_FUEL_SHARE_ROUND_EACH_UNIT';
-    return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule,source:{
+    return {total,rows,fuelCharge,fuelSharePerBom,bomCount,transportTotal,pricingRule,fuelComparison,source:{
       product_family:'ASSEMBLY',pricing_mode:'assembly',assembly_items:leaves,transport_total:transportTotal,
       fuel_charge:fuelCharge,calculated_price:total,pricing_rule:pricingRule
     }};

@@ -1,10 +1,10 @@
 {
-  "version": "5.00.90",
-  "baseline": "5.00.89",
-  "upgrade_supported_from": "5.00.89",
+  "version": "5.00.91",
+  "baseline": "5.00.90",
+  "upgrade_supported_from": "5.00.90",
   "release_status": "corrective_review",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,17 +13,14 @@
     "KeyStock": "1.04"
   },
   "changes": [
-    "Commercial identity precedence, shared mapped STOCK costing and consistent generated pumpset descriptions",
-    "KeyStock status preferences, stock option archival, audited batch correction, group filtering and movement layout",
-    "Category Compare trimming and measured quotation PDF pagination, capacity spacing and wrapping"
+    "Restore the original letterhead and commercial terms styling while retaining measured item pagination and wrapping",
+    "Resolve complete Pumpset quotes from the shared Assembly calculation",
+    "Compare Assembly fuel allocation methods and reconcile new quotation rows against captured BOM pricing"
   ],
   "known_issues": [
-    "Stock Check status preferences are stored per user and company in the current browser.",
-    "Production inputs for the reported ES 40-16 price difference were unavailable for verification.",
-    "Shared receiving-lot cost and remark corrections require lot-level review when multiple positions remain active."
+    "The historical ES Curve component calculation was unavailable. The supplied Assembly inputs reconcile in local route tests."
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
-  "approval_required_database_proposal": "supabase/migrations/20261126133759_v50090_stock_corrections.sql",
-  "asset_revision": "50090"
+  "asset_revision": "50091"
 }

@@ -72,7 +72,10 @@ function localLoad(){try{return (JSON.parse(localStorage.getItem(key())||'[]')||
 function localSave(){localStorage.setItem(key(),JSON.stringify(drafts))}
 function componentDisplayedTotal(d=current){return (d?.items||[]).reduce((n,x)=>n+Number(x.qty||0)*Number(x.unitPrice||0),0)}
 function consolidatedPricing(d=current,mode='assembly'){
- const pricing=window.KeySuitePricing,customer=customers().find(row=>String(row.id)===String(d?.customer_id||quoteCustomerId()));
+ const active=window.KeySuiteApp?.getPricingCustomer?.();
+ const customerId=d?.customer_id||quoteCustomerId();
+ const customer=String(active?.id||'')===String(customerId)?active:customers().find(row=>String(row.id)===String(customerId));
+ const pricing=window.KeySuitePricing;
  const calculate=String(mode).toLowerCase()==='quotation'?pricing?.priceAssemblyForQuotation:pricing?.priceAssemblyRowsForDisplay;
  if(!calculate||!customer||!(d?.items||[]).length)return null;
  const result=calculate(d.items,{customer});
@@ -87,9 +90,26 @@ function auditBomPricing(d){
    const calculated=pricing?.rows?.[item.id],qty=Number(item.qty||0);
    const unitPrice=calculated?.unitPrice??Number(item.unitPrice||0);
    return {model:item.bomDescription||item.model,qty,unitPrice,lineTotal:calculated?.lineTotal??qty*unitPrice,
-     unitBeforeFuel:calculated?.unitBeforeFuel??null,fuelShare:calculated?.fuelShare??null,fuelSharePerUnit:calculated?.fuelSharePerUnit??null};
+     unitBeforeFuel:calculated?.unitBeforeFuel??null,fuelShare:calculated?.fuelShare??null,fuelSharePerUnit:calculated?.fuelSharePerUnit??null,
+     fullFuelPerUnit:calculated?.fullFuelPerUnit??null,fullLineTotal:calculated?.fullLineTotal??null};
  });
- return {rows,total:pricing?.total??componentDisplayedTotal(d),fuelCharge:pricing?.fuelCharge,customer,usedStoredPrices:!pricing&&rows.length>0};
+ return {rows,total:pricing?.total??componentDisplayedTotal(d),fuelCharge:pricing?.fuelCharge,fuelComparison:pricing?.fuelComparison,customer,usedStoredPrices:!pricing&&rows.length>0};
+}
+function resolveAssemblyQuote(d){
+ const pricing=consolidatedPricing(d);
+ const complete=d.assembly_type==='pumpset'&&sections.pumpset.every(section=>
+   d.items.some(item=>item.section===section&&Number(item.qty)>0));
+ const stockChecked=window.KeySuitePricing?.flattenAssemblyItems?.(d.items).some(item=>sourceObject(item).stock_check);
+ const unitPrice=d.quote_price_manual?quoteUnitPrice(d):
+   pricing?.total??(complete||stockChecked?null:componentDisplayedTotal(d));
+ if(!(unitPrice>0)){
+   alert('Quotation pricing is unavailable for this BOM. Review the component costs or enter a manual selling price in the builder.');
+   return null;
+ }
+ return {unitPrice,pricing};
+}
+function assemblyQuoteAudit(pricing,manual=false){
+ return pricing?.fuelComparison?{fuel_comparison:pricing.fuelComparison,assembly_price_manual:manual}: {};
 }
 function syncQuoteUnitPrice(d=current){if(!d)return;if(!d.quote_price_manual)d.quote_unit_price=total(d)}
 function sourceCostAvailable(item){
@@ -713,8 +733,9 @@ async function quotePumpsetSelection(items=[],meta={}){
  const capacity=meta.capacity||null;if(capacity){const flow=String(capacity.capacityValue??capacity.capacity_value??'').trim(),head=String(capacity.headValue??capacity.head_value??'').trim();if(flow||head){copyCapacity(d,capacity);d.display_capacity=true}}
  // Explicit Complete Set requests all components; preserve its existing auto sizing.
  syncCouplingItems(d);syncAutomaticBaseplate(d);syncAutomaticComponents(d);const requiredSections=['pump','motor','coupling','baseplate'],missingSections=requiredSections.filter(section=>!(d.items||[]).some(item=>item.section===section));if(missingSections.length){alert(`Unable to create a complete ${family} Pumpset automatically. Missing: ${missingSections.map(section=>labels[section]||section).join(', ')}. Move to Pumpset to review the selection.`);return false}if(blockMissingPumpsetSourceCosts(d.items||[]))return false;if(blockAssemblyMargin(d.items||[]))return false;rebuildDescription(d);
- syncQuoteUnitPrice(d);const unitPrice=quoteUnitPrice(d);if(!(unitPrice>0)){alert('Quotation pricing is not available for this Pumpset.');return false}
- const displayPricing=consolidatedPricing(d,'assembly');const pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:`PUMPSET_DIRECT_${family}`,carried_final_price:true,calculated_price:Number(unitPrice||0)};
+ const result=resolveAssemblyQuote(d);if(!result)return false;
+ const {unitPrice,pricing:displayPricing}=result;
+ const pricingSource={...(displayPricing?.source||{}),...assemblyQuoteAudit(displayPricing),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:`PUMPSET_DIRECT_${family}`,carried_final_price:true,calculated_price:unitPrice};
  if(await window.KeySuiteApp?.selectCustomerForQuotation?.(customerId)===false)return false;window.KeySuiteApp?.showPage?.('quotation');
  const pumpData=meta.pumpData||items.find(item=>item.section==='pump'&&item.pumpData)?.pumpData||null;
  const row=window.KeySuiteApp?.addExternalQuoteItem?.({model:d.model_item,qty:d.quote_qty,unitPrice:Number(unitPrice||0),description:d.description,unit:'set',sourceType:'pumpset',brands:window.quoteItemBrands?.({items:d.items})||[],pricingSource,pumpData,displayCapacity:!!d.display_capacity,capacityValue:d.capacity_value||'',capacityUnit:d.capacity_unit||'m³/hr',headValue:d.head_value||'',headUnit:d.head_unit||'Mtr'});
@@ -727,12 +748,10 @@ async function toQuotation(){
  if(type==='pumpset'&&blockMissingPumpsetSourceCosts(current.items||[]))return;
  // V4.28.71: Assembly/System already owns the final unit price shown to the user.
  // Carry that exact value into Quotation; repricing the BOM here applies Fuel again.
- syncQuoteUnitPrice(current);unitPrice=quoteUnitPrice(current);if(!(unitPrice>0)){alert('Quotation pricing is not available.');return}
- const displayPricing=consolidatedPricing(current,'assembly');
- if(!displayPricing&&!current.quote_price_manual&&window.KeySuitePricing?.flattenAssemblyItems?.(current.items).some(item=>sourceObject(item).stock_check)){
-   alert('A BOM component no longer has an available automatic price. Reprice the component or enter a Pumpset selling price.');return;
- }
- pricingSource={...(displayPricing?.source||{}),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:type==='pumpset'?'PUMPSET':'SYSTEM',source_assembly_id:current.id,carried_final_price:true,calculated_price:unitPrice};
+ const result=resolveAssemblyQuote(current);if(!result)return;
+ unitPrice=result.unitPrice;
+ const displayPricing=result.pricing;
+ pricingSource={...(displayPricing?.source||{}),...assemblyQuoteAudit(displayPricing,current.quote_price_manual),product_family:'ASSEMBLY',pricing_mode:'carried_final',source_kind:type==='pumpset'?'PUMPSET':'SYSTEM',source_assembly_id:current.id,carried_final_price:true,calculated_price:unitPrice};
  current.quote_unit_price=Number(unitPrice||0);window.KeySuiteApp?.showPage?.('quotation');
  const capacityValue=String(current.capacity_value||'').trim(),headValue=String(current.head_value||'').trim();
  const displayCapacity=!!current.display_capacity;

@@ -1824,7 +1824,8 @@ async function ensureEsCompleteQuoteRouter(){
  if(esCompleteQuoteRouterPromise)return esCompleteQuoteRouterPromise;
  esCompleteQuoteRouterPromise=new Promise(resolve=>{
    const script=document.createElement('script');
-   script.src=`assembly.js?v=50078&compat=1`;
+   script.src=document.querySelector('script[src^="assembly.js?"]')?.src||
+     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.91').replace(/\D/g,'')}`;
    script.async=false;script.dataset.keysuiteAssemblyCompat='40502';
    script.onload=()=>{const fn=window.KeySuiteAssembly?.quotePumpsetSelection;resolve(typeof fn==='function'?fn.bind(window.KeySuiteAssembly):null)};
    script.onerror=()=>resolve(null);
@@ -2233,7 +2234,7 @@ function layoutQuotationPages(root,items,quoteNo,date,terms,closing){
    if(!fits()){
      terms.remove();closing.remove();
      body().querySelectorAll('tr:not(.print-quote-line)').forEach(row=>row.remove());
-     const trailing=body().children.length>1?body().lastElementChild:null;
+     const trailing=(page===cover||body().children.length>1)?body().lastElementChild:null;
      trailing?.remove();
      nextPage();
      if(trailing)body().append(trailing);
