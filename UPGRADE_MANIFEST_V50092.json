@@ -1,0 +1,22 @@
+{
+  "version": "5.00.92",
+  "baseline": "5.00.91 FULL",
+  "baseline_sha256": "acf4cf5fe472ee8898cc914a1fcedd4e10f6380fd601b329ff78e3000e26e26c",
+  "migration": null,
+  "installation": "Overlay the application-root files on V5.00.91.",
+  "files": [
+    "UPGRADE_MANIFEST_V50092.json",
+    "RELEASE.json",
+    "VERSION.txt",
+    "app.js",
+    "costing-audit-v50032.js",
+    "index.html",
+    "manifest.json",
+    "pricing.js",
+    "release-version.js",
+    "sw.js",
+    "tests/v50092-pdf.cjs",
+    "tests/v50092-pricing.cjs",
+    "v50033-actions.css"
+  ]
+}

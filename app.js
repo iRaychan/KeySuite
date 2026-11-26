@@ -1825,7 +1825,7 @@ async function ensureEsCompleteQuoteRouter(){
  esCompleteQuoteRouterPromise=new Promise(resolve=>{
    const script=document.createElement('script');
    script.src=document.querySelector('script[src^="assembly.js?"]')?.src||
-     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.91').replace(/\D/g,'')}`;
+     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.92').replace(/\D/g,'')}`;
    script.async=false;script.dataset.keysuiteAssemblyCompat='40502';
    script.onload=()=>{const fn=window.KeySuiteAssembly?.quotePumpsetSelection;resolve(typeof fn==='function'?fn.bind(window.KeySuiteAssembly):null)};
    script.onerror=()=>resolve(null);
@@ -2134,15 +2134,10 @@ function buildPrintQuotation(){
  $('pPriceBasis').textContent=$('priceBasis').value||'-';
  const items=getQuoteItems(),quoteNo=$('quoteNo').value||'';
  const root=$('printQuotationDocument'),cover=root.querySelector('.print-cover'),pagesBox=$('pItemPages');
- const terms=root.querySelector('.print-terms'),closing=root.querySelector('.print-closing');
- cover.insertBefore(terms,cover.querySelector('footer'));
- cover.insertBefore(closing,cover.querySelector('footer'));
- cover.querySelector('.print-items-table')?.remove();
  pagesBox.replaceChildren();
- cover.classList.add('print-cover-flow');
  const saved=currentQuote(),templateSnapshot=(isQuotationSealed()&&saved?.quotationTemplateSnapshot)?saved.quotationTemplateSnapshot:window.KeySuiteTemplates?.getSelectedSnapshot?.();
  window.KeySuiteTemplates?.applyToPrint?.(templateSnapshot,{quoteNo,customer:printedCompany,date:shownDate});
- layoutQuotationPages(root,items,quoteNo,shownDate,terms,closing);
+ layoutQuotationPages(root,items,quoteNo,shownDate);
  window.KeySuiteTemplates?.applyToPrint?.(templateSnapshot,{quoteNo,customer:printedCompany,date:shownDate});
  const footerLabel=cover.querySelector('#pTemplateFooter').textContent;
  const pages=[...root.querySelectorAll('.print-page')];
@@ -2153,19 +2148,22 @@ function buildPrintQuotation(){
  });
  showQuotationPageIndicators(pages);
 }
-function layoutQuotationPages(root,items,quoteNo,date,terms,closing){
- const cover=root.querySelector('.print-cover'),pagesBox=$('pItemPages');
+function layoutQuotationPages(root,items,quoteNo,date){
+ const pagesBox=$('pItemPages');
+ const amountOnly=root.classList.contains('template-amount-only');
  const subtotal=items.reduce((total,item)=>total+item.qty*item.unitPrice,0);
  const template=document.createElement('template');
  template.innerHTML=itemPageHtml(0,0,quoteNo,date,[],true,subtotal).trim();
  const continuation=template.content.firstElementChild;
  const summary=[...continuation.querySelectorAll('tbody tr')];
- let page=cover;
- const table=continuation.querySelector('table').cloneNode(true);
- table.querySelector('tbody').replaceChildren();
- cover.insertBefore(table,terms);
- terms.remove();
- closing.remove();
+ if(amountOnly)for(const row of summary)row.firstElementChild.colSpan=4;
+ let page;
+ const nextPage=()=>{
+   page=continuation.cloneNode(true);
+   page.querySelector('tbody').replaceChildren();
+   pagesBox.append(page);
+ };
+ nextPage();
  const measurement=document.createElement('iframe');
  measurement.setAttribute('aria-hidden','true');
  measurement.style.cssText='position:fixed;left:-10000px;top:0;width:210mm;height:297mm;border:0;visibility:hidden';
@@ -2178,32 +2176,27 @@ function layoutQuotationPages(root,items,quoteNo,date,terms,closing){
    doc.head.append(sheet);
    const fixture=doc.importNode(root.cloneNode(false),false);
    doc.body.append(fixture);
-   const fits=()=>{
+   const fits=(includeTotals=false)=>{
      const clone=doc.importNode(page,true);
+     if(includeTotals)clone.querySelector('tbody').append(...summary.map(row=>doc.importNode(row,true)));
      fixture.replaceChildren(clone);
      const foot=clone.querySelector('footer').getBoundingClientRect();
-     const content=clone.querySelector('.print-closing,.print-terms')?.getBoundingClientRect();
      const bounds=clone.querySelector('table').getBoundingClientRect();
-     const end=clone.querySelector('.print-closing')?.getBoundingClientRect()||content||bounds;
-     return !foot.top||Math.max(end.bottom,bounds.bottom)+6<=foot.top;
+     return !foot.top||bounds.bottom+6<=foot.top;
    };
    const body=()=>page.querySelector('tbody');
-   const nextPage=()=>{
-     if(!body().children.length)page.querySelector('table').remove();
-     page=continuation.cloneNode(true);
-     page.querySelector('tbody').replaceChildren();
-     pagesBox.append(page);
+   const append=(item,index,text,continued)=>{
+     body().insertAdjacentHTML('beforeend',quotationItemPrintRow(item,index,text,continued));
+     if(amountOnly)body().lastElementChild.lastElementChild.colSpan=3;
    };
-   const append=(item,index,text,continued)=>body().insertAdjacentHTML('beforeend',quotationItemPrintRow(item,index,text,continued));
    for(const [index,item] of items.entries()){
      let remaining=quotePrintDescription(item),continued=false;
      do{
        append(item,index,remaining,continued);
-       if(fits())break;
+       if(fits(index===items.length-1))break;
        body().lastElementChild.remove();
        // Keep ordinary items together when the current page already has content.
        if(body().children.length){nextPage();continue;}
-       if(page===cover){nextPage();continue;}
        // Oversized descriptions can span continuation pages. Find the largest
        // measured prefix that fits, then break at the nearest word boundary.
        const chars=Array.from(remaining);
@@ -2226,26 +2219,7 @@ function layoutQuotationPages(root,items,quoteNo,date,terms,closing){
        if(remaining)nextPage();
      }while(remaining);
    }
-   const appendClosing=()=>{
-     body().append(...summary.map(row=>row.cloneNode(true)));
-     page.querySelector('footer').before(terms,closing);
-   };
-   appendClosing();
-   if(!fits()){
-     terms.remove();closing.remove();
-     body().querySelectorAll('tr:not(.print-quote-line)').forEach(row=>row.remove());
-     const trailing=(page===cover||body().children.length>1)?body().lastElementChild:null;
-     trailing?.remove();
-     nextPage();
-     if(trailing)body().append(trailing);
-     appendClosing();
-     if(trailing&&!fits()){
-       terms.remove();closing.remove();
-       body().querySelectorAll('tr:not(.print-quote-line)').forEach(row=>row.remove());
-       nextPage();
-       appendClosing();
-     }
-   }
+   body().append(...summary.map(row=>row.cloneNode(true)));
  }finally{measurement.remove();}
 }
 function exportAllQuotationAndCurves(){

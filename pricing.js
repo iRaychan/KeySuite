@@ -163,6 +163,10 @@
   function resolvePricingBrand(family,options={}){
     return selectedPricingBrand(family,options)||window.KeySuiteV391?.defaultPricingBrand?.(family)||'';
   }
+  function marginPricingBrand(family,options={}){
+    return normalizedFamily(family)==='MOTOR'&&options.associated_pump_brand_id!=null
+      ? options.associated_pump_brand_id : resolvePricingBrand(family,options);
+  }
   function brandMarginStage(base,rate){
     if(!Number.isFinite(rate)||rate<0||rate>=1)return null;
     const afterBrand=base/(1-rate);
@@ -177,7 +181,7 @@
     const allCandidates=currencyCandidates(priceBook,options.rarityBook||{},variant,family);if(!allCandidates.length&&!categoryRule(cat,family).currencies.includes('STOCK'))return null;
     const pricingMode=normalizePricingMode(options.pricingMode),requested=String(options.rarity||'').toLowerCase();
     const priceContext=context(options),sellingBrandId=selectedPricingBrand(family,options);
-    const pricingBrandId=sellingBrandId||window.KeySuiteV391?.defaultPricingBrand?.(family)||'';
+    const pricingBrandId=marginPricingBrand(family,options);
     const configuredRate=window.KeySuiteV391?.customerBrandMargin?.(priceContext.customer?.id,pricingBrandId)??0;
     const brandMarginError='Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.';
     if(brandMarginStage(1,configuredRate)==null)return {family,variant,pricingMode,pricingBrandId,brandMarginError,finalPrice:null};
@@ -297,7 +301,7 @@
     return margin>0?'':'Margin is blank or 0%. Please update the Category Pricing Rule before adding this item.';
   }
   function pricingSourceBrandMarginError(source,customer){
-    const id=resolvePricingBrand(source.product_family||source.family,{...source,useSelectedBrand:false});
+    const id=marginPricingBrand(source.product_family||source.family,{...source,useSelectedBrand:false});
     const rate=window.KeySuiteV391?.customerBrandMargin?.(customer?.id||source.customer_id,id)??0;
     return brandMarginStage(1,rate)==null?'Cannot quote: Brand Margin must be a valid percentage from 0% to below 100%.':'';
   }
@@ -467,7 +471,7 @@
     // IE substitution removes the included raw cost, then adds the selected
     // motor calculated with the MOTOR pricing rule.
     const motorSpec=efficiency=>`${hp>0?`${Number(hp)} HP`:`${Number(kw)} kW`}, ${pole}-pole ${efficiency}`;
-    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,stockProductId:product.id,stockVariant:'SKU',rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null};
+    const pricedMotor=(efficiency)=>{const product=exactPricedMotor({hp,kw,pole,efficiency});if(!product)return null;const motorCalc=calculatePrice(motorProductPriceBook(product),'MOTOR',cat,'MOTOR',{...options,customer,associated_pump_brand_id:calc.pricingBrandId,stockProductId:product.id,stockVariant:'SKU',rarityBook:motorProductRarityBook(product),rarity:product.rarity||'common'});return motorCalc?{product,calc:motorCalc}:null};
     const includedMatch=pricedMotor(included);if(!includedMatch)return {...calc,motorPricingError:`Cannot quote: Included motor price is missing for ${motorSpec(included)}. Update the Motor Price List before using bare-shaft or motor-substitution pricing.`};
     const replacementMatch=bareShaft?includedMatch:pricedMotor(selected);if(!replacementMatch)return {...calc,motorPricingError:`Cannot quote: Replacement motor price is missing for ${motorSpec(selected)}. Update the Motor Price List before quoting this motor substitution.`};
     const includedMotor=includedMatch.product,replacementMotor=replacementMatch.product,includedCalc=includedMatch.calc,replacementCalc=replacementMatch.calc;
@@ -726,6 +730,7 @@
     options={...options,useSelectedBrand:false,v391_brand_id:source.v391_brand_id||source.keysuite_brand_id||options.v391_brand_id};
     const pricingMode=normalizePricingMode(mode),customer=options.customer||customersList().find(row=>String(row.id)===String(source.customer_id||''))||quotationCustomer(),cat=options.category||secureData.categories.find(row=>String(row.id)===String(source.category_id||''))||categoryForCustomer(customer);if(!customer||!cat)return null;
     const family=String(source.product_family||source.family||'CHC').toUpperCase();
+    if(family==='MOTOR')options.associated_pump_brand_id=source.associated_pump_brand_id??options.associated_pump_brand_id;
     if(family==='CR'){const material=source.material||source.variant||'CR',base=source.technical_model||String(source.price_model||source.model||'').replace(/^CR[SN]\b/i,'CR'),model=material==='CR'?base:base.replace(/^CR\b/i,material);return findCrPrice(model,{...options,customer,category:cat,pricingMode,seal:source.seal_faces||source.seal||'Car / Sic',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
     if(family==='KV'){const model=source.technical_model||source.price_model||source.model;return findKvPrice(model,{...options,customer,category:cat,pricingMode,material:source.material_variant||source.variant||source.material||'KV',seal:source.seal_faces||source.seal||'Carbon V Silicon Carbide (Ca SiC)',elastomer:source.seal_elastomer||source.elastomer||'Viton',motor_hp:Number(source.motor_hp||0),motor_kw:Number(source.motor_kw||0),pole:Number(source.motor_pole||2),motor_efficiency_class:source.selected_motor_efficiency_class||source.default_motor_efficiency_class,bareShaft:!!source.bare_shaft})}
     if(family==='BSV')return window.KeySuiteBSV?.findPrice(source.technical_model||source.product_id,source.variant,{...options,customer,category:cat,pricingMode});
@@ -761,25 +766,30 @@
     const brandId=source.v391_brand_id||item?.brandId||item?.pumpData?.keysuite_brand_id;
     return brandId?{...source,v391_brand_id:brandId,v391_brand_name:source.v391_brand_name||item.brand||item.pumpData?.keysuite_brand_name}:source;
   }
-  function esPumpsetMotorBrand(items){
-    const pumps=items.filter(item=>String(assemblyItemSource(item).product_family).toUpperCase()==='ES'&&Number(item.qty??1)>0);
-    const brandIds=new Set(pumps.map(item=>{
+  function pumpBrandByItem(items){
+    const pumps=new Map();
+    for(const item of items){
       const source=componentPricingSource(item);
-      return resolvePricingBrand('ES',{...source,useSelectedBrand:false});
-    }));
-    if(brandIds.size!==1)return {};
-    const [id]=brandIds;
-    const brand=window.KeySuiteV391?.state?.brands?.find(row=>String(row.id)===String(id));
-    return brand?assemblySellingBrand({id:brand.id,name:brand.brand_name},'MOTOR'):{};
+      if(Number(item.qty??1)<=0||!(item.section==='pump'||item.assemblySection==='pump'||item.pumpData&&String(source.product_family).toUpperCase()!=='MOTOR'))continue;
+      const family=source.product_family||item.productFamily;
+      if(!family)continue;
+      const identity=item.commercialIdentity||item.pumpData?.commercialIdentity;
+      pumps.set(item.id??item,identity?.brandId??resolvePricingBrand(family,{...source,useSelectedBrand:false}));
+    }
+    return pumps;
   }
-  function flattenAssemblyItems(items=[],multiplier=1,result=[],resolveBomBrands=false,motorBrand={}){
-    if(resolveBomBrands)motorBrand={...motorBrand,...esPumpsetMotorBrand(items)};
+  function motorPricingSource(item,source,pumps){
+    if(String(source.product_family).toUpperCase()!=='MOTOR')return source;
+    const brands=new Set(pumps.values());
+    const brand=pumps.get(item.associatedPumpId??source.associated_pump_item_id)??(brands.size===1?brands.values().next().value:undefined);
+    return brand==null?source:{...source,associated_pump_brand_id:brand};
+  }
+  function flattenAssemblyItems(items=[],multiplier=1,result=[],resolveBomBrands=false,pumps=resolveBomBrands?pumpBrandByItem(items):new Map()){
     for(const item of items||[]){
       const source=componentPricingSource(item);
       const qty=Math.max(0,Number(item?.qty??1))*Math.max(0,Number(multiplier)||0),nested=source.assembly_items||source.items||[];
       if(nested.length){flattenAssemblyItems(nested.map(entry=>({...entry,qty:entry?.qty??1,pricingSource:entry?.pricingSource||entry?.pricing_source||entry?.source||entry})),qty,result,resolveBomBrands);continue}
-      const useMotorBrand=resolveBomBrands&&String(source.product_family).toUpperCase()==='MOTOR'&&!source.v391_brand_id;
-      result.push({...item,qty,pricingSource:useMotorBrand?{...source,...motorBrand}:source});
+      result.push({...item,qty,pricingSource:motorPricingSource(item,source,pumps)});
     }
     return result;
   }
@@ -789,7 +799,7 @@
     const family=String(source.product_family||source.family||'').toUpperCase(),fixed=source.fixed_price===true||normalizeRarity(source.rarity)==='fixed';
     const brandMarginError=pricingSourceBrandMarginError(source,customer);
     if(brandMarginError)return {family,pricingMode,brandMarginError,finalPrice:null};
-    const pricingBrandId=resolvePricingBrand(family,{...source,useSelectedBrand:false});
+    const pricingBrandId=marginPricingBrand(family,{...source,useSelectedBrand:false});
     const brandMargin=window.KeySuiteV391?.customerBrandMargin?.(customer.id,pricingBrandId)??0;
     const storedFuel=Math.max(0,Number(source.fuel_charge)||0),storedUnrounded=Number(source.unrounded_price),storedFinal=Math.max(0,Number(source.calculated_price??item.unitPrice)||0);
     if(fixed){
@@ -861,7 +871,7 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
 
   function priceAssemblyForDisplay(items=[],options={}){
     const customer=options.customer||quotationCustomer(),cat=pricingCategory(options,customer);if(!customer||!cat)return {error:'Select a customer with a Pricing Category first.',total:0,items:[]};
-    const priced=[],components=[],leaves=flattenAssemblyItems(items,1,[],true,options.motorBrand),displayedComponentTotal=leaves.reduce((sum,item)=>sum+Math.max(0,Number(item?.qty||0))*Math.max(0,Number(item?.unitPrice||0)),0);
+    const priced=[],components=[],leaves=flattenAssemblyItems(items,1,[],true,options.pumps),displayedComponentTotal=leaves.reduce((sum,item)=>sum+Math.max(0,Number(item?.qty||0))*Math.max(0,Number(item?.unitPrice||0)),0);
     for(const item of leaves){
       const source=typeof item?.pricingSource==='string'?(()=>{try{return JSON.parse(item.pricingSource)}catch(_){return {}}})():item?.pricingSource||{};
       if(!source.product_family||String(source.product_family).toUpperCase()==='MANUAL'){
@@ -910,11 +920,11 @@ BOM item: ${item?.model||'Unnamed item'}`,total:0,items:priced};
 
   function priceAssemblyRowsForDisplay(items=[],options={}){
     const roots=[],leaves=[];
-    const motorBrand=esPumpsetMotorBrand(items);
+    const pumps=pumpBrandByItem(items);
     for(const item of items||[]){
       const qty=Math.max(0,Number(item?.qty??1));
       if(!qty)continue;
-      const result=priceAssemblyForDisplay([item],{...options,motorBrand});if(result.error)return result;
+      const result=priceAssemblyForDisplay([item],{...options,pumps});if(result.error)return result;
       leaves.push(...result.items);
       roots.push({id:item?.id||'',model:item?.bomDescription||item?.model||'',qty,beforeFuelLine:Number(result.source?.before_fuel_total||0),fuelCharge:Number(result.fuelCharge||0),fuelEligible:result.fuelEligible,transportTotal:Number(result.transportTotal||0)});
     }
