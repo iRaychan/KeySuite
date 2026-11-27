@@ -1,26 +1,28 @@
 {
-  "version": "5.00.92",
-  "baseline": "5.00.91",
-  "upgrade_supported_from": "5.00.91",
-  "release_status": "corrective_review",
+  "version": "5.00.93",
+  "baseline": "5.00.92",
+  "upgrade_supported_from": "5.00.92",
+  "release_status": "local_verification",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
   "frozen_quotation_pdf_version": "1.09",
   "modules": {
-    "KeyStock": "1.04"
+    "KeyStock": "1.05"
   },
   "changes": [
-    "Restore the separate cover letter and itemized quotation schedule",
-    "Apply the associated pump commercial Brand Margin to its motor while preserving the motor pricing source and identity",
-    "Match the quotation Cost button to Delete and move Fuel Charge Comparison below all audit trails"
+    "Align stock filters and tables and preserve expanded configurations",
+    "Add audited receiving quantity corrections with an inventory value preview",
+    "Use dependent movement fields, FIFO and manual selection, transaction previews and saved time frames",
+    "Track cannibalisation, mapped components, retained spares and restoration against the original batch"
   ],
   "known_issues": [
-    "The TESK template was verified with local fixture settings. Live TESK assets and native Safari were unavailable for validation."
+    "Live Supabase and native Safari were outside this release's test scope.",
+    "Serial-tracked receiving quantity corrections require serial reconciliation and are blocked in Edit Stock Batch."
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
-  "asset_revision": "50092"
+  "asset_revision": "50093"
 }

@@ -1825,7 +1825,7 @@ async function ensureEsCompleteQuoteRouter(){
  esCompleteQuoteRouterPromise=new Promise(resolve=>{
    const script=document.createElement('script');
    script.src=document.querySelector('script[src^="assembly.js?"]')?.src||
-     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.92').replace(/\D/g,'')}`;
+     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.93').replace(/\D/g,'')}`;
    script.async=false;script.dataset.keysuiteAssemblyCompat='40502';
    script.onload=()=>{const fn=window.KeySuiteAssembly?.quotePumpsetSelection;resolve(typeof fn==='function'?fn.bind(window.KeySuiteAssembly):null)};
    script.onerror=()=>resolve(null);

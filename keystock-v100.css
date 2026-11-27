@@ -130,14 +130,33 @@
 .stock-link-record summary{cursor:pointer;font-weight:600}
 
 #keyStock [data-detail-option][aria-pressed="true"]{background:#175b9b;color:white}
-#keyStock #stockMovementTime .stock-tools,#keyStock #stockMovementForm{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:none}
-#keyStock :is(#stockMovementTime,#stockMovementFormPanel) label{
-  display:grid;grid-template-columns:15rem minmax(0,1fr);align-items:center;gap:12px;margin-bottom:0
+#keyStock [data-detail-option]{font:inherit;min-height:38px;padding:8px 14px;border-radius:8px}
+#keyStock .stock-inline-fields{--stock-label-width:14rem;display:grid;gap:10px;margin-block:8px}
+#keyStock .stock-inline-fields label{
+  display:grid;grid-template-columns:var(--stock-label-width) minmax(0,1fr);align-items:center;gap:12px;margin:0
 }
-#keyStock #stockMovementFormPanel>label{margin-block:12px}
-#keyStock :is(#stockMovementTime,#stockMovementFormPanel) label :is(input,select,textarea){width:100%;min-width:0;margin:0;min-height:40px}
-#keyStock #stockMovementForm>div:last-child{padding-inline-start:calc(15rem + 12px)}
-@media(max-width:640px){
-  #keyStock :is(#stockMovementTime,#stockMovementFormPanel) label{grid-template-columns:8rem minmax(0,1fr)}
-  #keyStock #stockMovementForm>div:last-child{padding-inline-start:calc(8rem + 12px)}
+#keyStock .stock-inline-fields label :is(input,select,textarea){width:100%;min-width:0;box-sizing:border-box;margin:0;min-height:40px}
+#keyStock .stock-inline-fields label input[type=checkbox]{width:auto;min-height:0;justify-self:start}
+#keyStock .stock-inline-fields label input[readonly]{background:#f3f6fa}
+#keyStock .stock-inline-footer{padding-inline-start:calc(var(--stock-label-width) + 12px)}
+#keyStock #stockBatchCorrection>.stock-inline-footer{padding-inline-start:calc(var(--stock-label-width) + 27px)}
+#keyStock .stock-inline-footer .btn{margin-inline-end:6px}
+#keyStock .stock-inline-footer:empty{display:none}
+#keyStock .stock-component-availability{margin-top:12px}
+#keyStock #stockContent [data-layout="batch-details"] :is(th,td):nth-child(3){text-align:center}
+#keyStock #stockContent [data-layout="batch-details"] .stock-row-actions{flex-wrap:wrap}
+#keyStock #stockContent [aria-label="Configuration stock"] col:first-child{width:35%}
+#keyStock #stockContent [aria-label="Stock Check results"] col:first-child{width:40%}
+#keyStock #stockContent [data-layout="batch-details"] col:last-child{width:11rem}
+#keyStock #stockContent [data-layout="batch-details"] .stock-col-metric:not(:last-child){width:10%}
+#keyStock #stockContent .stock-phase2-table :is(th,td){font-variant-numeric:tabular-nums}
+#keyStock #stockContent [data-stock-left~="1"]> :is(thead,tbody)>tr> :first-child,
+#keyStock #stockContent [data-stock-left~="2"]> :is(thead,tbody)>tr> :nth-child(2),
+#keyStock #stockContent [data-stock-left~="3"]> :is(thead,tbody)>tr> :nth-child(3),
+#keyStock #stockContent [data-stock-left~="5"]> :is(thead,tbody)>tr> :nth-child(5),
+#keyStock #stockContent [data-stock-left~="6"]> :is(thead,tbody)>tr> :nth-child(6),
+#keyStock #stockContent [data-stock-left~="8"]> :is(thead,tbody)>tr> :nth-child(8){text-align:left}
+@media(max-width:800px){
+  #keyStock .stock-inline-fields{--stock-label-width:8rem}
+  #keyStock #stockContent :is([aria-label="Configuration stock"],[aria-label="Stock Check results"]){min-width:33rem}
 }

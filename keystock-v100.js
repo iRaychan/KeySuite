@@ -1,4 +1,4 @@
-/* KeyStock V1.04: shared series options and exact Pricelist links. */
+/* KeyStock V1.05 */
 (() => {
   'use strict';
   const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -25,6 +25,9 @@
   let newestFirst=false, batchEdit=null;
   const detailFilters={critical:'',normal:''};
   const detailSections={critical:false,normal:false};
+  const expandedConfigurations=new Set();
+  const stockV105=()=>state?.config_version==='v105';
+  const stockVersion=()=>stockV105()?'V1.05':state.config_version==='v104'?'V1.04':state.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01';
   const statusChoices=['','unconfigured','zero','positive'];
   const statusPreferenceKey=()=>{
     const a=window.KEYSUITE_ACCESS||{},user=window.KeySuiteAuth?.getSession?.()?.user?.id||a.user_id||a.email||window.KEYSUITE_PROFILE?.email;
@@ -45,6 +48,24 @@
   }
   function emptyStockFilter(){return {location:'',supplier:'',serial:'',open:false};}
   function emptyHistoryFilter(){return {model:'',serial:'',period:'all',from:'',to:'',open:false};}
+  const timeFrameDays={stockMovementTime:[7,30,90],stockHistoryTime:[7,30,90,365]};
+  let restoredPreferenceKey='';
+  function timeFramePreference(id,filter,read=false){
+    const key=statusPreferenceKey();
+    if(!key)return;
+    const storageKey=key.replace(':stock-status:',':stock-period:')+':'+id;
+    try{
+      if(!read){
+        const next=JSON.stringify({period:filter.period,from:filter.from,to:filter.to});
+        if(localStorage.getItem(storageKey)!==next)localStorage.setItem(storageKey,next);
+        return;
+      }
+      const prior=JSON.parse(localStorage.getItem(storageKey));
+      if(!prior||!['all','custom',...timeFrameDays[id].map(String)].includes(prior.period))return;
+      filter.period=prior.period;
+      for(const field of ['from','to'])filter[field]=/^\d{4}-\d{2}-\d{2}$/.test(prior[field])?prior[field]:'';
+    }catch(_){}
+  }
   const ledger=()=>state?.ledger;
   const ledgerCap=key=>state?.ledger_permissions?.[key]===true;
   const canDropdowns=()=>ledger()?ledgerCap('manage_stock_dropdowns'):state.can_manage;
@@ -275,7 +296,7 @@
   async function rpc(action,payload={}){
     const client=window.KeySuiteAuth?.getClient?.();
     if(!client)throw Error('Sign in to connect KeyStock.');
-    const p={...payload,config_client:'v104',...(action==='state'?{ledger_client:'v102'}:{})};
+    const p={...payload,config_client:'v104',stock_client:'v105',...(action==='state'?{ledger_client:'v102'}:{})};
     const {data,error}=await client.rpc('keysuite_stock_v100',{p_action:action,p_payload:p});
     if(error)throw error;
     return data;
@@ -288,10 +309,15 @@
       if(token!==request)return false;
       if(!data?.permissions)throw Error('The KeyStock V1.01 database migration is required.');
       state=data;
+      if(restoredPreferenceKey!==statusPreferenceKey()){
+        restoredPreferenceKey=statusPreferenceKey();
+        timeFramePreference('stockHistoryTime',historyFilter,true);
+        timeFramePreference('stockMovementTime',movementFilter,true);
+      }
       status=stockStatusPreference()||status;
       render();
       const writable=data.can_manage||Object.values(data.permissions).some(Boolean);
-      message(`KeyStock ${data.config_version==='v104'?'V1.04':data.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01'} · ${items().length.toLocaleString()} catalogue models · ${writable?'Editing available':'Read only'}`);
+      message(`KeyStock ${stockVersion()} · ${items().length.toLocaleString()} catalogue models · ${writable?'Editing available':'Read only'}`);
       return true;
     }catch(e){
       if(token!==request)return false;
@@ -345,8 +371,10 @@
       const byLocation=new Map();
       for(const b of active.get(config.id)||[]){
         const location=b.location_id||'';
-        const row=byLocation.get(location)||{config,location,quantity:0,reserved:0,missing:new Map()};
-        row.quantity+=Number(b.quantity);
+        const row=byLocation.get(location)||{config,location,quantity:0,complete:0,incomplete:0,reserved:0,missing:new Map()};
+        row.quantity+=b.total??Number(b.quantity);
+        row.complete+=Number(b.quantity);
+        row.incomplete+=Number(b.incomplete||0);
         row.reserved+=Number(b.reserved||0);
         for(const q of missing.get(b.id)||[])row.missing.set(q.option_id,(row.missing.get(q.option_id)||0)+Number(q.missing_quantity));
         byLocation.set(location,row);
@@ -356,7 +384,7 @@
     }
     return items().flatMap(item=>{
       const rows=configs.get(item.key)||[];
-      return rows.length?rows.map(r=>({...r,item,assemblable:Math.max(0,r.quantity-Math.max(0,...r.missing.values()))}))
+      return rows.length?rows.map(r=>({...r,item,assemblable:stockV105()?r.complete:Math.max(0,r.quantity-Math.max(0,...r.missing.values()))}))
         :[{item,config:null,location:'',quantity:0,assemblable:0}];
     });
   }
@@ -367,16 +395,27 @@
     :new Date(timestamp).toLocaleDateString('en-CA',{timeZone:'Asia/Kuala_Lumpur'});
   function currentBatches(){
     if(!ledger())return state.opening_balances;
-    const lots=new Map(ledger().lots.map(l=>[l.id,l]));
+    const lots=new Map(ledger().lots.map(l=>[l.id,l])),heldSerials=new Map();
+    for(const unit of state.incomplete_units||[]){
+      if(unit.closed_at||!unit.serial)continue;
+      const serials=heldSerials.get(unit.position_id)||[];
+      serials.push(unit.serial);heldSerials.set(unit.position_id,serials);
+    }
     const openings=new Map(state.opening_balances.map(b=>[b.id,b]));
     return ledger().positions.map(p=>{
       const lot=lots.get(p.lot_id);
       const opening=openings.get(lot.opening_id);
-      return {...p,opening_id:lot.opening_id,supplier:lot.supplier,supplier_id:lot.supplier_id,created_at:lot.fifo_at,
+      const incomplete=Number(p.incomplete||0);
+      return {...p,incomplete,total:Number(p.quantity)+incomplete,available:Number(p.quantity)-Number(p.reserved||0),
+        serials:[...(p.serials||[]),...(heldSerials.get(p.id)||[])],
+        opening_id:lot.opening_id,supplier:lot.supplier,supplier_id:lot.supplier_id,created_at:lot.fifo_at,
         cost:lot.unit_cost_myr,received_on:lot.received_on,legacy:!!opening,snapshot:opening?.snapshot};
     });
   }
-  const stockTable=(headers,rows,empty,attributes='')=>`<div class="stock-scroll"><table class="stock-phase2-table" ${attributes}>
+  const leftStockColumns=['Model','Configuration','Date','Location','From','To'];
+  const stockTable=(headers,rows,empty,attributes='')=>`<div class="stock-scroll"><table class="stock-phase2-table"
+    data-stock-left="${headers.flatMap((h,i)=>leftStockColumns.includes(h)?[i+1]:[]).join(' ')}" ${attributes}>
+    <colgroup>${headers.map(h=>`<col class="${['Model','Configuration','Date','Location','From','To'].includes(h)?'stock-col-text':'stock-col-center'} ${['Cost (RM)','Total','Reserve','Not Complete','On Hand','Actions'].includes(h)?'stock-col-metric':''}">`).join('')}</colgroup>
     <thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
     <tbody>${rows.length?rows.join(''):`<tr><td colspan="${headers.length}">${esc(empty)}</td></tr>`}</tbody></table></div>`;
   const textRow=values=>`<tr>${values.map(value=>`<td>${esc(value)}</td>`).join('')}</tr>`;
@@ -389,16 +428,17 @@
     const supplierNames=new Map(state.suppliers.map(s=>[s.id,s.label]));
     const locations=new Map(state.locations.map(l=>[l.id,l.label.toLowerCase()]));
     return currentBatches().filter(b=>!b.voided_at&&configs.has(b.configuration_id)
-      &&(!prefix||(Number(b.quantity)>0&&locations.get(b.location_id)?.startsWith(prefix)))
+      &&(!prefix||((b.total??Number(b.quantity))>0&&locations.get(b.location_id)?.startsWith(prefix)))
       &&(!supplier.trim()||textMatch(b.supplier,supplier)||textMatch(supplierNames.get(b.supplier_id),supplier))
       &&(!stockFilter.serial.trim()||b.serials?.some(serial=>textMatch(serial,stockFilter.serial))));
   }
   function stockCheckResults(){
-    const configs=configById(), totals=new Map(), reserves=new Map(), configured=new Set(state.configurations.map(c=>c.item_key));
+    const configs=configById(), totals=new Map(), reserves=new Map(), incomplete=new Map(), configured=new Set(state.configurations.map(c=>c.item_key));
     for(const b of batchesForCheck(configs)){
       const key=configs.get(b.configuration_id).item_key;
-      totals.set(key,(totals.get(key)||0)+Number(b.quantity));
+      totals.set(key,(totals.get(key)||0)+(b.total??Number(b.quantity)));
       reserves.set(key,(reserves.get(key)||0)+Number(b.reserved||0));
+      incomplete.set(key,(incomplete.get(key)||0)+Number(b.incomplete||0));
     }
     const requireBatch=Boolean(stockFilter.location.trim()||stockFilter.supplier.trim()||stockFilter.serial.trim());
     const models=filtered().filter(i=>{
@@ -407,9 +447,10 @@
         &&(status!=='zero'||total===0)&&(status!=='unconfigured'||!configured.has(i.key));
     });
     const rows=models.map(i=>{
-      const qty=formatQty(totals.get(i.key)||0);
+      const total=totals.get(i.key)||0, reserve=reserves.get(i.key)||0, missing=incomplete.get(i.key)||0;
       return `<tr><td><button class="stock-link" data-stock-detail="${esc(i.key)}">${esc(i.model)}</button>
-        <small>${esc(i.brand)} · ${esc(i.family)}</small></td><td>${qty}</td><td>${ledger()?formatQty(reserves.get(i.key)||0):'—'}</td><td>—</td><td>${qty}</td></tr>`;
+        <small>${esc(i.brand)} · ${esc(i.family)}</small></td><td>${formatQty(total)}</td><td>${ledger()?formatQty(reserve):'—'}</td>
+        <td>${stockV105()?formatQty(missing):'—'}</td><td>${formatQty(total-(stockV105()?reserve+missing:0))}</td></tr>`;
     });
     return `<p class="stock-summary">${formatQty(models.length)} ${models.length===1?'model':'models'} shown</p>
       ${stockTable(['Model','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Stock Check results"')}`;
@@ -427,7 +468,7 @@
           <label>Stock Status<select id="stockStatus">${[['','All statuses'],['unconfigured','Not Configured'],['zero','Zero Stock'],['positive','In Stock']].map(([value,label])=>`<option value="${value}" ${value===status?'selected':''}>${label}</option>`).join('')}</select></label>
         </div>
       </details>
-      <p class="stock-metrics-note">${ledger()?'On Hand is physical stock, including reservations. Calculated Not Complete totals await component requirements.'
+      <p class="stock-metrics-note">${stockV105()?'On Hand shows complete, unreserved pumps. Total includes reserved and incomplete pumps.':ledger()?'On Hand is physical stock, including reservations. Calculated Not Complete totals await component requirements.'
         :'On Hand is physical stock from active opening balances. Reserve and Not Complete totals are unavailable.'}</p>
       <div id="stockTable">${stockCheckResults()}</div>`;
   }
@@ -452,21 +493,25 @@
     const allBatches=batchesForCheck(configs).sort((a,b)=>(newestFirst?-1:1)*(
       (a.received_on||localDate(a.created_at)).localeCompare(b.received_on||localDate(b.created_at))
       ||a.created_at.localeCompare(b.created_at)||a.id.localeCompare(b.id)));
-    const total=formatQty(allBatches.reduce((sum,b)=>sum+Number(b.quantity),0));
-    const reserved=formatQty(allBatches.reduce((sum,b)=>sum+Number(b.reserved||0),0));
+    const summarize=rows=>rows.reduce((sum,b)=>{
+      const reserved=Number(b.reserved||0), incomplete=Number(b.incomplete||0), complete=Number(b.quantity);
+      return {total:sum.total+complete+incomplete,reserved:sum.reserved+reserved,incomplete:sum.incomplete+incomplete,
+        available:sum.available+complete-(stockV105()?reserved:0)};
+    },{total:0,reserved:0,incomplete:0,available:0});
+    const modelStock=summarize(allBatches);
     const hasOption=(batch,option)=>Object.values(configs.get(batch.configuration_id).selections||{}).some(value=>[value].flat().includes(option));
     const batches=allBatches.filter(b=>Object.values(detailFilters).every(option=>!option||hasOption(b,option)));
     const groupFilter=kind=>{
       const button=(id,label)=>`<button type="button" class="btn secondary" data-detail-kind="${kind}" data-detail-option="${esc(id)}" aria-pressed="${detailFilters[kind]===id}">${label}</button>`;
       const openingIds=new Set(allBatches.map(batch=>batch.opening_id||batch.id));
       const shortages=kind==='critical'?state.critical_quantities.filter(entry=>openingIds.has(entry.opening_id)):[];
-      const sections=groups(kind).map(group=>`<div class="stock-normal-row"><b>${esc(group.label)}</b>${options(group).map(option=>{
-        const total=allBatches.filter(batch=>hasOption(batch,option.id)).reduce((sum,batch)=>sum+Number(batch.quantity),0);
+      const sections=groups(kind).flatMap(group=>options(group).map(option=>{
+        const total=summarize(allBatches.filter(batch=>hasOption(batch,option.id))).available;
         const missing=shortages.filter(entry=>entry.option_id===option.id).reduce((sum,entry)=>sum+Number(entry.missing_quantity),0);
         return button(option.id,`${esc(option.label)} <strong>${formatQty(total)}</strong>`)+
           (missing>0?`<small>Recorded opening shortage: ${formatQty(missing)}</small>`:'');
-      }).join('')}</div>`).join('');
-      return `<details data-detail-section="${kind}" ${detailSections[kind]?'open':''}><summary>${kind==='critical'?'Critical':'Normal'} Group</summary><div class="stock-normal-row">${button('','All')}</div>${sections}</details>`;
+      })).join('');
+      return `<details data-detail-section="${kind}" ${detailSections[kind]?'open':''}><summary>${kind==='critical'?'Critical':'Normal'} Group</summary><div class="stock-normal-row">${button('','All')}${sections}</div></details>`;
     };
     const buckets=new Map();
     const price=n=>n==null?'—':Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -475,32 +520,36 @@
       const group=config.variant?'variant:'+config.variant:'configuration:'+config.id;
       if(!buckets.has(group))buckets.set(group,[]);
       buckets.get(group).push(b);
-      const values=[b.received_on||localDate(b.created_at),locationLabel(b.location_id),price(b.cost),formatQty(b.quantity),formatQty(b.reserved||0),'—',formatQty(b.quantity)];
+      const qty=summarize([b]);
+      const values=[b.received_on||localDate(b.created_at),locationLabel(b.location_id),price(b.cost),formatQty(qty.total),formatQty(qty.reserved),stockV105()?formatQty(qty.incomplete):'—',formatQty(qty.available)];
       const actions=ledger()?[
         ['adjust','+','adjust_stock','Add or adjust stock'],
         ['reserve','R','reserve_stock','Reserve stock'],
         ['issue','−','confirm_stock_out','Deduct stock']
-      ].filter(([, ,permission])=>ledgerCap(permission)).map(([action,label,,title])=>
+      ].filter(([action, ,permission])=>ledgerCap(permission)&&(action==='adjust'||qty.available>0)).map(([action,label,,title])=>
         `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('edit_stock_batch')?`<button type="button" class="stock-row-action" data-edit-position="${b.id}" aria-label="Edit batch">✎</button>`:'')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action issue" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
-      return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions||'—'}</div></td></tr>`;
+      const canStrip=stockV105()&&ledgerCap('move_stock')&&(qty.available>=1||qty.incomplete>0)
+        &&(state.parts||[]).some(p=>p.series_key===model.family&&!p.retired);
+      return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions}${canStrip?`<button type="button" class="stock-row-action" data-row-action="cannibalise" data-position="${b.id}">Cannibalise</button>`:actions?'':'—'}</div></td></tr>`;
     });
     const rowById=new Map(batches.map((b,i)=>[b.id,batchRows[i]]));
-    const rows=[...buckets.values()].flatMap((members,index)=>{
+    const rows=[...buckets.entries()].flatMap(([group,members],index)=>{
       const config=configs.get(members[0].configuration_id),variant=config.variant||configLabel(config);
-      const qty=members.reduce((sum,b)=>sum+Number(b.quantity),0),reserve=members.reduce((sum,b)=>sum+Number(b.reserved||0),0);
+      const qty=summarize(members),key=JSON.stringify([selected,group]),open=expandedConfigurations.has(key);
       const costs=members.filter(b=>b.quantity>0&&b.cost!=null).map(b=>Number(b.cost));
       const nested=stockTable(['Date','Location','Cost (RM)','Total','Reserve','Not Complete','On Hand','Actions'],members.map(b=>rowById.get(b.id)),'','data-layout="batch-details"');
-      return [`<tr><td><button class="stock-link" aria-expanded="false" data-bucket="${index}">${esc(variant)}</button></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty)}</td><td>${formatQty(reserve)}</td><td>—</td><td>${formatQty(qty)}</td></tr><tr hidden id="bucket-${index}"><td colspan="6">${nested}</td></tr>`];
+      return [`<tr><td><button class="stock-link" aria-expanded="${open}" aria-controls="bucket-${index}" data-bucket="${esc(key)}">${open?'▾':'▸'} ${esc(variant)}</button></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty.total)}</td><td>${formatQty(qty.reserved)}</td><td>${stockV105()?formatQty(qty.incomplete):'—'}</td><td>${formatQty(qty.available)}</td></tr><tr ${open?'':'hidden'} id="bucket-${index}"><td colspan="6">${nested}</td></tr>`];
     });
     return `<div class="stock-detail-head"><button class="btn secondary" id="stockDetailBack">Back</button><h2>${esc(model.model)}</h2></div>
-      <div class="stock-detail-metrics">${[['Total',total],['Reserve',ledger()?reserved:'—'],['Not Complete','—'],['On Hand',total]].map(([label,value],i)=>
+      <div class="stock-detail-metrics">${[['Total',formatQty(modelStock.total)],['Reserve',ledger()?formatQty(modelStock.reserved):'—'],['Not Complete',stockV105()?formatQty(modelStock.incomplete):'—'],['On Hand',formatQty(modelStock.available)]].map(([label,value],i)=>
         `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
       <p id="stockMetricStatus" class="stock-metrics-note" role="status" hidden></p>
       ${groupFilter('critical')}${groupFilter('normal')}<h3>Stock by configuration</h3>
       ${batchEdit?stockBatchEditor(batchEdit):''}
       <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
       <p class="stock-metrics-note">Opening dates identify the historical count. Purchase batches show their receiving date.</p>
-      ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}`;
+      ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}
+      ${stockV105()?componentAvailability(model,allBatches,configs):''}`;
   }
   function stockBatchEditor(batch){
     const config=state.configurations.find(c=>c.id===batch.configuration_id);
@@ -514,16 +563,25 @@
       return `<label>${esc(g.label)}<select data-correction-group="${g.id}" ${multiple?'multiple':''}>${multiple?'':'<option value="">Select an option</option>'}
        ${choices.map(o=>`<option value="${o.id}" ${prior.includes(o.id)?'selected':''}>${esc(o.label)}${o.retired?' (archived)':''}</option>`).join('')}</select></label>`;
     }).join('');
-    return `<form id="stockBatchCorrection" class="stock-form">
-      <h3 class="stock-wide">Edit stock batch</h3><p class="stock-wide">${esc(configLabel(config))} · ${esc(locationLabel(batch.location_id))}</p>
-      <label>Location<select name="location"><option value="">Not Assigned</option>${refOptions('location',batch.location_id)}</select></label>
+    const quantityEditable=stockV105()&&batch.original_quantity!=null&&!batch.serialised&&!batch.incomplete;
+    return `<form id="stockBatchCorrection" class="stock-inline-fields">
+      <h3>Edit Stock Batch</h3>
+      <details><summary>Goods Details</summary><div class="stock-inline-fields">
       ${linked?'':`<label>Pricelist configuration<select name="variant">${choiceOptions(config.variant)}</select></label>`}
       ${selections}
+      </div></details>
+      <details open><summary>Goods Cost, Location &amp; Quantity</summary><div class="stock-inline-fields">
+      <label>Location<select name="location"><option value="">Not Assigned</option>${refOptions('location',batch.location_id)}</select></label>
+      <label>Original Quantity<input readonly value="${esc(batch.original_quantity??(stockV105()?'—':batch.quantity))}"></label>
+      ${quantityEditable?`<label>Corrected Quantity<input name="corrected" type="number" min="0" step="any" required value="${esc(batch.effective_quantity)}"></label>
+      <label>Quantity Adjustment<input name="adjustment" readonly value="0"></label>`:'<p>Receiving quantity is read-only for this batch.</p>'}
       ${state.can_cost?`<label>Landed unit cost (RM)<input name="cost" type="number" min="0" step="any" value="${batch.cost??''}" ${shared?'disabled':''}></label>`:''}
+      ${state.can_cost?'<label>Total Stock Value (RM)<input name="stock_value" readonly></label>':''}
       <label>Remark<input name="remark" value="${esc(lot.remarks)}" ${shared?'disabled':''}></label>
-      ${shared?'<p class="stock-wide">Cost and remark are shared by the active positions in this receiving lot.</p>':''}
+      ${shared?'<p>Cost and remark are shared by the active positions in this receiving lot.</p>':''}
       <label>Correction reason<input name="reason" required></label>
-      <div class="stock-wide stock-actions"><button class="btn">Save correction</button><button type="button" class="btn secondary" id="stockBatchCancel">Cancel</button></div>
+      </div></details>
+      <div class="stock-inline-footer"><button class="btn">Save Correction</button><button type="button" class="btn secondary" id="stockBatchCancel">Cancel</button></div>
     </form>`;
   }
   function bindStockBatchEditor(){
@@ -538,6 +596,15 @@
     }));
     const initialSelections=JSON.stringify(readSelections());
     const initialVariant=form.elements.variant?.value;
+    const initialCost=form.elements.cost?.value,initialRemark=form.elements.remark.value;
+    const updateValue=()=>{
+      const previous=Number(batch.effective_quantity??batch.quantity);
+      const delta=form.elements.corrected?.value!==undefined?Number(form.elements.corrected.value)-previous:0;
+      if(form.elements.adjustment)form.elements.adjustment.value=Number(delta.toFixed(12));
+      if(form.elements.stock_value)form.elements.stock_value.value=form.elements.cost.value===''?'—':
+        ((Number(batch.quantity)+Number(batch.incomplete||0)+delta)*Number(form.elements.cost.value)).toFixed(2);
+    };
+    form.oninput=updateValue;updateValue();
     form.onsubmit=e=>{
       e.preventDefault();
       if(!editMode||!ledgerCap('edit_stock_batch'))return;
@@ -548,14 +615,17 @@
         payload.selections=draft;
         if(fields.has('variant'))payload.variant=fields.get('variant');
       }
-      if(fields.has('remark'))payload.remark=fields.get('remark');
-      if(fields.has('cost'))payload.unit_cost_myr=fields.get('cost')===''?null:Number(fields.get('cost'));
-      save('edit_batch',payload,()=>{batchEdit=null;});
+      if(fields.has('remark')&&fields.get('remark')!==initialRemark)payload.remark=fields.get('remark');
+      if(fields.has('cost')&&fields.get('cost')!==initialCost)payload.unit_cost_myr=fields.get('cost')===''?null:Number(fields.get('cost'));
+      if(fields.has('corrected')&&Number(fields.get('corrected'))!==Number(batch.effective_quantity)){
+        payload.corrected_quantity=fields.get('corrected');
+        submitRequest(form,'edit_batch',payload,()=>{batchEdit=null;});
+      }else save('edit_batch',payload,()=>{batchEdit=null;});
     };
   }
   function bindStockDetail(){
     const root=$('stockContent');
-    root.querySelectorAll('[data-detail-section]').forEach(node=>node.ontoggle=()=>{detailSections[node.dataset.detailSection]=node.open;});
+    root.querySelectorAll('[data-detail-section]').forEach(node=>node.ontoggle=()=>{if(node.isConnected)detailSections[node.dataset.detailSection]=node.open;});
     root.querySelectorAll('[data-detail-option]').forEach(button=>button.onclick=()=>{
       detailSections[button.dataset.detailKind]=true;
       detailFilters[button.dataset.detailKind]=button.dataset.detailOption;render();
@@ -568,7 +638,13 @@
       batchEdit=batch;render();$('stockBatchCorrection')?.scrollIntoView({block:'nearest'});
     });
     bindStockBatchEditor();
-    $('stockContent').querySelectorAll('[data-bucket]').forEach(b=>b.onclick=()=>{const row=$('bucket-'+b.dataset.bucket);row.hidden=!row.hidden;b.setAttribute('aria-expanded',String(!row.hidden))});
+    root.querySelectorAll('[data-bucket]').forEach(b=>b.onclick=()=>{
+      const row=$(b.getAttribute('aria-controls')),key=b.dataset.bucket;
+      row.hidden=!row.hidden;
+      if(row.hidden)expandedConfigurations.delete(key);else expandedConfigurations.add(key);
+      b.setAttribute('aria-expanded',String(!row.hidden));
+      b.textContent=(row.hidden?'▸':'▾')+b.textContent.slice(1);
+    });
     $('stockContent').querySelectorAll('[data-cancel-position]').forEach(b=>b.onclick=()=>{if(!editMode||!ledgerCap('delete_stock_batch'))return;const reason=prompt('Reason for cancelling this receiving batch')?.trim();if(reason&&confirm('Cancel the entire batch and record a reversal?'))save('cancel_batch',{position:b.dataset.cancelPosition,reason,request_id:uid()})});
     $('stockDetailBack').onclick=back;
     $('stockDateOrder').onchange=e=>{newestFirst=e.target.value==='newest';render();};
@@ -609,11 +685,97 @@
     return [...shortages.values()].sort((a,b)=>modelCompare(a.model,b.model)).map(row=>
       textRow([row.model.model,configLabel(row.config),row.component,'Unknown','Unknown','Unknown',formatQty(row.quantity)]));
   }
+  const partPurpose={customer:'Customer spare part',repair:'Repair another pump',spare:'Keep as spare stock'};
+  const partSpecs=(part,config)=>Object.fromEntries((part.group_ids||[]).map(id=>[id,config?.selections?.[id]??null]));
+  const specNames=specs=>Object.entries(specs||{}).map(([id,value])=>{
+    const group=state.groups.find(g=>g.id===id);
+    const labels=[value].flat().filter(Boolean).map(v=>state.options.find(o=>o.id===v)?.label||v);
+    return `${group?.label||'Recorded specification'}: ${labels.join(', ')||'Unspecified'}`;
+  }).join(' · ');
+  const savedSpecNames=part=>Object.values(part.specification_labels||{}).map(x=>`${x.group}: ${x.options.join(', ')||'Unspecified'}`).join(' · ');
+  const partRows=()=>state.missing_components||[];
+  const unitById=id=>(state.incomplete_units||[]).find(u=>u.id===id);
+  const unitLabel=u=>u?.serial||u?.id.slice(0,8)||'—';
+  const sameSpecs=(a,b)=>JSON.stringify(Object.entries(a||{}).sort())===JSON.stringify(Object.entries(b||{}).sort());
+  function componentAvailability(model,batches,configs){
+    const parts=(state.parts||[]).filter(p=>p.series_key===model.family&&!p.retired);
+    if(!parts.length)return '';
+    const summaries=new Map(),batchIds=new Set(batches.map(b=>b.id));
+    const openUnits=new Map((state.incomplete_units||[]).filter(u=>batchIds.has(u.position_id)&&!u.closed_at).map(u=>[u.id,u]));
+    const add=(part,specs,present,spare)=>{
+      const key=part.id+':'+JSON.stringify(Object.entries(specs).sort());
+      const row=summaries.get(key)||{part,specs,present:0,spare:0};
+      row.present+=present;row.spare+=spare;summaries.set(key,row);
+    };
+    for(const part of parts)for(const batch of batches){
+      add(part,partSpecs(part,configs.get(batch.configuration_id)),(batch.total??Number(batch.quantity))*part.units_per_pump,0);
+    }
+    const allConfigs=configById();
+    for(const missing of partRows()){
+      const part=parts.find(p=>p.id===missing.part_id);
+      if(!part)continue;
+      const unit=unitById(missing.unit_id);
+      if(!missing.restored_event&&openUnits.has(missing.unit_id))add(part,missing.specifications,-Number(missing.quantity),0);
+      if(missing.spare_available>0&&allConfigs.get(unit?.configuration_id)?.item_key===model.key)
+        add(part,missing.specifications,0,Number(missing.spare_available));
+    }
+    return `<details class="stock-component-availability"><summary>Physical Component Availability</summary>
+      ${stockTable(['Component','Specifications','Present in pumps','Separate spare stock'],[...summaries.values()].map(row=>
+        textRow([row.part.label,specNames(row.specs),formatQty(row.present),formatQty(row.spare)])),'No components recorded.')}</details>`;
+  }
+  function cannibalisationRecords(){
+    if(!stockV105())return '';
+    const configs=configById(),models=new Map(items().map(i=>[i.key,i]));
+    const events=new Map(ledger().events.map(e=>[e.id,e]));
+    const rows=partRows().flatMap(part=>{
+      const unit=unitById(part.unit_id),cfg=configs.get(unit?.configuration_id);
+      const model=models.get(cfg?.item_key),event=events.get(part.removed_event),restoration=events.get(part.restored_event);
+      if(!model||!event||!textMatch(model.model,missingFilter.model)||!textMatch(model.family,missingFilter.series)
+        ||!textMatch(part.part_label,missingFilter.component))return [];
+      return [`<tr>${[model.model,configLabel(cfg),locationLabel(unit.location_id),unitLabel(unit),part.part_label,
+        savedSpecNames(part)||specNames(part.specifications),part.quantity,event.effective_on,partPurpose[part.purpose],
+        event.reference,restoration?'Restored':'Missing',part.spare_available].map(x=>`<td>${esc(x)}</td>`).join('')}
+        <td><details class="stock-movement-detail"><summary>Details</summary>
+        <p>Batch ${esc(unit.lot_id)} · Position ${esc(unit.position_id)}</p><p>Removed by ${esc(event.actor)} · ${esc(event.reason)} · ${esc(event.remark)}</p>
+        ${restoration?`<p>Restored ${esc(restoration.effective_on)} by ${esc(restoration.actor)} · ${esc(restoration.reference)} · ${esc(restoration.reason)}</p>`:''}</details>
+        ${!restoration&&ledgerCap('move_stock')?`<button type="button" class="btn secondary" data-restore-part="${part.id}">Restore Parts</button>`:''}</td></tr>`];
+    });
+    return `<h3>Cannibalisation &amp; Restoration</h3><div id="stockRestorePanel"></div>
+      ${stockTable(['Model','Configuration','Location','Pump','Component','Specifications','Qty','Date','Purpose','Reference','Status','Spare Stock','Actions'],
+        rows,'No cannibalisation records match these filters.')}`;
+  }
+  function bindRestoreParts(){
+    $('stockMissingResults').querySelectorAll('[data-restore-part]').forEach(button=>button.onclick=()=>{
+      const part=partRows().find(p=>p.id===button.dataset.restorePart);
+      const configs=configById(),key=configs.get(unitById(part.unit_id)?.configuration_id)?.item_key;
+      const donors=partRows().filter(p=>p.spare_available>=part.quantity&&p.part_id===part.part_id&&sameSpecs(p.specifications,part.specifications)
+        &&configs.get(unitById(p.unit_id)?.configuration_id)?.item_key===key);
+      const root=$('stockRestorePanel');
+      root.innerHTML=`<form class="stock-inline-fields"><h3>Restore ${esc(part.part_label)}</h3>
+        <label>Pump<input readonly value="${esc(unitLabel(unitById(part.unit_id)))}"></label>
+        <label>Required specifications<textarea readonly rows="2">${esc(savedSpecNames(part)||specNames(part.specifications))}</textarea></label>
+        <label>Quantity<input readonly value="${esc(part.quantity)}"></label>
+        <label>Replacement source<select name="spare_source"><option value="">External replacement</option>
+          ${donors.map(p=>`<option value="${p.id}">Retained spare · ${esc(unitLabel(unitById(p.unit_id)))} · ${p.spare_available} available</option>`).join('')}</select></label>
+        <label data-external>Replacement reference<input name="replacement_reference" required></label>
+        ${dateField()}<label>Reason<input name="reason" required></label><label>Remark<input name="remark"></label>
+        <label>Verify matching part and specifications<input type="checkbox" required></label>
+        <div class="stock-inline-footer"><button class="btn">Restore Parts</button><button type="button" class="btn secondary" data-restore-cancel>Cancel</button></div></form>`;
+      const form=root.querySelector('form'),reference=form.elements.replacement_reference;
+      form.elements.spare_source.onchange=e=>{reference.disabled=!!e.target.value;root.querySelector('[data-external]').hidden=reference.disabled;};
+      root.querySelector('[data-restore-cancel]').onclick=()=>root.replaceChildren();
+      form.onsubmit=e=>{
+        e.preventDefault();
+        submitLedger(form,'restore_parts',{...formData(form),missing_id:part.id,part_id:part.part_id,quantity:part.quantity,specifications:part.specifications});
+      };
+      root.scrollIntoView?.({block:'nearest'});
+    });
+  }
   function missingResults(){
-    return stockTable(['Model','Configuration','Missing Component','Qty Affected','Required','Available','Shortage'],missingRows(),'No recorded shortages match these filters.');
+    return stockTable(['Model','Configuration','Missing Component','Qty Affected','Required','Available','Shortage'],missingRows(),'No recorded opening shortages match these filters.')+cannibalisationRecords();
   }
   function missingParts(){
-    return `<h2>Missing Parts</h2><p class="stock-metrics-note">Shows shortages recorded on active opening balances. Component requirements, available components and allocation are unknown.</p>
+    return `<h2>Missing Parts</h2><p class="stock-metrics-note">Historical opening shortages and tracked component removals are displayed in separate tables.</p>
       <div class="stock-tools">${Object.entries(missingFilter).map(([key,value])=>
         `<label>${{model:'Model',series:'Series',component:'Component'}[key]}<input type="search" data-missing-filter="${key}" value="${esc(value)}"></label>`).join('')}</div>
       <div id="stockMissingResults">${missingResults()}</div>`;
@@ -622,22 +784,26 @@
     const choices=[...days.map(n=>[String(n),'Last '+n+' Days']),['all','All Time'],['custom','Custom Date Range']];
     const label=choices.find(([value])=>value===filter.period)[1];
     return `<details id="${id}" ${filter.open?'open':''}><summary>Time Frame · ${label}</summary>
-      <div class="stock-tools"><label>Period<select data-period>${choices.map(([value,label])=>
+      <div class="stock-inline-fields"><label>Period<select data-period>${choices.map(([value,label])=>
         `<option value="${value}" ${value===filter.period?'selected':''}>${label}</option>`).join('')}</select></label>
         ${filter.period==='custom'?`<label>From<input type="date" data-date="from" value="${esc(filter.from)}"></label>
           <label>To<input type="date" data-date="to" value="${esc(filter.to)}"></label>`:''}</div></details>`;
   }
   function bindTimeFrame(id,filter,refresh){
     const element=$(id);
-    element.ontoggle=()=>{filter.open=element.open;};
+    element.ontoggle=()=>{if(element.isConnected)filter.open=element.open;};
     element.querySelector('[data-period]').onchange=e=>{
       filter.period=e.target.value;
       filter.open=element.open;
-      render();
+      timeFramePreference(id,filter);
+      element.outerHTML=timeFrame(id,filter,timeFrameDays[id]);
+      bindTimeFrame(id,filter,refresh);
       $(id).querySelector('[data-period]').focus();
+      refresh?.();
     };
     element.querySelectorAll('[data-date]').forEach(input=>input.onchange=()=>{
       filter[input.dataset.date]=input.value;
+      timeFramePreference(id,filter);
       refresh?.();
     });
   }
@@ -667,14 +833,28 @@
     for(const e of events){
       if(!textMatch(e.model,historyFilter.model)
         ||(historyFilter.serial.trim()&&!e.serials.some(s=>textMatch(s,historyFilter.serial))))continue;
+      const components=partRows().filter(m=>m.removed_event===e.id||m.restored_event===e.id);
+      const note=components.length?[...new Set(components.map(x=>x.part_label+' · '+partPurpose[x.purpose]))].join(', '):'Recorded';
       rows.push({date:e.effective_on,at:e.recorded_at,values:[e.effective_on,e.model,e.serials.join(', ')||'—',
         actionLabels[e.kind]||e.kind,formatQty(Number(e.quantity)),e.reference||'—',e.customer||e.supplier||'—',
-        [e.source_location,e.destination_location].filter(Boolean).join(' → ')||'—','Recorded']});
+        [...new Set([e.source_location,e.destination_location].filter(Boolean))].join(' → ')||'—',note]});
+    }
+    if(!historyFilter.serial.trim())for(const correction of state.quantity_corrections||[]){
+      const detail=correction.detail, model=models.get(configs.get(detail.configuration)?.item_key);
+      if(!model||!textMatch(model.model,historyFilter.model))continue;
+      const date=localDate(correction.at);
+      const values=[date,model.model,'—','Receiving Quantity Correction',formatQty(Number(detail.adjustment)),'—','—',locationLabel(detail.location)];
+      const audit=`<details class="stock-movement-detail"><summary>${esc(detail.previous_quantity)} → ${esc(detail.corrected_quantity)}</summary>
+        <p>Original quantity ${esc(detail.original_quantity)} · On Hand ${esc(detail.previous_on_hand)} → ${esc(detail.corrected_on_hand)}</p>
+        ${Object.hasOwn(correction,'previous_stock_value')?`<p>Stock value (RM) ${esc(correction.previous_stock_value??'—')} → ${esc(correction.corrected_stock_value??'—')}</p>`:''}
+        <p>Batch ${esc(detail.lot)} · Position ${esc(detail.position)}</p>
+        <p>${esc(correction.actor)} · ${esc(new Date(correction.at).toLocaleString())} · ${esc(detail.reason)}</p></details>`;
+      rows.push({date,at:correction.at,html:`<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td>${audit}</td></tr>`});
     }
     const visible=rows.filter(e=>matchesPeriod(e.date,historyFilter))
-      .sort((a,b)=>b.date.localeCompare(a.date)||b.at.localeCompare(a.at)).map(e=>textRow(e.values));
+      .sort((a,b)=>b.date.localeCompare(a.date)||b.at.localeCompare(a.at)).map(e=>e.html||textRow(e.values));
     const current=currentBatches().reduce((sum,b)=>sum+(!b.voided_at
-      &&configs.get(b.configuration_id)?.item_key===historyFilter.selected?Number(b.quantity):0),0);
+      &&configs.get(b.configuration_id)?.item_key===historyFilter.selected?(b.total??Number(b.quantity)):0),0);
     const lifetime=kind=>formatQty(events.reduce((n,e)=>n+(e.kind===kind&&e.item_key===historyFilter.selected?Number(e.quantity):0),0));
     return `${historyFilter.selected?`<div class="stock-detail-metrics stock-history-metrics">
       <div><b>Total Purchased</b><strong>${ledger()?lifetime('receive'):'—'}</strong></div>
@@ -692,7 +872,7 @@
         <label>Lifetime summary model<select id="stockHistorySelection"><option value="">Select a model</option>
           ${items().map(i=>`<option value="${esc(i.key)}" ${i.key===historyFilter.selected?'selected':''}>${esc(i.model)} · ${esc(i.family)}</option>`).join('')}</select></label>
       </div>
-      ${timeFrame('stockHistoryTime',historyFilter,[30,90,365])}
+      ${timeFrame('stockHistoryTime',historyFilter,timeFrameDays.stockHistoryTime)}
       <div id="stockHistoryResults">${stockHistoryResults()}</div>`;
   }
   function bindStockHistory(){
@@ -749,7 +929,7 @@
   }
 
   const seriesLabels={ES:'ES',ISO:'ISO',CHC_G1:'CHC C4',CHC_G2:'CHC C6',CR:'CR',KV:'KV',BSW:'BSW',BSV:'BSV',MOTOR:'Motor',BGF:'BGF',BFI:'BFI'};
-  const groupingLabels={linked:'Pricelist Link',critical:'Critical Group',normal:'Normal Group'};
+  const groupingLabels={linked:'Pricelist Link',critical:'Critical Group',normal:'Normal Group',parts:'Cannibalisation Parts'};
   let linkDraft=null;
   const arrangements=()=>state.groups.filter(g=>g.series_key===dropdownSeries&&g.kind==='linked'&&!g.retired).sort(sort);
   const seriesMappings=()=> (state.series_mappings||[]).filter(m=>m.series_key===dropdownSeries&&!m.retired);
@@ -761,7 +941,7 @@
     return 'Mapped';
   }
   function pricelistDetails(option,members,configurations,editable){
-    if(state.config_version!=='v104')return '<p>The KeyStock V1.04 migration is required for Pricelist Link editing.</p>';
+    if(!['v104','v105'].includes(state.config_version))return '<p>The KeyStock V1.04 migration is required for Pricelist Link editing.</p>';
     const gs=arrangements(),maps=seriesMappings(),disabled=editable?'':'disabled';
     const button=(action,id,label)=>`<button type="button" class="btn secondary" data-link-action="${action}" data-id="${esc(id||'')}" ${disabled}>${label}</button>`;
     let form='';
@@ -818,7 +998,7 @@
     return window.confirm(`Remove “${option.label}” from future stock selections?${warning}`);
   }
   function seriesDropdowns(){
-    if(!['v103','v104'].includes(state.config_version))return '<h2>Dropdown Management</h2><p>The V1.04 database update is required for this interface.</p>';
+    if(!['v103','v104','v105'].includes(state.config_version))return '<h2>Dropdown Management</h2><p>The V1.04 database update is required for this interface.</p>';
     const catalog=state.catalog||[], series=[...new Set(catalog.map(i=>i.family))];
     const preferred=['ES','ISO','CHC_G1','CHC_G2','CR','KV','BSV','BSW'];
     series.sort((a,b)=>(preferred.includes(a)?preferred.indexOf(a):99)-(preferred.includes(b)?preferred.indexOf(b):99)||natural.compare(a,b));
@@ -830,13 +1010,28 @@
       if(!configurations.has(choice.code))configurations.set(choice.code,{id:choice.code,label:choice.label,models:[]});
       configurations.get(choice.code).models.push(model);
     }
-    const list=dropdownKind==='linked'?[...configurations.values()]:group?options(group):[];
+    const seriesParts=()=> (state.parts||[]).filter(p=>p.series_key===dropdownSeries&&!p.retired);
+    const list=dropdownKind==='linked'?[...configurations.values()]:dropdownKind==='parts'?seriesParts():group?options(group):[];
     if(!list.some(o=>o.id===dropdownOption))dropdownOption=list[0]?.id||'';
     const option=list.find(o=>o.id===dropdownOption), editable=editMode&&canDropdowns();
     const row=(attribute,id,text,active,sub='')=>`<button type="button" class="stock-browser-row" ${attribute}="${esc(id)}" aria-pressed="${active}"><span>${esc(text)}${sub?`<small>${esc(sub)}</small>`:''}</span><span aria-hidden="true">›</span></button>`;
     let details='';
     if(dropdownKind==='linked'){
       details=pricelistDetails(option,members,configurations,editable);
+    }else if(dropdownKind==='parts'){
+      const active=state.groups.filter(g=>g.series_key===dropdownSeries&&!g.retired&&['linked','critical','normal'].includes(g.kind)).sort(sort);
+      details=optionDraft&&editable?`<form id="stockSeriesOptionForm"><h3>${optionDraft.id?'Edit Part':'Add Part'}</h3>
+        <label>Part name<input name="label" required maxlength="120" value="${esc(optionDraft.label)}"></label>
+        <label>Units per pump<input name="units_per_pump" type="number" required min="1" max="10000" value="${optionDraft.units_per_pump??1}"></label>
+        <label>Stock specification mappings<select name="group_ids" multiple size="6" required>
+          ${active.map(g=>`<option value="${g.id}" ${optionDraft.group_ids?.includes(g.id)?'selected':''}>${esc(groupingLabels[g.kind])} · ${esc(g.label)}</option>`).join('')}</select></label>
+        ${active.length?'':'<p>Set up a stock specification group for this series first.</p>'}
+        <div class="stock-actions"><button class="btn">Save Part</button><button type="button" class="btn secondary" id="stockOptionCancel">Cancel</button></div></form>`:
+        `<p class="stock-browser-applies">Available to all ${members.length} ${esc(label)} models</p>
+        ${option?`<h3>${esc(option.label)}</h3><p>Units per pump: ${option.units_per_pump}</p>
+          <ul>${option.group_ids.map(id=>{const g=state.groups.find(g=>g.id===id);return `<li>${esc(groupingLabels[g?.kind]||'Stock group')} · ${esc(g?.label||id)}${g?.retired?' (archived)':''}</li>`;}).join('')}</ul>
+          <div class="stock-actions"><button class="btn secondary" id="stockOptionEdit" ${editable?'':'disabled'}>Edit</button>
+          <button class="btn stock-danger" id="stockOptionDelete" ${editable?'':'disabled'}>Deactivate</button></div>`:'<p>No parts configured for this series.</p>'}`;
     }else if(optionDraft&&editable){
       details=`<form id="stockSeriesOptionForm"><h3>${optionDraft.id?'Edit option':'Add option'}</h3>
         <label>Option name<input name="label" maxlength="120" required value="${esc(optionDraft.label)}" autocomplete="off"></label>
@@ -852,8 +1047,8 @@
     return `<div class="stock-browser-heading"><div><h2>Dropdown Management</h2><p>Configure once for every model in a series</p></div><span>${editable?'Editing enabled':'View mode'}</span></div>
       <div class="stock-browser-scroll" tabindex="0" aria-label="Four-column dropdown configuration"><div class="stock-browser">
         <section aria-labelledby="stockSeriesTitle"><h3 id="stockSeriesTitle">1. Series</h3>${series.map(s=>row('data-series',s,seriesLabels[s]||s,s===dropdownSeries)).join('')}</section>
-        <section aria-labelledby="stockGroupingTitle"><h3 id="stockGroupingTitle">2. Grouping</h3>${Object.entries(groupingLabels).map(([k,v])=>row('data-grouping',k,v,k===dropdownKind)).join('')}</section>
-        <section aria-labelledby="stockOptionsTitle"><h3 id="stockOptionsTitle">3. ${dropdownKind==='linked'?'Configurations':dropdownKind==='critical'?'Critical Options':'Normal Options'}</h3>
+        <section aria-labelledby="stockGroupingTitle"><h3 id="stockGroupingTitle">2. Grouping</h3>${Object.entries(groupingLabels).filter(([k])=>k!=='parts'||stockV105()).map(([k,v])=>row('data-grouping',k,v,k===dropdownKind)).join('')}</section>
+        <section aria-labelledby="stockOptionsTitle"><h3 id="stockOptionsTitle">3. ${dropdownKind==='linked'?'Configurations':dropdownKind==='parts'?'Parts':dropdownKind==='critical'?'Critical Options':'Normal Options'}</h3>
         ${list.map(o=>row('data-series-option',o.id,o.label,o.id===dropdownOption,dropdownKind==='linked'?(seriesMappings().some(m=>m.variant===o.id&&mappingStatus(m,configurations)==='Mapped')?'Mapped':'Unmapped'):'')).join('')||'<p class="stock-browser-note">No options configured.</p>'}
         ${dropdownKind==='linked'?'':`<button type="button" class="btn secondary stock-option-add" id="stockOptionAdd" ${editable?'':'disabled'}>＋ Add Option</button>`}</section>
         <section aria-labelledby="stockDetailsTitle"><h3 id="stockDetailsTitle">4. Option Details</h3><p>${esc(label)} — ${groupingLabels[dropdownKind]}</p>${details}</section>
@@ -870,7 +1065,8 @@
     const editable=()=>!busy&&editMode&&canDropdowns();
     bindPricelist();
     if($('stockOptionAdd'))$('stockOptionAdd').onclick=()=>{if(!editable())return;optionDraft={label:''};render();$('stockSeriesOptionForm').elements.label.focus();};
-    if($('stockOptionEdit'))$('stockOptionEdit').onclick=()=>{if(!editable())return;optionDraft={...state.options.find(o=>o.id===dropdownOption)};render();$('stockSeriesOptionForm').elements.label.focus();};
+    const records=dropdownKind==='parts'?state.parts:state.options;
+    if($('stockOptionEdit'))$('stockOptionEdit').onclick=()=>{if(!editable())return;optionDraft={...records.find(o=>o.id===dropdownOption)};render();$('stockSeriesOptionForm').elements.label.focus();};
     if($('stockOptionCancel'))$('stockOptionCancel').onclick=()=>{optionDraft=null;render();};
     if($('stockSeriesOptionForm'))$('stockSeriesOptionForm').onsubmit=e=>{
       e.preventDefault();if(!editable())return;
@@ -878,34 +1074,42 @@
       if(!label)return message('Enter an option name.',true);
       // Keep a failed draft available for correction or a refresh after a conflict.
       optionDraft.label=label;
-      save('series_option_save',{series_key:dropdownSeries,kind:dropdownKind,id:optionDraft.id,revision:optionDraft.revision,label},result=>{
+      const data={series_key:dropdownSeries,kind:dropdownKind,id:optionDraft.id,revision:optionDraft.revision,label};
+      if(dropdownKind==='parts'){
+        data.units_per_pump=e.target.elements.units_per_pump.value;
+        data.group_ids=[...e.target.elements.group_ids.selectedOptions].map(o=>o.value);
+        Object.assign(optionDraft,data);
+      }
+      save(dropdownKind==='parts'?'part_save':'series_option_save',data,result=>{
         dropdownOption=result.id;optionDraft=null;
       });
     };
     if($('stockOptionDelete'))$('stockOptionDelete').onclick=()=>{
       if(!editable())return;
-      const option=state.options.find(o=>o.id===dropdownOption);
-      if(!option||!confirmOptionRemoval(option))return;
-      save('series_option_delete',{series_key:dropdownSeries,kind:dropdownKind,id:option.id,revision:option.revision},()=>{dropdownOption='';});
+      const option=records.find(o=>o.id===dropdownOption),part=dropdownKind==='parts';
+      if(!option||!(part?confirm('Deactivate this part for new removals?'):confirmOptionRemoval(option)))return;
+      save(part?'part_retire':'series_option_delete',{series_key:dropdownSeries,kind:dropdownKind,id:option.id,revision:option.revision},()=>{dropdownOption='';});
     };
   }
   const today=()=>localDate(Date.now());
   const actionLabels={issue:'Stock Out',return:'Customer Return',write_off:'Write Off',transfer:'Transfer Location',
-    reconfigure:'Reconfigure Stock',adjust:'Add / Adjust Stock',reserve:'Reservation',release:'Return to Available',receive:'Receiving'};
+    reconfigure:'Reconfigure Stock',adjust:'Add / Adjust Stock',reserve:'Reservation',release:'Return to Available',receive:'Receiving',
+    cannibalise:'Cannibalise Stock',restore_parts:'Restore Parts'};
   const dateField=()=>`<label>Date<input type="date" name="date" value="${today()}" required></label>`;
   const qtyField=(max='')=>`<label>Quantity<input type="number" name="quantity" min="0" step="any" max="${max}" required></label>`;
   const serialField=(help='One serial per line or comma-separated')=>
     `<label>Serial numbers<textarea name="serials" placeholder="${esc(help)}"></textarea></label>`;
   const serialValues=value=>String(value||'').split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
   const requestDrafts=new WeakMap();
-  function submitLedger(form,action,p,after){
+  function submitRequest(form,action,p,after){
     if(busy)return;
     const signature=JSON.stringify([action,p]);
     const previous=requestDrafts.get(form);
     const requestId=previous?.signature===signature?previous.id:uid();
     requestDrafts.set(form,{signature,id:requestId});
-    save('ledger_'+action,{...p,request_id:requestId},after);
+    save(action,{...p,request_id:requestId},after);
   }
+  const submitLedger=(form,action,p,after)=>submitRequest(form,'ledger_'+action,p,after);
   function formData(form){
     const values=Object.fromEntries(new FormData(form));
     return Object.fromEntries(Object.entries(values).filter(([,value])=>value!==''));
@@ -1006,33 +1210,150 @@
 
   const movementTypes={
     issue:'confirm_stock_out',return:'adjust_stock',write_off:'adjust_stock',
-    transfer:'move_stock',reconfigure:'move_stock',adjust:'adjust_stock'
+    transfer:'move_stock',reconfigure:'move_stock',adjust:'adjust_stock',cannibalise:'move_stock'
   };
-  function positionOptions(){
-    const configs=configById(), models=new Map(items().map(i=>[i.key,i]));
-    return ledger().positions.filter(p=>p.quantity>p.reserved||p.id===actionContext?.position).map(p=>{
-      const c=configs.get(p.configuration_id);
-      const model=models.get(c?.item_key);
-      return `<option value="${p.id}" ${p.id===actionContext?.position?'selected':''}>
-        ${esc(model?.model||'Historical model')} · ${esc(configLabel(c))} · ${esc(locationLabel(p.location_id))} ·
-        ${formatQty(Number(p.quantity)-Number(p.reserved))} available in batch</option>`;
-    }).join('');
-  }
-  function movementFields(action){
+  const movementSelect=(name,label,choices,value,placeholder='Select '+label.toLowerCase())=>
+    `<label>${label}<select name="${name}" required><option value="">${placeholder}</option>${choices.map(([id,text])=>
+      `<option value="${esc(id)}" ${value===id?'selected':''}>${esc(text)}</option>`).join('')}</select></label>`;
+  function movementInputs(form,action,initialPosition){
+    const configs=configById(),models=new Map(items().map(i=>[i.key,i]));
+    const locations=new Map(state.locations.map(x=>[x.id,x]));
+    const batches=currentBatches().filter(b=>!b.location_id||!locations.get(b.location_id)?.retired).sort((a,b)=>
+      (a.received_on||localDate(a.created_at)).localeCompare(b.received_on||localDate(b.created_at))||
+      Number(!a.opening_id)-Number(!b.opening_id)||Date.parse(a.created_at)-Date.parse(b.created_at)||a.lot_id.localeCompare(b.lot_id)||a.id.localeCompare(b.id));
+    const partMode=action==='cannibalise',forcedBatch=partMode||action==='adjust';
+    const sources=batches.filter(b=>action==='adjust'?b.quantity>0:partMode?b.available>=1||b.incomplete>0:b.available>0);
+    const initial=sources.find(b=>b.id===initialPosition);
+    const initialModel=models.get(configs.get(initial?.configuration_id)?.item_key);
+    const draft={series:initialModel?.family||'',model:initialModel?.key||'',configuration:initial?.configuration_id||'',
+      source_location:initial?(initial.location_id||'unassigned'):'',batch_method:forcedBatch?'manual':'fifo',
+      position_id:initial?.id||'',date:today()};
+    const modelKey=b=>configs.get(b.configuration_id)?.item_key;
+    const sourceLoc=b=>b.location_id||'unassigned';
+    const unique=(rows,key,label)=>[...new Map(rows.map(r=>[key(r),label(r)])).entries()];
     const returns=ledger().events.filter(e=>e.kind==='issue'&&e.quantity>e.returned);
-    return `${action==='return'?`<label>Original delivery<select name="movement_id" required><option value="">Select stock out</option>
-      ${returns.map(e=>`<option value="${e.id}">${esc(e.reference)} · ${esc(e.model)} · ${formatQty(e.quantity-e.returned)} unreturned</option>`).join('')}</select></label>`:
-      `<label>Source configuration and location<select name="position_id" required><option value="">Select stock</option>${positionOptions()}</select></label>`}
-      ${['transfer','return'].includes(action)?`<label>Destination location<select name="location_id" required><option value="">Select location</option>${refOptions('location')}</select></label>`:''}
-      ${action==='reconfigure'?'<div class="stock-wide" id="stockReconfigureOptions"></div>':''}
-      ${qtyField()}${dateField()}${serialField('Enter serials when the batch is tracked')}
-      <label>Reason<input name="reason" required></label>
-      <label>Reference<input name="reference" ${['return','issue'].includes(action)?'required':''}></label>
-      <label>Remark<input name="remark"></label>
-      <div class="stock-wide"><button class="btn">Save ${esc(actionLabels[action])}</button></div>`;
+    const candidates=()=>sources.filter(b=>b.configuration_id===draft.configuration&&sourceLoc(b)===draft.source_location);
+    const chosen=()=>draft.batch_method==='manual'?candidates().filter(b=>b.id===draft.position_id):candidates();
+    const replacementUnits=()=> (state.incomplete_units||[]).filter(u=>u.position_id===draft.position_id&&!u.closed_at);
+    const activePart=()=> (state.parts||[]).find(p=>p.id===draft.part_id&&!p.retired);
+    const update=()=>{
+      const selected=chosen(), source=selected[0], part=activePart();
+      const delivery=returns.find(e=>e.id===draft.movement_id);
+      const existing=partMode&&draft.unit_id&&draft.unit_id!=='new';
+      const qty=existing?1:Number(draft.quantity||0);
+      const available=delivery?Number(delivery.quantity)-Number(delivery.returned):
+        selected.reduce((n,b)=>n+Math.max(0,b.available),0);
+      let remaining=qty;
+      let tracked=!!delivery?.serials.length;
+      for(const batch of selected){
+        if((batch.serialised||(!stockV105()&&batch.serials?.length))&&(forcedBatch||remaining>0||!qty))tracked=true;
+        remaining=Math.max(0,remaining-batch.available);
+        if(qty&&!remaining&&!forcedBatch)break;
+      }
+      if(form.elements.available)form.elements.available.value=existing?'1 incomplete pump':formatQty(available);
+      if(form.elements.quantity){
+        form.elements.quantity.readOnly=!!existing;
+        if(existing)form.elements.quantity.value='1';
+        form.elements.quantity.max=action==='adjust'?'':String(existing?1:partMode?Math.min(10000,Math.floor(available)):available);
+      }
+      form.elements.serials.closest('label').hidden=!tracked||!!existing;
+      form.elements.serials.disabled=!tracked||!!existing;
+      if(form.elements.part_quantity)form.elements.part_quantity.value=part&&qty?qty*part.units_per_pump:'';
+      let preview='';
+      if(action==='transfer'&&source&&draft.location_id&&qty>0&&qty<=available){
+        const physical=id=>batches.filter(b=>b.configuration_id===source.configuration_id&&b.location_id===id)
+          .reduce((n,b)=>n+(b.total??Number(b.quantity)),0);
+        const from=physical(source.location_id),to=physical(draft.location_id);
+        const total=batches.filter(b=>b.configuration_id===source.configuration_id).reduce((n,b)=>n+(b.total??Number(b.quantity)),0);
+        preview=`${locationLabel(source.location_id)} ${formatQty(from)} → ${formatQty(from-qty)}. ${locationLabel(draft.location_id)} ${formatQty(to)} → ${formatQty(to+qty)}. Total for this configuration stays ${formatQty(total)}.`;
+      }else if(partMode&&source&&part&&qty>0&&(existing||qty<=available)){
+        const modelBatches=batches.filter(b=>modelKey(b)===draft.model);
+        const total=modelBatches.reduce((n,b)=>n+(b.total??Number(b.quantity)),0), incomplete=modelBatches.reduce((n,b)=>n+b.incomplete,0);
+        const ready=modelBatches.reduce((n,b)=>n+b.available,0), delta=existing?0:qty;
+        preview=`Total ${formatQty(total)} · Not Complete ${formatQty(incomplete)} → ${formatQty(incomplete+delta)} · On Hand ${formatQty(ready)} → ${formatQty(ready-delta)}.`;
+      }else if(source&&qty>0&&(action==='adjust'||qty<=available)){
+        const delta=action==='adjust'?qty:-qty;
+        preview=`Available in selected source ${formatQty(available)} → ${formatQty(available+delta)}.`;
+      }else if(delivery&&qty>0&&qty<=available)preview=`Unreturned delivery ${formatQty(available)} → ${formatQty(available-qty)}. Destination receives ${formatQty(qty)}.`;
+      form.querySelector('output').textContent=preview;
+    };
+    const draw=()=>{
+      const bySeries=sources.filter(b=>models.get(modelKey(b))?.family===draft.series);
+      const byModel=bySeries.filter(b=>modelKey(b)===draft.model);
+      const byConfig=byModel.filter(b=>b.configuration_id===draft.configuration);
+      const selected=chosen(), source=selected[0], part=activePart(), existing=draft.unit_id&&draft.unit_id!=='new';
+      const cfg=configs.get(draft.configuration);
+      const related=state.groups.filter(g=>cfg&&belongs(g,cfg.item_key)&&g.kind==='normal'&&!g.retired);
+      const eligibleParts=(state.parts||[]).filter(p=>!p.retired&&p.series_key===draft.series
+        &&!partRows().some(m=>m.unit_id===draft.unit_id&&m.part_id===p.id&&!m.restored_event));
+      const choices=related.flatMap(g=>options(g).filter(o=>o.id!==cfg.selections[g.id]).map(o=>
+        [g.id+':'+o.id,(g.series_key?(cfg.selections[g.id]?.includes(o.id)?'Remove · ':'Add · '):g.label+' · ')+o.label]));
+      const batchChoices=candidates().map(b=>[b.id,`${b.received_on||localDate(b.created_at)} · ${b.lot_id.slice(0,8)} · ${formatQty(b.available)} available`]);
+      form.innerHTML=`${action==='return'?movementSelect('movement_id','Original delivery',returns.map(e=>[e.id,`${e.reference} · ${e.model} · ${e.quantity-e.returned} unreturned`]),draft.movement_id):
+        movementSelect('series','Series',unique(sources,b=>models.get(modelKey(b))?.family,b=>seriesLabels[models.get(modelKey(b))?.family]||models.get(modelKey(b))?.family).filter(([id])=>id),draft.series)
+        +movementSelect('model','Model',unique(bySeries,modelKey,b=>models.get(modelKey(b)).model),draft.model)
+        +movementSelect('configuration','Configuration',unique(byModel,b=>b.configuration_id,b=>configLabel(configs.get(b.configuration_id))),draft.configuration)
+        +movementSelect('source_location','Source Location',unique(byConfig,sourceLoc,b=>locationLabel(b.location_id)),draft.source_location)
+        +(!forcedBatch&&stockV105()&&action!=='return'?movementSelect('batch_method','Batch Selection Method',[['fifo','FIFO'],['manual','Manual']],draft.batch_method):'')
+        +(draft.batch_method==='manual'?movementSelect('position_id','Source Batch',batchChoices,draft.position_id):'')}
+        ${partMode?movementSelect('unit_id','Pump Selection',[['new','Complete pump(s)'],...replacementUnits().map(u=>[u.id,'Incomplete pump · '+unitLabel(u)])],draft.unit_id||'new'):''}
+        <label>Available Quantity<input name="available" readonly></label>
+        ${['transfer','return'].includes(action)?movementSelect('location_id','Destination Location',
+          state.locations.filter(l=>!l.retired&&(action==='return'||source?.location_id!==l.id)).map(l=>[l.id,l.label]),draft.location_id):''}
+        ${action==='reconfigure'?movementSelect('choice','Change one Normal Group option',choices,draft.choice):''}
+        ${partMode?`${state.can_cost?`<label>Original Landed Unit Cost (RM)<input readonly value="${esc(source?.cost??'—')}"></label>`:''}
+          ${movementSelect('part_id','Part Removed',eligibleParts.map(p=>[p.id,p.label]),draft.part_id)}
+          <label>Applicable Part Specifications<textarea readonly rows="2">${esc(part?specNames(partSpecs(part,cfg)):'')}</textarea></label>`:''}
+        <label>${partMode?'Pump Quantity Affected':action==='transfer'?'Transfer Quantity':'Quantity'}
+          <input type="number" name="quantity" min="${partMode?1:0}" step="${partMode?1:'any'}" required value="${esc(existing?1:draft.quantity)}"></label>
+        ${partMode?`<label>Part Quantity Removed<input name="part_quantity" readonly></label>
+          ${movementSelect('purpose','Purpose',Object.entries(partPurpose),draft.purpose)}`:''}
+        <label>Date<input type="date" name="date" required value="${esc(draft.date)}"></label>
+        <label>Serial numbers<textarea name="serials">${esc(draft.serials)}</textarea></label>
+        <label>Reason<input name="reason" required value="${esc(draft.reason)}"></label>
+        <label>Reference<input name="reference" ${['return','issue'].includes(action)?'required':''} value="${esc(draft.reference)}"></label>
+        <label>Remark<input name="remark" value="${esc(draft.remark)}"></label>
+        <output class="stock-inline-footer" aria-live="polite"></output>
+        <div class="stock-inline-footer"><button class="btn">Save ${esc(actionLabels[action])}</button></div>`;
+      update();
+    };
+    const dependent=['series','model','configuration','source_location','batch_method','position_id','unit_id','part_id'];
+    form.oninput=e=>{if(e.target.name)draft[e.target.name]=e.target.value;if(e.target.name==='quantity')update();};
+    form.onchange=e=>{
+      const name=e.target.name;
+      draft[name]=e.target.value;
+      if(dependent.includes(name)||name==='movement_id'){
+        for(const field of dependent.slice(dependent.indexOf(name)+1)){
+          if(field!=='batch_method')delete draft[field];
+        }
+        if(name!=='part_id')delete draft.serials;
+        if(name==='source_location')delete draft.location_id;
+        draw();
+        form.elements[name]?.focus();
+      }else update();
+    };
+    form.onsubmit=e=>{
+      e.preventDefault();
+      const p=formData(form), source=chosen()[0];
+      if(action!=='return'&&!source)return message('Select eligible source stock.',true);
+      if(source){
+        p.position_id=source.id;
+        p.source_configuration=source.configuration_id;
+        p.source_location=source.location_id;
+      }
+      if(p.choice){[p.group_id,p.option_id]=p.choice.split(':');delete p.choice;}
+      if(partMode){
+        p.part_revision=activePart()?.revision;
+        p.unit_id=p.unit_id==='new'?null:p.unit_id;
+      }
+      delete p.available;delete p.series;delete p.model;delete p.configuration;
+      p.serials=serialValues(p.serials);
+      submitLedger(form,action,p,()=>{actionContext=null;});
+    };
+    draw();
   }
   function movementResults(){
-    const events=ledger().events.filter(e=>Object.hasOwn(movementTypes,e.kind)&&matchesPeriod(e.effective_on,movementFilter));
+    const events=ledger().events.filter(e=>(Object.hasOwn(movementTypes,e.kind)||e.kind==='restore_parts')&&matchesPeriod(e.effective_on,movementFilter));
     const rows=events.map(e=>{
       const details=`<details class="stock-movement-detail"><summary>${esc(actionLabels[e.kind])}</summary>
         <p>Recorded ${esc(new Date(e.recorded_at).toLocaleString())}</p>
@@ -1045,12 +1366,12 @@
     return stockTable(['Date','Type','Model','Qty','From','To','Reason','Reference','Operator'],rows,'No stock movements match this period.');
   }
   function movementView(){
-    const actions=Object.keys(movementTypes).filter(action=>ledgerCap(movementTypes[action]));
+    const actions=Object.keys(movementTypes).filter(action=>ledgerCap(movementTypes[action])&&(action!=='cannibalise'||stockV105()));
     const action=actions.includes(actionContext?.action)?actionContext.action:actions[0];
-    return `<h2>Stock Movement</h2>${timeFrame('stockMovementTime',movementFilter,[7,30,90])}
+    return `<h2>Stock Movement</h2>${timeFrame('stockMovementTime',movementFilter,timeFrameDays.stockMovementTime)}
       ${action?`<details id="stockMovementFormPanel" ${actionContext?.position?'open':''}><summary>Record stock movement</summary>
-        <label>Movement type<select id="stockMovementAction">${actions.map(a=>`<option value="${a}" ${action===a?'selected':''}>${actionLabels[a]}</option>`).join('')}</select></label>
-        <form class="stock-form" id="stockMovementForm">${movementFields(action)}</form></details>`:''}
+        <div class="stock-inline-fields stock-movement-type"><label>Movement Type<select id="stockMovementAction">${actions.map(a=>`<option value="${a}" ${action===a?'selected':''}>${actionLabels[a]}</option>`).join('')}</select></label></div>
+        <form class="stock-inline-fields" id="stockMovementForm"></form></details>`:''}
       <div id="stockMovementResults">${movementResults()}</div>`;
   }
   function bindMovement(){
@@ -1058,29 +1379,8 @@
     const selector=$('stockMovementAction');
     if(!selector)return;
     const form=$('stockMovementForm');
-    const bind=()=>{
-      const action=selector.value;
-      const source=form.elements.position_id;
-      if(action==='reconfigure'){
-        const refresh=()=>{
-          const pos=ledger().positions.find(p=>p.id===source.value);
-          const cfg=state.configurations.find(c=>c.id===pos?.configuration_id);
-          const relevant=state.groups.filter(g=>cfg&&belongs(g,cfg.item_key)&&g.kind==='normal'&&!g.retired);
-          $('stockReconfigureOptions').innerHTML=`<label>Change one Normal Group option<select name="choice" required>
-            <option value="">Select group and option</option>${relevant.flatMap(g=>options(g).filter(o=>o.id!==cfg.selections[g.id])
-              .map(o=>`<option value="${g.id}:${o.id}">${g.series_key?(cfg.selections[g.id]?.includes(o.id)?'Remove':'Add')+' · ':esc(g.label)+' · '}${esc(o.label)}</option>`)).join('')}</select></label>`;
-        };
-        source.onchange=refresh;refresh();
-      }
-      form.onsubmit=e=>{
-        e.preventDefault();
-        const p=formData(form);
-        if(p.choice){[p.group_id,p.option_id]=p.choice.split(':');delete p.choice;}
-        submitLedger(form,action,{...p,serials:serialValues(p.serials)},()=>{actionContext=null;});
-      };
-    };
-    selector.onchange=()=>{form.innerHTML=movementFields(selector.value);bind();};
-    bind();
+    selector.onchange=()=>movementInputs(form,selector.value);
+    movementInputs(form,selector.value,actionContext?.position);
   }
   function receiptRow(){
     return `<tr data-receipt-row>
@@ -1252,7 +1552,7 @@
           <dt>Pricelist configuration</dt><dd>${esc(r.config.variant||(r.item.independent?'Independent item':'Unmapped'))}</dd></dl>
         </details>
         <details><summary>Critical Parts</summary>
-          <p>Assemblable stock ${ledger()?'Unknown':formatQty(r.assemblable)}</p>
+          <p>${stockV105()?`Complete ${formatQty(r.complete)} · Not Complete ${formatQty(r.incomplete)} · On Hand ${formatQty(r.complete-r.reserved)}`:`Assemblable stock ${ledger()?'Unknown':formatQty(r.assemblable)}`}</p>
           <dl>${[...r.missing].map(([id,qty])=>`<dt>${esc(state.options.find(o=>o.id===id)?.label||'Historical part')}</dt><dd>${formatQty(qty)} missing</dd>`).join('')||(ledger()?'<dd>Component requirements pending</dd>':'<dd>No missing parts recorded</dd>')}</dl>
         </details>
         </td></tr>`).join('')}</tbody></table></div>`;
@@ -1279,14 +1579,14 @@
             <small>${esc(i.brand)} · ${esc(i.family)}${i.unavailable?' · Source unavailable':''}</small></div>
           <div class="stock-rating">${power?`<small>Rating</small>${power.value} ${power.unit}`:''}</div>
           <div><small>Physical On Hand</small><strong>${formatQty(total)}</strong></div>
-          <div><small>Assemblable Stock</small><strong>${ledger()?'—':formatQty(assemblable)}</strong></div>
+          <div><small>Assemblable Stock</small><strong>${ledger()&&!stockV105()?'—':formatQty(assemblable)}</strong></div>
           <div><small>Reserved Stock</small><span>${ledger()?formatQty(reserved):'—'}</span></div>
-          <div><small>Available to Promise</small><span>—</span></div>
+          <div><small>Available to Promise</small><span>${stockV105()?formatQty(assemblable-reserved):'—'}</span></div>
           ${count?`<button class="btn secondary" aria-expanded="${open}" data-expand-model="${esc(key)}">${open?'▾':'▸'} ${count} configuration${count===1?'':'s'}</button>`:'<small>Not Configured</small>'}
         </div>${open&&configs.length?configurationTable(configs):''}</article>`);
     }
     return `<div class="stock-summary"><span>${cards.length.toLocaleString()} models shown</span><span>${items().length.toLocaleString()} catalogue models</span></div>
-      <p class="stock-metrics-note">${ledger()?'Assemblable and Available to Promise quantities await component requirements.'
+      <p class="stock-metrics-note">${stockV105()?'Assemblable Stock reflects complete pumps. Available to Promise excludes reservations.':ledger()?'Assemblable and Available to Promise quantities await component requirements.'
         :'Totals are for overview. Reservations and Available to Promise are not tracked in this phase.'}</p>
       ${cards.join('')||'<p>No stock matches this filter.</p>'}`;
   }
@@ -1402,7 +1702,7 @@
     }
     if((tab==='input'&&!ledger()&&!state.can_manage)||(tab==='dropdowns'&&!canDropdowns())
       ||(tab==='receive'&&!ledgerCap('receive_stock')))tab='check';
-    $('stockVersion').textContent=state.config_version==='v104'?'V1.04':state.config_version==='v103'?'V1.03':ledger()?'V1.02':'V1.01';
+    $('stockVersion').textContent=stockVersion();
     const currentTab=tab==='detail'?'check':tab;
     const pageItems=Object.entries(pages).filter(([key])=>
       (key!=='dropdowns'||canDropdowns())&&(key!=='receive'||ledgerCap('receive_stock')));
@@ -1448,9 +1748,10 @@
       if(ledger())bindMovement();else bindTimeFrame('stockMovementTime',movementFilter);
     }
     else if(tab==='missing'){
+      bindRestoreParts();
       $('stockContent').querySelectorAll('[data-missing-filter]').forEach(input=>input.oninput=()=>{
         missingFilter[input.dataset.missingFilter]=input.value;
-        $('stockMissingResults').innerHTML=missingResults();
+        $('stockMissingResults').innerHTML=missingResults();bindRestoreParts();
       });
     }else{
       bindFilters();bindInput();bindDropdowns();bindManagement();bindReferences();bindRows();
@@ -1513,10 +1814,11 @@
       refreshVisibility();
       ++authContext;++request;
       state=null;selected='';family='';query='';location='';status=stockStatusPreference();tab='check';trail.length=0;batchEdit=null;
-      expanded.clear();editMode=false;editKey='';correction=null;entryId=uid();
+      expanded.clear();expandedConfigurations.clear();editMode=false;editKey='';correction=null;entryId=uid();
       stockFilter=emptyStockFilter();
       historyFilter=emptyHistoryFilter();
       movementFilter={period:'30',from:'',to:'',open:false};
+      restoredPreferenceKey='';
       missingFilter={model:'',series:'',component:''};
       dropdownFilter=['','','',''];
       dropdownSeries='';dropdownKind='critical';dropdownOption='';optionDraft=null;linkDraft=null;
@@ -1532,6 +1834,6 @@
       if($('keyStock').classList.contains('active'))load();
     });
   }
-  window.KeyStock={version:'1.04',refresh:load,back,resetTab:()=>{tab='check';correction=null;actionContext=null;entryId=uid();render();},stockRows:()=>state?stockRows():[],resolve:(s,d)=>state?resolve(s,d):null};
+  window.KeyStock={version:'1.05',refresh:load,back,resetTab:()=>{tab='check';correction=null;actionContext=null;entryId=uid();render();},stockRows:()=>state?stockRows():[],resolve:(s,d)=>state?resolve(s,d):null};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

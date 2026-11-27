@@ -1,2 +1,2 @@
 /* Generated from RELEASE.json by tools/sync-release-version.py. */
-window.KEYSUITE_VERSION='5.00.92';window.KEYSUITE_BUILD='V'+window.KEYSUITE_VERSION;
+window.KEYSUITE_VERSION='5.00.93';window.KEYSUITE_BUILD='V'+window.KEYSUITE_VERSION;

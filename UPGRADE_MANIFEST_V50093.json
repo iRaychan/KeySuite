@@ -1,0 +1,27 @@
+{
+  "version": "5.00.93",
+  "modules": {
+    "KeyStock": "1.05"
+  },
+  "baseline": "5.00.92 FULL",
+  "baseline_sha256": "8585ec5d5b9437fc2d8b60b3c5f2637c76d1414037ab6dc76884e05abb0b8773",
+  "migration": "supabase/migrations/20261127093528_v50093_keystock_v105.sql",
+  "installation": "Overlay application-root files on V5.00.92 and validate against a staging database.",
+  "files": [
+    "UPGRADE_MANIFEST_V50093.json",
+    "RELEASE.json",
+    "VERSION.txt",
+    "app.js",
+    "index.html",
+    "keystock-v100.css",
+    "keystock-v100.js",
+    "manifest.json",
+    "release-version.js",
+    "supabase/migrations/20261127093528_v50093_keystock_v105.sql",
+    "supabase/rollback_keystock_v105_before_use.sql",
+    "supabase/verification/keystock_v105_reconcile.sql",
+    "sw.js",
+    "tests/v50093-db.cjs",
+    "tests/v50093-ui.cjs"
+  ]
+}
