@@ -527,7 +527,7 @@
         ['reserve','R','reserve_stock','Reserve stock'],
         ['issue','−','confirm_stock_out','Deduct stock']
       ].filter(([action, ,permission])=>ledgerCap(permission)&&(action==='adjust'||qty.available>0)).map(([action,label,,title])=>
-        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('edit_stock_batch')?`<button type="button" class="stock-row-action" data-edit-position="${b.id}" aria-label="Edit batch">✎</button>`:'')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action issue" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
+        `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('edit_stock_batch')?`<button type="button" class="stock-row-action" data-edit-position="${b.id}" aria-label="Edit batch">✎</button>`:'')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action delete-batch" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
       const canStrip=stockV105()&&ledgerCap('move_stock')&&(qty.available>=1||qty.incomplete>0)
         &&(state.parts||[]).some(p=>p.series_key===model.family&&!p.retired);
       return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions}${canStrip?`<button type="button" class="stock-row-action" data-row-action="cannibalise" data-position="${b.id}">Cannibalise</button>`:actions?'':'—'}</div></td></tr>`;
@@ -545,7 +545,7 @@
         `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
       <p id="stockMetricStatus" class="stock-metrics-note" role="status" hidden></p>
       ${groupFilter('critical')}${groupFilter('normal')}<h3>Stock by configuration</h3>
-      ${batchEdit?stockBatchEditor(batchEdit):''}
+      ${editMode&&ledgerCap('edit_stock_batch')&&batchEdit?stockBatchEditor(batchEdit):''}
       <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
       <p class="stock-metrics-note">Opening dates identify the historical count. Purchase batches show their receiving date.</p>
       ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}
@@ -1689,19 +1689,47 @@
       }
     }));
   }
+  const editFormSelector='#stockBatchCorrection,#stockSeriesOptionForm,#stockLinkForm,#stockSerialPolicy,#stockItemForm,#stockInputForm,#stockGroupForm,#stockMappingForm,[data-ref-form]';
+  const editFormDefaults=new WeakMap();
+  const editFormValues=form=>JSON.stringify([...form.querySelectorAll('input,select,textarea')]
+    .filter(field=>!field.disabled&&!field.readOnly)
+    .map(field=>field.validity.badInput?null:field.multiple?[...field.selectedOptions].map(option=>option.value):
+      ['checkbox','radio'].includes(field.type)?field.checked:field.value));
+  function bindEditToggle(){
+    let edit=$('stockEdit');
+    const mode=editMode?'editing':'locked';
+    if(edit.dataset.mode!==mode){
+      const restoreFocus=document.activeElement===edit;
+      edit.cancelStockHold?.();
+      const replacement=edit.cloneNode(false);
+      replacement.dataset.mode=mode;
+      edit.replaceWith(replacement);
+      edit=replacement;
+      if(restoreFocus)edit.focus();
+      edit.textContent=editMode?'Done Editing':'Hold 3s to Edit';
+      if(editMode){
+        edit.onclick=()=>{
+          if(busy)return;
+          const dirty=[...$('stockContent').querySelectorAll(editFormSelector)].some(form=>
+            editFormDefaults.get(form)!==editFormValues(form));
+          if(dirty&&!window.confirm('Discard unsaved KeyStock changes and exit editing? Cancel to stay in editing mode and save your changes.'))return;
+          editMode=false;editKey='';optionDraft=null;linkDraft=null;batchEdit=null;correction=null;
+          render();
+        };
+      }else hold(edit,3,()=>{
+        if(edit.hidden||edit.disabled||busy)return;
+        editMode=true;editKey='';
+        if(['items','dropdowns','references','detail'].includes(tab))render();else moveTo('items');
+      });
+    }
+    if(!editMode)edit.cancelStockHold?.();
+    edit.hidden=tab==='references'?!(caps('manage_stock_locations')||caps('manage_stock_suppliers')):tab==='detail'?!(mayEdit()||ledgerCap('delete_stock_batch')||ledgerCap('edit_stock_batch')):tab==='dropdowns'?!canDropdowns():!mayEdit();
+  }
   function render() {
     if(!state)return;
-    const edit=$('stockEdit');
-    edit.hidden=tab==='references'?!(caps('manage_stock_locations')||caps('manage_stock_suppliers')):tab==='detail'?!(mayEdit()||ledgerCap('delete_stock_batch')||ledgerCap('edit_stock_batch')):tab==='dropdowns'?!canDropdowns():!mayEdit();
-    edit.cancelStockHold?.();
-    edit.textContent=editMode?'Done Editing':'Hold 3s to Edit';
-    hold(edit,3,()=>{editMode=true;editKey='';if(['items','dropdowns','references','detail'].includes(tab))render();else moveTo('items');});
-    if(editMode){
-      edit.onpointerdown=null;edit.onkeydown=null;
-      edit.onclick=()=>{editMode=false;editKey='';optionDraft=null;linkDraft=null;render();};
-    }
     if((tab==='input'&&!ledger()&&!state.can_manage)||(tab==='dropdowns'&&!canDropdowns())
       ||(tab==='receive'&&!ledgerCap('receive_stock')))tab='check';
+    bindEditToggle();
     $('stockVersion').textContent=stockVersion();
     const currentTab=tab==='detail'?'check':tab;
     const pageItems=Object.entries(pages).filter(([key])=>
@@ -1762,6 +1790,7 @@
         bindRows();
       };
     }
+    $('stockContent').querySelectorAll(editFormSelector).forEach(form=>editFormDefaults.set(form,editFormValues(form)));
   }
   function bindRows() {
     $('stockContent').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>moveTo(state.can_manage?'input':'detail',b.dataset.item));

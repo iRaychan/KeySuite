@@ -205,49 +205,54 @@ function pumpDescriptionParts(item){
  const extras=lines.filter(line=>line!==capacity&&line!==suction&&line!==material&&!modelPattern.test(line)&&!/Bare shaft pump only/i.test(line));
  return {capacity,model:modelLine,suction,material,extras};
 }
-function commercialComponentLine(item,text){
- const identity=item&&window.KeySuiteCommercialIdentity?.forItem(item);
- return identity?window.KeySuiteCommercialIdentity.description(text,identity):text;
-}
 function customerMotorLine(text){
  return String(text||'').replace(/(\bMotor\s*\([^\n]*?\))\s+Model:[^\r\n]*/gi,'$1');
 }
-function completePumpsetDescription(d=current){
- if(!d||d.assembly_type!=='pumpset')return '';
- const pumps=(d.items||[]).filter(item=>item.section==='pump');pumps.forEach(sanitizeEsPumpDescription);const motor=(d.items||[]).find(item=>item.section==='motor'),couplings=(d.items||[]).filter(item=>item.section==='coupling'&&item.couplingData?.model),coupling=couplings.find(isAutoCouplingItem)||couplings[0];
- const iso=pumps.length>0&&pumps.every(item=>String(item.productFamily||sourceObject(item).product_family).toUpperCase()==='ISO');
- if(!pumps.length||!motor||(!iso&&!coupling))return '';
- const motorLine=normalizeDescriptionIndentation(String(motor.description||'')).split('\n').find(line=>/^c\/w(?:\t+| +)/i.test(line))||String(motor.description||'').trim();
- const hasBaseplate=(d.items||[]).some(item=>item.section==='baseplate'&&Number(item.qty)>0);
- const baseplateItem=(d.items||[]).find(item=>item.section==='baseplate'&&Number(item.qty)>0),baseplateIdentity=baseplateItem&&window.KeySuiteCommercialIdentity?.forItem(baseplateItem);
- let couplingLine=coupling&&(!iso||hasBaseplate)
-  ?window.KeySuiteCoupling?.assemblyDescription?.(coupling.couplingData?.selectionMode||d.coupling_mode||'flexible')||String(coupling.description||'').trim()
-  :'';
- if(couplingLine)couplingLine=commercialComponentLine(coupling,baseplateIdentity?couplingLine.replace(/Baseplate with\s*/i,''):couplingLine);
- const baseplateLine=baseplateIdentity?commercialComponentLine(baseplateItem,'c/w\tBaseplate'):'';
- return pumps.map((pump,index)=>{const part=pumpDescriptionParts(pump),lines=[part.model];if(index===0)lines.push(motor.descriptionManuallyEdited?motorLine:customerMotorLine(motorLine),couplingLine,baseplateLine);lines.push(part.suction,part.material,...part.extras);return lines.filter(Boolean).join('\n')}).join('\n');
+function pumpsetMotorLine(motor){
+ const description=normalizeDescriptionIndentation(motor.description||'').trim();
+ if(motor.descriptionManuallyEdited)return description;
+ const lines=description.split('\n');
+ const spec=lines.map(line=>line.match(/((?:(?:\d+\s+)?\d+\/\d+|\d+(?:\.\d+)?)\s*(?:HP|kW)\b.*?\bMotor\b(?:\s*\([^)]*\))?)/i)).find(Boolean);
+ if(spec)return 'c/w\t'+spec[1];
+ const line=lines.find(line=>/\bMotor\b/i.test(line)&&!/\bMotor Model:/i.test(line));
+ if(!line)return '';
+ const identity=window.KeySuiteCommercialIdentity?.forItem(motor);
+ let detail=customerMotorLine(line).replace(/^c\/w\s*/i,'').trim();
+ const brand=String(identity?.brand||motor.brand||'').trim();
+ if(brand&&detail.toLowerCase().startsWith(brand.toLowerCase()+' '))detail=detail.slice(brand.length).trim();
+ return 'c/w\t'+detail;
+}
+function pumpsetMountingLine(coupling,baseplate,draft){
+ if(!coupling)return baseplate?'c/w\tBaseplate':'';
+ const configuration=coupling.couplingData||{};
+ const declaredType=configuration.selectionMode||configuration.type||configuration.resolvedType;
+ const description=[coupling.description,coupling.model].join(' ');
+ const inferredType=/\btyre coupling\b/i.test(description)?'tyre':
+   /\bpin\s*&\s*bush coupling\b/i.test(description)?'pin_bush':'';
+ const mode=declaredType||inferredType||draft.coupling_mode||'flexible';
+ const label=window.KeySuiteCoupling?.modeLabel?.(mode)||
+   ({tyre:'Tyre Coupling',pin_bush:'Pin & Bush Coupling'}[mode]||'Flexible Coupling');
+ return 'c/w\t'+(baseplate?'Baseplate with ':'')+label;
 }
 function completedPumpsetDescription(d=current){
  if(!d||d.assembly_type!=='pumpset')return '';
- const selected=(d.items||[]).filter(item=>Number(item.qty??1)>0),pumps=selected.filter(item=>item.section==='pump');
+ const selected=(d.items||[]).filter(item=>Number(item.qty??1)>0);
+ const pumps=selected.filter(item=>item.section==='pump');
  if(!pumps.length)return selected.map(item=>stripCapacityDescription(item.description||item.model||'')).filter(Boolean).join('\n');
- const motor=selected.find(item=>item.section==='motor'),coupling=selected.find(item=>item.section==='coupling'),baseplate=selected.find(item=>item.section==='baseplate');
- if(motor&&coupling&&baseplate)return completePumpsetDescription({...d,items:selected});
+ const motor=selected.find(item=>item.section==='motor');
+ const couplings=selected.filter(item=>item.section==='coupling'&&(item.couplingData?.model||item.model||!item.couplingData));
+ const coupling=couplings.find(isAutoCouplingItem)||couplings[0];
+ const baseplate=selected.find(item=>item.section==='baseplate');
  return pumps.map((pump,index)=>{
-  sanitizeEsPumpDescription(pump);const part=pumpDescriptionParts(pump),pd=pump.pumpData||{},md=motor?.motorData||{};
-  // Use the selected motor rating or the pump's selected motor sizing even if customer supplied.
-  const hp=Number(md.hp||pd.motor_hp||pd.motorHp||pd.hp||0),kw=Number(md.kw||pd.motor_kw||pd.motorKw||0);
-  const rating=hp>0?`${Math.round(hp*100)/100}HP`:kw>0?`${kw}kW`:'',pole=Number(md.pole||pd.motor_pole||pd.motorPole||pd.pole||2);
-  const sizing=rating?` for ${rating} ${pole}Pole Motor`:'';
+  // Sanitize the description copy. The selected component and its costing remain intact.
+  const pumpText={...pump,pricingSource:{...sourceObject(pump)}};
+  sanitizeEsPumpDescription(pumpText);
+  const part=pumpDescriptionParts(pumpText);
   const lines=[part.model];
-  if(index===0&&motor)lines.push(normalizeDescriptionIndentation(motor.descriptionManuallyEdited?motor.description:customerMotorLine(motor.description)).trim());
-  const baseplateIdentity=baseplate&&window.KeySuiteCommercialIdentity?.forItem(baseplate);
-  if(index===0&&coupling)lines.push(commercialComponentLine(coupling,`c/w\t${baseplate&&!baseplateIdentity?'Baseplate with ':''}Flexible Coupling${motor?'':sizing}`));
-  if(index===0&&baseplate&&((!coupling&&motor)||(coupling&&baseplateIdentity)))lines.push(commercialComponentLine(baseplate,'c/w\tBaseplate'));
-  lines.push(part.suction,part.material,...part.extras.filter(line=>!/^c\/w\b|supply by Customer$/i.test(line.trim())));
-  if(!motor&&!coupling)lines.push('(Bare shaft pump only)');
-  if(index===0&&baseplate&&!coupling&&!motor)lines.push(commercialComponentLine(baseplate,`c/w\tBaseplate${sizing.replace(/(\d+)Pole/,'$1P')}`));
-  if(index===0&&(motor||coupling||baseplate)){const missing=[!motor?'Motor':'',!baseplate?'Baseplate':'',!coupling?'Flexible Coupling':''].filter(Boolean);if(missing.length)lines.push(`${missing.join(' & ')} supply by Customer`)}
+  if(index===0)lines.push(motor?pumpsetMotorLine(motor):'',pumpsetMountingLine(coupling,baseplate,d));
+  lines.push(part.suction,part.material,...part.extras.filter(line=>!(/^c\/w\b/i.test(line.trim())&&
+    /\b(?:motor|coupling|baseplate)\b/i.test(line))&&!/supply by Customer$/i.test(line.trim())));
+  if(!motor&&!coupling&&!baseplate)lines.push('(Bare shaft pump only)');
   return lines.filter(Boolean).join('\n');
  }).join('\n');
 }

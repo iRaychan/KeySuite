@@ -8,12 +8,8 @@
 #stockReceiptRows{min-width:46rem}
 #stockReceiptRows th:nth-child(1){width:29%} #stockReceiptRows th:nth-child(2){width:18%} #stockReceiptRows th:nth-child(3){width:8%} #stockReceiptRows th:nth-child(6){width:5rem}
 #stockReceiptRows :is(input,select){width:100%;min-width:0;box-sizing:border-box}
-#keyStock #stockContent [data-layout="batch-details"]{min-width:50rem}
 #keyStock #stockContent [data-layout="batch-details"] :is(th,td){text-align:center}
 #keyStock #stockContent [data-layout="batch-details"] :is(th,td):nth-child(-n+2){text-align:left}
-#keyStock #stockContent [data-layout="batch-details"] :is(th,td):nth-child(3){text-align:right}
-#keyStock #stockContent [data-layout="batch-details"] th:last-child{width:10rem}
-#keyStock #stockContent [data-layout="batch-details"] .stock-row-actions{display:flex;flex-wrap:nowrap;justify-content:center;gap:.2rem}
 #costingAuditBody :is(.cost-audit-table,.cost-trail) :is(td,th){text-align:right;font-variant-numeric:tabular-nums}
 #costingAuditBody :is(.cost-audit-table,.cost-trail) :is(td,th):first-child{text-align:left}
 #costingAuditBody .cost-audit-table th:first-child{width:32%}

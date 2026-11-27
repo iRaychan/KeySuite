@@ -143,12 +143,26 @@
 #keyStock .stock-inline-footer .btn{margin-inline-end:6px}
 #keyStock .stock-inline-footer:empty{display:none}
 #keyStock .stock-component-availability{margin-top:12px}
-#keyStock #stockContent [data-layout="batch-details"] :is(th,td):nth-child(3){text-align:center}
-#keyStock #stockContent [data-layout="batch-details"] .stock-row-actions{flex-wrap:wrap}
 #keyStock #stockContent [aria-label="Configuration stock"] col:first-child{width:35%}
 #keyStock #stockContent [aria-label="Stock Check results"] col:first-child{width:40%}
-#keyStock #stockContent [data-layout="batch-details"] col:last-child{width:11rem}
-#keyStock #stockContent [data-layout="batch-details"] .stock-col-metric:not(:last-child){width:10%}
+#keyStock #stockContent [data-layout="batch-details"]{width:100%;table-layout:fixed;min-width:57rem}
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(1){width:7rem}
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(3){width:6.5rem}
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(4),
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(5){width:4.75rem}
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(6){width:8rem}
+#keyStock #stockContent [data-layout="batch-details"] col:nth-child(7){width:5.5rem}
+#keyStock #stockContent [data-layout="batch-details"] col:last-child{width:12rem}
+#keyStock #stockContent [data-layout="batch-details"] th{white-space:nowrap}
+#keyStock #stockContent [data-layout="batch-details"] :is(th,td){vertical-align:middle}
+#keyStock #stockContent [data-layout="batch-details"] td:nth-child(2){overflow-wrap:anywhere}
+#keyStock #stockContent [data-layout="batch-details"] .stock-row-actions{flex-wrap:nowrap;align-items:center;gap:4px}
+#keyStock #stockContent [data-layout="batch-details"] .stock-row-action:not([data-row-action="cannibalise"]){
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;padding:0;box-sizing:border-box
+}
+#keyStock .stock-row-action.delete-batch{background:#A52019;color:#fff}
+#keyStock #stockContent [data-layout="batch-details"]:has([data-row-action="cannibalise"]){min-width:64rem}
+#keyStock #stockContent [data-layout="batch-details"]:has([data-row-action="cannibalise"]) col:last-child{width:19rem}
 #keyStock #stockContent .stock-phase2-table :is(th,td){font-variant-numeric:tabular-nums}
 #keyStock #stockContent [data-stock-left~="1"]> :is(thead,tbody)>tr> :first-child,
 #keyStock #stockContent [data-stock-left~="2"]> :is(thead,tbody)>tr> :nth-child(2),

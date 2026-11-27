@@ -1,6 +1,6 @@
-/* KeySuite V5.00.93 Service Worker. */
-const CACHE='keysuite-v50093';
-const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50093"></script>';
+/* KeySuite V5.00.94 Service Worker. */
+const CACHE='keysuite-v50094';
+const BOOTSTRAP='<script src="./v41200-bootstrap.js?v=50094"></script>';
 const SHELL=[
  './stock-source-v50088.js','./quotation-history-v50087.js','./payment-terms.js',
  './keystock-v100.js','./keystock-v100.css','./v50051-version-lock.js',

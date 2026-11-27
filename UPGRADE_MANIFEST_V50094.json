@@ -1,0 +1,13 @@
+{
+  "version": "5.00.94",
+  "modules": {"KeyStock": "1.05"},
+  "baseline": "5.00.93 FULL",
+  "baseline_sha256": "353c55068ead5fa6eac7df45496ec4b3f32270f0aee1b69861b29458ef9e5b6d",
+  "migration": null,
+  "installation": "Overlay the application-root files on V5.00.93. Existing KeyStock V1.05 database setup remains a prerequisite.",
+  "files": [
+    "UPGRADE_MANIFEST_V50094.json", "RELEASE.json", "VERSION.txt", "app.js", "assembly.js",
+    "coupling.js", "index.html", "keystock-v100.css", "keystock-v100.js",
+    "manifest.json", "release-v50089.css", "release-version.js", "sw.js"
+  ]
+}

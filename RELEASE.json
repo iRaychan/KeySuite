@@ -1,10 +1,10 @@
 {
-  "version": "5.00.93",
-  "baseline": "5.00.92",
-  "upgrade_supported_from": "5.00.92",
+  "version": "5.00.94",
+  "baseline": "5.00.93",
+  "upgrade_supported_from": "5.00.93",
   "release_status": "local_verification",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": true,
+  "new_database_migration_required": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,10 +13,10 @@
     "KeyStock": "1.05"
   },
   "changes": [
-    "Align stock filters and tables and preserve expanded configurations",
-    "Add audited receiving quantity corrections with an inventory value preview",
-    "Use dependent movement fields, FIFO and manual selection, transaction previews and saved time frames",
-    "Track cannibalisation, mapped components, retained spares and restoration against the original batch"
+    "Align stock batch columns and keep actions on one row",
+    "Restore single-click Done Editing with unsaved-change handling",
+    "Share commercial pumpset descriptions across quotation routes",
+    "Use the bush master 65 mm shaft limit for 2517"
   ],
   "known_issues": [
     "Live Supabase and native Safari were outside this release's test scope.",
@@ -24,5 +24,5 @@
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
-  "asset_revision": "50093"
+  "asset_revision": "50094"
 }
