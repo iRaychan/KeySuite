@@ -1,5 +1,5 @@
 
-#keyStock #stockContent .stock-phase2-table[aria-label="Stock Check results"],[aria-label="Configuration stock"],#stockReceiptRows,[data-layout="batch-details"],.cost-audit-table {width:100%;table-layout:fixed}
+#keyStock #stockContent .stock-phase2-table[aria-label="Stock Check results"],#stockReceiptRows,.cost-audit-table {width:100%;table-layout:fixed}
 #keyStock #stockContent .stock-phase2-table[aria-label="Stock Check results"] :is(th,td){text-align:center}
 #keyStock #stockContent .stock-phase2-table[aria-label="Stock Check results"] :is(th,td):first-child{width:40%;text-align:left;padding-inline:1rem;overflow-wrap:anywhere}
 #keyStock #stockContent .stock-phase2-table[aria-label="Stock Check results"] .stock-link{text-align:left;white-space:normal}
@@ -8,9 +8,14 @@
 #stockReceiptRows{min-width:46rem}
 #stockReceiptRows th:nth-child(1){width:29%} #stockReceiptRows th:nth-child(2){width:18%} #stockReceiptRows th:nth-child(3){width:8%} #stockReceiptRows th:nth-child(6){width:5rem}
 #stockReceiptRows :is(input,select){width:100%;min-width:0;box-sizing:border-box}
-#keyStock #stockContent [data-layout="batch-details"] :is(th,td){text-align:center}
-#keyStock #stockContent [data-layout="batch-details"] :is(th,td):nth-child(-n+2){text-align:left}
 #costingAuditBody :is(.cost-audit-table,.cost-trail) :is(td,th){text-align:right;font-variant-numeric:tabular-nums}
 #costingAuditBody :is(.cost-audit-table,.cost-trail) :is(td,th):first-child{text-align:left}
 #costingAuditBody .cost-audit-table th:first-child{width:32%}
 .cost-converted{background:#e2efda}
+#openStaffModule[hidden],#staffManagement [hidden]{display:none}
+#staffManagement .staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:1rem}
+#staffManagement .staff-grid input,#staffManagement .staff-grid select{display:block;width:100%;margin-top:.3rem}
+#staffManagement .staff-profiles{margin:0;padding:0;list-style:none}
+#staffManagement .staff-profiles li{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;padding:.6rem 0;border-bottom:1px solid #dbe4ee}
+#staffManagement .staff-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-block:1rem}
+#staffProfileEditor{margin-top:1rem}

@@ -11,6 +11,7 @@
   Object.keys(DEFAULTS).forEach(role=>{DEFAULTS[role].view_costing_breakdown=role==='owner'?'full':'none'});
   const stockKeys=['add_stock_model','edit_stock_model','delete_stock_model','delete_stock_mapping','manage_stock_locations','manage_stock_suppliers'];
   for(const [role,permissions] of Object.entries(DEFAULTS)){
+    for(const key of ['view_staff','add_staff','edit_staff','delete_staff'])permissions[key]=role==='owner'?'full':'none';
     for(const key of stockKeys)permissions[key]=['owner','admin'].includes(role)?'full':'none';
     permissions.view_stock='full';
     for(const key of ['view_stock_cost','delete_stock_batch','edit_stock_batch'])permissions[key]=role==='owner'?'full':'none';

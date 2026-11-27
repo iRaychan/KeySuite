@@ -1,0 +1,15 @@
+{
+  "version": "5.00.95",
+  "release_status": "staging_preview",
+  "modules": {"KeyStock": "1.05"},
+  "baseline": "5.00.94 FULL",
+  "baseline_sha256": "83f38621feb0dcab76ff4dbe7c331c7a54b6e8a53ac30fdf3dfbc20143608194",
+  "migration": "supabase/migrations/20261127142209_v50095_staff_profiles.sql",
+  "installation": "Overlay the application-root files on V5.00.94 in staging. Apply the listed migration only to a disposable staging database for the Staff Management preview. KeyStock alignment uses the existing V1.05 schema.",
+  "files": [
+    "UPGRADE_MANIFEST_V50095.json", "RELEASE.json", "VERSION.txt", "app.js", "index.html",
+    "keystock-v100.css", "keystock-v100.js", "manifest.json", "permissions.js",
+    "release-v50089.css", "release-version.js", "roles.js", "staff-v50095.js", "sw.js",
+    "supabase/migrations/20261127142209_v50095_staff_profiles.sql"
+  ]
+}

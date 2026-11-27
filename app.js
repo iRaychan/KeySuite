@@ -183,6 +183,7 @@ function hasPermission(key){return permissionLevel(key)!=='none'}
 function syncOwnerKeyVisibility(){
  const button=$('keyButton'),allowed=hasPermission('key_dashboard');
  if(button){button.hidden=!allowed;button.style.display=allowed?'inline-flex':'none'}
+ const staffCard=$('openStaffModule');if(staffCard)staffCard.hidden=permissionLevel('view_staff')!=='full';
  const modulePermissions={openRoleModule:'manage_roles',categoryManagement:'manage_categories',priceListDashboard:'manage_price_list',companySettings:'customer_settings',companyPricing:'company_pricing',keyAiSettings:'keyai_access'};
  const roleModule=$('openRoleModule');if(roleModule)roleModule.style.display=hasPermission('manage_roles')?'flex':'none';
  Object.entries(modulePermissions).forEach(([target,key])=>{if(target==='openRoleModule')return;const allowed=hasPermission(key);document.querySelectorAll(`#keyDashboard [data-go="${target}"]`).forEach(card=>card.style.display=allowed?'flex':'none')});
@@ -200,6 +201,7 @@ function syncOwnerKeyVisibility(){
 }
 function canOpenPage(id){
  if(window.KeySuiteAuthority?.canOpenPage&&!window.KeySuiteAuthority.canOpenPage(id))return false;
+ if(id==='staffManagement')return permissionLevel('view_staff')==='full';
  if(id==='companySettings')return hasPermission('customer_settings');
  if(id==='keyAiSettings')return hasPermission('keyai_access');
  if(id==='customers')return hasPermission('view_customers');
@@ -1825,7 +1827,7 @@ async function ensureEsCompleteQuoteRouter(){
  esCompleteQuoteRouterPromise=new Promise(resolve=>{
    const script=document.createElement('script');
    script.src=document.querySelector('script[src^="assembly.js?"]')?.src||
-     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.94').replace(/\D/g,'')}`;
+     `assembly.js?v=${String(window.KEYSUITE_VERSION||'5.00.95').replace(/\D/g,'')}`;
    script.async=false;script.dataset.keysuiteAssemblyCompat='40502';
    script.onload=()=>{const fn=window.KeySuiteAssembly?.quotePumpsetSelection;resolve(typeof fn==='function'?fn.bind(window.KeySuiteAssembly):null)};
    script.onerror=()=>resolve(null);

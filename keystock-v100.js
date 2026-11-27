@@ -515,7 +515,9 @@
     };
     const buckets=new Map();
     const price=n=>n==null?'—':Number(n).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const batchRows=batches.map(b=>{
+    const supportsCannibalise=stockV105()&&ledgerCap('move_stock')
+      &&(state.parts||[]).some(p=>p.series_key===model.family&&!p.retired);
+    const batchRows=new Map(batches.map(b=>{
       const config=configs.get(b.configuration_id);
       const group=config.variant?'variant:'+config.variant:'configuration:'+config.id;
       if(!buckets.has(group))buckets.set(group,[]);
@@ -528,18 +530,29 @@
         ['issue','−','confirm_stock_out','Deduct stock']
       ].filter(([action, ,permission])=>ledgerCap(permission)&&(action==='adjust'||qty.available>0)).map(([action,label,,title])=>
         `<button type="button" class="stock-row-action ${action}" data-row-action="${action}" data-position="${b.id}" aria-label="${title}">${label}</button>`).join('')+(editMode&&ledgerCap('edit_stock_batch')?`<button type="button" class="stock-row-action" data-edit-position="${b.id}" aria-label="Edit batch">✎</button>`:'')+(editMode&&ledgerCap('delete_stock_batch')?`<button type="button" class="stock-row-action delete-batch" data-cancel-position="${b.id}" aria-label="Delete batch">×</button>`:''):'';
-      const canStrip=stockV105()&&ledgerCap('move_stock')&&(qty.available>=1||qty.incomplete>0)
-        &&(state.parts||[]).some(p=>p.series_key===model.family&&!p.retired);
-      return `<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions}${canStrip?`<button type="button" class="stock-row-action" data-row-action="cannibalise" data-position="${b.id}">Cannibalise</button>`:actions?'':'—'}</div></td></tr>`;
-    });
-    const rowById=new Map(batches.map((b,i)=>[b.id,batchRows[i]]));
-    const rows=[...buckets.entries()].flatMap(([group,members],index)=>{
+      const canStrip=supportsCannibalise&&(qty.available>=1||qty.incomplete>0);
+      return [b.id,`<tr>${values.map(v=>`<td>${esc(v)}</td>`).join('')}<td><div class="stock-row-actions">${actions}${canStrip?`<button type="button" class="stock-row-action" data-row-action="cannibalise" data-position="${b.id}">Cannibalise</button>`:actions?'':'—'}</div></td></tr>`];
+    }));
+    const metrics=['Cost (RM)','Total','Reserve','Not Complete','On Hand'];
+    const headings=labels=>labels.map(label=>`<th scope="col">${esc(label)}</th>`).join('');
+    const rows=[...buckets.entries()].map(([group,members],index)=>{
       const config=configs.get(members[0].configuration_id),variant=config.variant||configLabel(config);
       const qty=summarize(members),key=JSON.stringify([selected,group]),open=expandedConfigurations.has(key);
       const costs=members.filter(b=>b.quantity>0&&b.cost!=null).map(b=>Number(b.cost));
-      const nested=stockTable(['Date','Location','Cost (RM)','Total','Reserve','Not Complete','On Hand','Actions'],members.map(b=>rowById.get(b.id)),'','data-layout="batch-details"');
-      return [`<tr><td><button class="stock-link" aria-expanded="${open}" aria-controls="bucket-${index}" data-bucket="${esc(key)}">${open?'▾':'▸'} ${esc(variant)}</button></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty.total)}</td><td>${formatQty(qty.reserved)}</td><td>${stockV105()?formatQty(qty.incomplete):'—'}</td><td>${formatQty(qty.available)}</td></tr><tr ${open?'':'hidden'} id="bucket-${index}"><td colspan="6">${nested}</td></tr>`];
+      return `<tbody><tr class="stock-configuration-summary">
+        <th scope="row"><button type="button" class="stock-link" aria-expanded="${open}" aria-controls="bucket-${index}" data-bucket="${esc(key)}">${open?'▾':'▸'} ${esc(variant)}</button></th>
+        <td></td><td>${costs.length?price(Math.max(...costs)):'—'}</td><td>${formatQty(qty.total)}</td>
+        <td>${formatQty(qty.reserved)}</td><td>${stockV105()?formatQty(qty.incomplete):'—'}</td><td>${formatQty(qty.available)}</td><td></td>
+      </tr></tbody>
+      <tbody class="stock-configuration-batches" ${open?'':'hidden'} id="bucket-${index}">
+        <tr>${headings(['Date','Location',...metrics,'Actions'])}</tr>${members.map(b=>batchRows.get(b.id)).join('')}
+      </tbody>`;
     });
+    const configurationTable=`<div class="stock-scroll"><table class="stock-phase2-table stock-configuration-table${supportsCannibalise?' has-cannibalise':''}" aria-label="Configuration stock">
+      <colgroup><col><col><col><col><col><col><col><col></colgroup>
+      <thead><tr>${headings(['Configuration','',...metrics,''])}</tr></thead>
+      ${rows.join('')||'<tbody><tr><td colspan="8">No stock matches these filters.</td></tr></tbody>'}
+      </table></div>`;
     return `<div class="stock-detail-head"><button class="btn secondary" id="stockDetailBack">Back</button><h2>${esc(model.model)}</h2></div>
       <div class="stock-detail-metrics">${[['Total',formatQty(modelStock.total)],['Reserve',ledger()?formatQty(modelStock.reserved):'—'],['Not Complete',stockV105()?formatQty(modelStock.incomplete):'—'],['On Hand',formatQty(modelStock.available)]].map(([label,value],i)=>
         `<div><b>${label}</b>${i===1||i===2?`<button class="stock-link" data-stock-metric="${i}">${value}<span class="stock-sr"> View ${label} details</span></button>`:`<strong>${value}</strong>`}</div>`).join('')}</div>
@@ -548,7 +561,7 @@
       ${editMode&&ledgerCap('edit_stock_batch')&&batchEdit?stockBatchEditor(batchEdit):''}
       <label>Sort by date<select id="stockDateOrder"><option value="oldest">Oldest First</option><option value="newest" ${newestFirst?'selected':''}>Newest First</option></select></label>
       <p class="stock-metrics-note">Opening dates identify the historical count. Purchase batches show their receiving date.</p>
-      ${stockTable(['Configuration','Cost (RM)','Total','Reserve','Not Complete','On Hand'],rows,'No stock matches these filters.','aria-label="Configuration stock"')}
+      ${configurationTable}
       ${stockV105()?componentAvailability(model,allBatches,configs):''}`;
   }
   function stockBatchEditor(batch){

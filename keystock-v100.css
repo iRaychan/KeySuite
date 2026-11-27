@@ -143,26 +143,29 @@
 #keyStock .stock-inline-footer .btn{margin-inline-end:6px}
 #keyStock .stock-inline-footer:empty{display:none}
 #keyStock .stock-component-availability{margin-top:12px}
-#keyStock #stockContent [aria-label="Configuration stock"] col:first-child{width:35%}
 #keyStock #stockContent [aria-label="Stock Check results"] col:first-child{width:40%}
-#keyStock #stockContent [data-layout="batch-details"]{width:100%;table-layout:fixed;min-width:57rem}
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(1){width:7rem}
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(3){width:6.5rem}
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(4),
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(5){width:4.75rem}
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(6){width:8rem}
-#keyStock #stockContent [data-layout="batch-details"] col:nth-child(7){width:5.5rem}
-#keyStock #stockContent [data-layout="batch-details"] col:last-child{width:12rem}
-#keyStock #stockContent [data-layout="batch-details"] th{white-space:nowrap}
-#keyStock #stockContent [data-layout="batch-details"] :is(th,td){vertical-align:middle}
-#keyStock #stockContent [data-layout="batch-details"] td:nth-child(2){overflow-wrap:anywhere}
-#keyStock #stockContent [data-layout="batch-details"] .stock-row-actions{flex-wrap:nowrap;align-items:center;gap:4px}
-#keyStock #stockContent [data-layout="batch-details"] .stock-row-action:not([data-row-action="cannibalise"]){
+#keyStock .stock-configuration-table {width:100%;table-layout:fixed;min-width:62rem}
+#keyStock .stock-configuration-table col:nth-child(1){width:13rem}
+#keyStock .stock-configuration-table col:nth-child(3){width:6.5rem}
+#keyStock .stock-configuration-table col:nth-child(4),
+#keyStock .stock-configuration-table col:nth-child(5){width:4.75rem}
+#keyStock .stock-configuration-table col:nth-child(6){width:8rem}
+#keyStock .stock-configuration-table col:nth-child(7){width:5.5rem}
+#keyStock .stock-configuration-table col:last-child{width:12rem}
+#keyStock .stock-configuration-table.has-cannibalise{min-width:69rem}
+#keyStock .stock-configuration-table.has-cannibalise col:last-child{width:19rem}
+#keyStock .stock-configuration-table > tbody[hidden]{display:none}
+#keyStock .stock-configuration-table :is(th,td){text-align:center;vertical-align:middle}
+#keyStock .stock-configuration-table :is(th,td):nth-child(-n+2){text-align:left}
+#keyStock .stock-configuration-table th{white-space:nowrap}
+#keyStock .stock-configuration-table .stock-configuration-summary th{background:white;white-space:normal;overflow-wrap:anywhere}
+#keyStock .stock-configuration-table td:nth-child(2){overflow-wrap:anywhere}
+#keyStock .stock-configuration-table .stock-row-actions{flex-wrap:nowrap;align-items:center;gap:4px;white-space:nowrap}
+#keyStock .stock-configuration-table .stock-row-action:not([data-row-action="cannibalise"]){
   display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;padding:0;box-sizing:border-box
 }
 #keyStock .stock-row-action.delete-batch{background:#A52019;color:#fff}
-#keyStock #stockContent [data-layout="batch-details"]:has([data-row-action="cannibalise"]){min-width:64rem}
-#keyStock #stockContent [data-layout="batch-details"]:has([data-row-action="cannibalise"]) col:last-child{width:19rem}
+#keyStock .stock-configuration-table [data-edit-position]{background:#bcbcbc;color:#222}
 #keyStock #stockContent .stock-phase2-table :is(th,td){font-variant-numeric:tabular-nums}
 #keyStock #stockContent [data-stock-left~="1"]> :is(thead,tbody)>tr> :first-child,
 #keyStock #stockContent [data-stock-left~="2"]> :is(thead,tbody)>tr> :nth-child(2),
@@ -172,5 +175,5 @@
 #keyStock #stockContent [data-stock-left~="8"]> :is(thead,tbody)>tr> :nth-child(8){text-align:left}
 @media(max-width:800px){
   #keyStock .stock-inline-fields{--stock-label-width:8rem}
-  #keyStock #stockContent :is([aria-label="Configuration stock"],[aria-label="Stock Check results"]){min-width:33rem}
+  #keyStock #stockContent [aria-label="Stock Check results"]{min-width:33rem}
 }

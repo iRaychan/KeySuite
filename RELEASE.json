@@ -1,10 +1,11 @@
 {
-  "version": "5.00.94",
-  "baseline": "5.00.93",
-  "upgrade_supported_from": "5.00.93",
-  "release_status": "local_verification",
+  "version": "5.00.95",
+  "baseline": "5.00.94",
+  "upgrade_supported_from": "5.00.94",
+  "release_status": "staging_preview",
   "technical_pdf_service_required": false,
-  "new_database_migration_required": false,
+  "new_database_migration_required": true,
+  "staff_pricing_inheritance_available": false,
   "supabase_data_seed_required": false,
   "production_deployed": false,
   "github_pushed": false,
@@ -13,16 +14,14 @@
     "KeyStock": "1.05"
   },
   "changes": [
-    "Align stock batch columns and keep actions on one row",
-    "Restore single-click Done Editing with unsaved-change handling",
-    "Share commercial pumpset descriptions across quotation routes",
-    "Use the bush master 65 mm shaft limit for 2517"
+    "Use shared columns for stock summaries and batches with a fixed Actions space.",
+    "Add permission-gated Staff profile management and audit history for staging."
   ],
   "known_issues": [
-    "Live Supabase and native Safari were outside this release's test scope.",
+    "Staff profile management is staging-only. Customer registration defaults, inheritance, independent conversion, and restricted quotation pricing are pending a server-side pricing boundary.",
     "Serial-tracked receiving quantity corrections require serial reconciliation and are blocked in Edit Stock Batch."
   ],
   "optional_database_configuration_script": "OPTIONAL_V50079_ES_DUPLEX.sql",
   "production_ready": false,
-  "asset_revision": "50094"
+  "asset_revision": "50095"
 }

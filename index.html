@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17365d">
-  <title>KeySuite V5.00.94</title>
-  <script src="release-version.js?v=50094"></script>
+  <title>KeySuite V5.00.95</title>
+  <script src="release-version.js?v=50095"></script>
   <link rel="manifest" href="manifest.json">
   <style>
     :root{--navy:#17365d;--blue:#2f75b5;--light:#eef3f8;--line:#cbd5e1;--text:#172033;--muted:#64748b;--ok:#15803d}
@@ -671,12 +671,12 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <link rel="stylesheet" href="g-performance-v50072.css?v=50074">
 <link rel="stylesheet" href="bfi-curve-layout.css?v=50074">
 <script src="v50033-series-registry.js?v=50083"></script>
-<link rel="stylesheet" href="release-v50089.css?v=50094">
+<link rel="stylesheet" href="release-v50089.css?v=50095">
 </head>
 <body>
 <div id="loginView" class="auth-shell">
   <form id="loginForm" class="auth-card" novalidate>
-    <div class="auth-brand">KeySuite<small>V5.00.94</small></div>
+    <div class="auth-brand">KeySuite<small>V5.00.95</small></div>
     <h1>Sign in</h1>
     <p>Only approved Keylargo users can enter KeySuite.</p>
     <div id="loginMessage" class="auth-message"></div>
@@ -692,7 +692,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <div id="loadingView" class="loading-screen hidden"><div class="loading-card"><div class="spinner"></div><div id="loadingText">Checking secure access…</div></div></div>
 <div id="appView" class="app hidden">
   <aside>
-    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.94</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
+    <div class="brand-row"><div class="brand">KeySuite<small>Full Suite V5.00.95</small></div><button id="keyButton" type="button" class="key-button" title="Open Key Dashboard" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l8-8m-2 2l2 2m-5 1l2 2"></path></svg><span>Key</span></button></div>
     <nav>
       <button data-page="dashboard" class="active">Dashboard</button>
       <button data-page="customers">Customers</button>
@@ -718,7 +718,7 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
       <button id="settingsButton" type="button" class="settings-button">⚙ Settings</button>
       <button id="logoutButton" type="button">Sign out</button>
     </div>
-    <div class="suite-version">KeySuite V5.00.94</div>
+    <div class="suite-version">KeySuite V5.00.95</div>
   </aside>
 
   <main>
@@ -1364,9 +1364,24 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
           <p>Brand identity, logo, OEM family mapping and quotation template.</p>
           <span class="module-order">06 · MULTI-BRAND</span>
         </button>
+        <button id="openStaffModule" type="button" class="key-module-card" data-go="staffManagement" hidden>
+          <span class="module-icon" aria-hidden="true">👤</span>
+          <h2>Staff</h2>
+          <p>Manage Staff pricing profiles and their linked user accounts.</p>
+        </button>
       </div>
     </section>
 
+    <section id="staffManagement" class="page">
+      <div class="page-title-row">
+        <h1>Staff Management</h1>
+        <button id="staffAdd" class="btn" type="button" hidden>+ Add Staff</button>
+      </div>
+      <p class="notice">Staging preview. Profiles are available for configuration. Customer registration and quotation pricing still use the existing Customer workflow.</p>
+      <p id="staffStatus" role="status" aria-live="polite"></p>
+      <div id="staffProfileList" class="card"></div>
+      <div id="staffProfileEditor" class="card" hidden></div>
+    </section>
 
     <section id="keyAiSettings" class="page">
       <div class="page-title-row"><div><h1>KeyBot</h1><div class="muted">OpenAI, Telegram enquiries and Sender → Customer company assignment. Access is controlled by Role Permissions.</div></div></div>
@@ -2341,10 +2356,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
-<script src="permissions.js?v=50094"></script>
+<script src="permissions.js?v=50095"></script>
 <script src="v40407-role-authority.js?v=50071"></script>
 <script src="applications.js?v=409"></script>
-<script src="assembly.js?v=50094"></script>
+<script src="assembly.js?v=50095"></script>
 <script src="bfi-data-v42302.js?v=42821"></script>
 <script src="cr-price-data-v42854.js?v=42854"></script>
 <script src="supabase/functions/shared-cr/cr-data.js?v=42872"></script>
@@ -2353,18 +2368,18 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="kv-price-data-v50017.js?v=50069"></script>
 <script src="pdf-optimization.js?v=50056"></script>
 <script src="payment-terms.js?v=50082"></script>
-<script src="commercial-identity.js?v=50094"></script>
+<script src="commercial-identity.js?v=50095"></script>
 <script src="quotation-history-v50087.js?v=50087"></script>
-<script src="app.js?v=50094"></script>
-<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50094"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
+<script src="app.js?v=50095"></script>
+<script src="iso-products-v50011.js"></script><script src="selector-iso/iso-data.js"></script><script src="iso-v50011.js?v=50095"></script><script src="iso-family-labels-v50027.js?v=50027-startup2"></script>
 <script src="selector-es/es-data.js"></script>
 <script src="component-prices-v50011.js?v=50078"></script>
 <script src="manual-price-v50011.js?v=50085-corrected-r1"></script>
 <script src="product-family-registry-v50047.js?v=50047"></script>
-<script src="pricing.js?v=50094"></script>
+<script src="pricing.js?v=50095"></script>
 <script src="technical-pdf.js?v=50074-gpdf"></script>
 <script src="quotation-references.js?v=409"></script>
-<script src="categories.js?v=50094"></script>
+<script src="categories.js?v=50095"></script>
 <script src="chc-g1-price-map-v41409.js?v=42821"></script>
 <script src="pricelist.js?v=50079"></script>
 <script src="cr-pricelist-v42854.js?v=42854"></script>
@@ -2385,9 +2400,10 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="g-series-v50068.js?v=50085"></script>
 <script src="bsw-v50027.js?v=50085"></script>
 <script src="manifold.js?v=42821"></script>
-<script src="roles.js?v=50094"></script>
-<script src="motor.js?v=50094"></script>
-<script src="coupling.js?v=50094"></script>
+<script src="roles.js?v=50095"></script>
+<script src="staff-v50095.js?v=50095"></script>
+<script src="motor.js?v=50095"></script>
+<script src="coupling.js?v=50095"></script>
 <script src="baseplate.js?v=50069"></script>
 <script src="quotation-templates.js?v=409"></script>
 
@@ -2447,8 +2463,8 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 <script src="company-settings.js?v=41707"></script>
 <script src="keyai.js?v=50060"></script>
 <script src="keylab.js?v=41406"></script>
-<script src="stock-source-v50088.js?v=50094"></script>
-<script src="auth.js?v=50094"></script>
+<script src="stock-source-v50088.js?v=50095"></script>
+<script src="auth.js?v=50095"></script>
 <script src="keyhq/avatar-sync.js?v=42925"></script>
 <script src="keyhq-social.js?v=50001"></script>
 <script src="keyhq-launcher.js?v=50001"></script>
@@ -2491,13 +2507,13 @@ aside::-webkit-scrollbar{width:0;height:0;display:none}
 </script>
 <script src="v42872-selector-first-open.js?v=50078"></script>
 <script src="kv-product-families-v50027.js?v=50069"></script>
-<script src="v41200-bootstrap.js?v=50094"></script>
+<script src="v41200-bootstrap.js?v=50095"></script>
 <link rel="stylesheet" href="v50032-bugfixes.css?v=50032">
-<link rel="stylesheet" href="v50033-actions.css?v=50094">
+<link rel="stylesheet" href="v50033-actions.css?v=50095">
 <link rel="stylesheet" href="v50063-focused-fixes.css?v=50069">
 <script src="v50051-version-lock.js?v=50071"></script>
-<link rel="stylesheet" href="keystock-v100.css?v=50094">
-<script src="keystock-v100.js?v=50094"></script>
+<link rel="stylesheet" href="keystock-v100.css?v=50095">
+<script src="keystock-v100.js?v=50095"></script>
 
 <script id="v41412-static-product-generation">
 document.addEventListener('click',event=>{
@@ -2586,6 +2602,6 @@ document.addEventListener('click',event=>{
 })();
 </script>
 
-<script src="costing-audit-v50032.js?v=50094"></script>
-<script src="bsv-catalogue.js?v=50094"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50094"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
+<script src="costing-audit-v50032.js?v=50095"></script>
+<script src="bsv-catalogue.js?v=50095"></script><script src="bsw-variants-v50036.js?v=50085"></script><script src="bsw-pricing-v50036.js?v=50095"></script><script src="customer-remarks-v50036.js"></script><script src="product-audit-v50036.js?v=50037"></script></body>
 </html>
